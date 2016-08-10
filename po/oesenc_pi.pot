@@ -1,0 +1,464 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: oesenc_pi 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-05 22:25-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/oesenc_pi.cpp:304
+msgid "S63"
+msgstr ""
+
+#: src/oesenc_pi.cpp:310
+msgid "S63 PlugIn for OpenCPN"
+msgstr ""
+
+#: src/oesenc_pi.cpp:316
+msgid ""
+"S63 PlugIn for OpenCPN\n"
+"Provides support of S63 charts.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:338 src/oesenc_pi.cpp:367
+msgid ""
+"SSE 25..The ENC permit for this cell has expired.\n"
+" This cell may be out of date and MUST NOT be used for NAVIGATION."
+msgstr ""
+
+#: src/oesenc_pi.cpp:410
+msgid "S63 Charts"
+msgstr ""
+
+#: src/oesenc_pi.cpp:422
+msgid "Chart Cells"
+msgstr ""
+
+#: src/oesenc_pi.cpp:433
+msgid "Installed S63 Cell Permits"
+msgstr ""
+
+#: src/oesenc_pi.cpp:442
+msgid "Cell Name"
+msgstr ""
+
+#: src/oesenc_pi.cpp:447 src/oesenc_pi.cpp:522
+msgid "Data Server ID"
+msgstr ""
+
+#: src/oesenc_pi.cpp:452 src/oesenc_pi.cpp:527
+msgid "Expiration Date"
+msgstr ""
+
+#: src/oesenc_pi.cpp:463
+msgid "Import Cell Permits..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:466
+msgid "Remove Permits"
+msgstr ""
+
+#: src/oesenc_pi.cpp:470
+msgid "Import Charts/Updates..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:487
+msgid "S63_pi Log"
+msgstr ""
+
+#: src/oesenc_pi.cpp:502
+msgid "Keys/Permits"
+msgstr ""
+
+#: src/oesenc_pi.cpp:508
+msgid "Installed S63 Certificates/Keys"
+msgstr ""
+
+#: src/oesenc_pi.cpp:516
+msgid "Certificate Name"
+msgstr ""
+
+#: src/oesenc_pi.cpp:539
+msgid "Import Certificate..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:549
+msgid "UserPermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:556
+msgid "New Userpermit..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:563
+msgid "InstallPermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:570
+msgid "New Installpermit..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:577
+msgid "System Identification"
+msgstr ""
+
+#: src/oesenc_pi.cpp:583
+msgid "Create System Identifier file..."
+msgstr ""
+
+#: src/oesenc_pi.cpp:728
+msgid "Select S63 exchange set root directory (usually ENC_ROOT)"
+msgstr ""
+
+#: src/oesenc_pi.cpp:754
+msgid "Cannot find \"ENC_ROOT\" directory"
+msgstr ""
+
+#: src/oesenc_pi.cpp:756 src/oesenc_pi.cpp:777 src/oesenc_pi.cpp:867
+#: src/oesenc_pi.cpp:1119 src/oesenc_pi.cpp:1257 src/oesenc_pi.cpp:1287
+#: src/oesenc_pi.cpp:1458 src/oesenc_pi.cpp:1483 src/oesenc_pi.cpp:1507
+#: src/oesenc_pi.cpp:1590 src/oesenc_pi.cpp:1651 src/oesenc_pi.cpp:1693
+#: src/oesenc_pi.cpp:1723 src/oesenc_pi.cpp:1772 src/oesenc_pi.cpp:1802
+#: src/oesenc_pi.cpp:1959 src/oesenc_pi.cpp:1980 src/oesenc_pi.cpp:2020
+#: src/oesenc_pi.cpp:2032 src/oesenc_pi.cpp:2049
+msgid "s63_pi Message"
+msgstr ""
+
+#: src/oesenc_pi.cpp:775
+msgid ""
+"OpenCPN can create eSENC files as cells are imported.\n"
+"\n"
+"Note:\n"
+"This process may take some time.\n"
+"eSENCS not processed here will be created as needed by OpenCPN.\n"
+"\n"
+"Create eSENCs on Import?\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:805
+msgid "CATALOG.031 file not found in ENC_ROOT"
+msgstr ""
+
+#: src/oesenc_pi.cpp:864
+msgid ""
+"Security Scheme Error\n"
+"\n"
+" SSE 10 - Permits not available for this data provider.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:885
+msgid "Creating eSenc"
+msgstr ""
+
+#: src/oesenc_pi.cpp:998
+msgid "cell: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1000
+msgid " is not present in exchange set.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1110 src/oesenc_pi.cpp:1275 src/oesenc_pi.cpp:1764
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 15 - Subscription service has expired.\n"
+" Please contact your data supplier to renew the subscription licence.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1111 src/oesenc_pi.cpp:1276
+msgid "First expired base cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1114
+msgid "Base cell edition update skipped\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1115 src/oesenc_pi.cpp:1283 src/oesenc_pi.cpp:1768
+msgid ""
+"There may be other expired permits.  However, this message will be shown once "
+"only."
+msgstr ""
+
+#: src/oesenc_pi.cpp:1245
+msgid ""
+"Security Scheme Error\n"
+"\n"
+" SSE 23 - Non sequential update, previous update(s) missing.\n"
+"Try reloading from the base media. \n"
+" If the problem persists contact your data supplier.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1247
+msgid "cell:"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1251
+#, c-format
+msgid "Latest intalled update: %d\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1253 src/oesenc_pi.cpp:1281
+#, c-format
+msgid "Attempted update: %d\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1279
+msgid "Cell update skipped\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1303
+msgid "Cell update NOT authenticated\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1304
+msgid ""
+"This update and all subsequent updates to this cell are NOT applied.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1438
+msgid "Select Public Key File"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1440
+msgid "PUB files (*.PUB)|*.PUB|txt files (*.txt)|*.txt|All files (*.*)|*.*"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1455 src/oesenc_pi.cpp:1977
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 08 - SA Digital Certificate file incorrect format.\n"
+"A valid certificate can be obtained from the IHO website or your data "
+"supplier.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1477
+msgid "Certificate Key imported successfully\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1479
+msgid "Certificate Key import FAILED\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1504
+msgid "Please enter valid Userpermit and Installpermit on Keys/Permits tab"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1517
+msgid "Select PERMIT.TXT File"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1519
+msgid "TXT files (*.TXT)|*.TXT|All files (*.*)|*.*"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1588
+msgid "Update all existing cell permits?"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1650
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 11 - Cell permit not found"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1688
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 12 - Cell permit format is incorrect\n"
+"\n"
+"Incorrect cell permit line starts with "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1718
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 13 - Cell Permit is invalid (checksum is incorrect)\n"
+"or the Cell Permit is for a different system.\n"
+"\n"
+" Invalid cell permit starts with "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1765
+msgid "First expired cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1797
+msgid "Permit\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1799
+msgid ""
+"\n"
+"already imported.\n"
+"Would you like to replace it?"
+msgstr ""
+
+#: src/oesenc_pi.cpp:1862
+msgid "   Error: Cannot create "
+msgstr ""
+
+#: src/oesenc_pi.cpp:1955
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 24 - ENC Signature format is incorrect.\n"
+"\n"
+" Cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:2016
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 06 - The SA Signed Data Server Certificate is invalid.\n"
+"The SA may have issued a new public key or the ENC may originate from another "
+"service.\n"
+"A new SA public key can be obtained from the IHO website or from your data "
+"supplier.\n"
+"\n"
+"Cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:2028
+msgid ""
+"Security Scheme Warning\n"
+"\n"
+"SSE 26 - ENC is not authenticated by the IHO acting as the SA.\n"
+"\n"
+"Cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:2045
+msgid ""
+"Security Scheme Error\n"
+"\n"
+"SSE 09 - ENC Signature is invalid.\n"
+"Cell name: "
+msgstr ""
+
+#: src/oesenc_pi.cpp:2210
+msgid ""
+"To obtain an Install Permit, you must generate a unique System Identifier "
+"File.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2211
+msgid "This file is also known as a\"fingerprint\" file.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2212
+msgid ""
+"The fingerprint file contains information to uniquely identifiy this "
+"computer.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2213
+msgid ""
+"After creating this file, you will need it to generate your InstallPermit at "
+"the o-charts.org shop.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2214
+msgid "Proceed to create Fingerprint file?"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2216 src/oesenc_pi.cpp:2261 src/oesenc_pi.cpp:2269
+msgid "S63_PI Message"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2258
+msgid "Fingerprint file created.\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2641
+msgid "S63_pi backchannel could not listen at the specified port !\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2645
+msgid ""
+"S63_pi backchannel server listening.\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2734 src/oesenc_pi.cpp:2780
+msgid "Unexpected event !\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:2753
+msgid ""
+"Error: couldn't accept a new connection\n"
+"\n"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3083
+msgid "S63_pi Userpermit Required"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3130
+msgid "Enter Userpermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3149
+msgid "Test Userpermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3154 src/oesenc_pi.cpp:3376
+msgid "Test Results"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3169 src/oesenc_pi.cpp:3390
+msgid "Cancel"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3174 src/oesenc_pi.cpp:3395
+msgid "OK"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3208
+msgid "Userpermit invalid"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3216
+msgid "Userpermit OK"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3331
+msgid "S63_pi Install Permit Required"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3352
+msgid "Enter Installpermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3371
+msgid "Test Installpermit"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3433
+msgid "Install permit invalid"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3441
+msgid "Install permit OK"
+msgstr ""

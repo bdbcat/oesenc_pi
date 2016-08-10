@@ -1,0 +1,2 @@
+/usr/local/lib/opencpn/libs63_pi.so
+/usr/local/bin/OCPNsenc
