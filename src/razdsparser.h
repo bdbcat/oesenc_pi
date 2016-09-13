@@ -32,7 +32,7 @@ class RazdsParser {
 public:
 	RazdsParser();
 	virtual ~RazdsParser();
-//        int LoadFile ( pi_s52plib* plib, const wxString& PLib );
+//        int LoadFile ( s52plib* plib, const wxString& PLib );
 
 private:
 	int ReadS52Line( char *pBuffer, const char *delim, int nCount, FILE *fp );
@@ -50,7 +50,7 @@ private:
     #define  MAX_BUF  1024
     char buffer[MAX_BUF];
     char *pBuf;
-    pi_s52plib* plib;
+    s52plib* plib;
     wxArrayPtrVoid* ColorTableArray;
     int m_LUPSequenceNumber;
 };

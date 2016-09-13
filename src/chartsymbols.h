@@ -105,7 +105,7 @@ class ChartSymbols
 public:
 	ChartSymbols(void);
 	~ChartSymbols(void);
-        bool LoadConfigFile(pi_s52plib* plibArg, const wxString & path);
+        bool LoadConfigFile(s52plib* plibArg, const wxString & path);
 
 	static void InitializeGlobals( void );
 	static void DeleteGlobals( void );
@@ -132,6 +132,6 @@ private:
 	void BuildPattern( OCPNPattern &pattern );
 	void BuildSymbol( ChartSymbol &symol );
 
-        pi_s52plib* plib;
+        s52plib* plib;
 };
 

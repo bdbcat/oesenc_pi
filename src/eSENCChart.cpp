@@ -37,6 +37,7 @@
 #include <algorithm>          // for std::sort
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "oesenc_pi.h"
 #include "eSENCChart.h"
@@ -58,6 +59,11 @@
 
 #ifdef __MSVC__
 #define strncasecmp(x,y,z) _strnicmp(x,y,z)
+
+//    __MSVC__ randomly does not link snprintf, or _snprintf
+//    Replace it with a local version, code is in cutil.c
+#define snprintf mysnprintf
+
 #endif
 
 
@@ -78,8 +84,11 @@ extern bool             g_b_validated;
 extern bool             g_bSENCutil_valid;
  
 extern wxString         g_UserKey;
+extern bool             g_PIbDebugS57;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
+
+bool g_Disable;
 
 extern s57RegistrarMgr  *pi_poRegistrarMgr;
 
@@ -89,7 +98,7 @@ InfoWinDialog           *g_pInfoDlg;
 wxDialog                *s_plogcontainer;
 wxTextCtrl              *s_plogtc;
 int                     nseq;
-extern pi_s52plib                 *ps52plib;
+extern s52plib                 *ps52plib;
 
 #include <wx/arrimpl.cpp>
 WX_DEFINE_ARRAY( float*, MyFloatPtrArray );
@@ -115,17 +124,35 @@ extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 #endif
 #endif
 
-extern bool              pi_b_EnableVBO;
+extern bool              g_b_EnableVBO;
 
 extern void initLibraries(void);
 extern bool validate_SENC_server( void );
-extern wxString GetUserKey( bool bforceNew);
+extern wxString GetUserKey( int legendID, bool bforceNew);
 
 // ----------------------------------------------------------------------------
 // Random Prototypes
 // ----------------------------------------------------------------------------
 
 ViewPort CreateCompatibleViewport( const PlugIn_ViewPort &pivp);
+
+#if defined( __UNIX__ ) && !defined(__WXOSX__)  // high resolution stopwatch for profiling
+class OCPNStopWatch
+{
+public:
+    OCPNStopWatch() { Reset(); }
+    void Reset() { clock_gettime(CLOCK_REALTIME, &tp); }
+    
+    double GetTime() {
+        timespec tp_end;
+        clock_gettime(CLOCK_REALTIME, &tp_end);
+        return (tp_end.tv_sec - tp.tv_sec) * 1.e3 + (tp_end.tv_nsec - tp.tv_nsec) / 1.e6;
+    }
+    
+private:
+    timespec tp;
+};
+#endif
 
 
 #define round(x) round_msvc(x)
@@ -575,15 +602,15 @@ eSENCChart::~eSENCChart()
       }
       m_vc_hash.clear();
 
-//       connected_segment_hash::iterator itcsc;
-//       for( itcsc = m_connector_hash.begin(); itcsc != m_connector_hash.end(); ++itcsc ) {
-//           connector_segment *value = itcsc->second;
-//           if( value ) {
-//               delete value;
-//           }
-//       }
-//       m_connector_hash.clear();
-      
+      for(int i=0 ; i < m_pcs_vector.size() ; i++)
+          delete m_pcs_vector.at(i);                    // destroy the connector segments
+          
+      m_pcs_vector.clear();
+
+      for(int i=0 ; i < m_pve_vector.size() ; i++)
+          delete m_pve_vector.at(i);                    // destroy the edges segments
+          
+      m_pve_vector.clear();
       
       //m_pcontour_array->Clear();
       //delete m_pcontour_array;
@@ -800,9 +827,18 @@ wxString eSENCChart::Build_eHDR( const wxString& name000 )
     
 }
 
+int nInit;
+
 
 int eSENCChart::Init( const wxString& name, int init_flags )
 {
+//    if(++nInit < 3)
+//        return PI_INIT_FAIL_NOERROR;
+    
+    if(g_Disable){
+        return PI_INIT_FAIL_REMOVE;
+    }
+    
     //    Use a static semaphore flag to prevent recursion
     if( s_PI_bInS57 ) {
         return PI_INIT_FAIL_NOERROR;
@@ -1203,6 +1239,11 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         return false;
     }
     
+    if(g_UserKey.Length() == 0){
+        g_UserKey = GetUserKey( LEGEND_FIRST, true );
+    }
+        
+    
     Osenc senc;
     senc.setKey(g_UserKey);
 
@@ -1214,11 +1255,14 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
             if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
                 
                 //  On a signature error, we try once more, allowing user to enter a new key
-                wxString key = GetUserKey( true );
+                wxString key = GetUserKey( LEGEND_SECOND, true );
                 senc.setKey(key);
                 int retCode_retry = senc.ingestHeader( m_SENCFileName.GetFullPath() );
-                if(retCode_retry != SENC_NO_ERROR)
+                if(retCode_retry != SENC_NO_ERROR){
+                    GetUserKey( LEGEND_THIRD, true );                  // Bail out
+                    g_Disable = true;
                     return false;
+                }
                 else{
                     g_UserKey = key;
                 }
@@ -1329,7 +1373,7 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
     
     if( Region != m_last_Region ) force_new_view = true;
     
-    ps52plib->PrepareForRender();
+    ps52plib->PrepareForRender(VPoint);
     
     if( m_plib_state_hash != ps52plib->GetStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
@@ -1479,11 +1523,11 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     //PI_PLIBSetRenderCaps( PLIB_CAPS_LINE_BUFFER | PLIB_CAPS_SINGLEGEO_BUFFER | PLIB_CAPS_OBJSEGLIST | PLIB_CAPS_OBJCATMUTATE);
     //PI_PLIBPrepareForNewRender();
     
-    ps52plib->PrepareForRender();
+    ps52plib->PrepareForRender(VPoint);
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
-        UpdateLUPsOnStateChange( );                     // and update the LUPs
+        UpdateLUPs( this );                             // and update the LUPs
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
         m_plib_state_hash = PI_GetPLIBStateHash();
@@ -1831,9 +1875,9 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     
     //      Render the areas quickly
     for( i = 0; i < PRIO_NUM; ++i ) {
-//        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES ) 
-//            top = razRules[i][4]; // Area Symbolized Boundaries
-//        else
+        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES ) 
+            top = razRules[i][4]; // Area Symbolized Boundaries
+        else
             top = razRules[i][3];           // Area Plain Boundaries
 
         while( top != NULL ) {
@@ -1850,9 +1894,9 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     
     //    Render the lines and points
     for( i = 0; i < PRIO_NUM; ++i ) {
-//        TODO if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
-//            top = razRules[i][4]; // Area Symbolized Boundaries
-//        else
+        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
+            top = razRules[i][4]; // Area Symbolized Boundaries
+        else
             top = razRules[i][3];           // Area Plain Boundaries
         while( top != NULL ) {
             crnt = top;
@@ -1869,9 +1913,9 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
 
-//        TODO if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
-//            top = razRules[i][0];       //SIMPLIFIED Points
-//        else
+        if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
+            top = razRules[i][0];       //SIMPLIFIED Points
+        else
             top = razRules[i][1];           //Paper Chart Points Points
 
         while( top != NULL ) {
@@ -2476,7 +2520,7 @@ int eSENCChart::my_fgets( char *buf, int buf_len_max, CryptInputStream &ifs )
 bool eSENCChart::InitFrom_ehdr( wxString &efn )
 {
     bool ret_val = true;
-
+#if 0
     wxString ifs = efn;
     
     wxFileInputStream fpx_u( ifs );
@@ -2768,7 +2812,7 @@ bool eSENCChart::InitFrom_ehdr( wxString &efn )
     
     wxDateTime dt;
     dt.ParseDate( date_000 );
-    
+#endif    
     if( !ret_val ) return false;
     
     return true;
@@ -3411,6 +3455,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     VE_ElementVector VEs;
     VC_ElementVector VCs;
     
+    if(g_UserKey.Length() == 0){
+        g_UserKey = GetUserKey( LEGEND_FIRST, true );
+    }
     
     sencfile.setRegistrarMgr( pi_poRegistrarMgr );
     sencfile.setKey(userKey);
@@ -3649,6 +3696,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         
         
         // Validate hash maps....
+        //TODO  Do we really need to do this?
+        // nedd to fix up the negatives?
         
         ObjRazRules *top;
         ObjRazRules *nxx;
@@ -3678,6 +3727,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                         
                         //  Get the edge
                         int enode = *index_run;
+                        if(enode < 0)
+                            enode = -enode;
                         if( ( enode ) ) {
                             if( m_ve_hash.find( enode ) == m_ve_hash.end() ) {
                                 //    Must be a bad index in the SENC file
@@ -4238,7 +4289,7 @@ PI_InitReturn eSENCChart::PostInit( int flags, int cs )
     
         //
         if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
-            wxString permit = GetUserKey( false );
+            wxString permit = GetUserKey( LEGEND_FIRST, false );
             return PI_INIT_FAIL_RETRY;
         }
         else{
@@ -4596,16 +4647,16 @@ void eSENCChart::SetLinePriorities( void )
                     connector_segment *pcs;
                     line_segment_element *list = obj->m_ls_list;
                     while( list ){
-                        switch (list->type){
+                        switch (list->ls_type){
                             case TYPE_EE:
                                 
-                                pedge = (VE_Element *)list->private0;
+                                pedge = list->pedge;// (VE_Element *)list->private0;
                                 if(pedge)
                                     list->priority = pedge->max_priority;
                                 break;
                                 
                             default:
-                                pcs = (connector_segment *)list->private0;
+                                pcs = list->pcs; //(connector_segment *)list->private0;
                                 if(pcs)
                                     list->priority = pcs->max_priority_cs;
                                 break;
@@ -4625,77 +4676,6 @@ void eSENCChart::SetLinePriorities( void )
     m_bLinePrioritySet = true;
 }
 
-#if 0
-void eSENCChart::SetLinePriorities( void )
-{
-
-    //      If necessary.....
-    //      Establish line feature rendering priorities
-    
-    if( !m_bLinePrioritySet ) {
-        PI_S57Obj *obj;
-        
-        for( int i = 0; i < PRIO_NUM; ++i ) {
-            
-            obj = razRules[i][2];           //LINES
-            while( obj != NULL ) {
-                PI_PLIBSetLineFeaturePriority( obj, i );
-                obj = obj->next;
-            }
-
-    //    In the interest of speed, choose only the one necessary area boundary style index
-            int j;
-            if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
-                j = 4;
-            else
-            j = 3;
-    
-            obj = razRules[i][j];           
-            while( obj != NULL ) {
-                PI_PLIBSetLineFeaturePriority( obj, i );
-                obj = obj->next;
-            }
-        }
-    }
-    // Traverse the entire object list again, setting the priority of each line_segment_element
-    // to the maximum priority seen for that segment
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            PI_S57Obj *obj = razRules[i][j];
-            while( obj ) {
-                
-                PI_VE_Element *pedge;
-                PI_connector_segment *pcs;
-                PI_line_segment_element *list = obj->m_ls_list;
-                while( list ){
-                    switch (list->type){
-                        case TYPE_EE:
-                            
-                            pedge = (PI_VE_Element *)list->private0;
-                            if(pedge)
-                                list->priority = pedge->max_priority;
-                            break;
-                            
-                        default:
-                            pcs = (PI_connector_segment *)list->private0;
-                            if(pcs)
-                                list->priority = pcs->max_priority;
-                            break;
-                    }
-                    
-                    list = list->next;
-                }
-                
-                obj = obj->next;
-            }
-        }
-    }
-    
-    //      Mark the priority as set.
-    //      Generally only reset by Options Dialog post processing
-    m_bLinePrioritySet = true;
-}
-#endif
 
 void eSENCChart::ResetPointBBoxes( const PlugIn_ViewPort &vp_last, const PlugIn_ViewPort &vp_this )
 {
@@ -4789,7 +4769,7 @@ bool eSENCChart::DoRenderRegionViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& 
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
-        UpdateLUPsOnStateChange( );                     // and update the LUPs
+        UpdateLUPs( this );                             // and update the LUPs
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
         m_plib_state_hash = PI_GetPLIBStateHash();
@@ -4931,7 +4911,7 @@ bool eSENCChart::RenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint )
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
-        UpdateLUPsOnStateChange( );                     // and update the LUPs
+        UpdateLUPs( this );                             // and update the LUPs
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
         m_plib_state_hash = PI_GetPLIBStateHash();
@@ -5288,7 +5268,7 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
     int i;
     ObjRazRules *top;
     ObjRazRules *crnt;
-    PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
+    //PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
     
     for( i = 0; i < PI_PRIO_NUM; ++i ) {
         //      Set up a Clipper for Lines
@@ -5298,9 +5278,9 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
             //         pdcc = new wxDCClipper(dcinput, nr);
         }
         
-//        if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
-//            top = razRules[i][4]; // Area Symbolized Boundaries
-//            else
+        if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
+            top = razRules[i][4]; // Area Symbolized Boundaries
+            else
                 top = razRules[i][3];           // Area Plain Boundaries
                 while( top != NULL ) {
                     crnt = top;
@@ -5318,10 +5298,10 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     ps52plib->RenderObjectToDC( &dcinput, crnt, &m_cvp );
                 }
                 
-//TODO                if( PI_GetPLIBSymbolStyle() == PI_SIMPLIFIED )
+                if( PI_GetPLIBSymbolStyle() == PI_SIMPLIFIED )
                     top = razRules[i][0];       //SIMPLIFIED Points
-//                    else
-//                        top = razRules[i][1];           //Paper Chart Points Points
+                else
+                    top = razRules[i][1];           //Paper Chart Points Points
                         
                         while( top != NULL ) {
                             crnt = top;
@@ -6154,26 +6134,26 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                 classDesc = wxString( name_desc, wxConvUTF8 );
             }
             
-#if 0            
+#if 1           
             //    Show LUP
-            if( g_bDebugS57 ) {
+            if( g_PIbDebugS57 ) {
                 wxString index;
-                index.Printf( _T("Feature Index: %d\n"), current->obj->Index );
-            classAttributes << index;
+                index.Printf( _T("Feature Index: %d\n"), current->Index );
+                classDesc << index;
             
-            wxString LUPstring;
-            LUPstring.Printf( _T("LUP RCID:  %d\n"), current->LUP->RCID );
-            classAttributes << LUPstring;
-            
-            LUPstring = _T("    LUP ATTC: ");
-            if( current->LUP->ATTCArray ) LUPstring += current->LUP->ATTCArray->Item( 0 );
-            LUPstring += _T("\n");
-            classAttributes << LUPstring;
-            
-            LUPstring = _T("    LUP INST: ");
-            if( current->LUP->INST ) LUPstring += *( current->LUP->INST );
-            LUPstring += _T("\n\n");
-            classAttributes << LUPstring;
+//             wxString LUPstring;
+//             LUPstring.Printf( _T("LUP RCID:  %d\n"), current->LUP->RCID );
+//             classAttributes << LUPstring;
+//             
+//             LUPstring = _T("    LUP ATTC: ");
+//             if( current->LUP->ATTCArray ) LUPstring += current->LUP->ATTCArray->Item( 0 );
+//             LUPstring += _T("\n");
+//             classAttributes << LUPstring;
+//             
+//             LUPstring = _T("    LUP INST: ");
+//             if( current->LUP->INST ) LUPstring += *( current->LUP->INST );
+//             LUPstring += _T("\n\n");
+//             classAttributes << LUPstring;
             
             }
 #endif            
@@ -6634,7 +6614,10 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     int nPoints = 0;
     line_segment_element *ls_list = obj->m_ls_list;
     while( ls_list){
-        nPoints += ls_list->n_points;
+        if(ls_list->ls_type == TYPE_EE)
+            nPoints += ls_list->pedge->nCount;
+        else
+            nPoints += 2;
         ls_list = ls_list->next;
     }
     
@@ -6651,8 +6634,19 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     unsigned char *source_buffer = (unsigned char *)GetLineVertexBuffer();
     ls_list = obj->m_ls_list;
     while( ls_list){
-        memcpy(br, source_buffer + ls_list->vbo_offset, ls_list->n_points * 2 * sizeof(float));
-        br += ls_list->n_points * 2;
+        size_t vbo_offset = 0;
+        size_t count = 0;
+        if(ls_list->ls_type == TYPE_EE){
+            vbo_offset = ls_list->pedge->vbo_offset;
+            count = ls_list->pedge->nCount;
+        }
+        else{
+            vbo_offset = ls_list->pcs->vbo_offset;
+            count = 2;
+        }
+        
+        memcpy(br, source_buffer + vbo_offset, count * 2 * sizeof(float));
+        br += count * 2;
         ls_list = ls_list->next;
     }
     
@@ -6663,6 +6657,9 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
 
 void eSENCChart::AssembleLineGeometry( void )
 {
+
+//    OCPNStopWatch sw;
+    
     // Walk the hash tables to get the required buffer size
     
     //  Start with the edge hash table
@@ -6674,53 +6671,39 @@ void eSENCChart::AssembleLineGeometry( void )
             nPoints += pedge->nCount;
         }
     }
- 
-/* 
-    // Determine hash key length required
-    int max_node = 0;
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            ObjRazRules *top = razRules[i][j];
-            while( top != NULL ) {
-                S57Obj *obj = top->obj;
-                
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    max_node = wxMax(max_node, inode);
-                    max_node = wxMax(max_node, enode);
-                    
-                }                    
-                
-                top = top->next;
-            }
-        }
-    }
-*/    
+
+//    printf("time0 %f\n", sw.GetTime());
     
     
-    std::map<std::string, connector_segment *> ce_connector_hash;
-    std::map<std::string, connector_segment *> ec_connector_hash;
-    std::map<std::string, connector_segment *> cc_connector_hash;
+    
+    std::unordered_map<std::string, connector_segment *> ce_connector_hash;
+    std::unordered_map<std::string, connector_segment *> ec_connector_hash;
+    std::unordered_map<std::string, connector_segment *> cc_connector_hash;
     
     int ndelta = 0;
+    
+    //  Define a vector to temporarily hold the geometry for the created pcs elements
+    
+    typedef struct segment_pair{
+        float e0, n0, e1, n1;
+    };
+    std::vector<segment_pair> connector_segment_vector;
+    size_t seg_pair_index = 0;
+    
+    
+    
     //  Get the end node connected segments.  To do this, we
-    //  walk the Feature array and process each feature that potetially has a LINE type element
+    //  walk the Feature array and process each feature that potentially has a LINE type element
     for( int i = 0; i < PRIO_NUM; ++i ) {
         for( int j = 0; j < LUPNAME_NUM; j++ ) {
             ObjRazRules *top = razRules[i][j];
             while( top != NULL ) {
                 S57Obj *obj = top->obj;
+
+                line_segment_element list_top;
+                list_top.next = 0;
+                
+                line_segment_element *le_current = &list_top;
                 
                 for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
                     int seg_index = iseg * 3;
@@ -6730,7 +6713,14 @@ void eSENCChart::AssembleLineGeometry( void )
                     unsigned int inode = *index_run++;
                     
                     //  Get the edge
-                    unsigned int venode = *index_run++;
+                    bool edge_dir = true;
+                    int venode = *index_run++;
+                    if(venode < 0){
+                        venode = -venode;
+                        edge_dir = false;
+                    }
+                    
+                    
                     VE_Element *pedge = 0;
                     pedge = m_ve_hash[venode];
                     
@@ -6745,47 +6735,87 @@ void eSENCChart::AssembleLineGeometry( void )
                     VC_Element *epnode = 0;
                     epnode = m_vc_hash[enode];
                     
-//                    double e0, n0, e1, n1;
                     
                     if( ipnode ) {
-//                        double *ppt = ipnode->pPoint;
-//                        e0 = *ppt++;
-//                        n0 = *ppt;
                         if(pedge && pedge->nCount)
                         {
-//                            e1 = pedge->pPoints[0];
-//                            n1 = pedge->pPoints[1];
                             
                             //      The initial node exists and connects to the start of an edge
-                            //wxString key;
-                            //key.Printf(_T("CE%d%d"), inode, venode);
                             
                             char buf[40];
-                            snprintf(buf, sizeof(buf), "CE%d_%d", inode, venode);
+                            snprintf(buf, sizeof(buf), "%d_%d", inode, venode);
                             std::string key(buf);
 
-                            if(ce_connector_hash.find( key ) == ce_connector_hash.end()){
+                            connector_segment *pcs = NULL;
+                            std::unordered_map<std::string, connector_segment *>::iterator itce;
+                            itce = ce_connector_hash.find( key );
+                            if( itce == ce_connector_hash.end() ){
                                 ndelta += 2;
-                                connector_segment *pcs = new connector_segment;
-                                pcs->type = TYPE_CE;
-                                pcs->start = ipnode;
-                                pcs->end = pedge;
+                                pcs = new connector_segment;
+//                                pcs->type = TYPE_CE;
+//                                pcs->start = ipnode;
+//                                pcs->end = pedge;
                                 ce_connector_hash[key] = pcs;
+                                
+                                // capture and store geometry
+                                segment_pair pair;
+                                float *ppt = ipnode->pPoint;
+                                pair.e0 = *ppt++;
+                                pair.n0 = *ppt;
+
+                                if(edge_dir){
+                                    pair.e1 = pedge->pPoints[ 0 ];
+                                    pair.n1 = pedge->pPoints[ 1 ];
+                                }
+                                else{
+                                    int last_point_index = (pedge->nCount -1) * 2;
+                                    pair.e1 = pedge->pPoints[ last_point_index ];
+                                    pair.n1 = pedge->pPoints[ last_point_index + 1 ];
+                                }
+                                
+                                connector_segment_vector.push_back(pair);
+                                pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                seg_pair_index ++;
+                                
+                                // calculate the centroid of this connector segment, used for viz testing
+                                double lat, lon;
+                                fromSM_Plugin( (pair.e0 + pair.e1)/2, (pair.n0 + pair.n1)/2, m_ref_lat, m_ref_lon, &lat, &lon );
+                                pcs->cs_lat_avg = lat;
+                                pcs->cs_lon_avg = lon;
+                                
                             }
+                            else
+                                pcs = itce->second;
+
+                            
+                            line_segment_element *pls = new line_segment_element;
+                            pls->next = 0;
+//                            pls->n_points = 2;
+                            pls->priority = 0;
+                            pls->pcs = pcs;
+                            pls->ls_type = TYPE_CE;
+                            
+                            le_current->next = pls;             // hook it up
+                            le_current = pls;
+                            
                         }
                     }
                     
                     if(pedge && pedge->nCount){
-//                        e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-//                        n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
+                        line_segment_element *pls = new line_segment_element;
+                        pls->next = 0;
+//                        pls->n_points = pedge->nCount;
+                        pls->priority = 0;
+                        pls->pedge = pedge;
+                        pls->ls_type = TYPE_EE;
+                        
+                        le_current->next = pls;             // hook it up
+                        le_current = pls;
                         
                     }   //pedge
                     
                     // end node
                     if( epnode ) {
-//                        double *ppt = epnode->pPoint;
-//                        e1 = *ppt++;
-//                        n1 = *ppt;
                         
                         if(ipnode){
                             if(pedge && pedge->nCount){
@@ -6793,50 +6823,139 @@ void eSENCChart::AssembleLineGeometry( void )
                                 //wxString key;
                                 //key.Printf(_T("EC%d%d"), venode, enode);
                                 char buf[40];
-                                snprintf(buf, sizeof(buf), "EC%d_%d", venode, enode);
+                                snprintf(buf, sizeof(buf), "%d_%d", venode, enode);
                                 std::string key(buf);
                                 
-                                
-                                if(ec_connector_hash.find( key ) == ec_connector_hash.end()){
+                                connector_segment *pcs = NULL;
+                                std::unordered_map<std::string, connector_segment *>::iterator itec;
+                                itec = ec_connector_hash.find( key );
+                                if( itec == ec_connector_hash.end() ){
                                     ndelta += 2;
-                                    connector_segment *pcs = new connector_segment;
-                                    pcs->type = TYPE_EC;
-                                    pcs->start = pedge;
-                                    pcs->end = epnode;
+                                    pcs = new connector_segment;
+//                                    pcs->type = TYPE_EC;
                                     ec_connector_hash[key] = pcs;
+                                    
+                                    // capture and store geometry
+                                    segment_pair pair;
+                                    
+                                    if(!edge_dir){
+                                        pair.e0 = pedge->pPoints[ 0 ];
+                                        pair.n0 = pedge->pPoints[ 1 ];
+                                    }
+                                    else{
+                                        int last_point_index = (pedge->nCount -1) * 2;
+                                        pair.e0 = pedge->pPoints[ last_point_index ];
+                                        pair.n0 = pedge->pPoints[ last_point_index + 1 ];
+                                    }
+                                    
+                                    
+                                    float *ppt = epnode->pPoint;
+                                    pair.e1 = *ppt++;
+                                    pair.n1 = *ppt;
+                                    
+                                    connector_segment_vector.push_back(pair);
+                                    pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                    seg_pair_index ++;
+                                
+                                    // calculate the centroid of this connector segment, used for viz testing
+                                    double lat, lon;
+                                    fromSM_Plugin( (pair.e0 + pair.e1)/2, (pair.n0 + pair.n1)/2, m_ref_lat, m_ref_lon, &lat, &lon );
+                                    pcs->cs_lat_avg = lat;
+                                    pcs->cs_lon_avg = lon;
+                                    
                                 }
+                                else
+                                    pcs = itec->second;
+                                
+                                line_segment_element *pls = new line_segment_element;
+                                pls->next = 0;
+//                                pls->n_points = 2;
+                                pls->priority = 0;
+                                pls->pcs = pcs;
+                                pls->ls_type = TYPE_EC;
+                                
+                                le_current->next = pls;             // hook it up
+                                le_current = pls;
+                                
                                 
                             }
                             else {
                                 //wxString key;
                                 //key.Printf(_T("CC%d%d"), inode, enode);
                                 char buf[40];
-                                snprintf(buf, sizeof(buf), "CC%d_%d", inode, enode);
+                                snprintf(buf, sizeof(buf), "%d_%d", inode, enode);
                                 std::string key(buf);
                                 
                                 
-                                if(cc_connector_hash.find( key ) == cc_connector_hash.end()){
+                                connector_segment *pcs = NULL;
+                                std::unordered_map<std::string, connector_segment *>::iterator itcc;
+                                itcc = cc_connector_hash.find( key );
+                                if( itcc == cc_connector_hash.end() ){
                                     ndelta += 2;
-                                    connector_segment *pcs = new connector_segment;
-                                    pcs->type = TYPE_CC;
-                                    pcs->start = ipnode;
-                                    pcs->end = epnode;
+                                    pcs = new connector_segment;
+//                                    pcs->type = TYPE_CC;
+//                                    pcs->start = ipnode;
+//                                    pcs->end = epnode;
                                     cc_connector_hash[key] = pcs;
+                                    
+                                    // capture and store geometry
+                                    segment_pair pair;
+                                    
+                                    float *ppt = ipnode->pPoint;
+                                    pair.e0 = *ppt++;
+                                    pair.n0 = *ppt;
+                                    
+                                    ppt = epnode->pPoint;
+                                    pair.e1 = *ppt++;
+                                    pair.n1 = *ppt;
+
+                                    connector_segment_vector.push_back(pair);
+                                    pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                    seg_pair_index ++;
+                                    
+                                    // calculate the centroid of this connector segment, used for viz testing
+                                    double lat, lon;
+                                    fromSM_Plugin( (pair.e0 + pair.e1)/2, (pair.n0 + pair.n1)/2, m_ref_lat, m_ref_lon, &lat, &lon );
+                                    pcs->cs_lat_avg = lat;
+                                    pcs->cs_lon_avg = lon;
+                                    
                                 }
+                                else
+                                    pcs = itcc->second;
+                                
+                                line_segment_element *pls = new line_segment_element;
+                                pls->next = 0;
+//                                pls->n_points = 2;
+                                pls->priority = 0;
+                                pls->pcs = pcs;
+                                pls->ls_type = TYPE_CC;
+                                
+                                le_current->next = pls;             // hook it up
+                                le_current = pls;
+                                
                                 
                             }
                         }
                     }
+                    
+                    
                 }  // for
                 
+                //  All done, so assign the list to the object
+                obj->m_ls_list = list_top.next;    // skipping the empty first placeholder element
+
+                // we are all finished with the line segment index array, per object
+                free(obj->m_lsindex_array);
+                obj->m_lsindex_array = NULL;
                 
                 top = top->next;
             }
         }
     }
+//    printf("time1 %f\n", sw.GetTime());
     
     //  We have the total VBO point count, and a nice hashmap of the connector segments
-    nPoints += ndelta;
+    nPoints += ndelta;          // allow for the connector segments
     
     size_t vbo_byte_length = 2 * nPoints * sizeof(float);
     m_vbo_byte_length = vbo_byte_length;
@@ -6844,1267 +6963,109 @@ void eSENCChart::AssembleLineGeometry( void )
     m_line_vertex_buffer = (float *)malloc( vbo_byte_length);
     float *lvr = m_line_vertex_buffer;
     size_t offset = 0;
-#if 0    
-    //      Copy and convert the edge points from doubles to floats,
-    //      and recording each segment's offset in the array
-    for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
-        VE_Element *pedge = it->second;
-        if( pedge ) {
-            double *pp = pedge->pPoints;
-            for(size_t i = 0 ; i < pedge->nCount ; i++){
-                double x = *pp++;
-                double y = *pp++;
-                
-                *lvr++ = (float)x;
-                *lvr++ = (float)y;
-            }
-            
-            pedge->vbo_offset = offset;
-            offset += pedge->nCount * 2 * sizeof(float);
-            
-        }
-    }
-#else    
 
     //      Copy and edge points as floats,
     //      and recording each segment's offset in the array
     for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
         VE_Element *pedge = it->second;
         if( pedge ) {
-            float *pp = pedge->pPoints;
-            for(size_t i = 0 ; i < pedge->nCount ; i++){
-                float x = *pp++;
-                float y = *pp++;
-                
-                *lvr++ = (float)x;
-                *lvr++ = (float)y;
-            }
+            memcpy(lvr, pedge->pPoints, pedge->nCount * 2 * sizeof(float));
+            lvr += pedge->nCount * 2;
             
             pedge->vbo_offset = offset;
             offset += pedge->nCount * 2 * sizeof(float);
-            
         }
     }
-#endif
-
-    //      Now iterate on the hashmap, adding the connector segments in the hashmap to the VBO buffer
-#if 0
-    double e0, n0, e1, n1;
-    double *ppt;
-#else    
-    float e0, n0, e1, n1;
-    float *ppt;
-#endif    
-    VC_Element *ipnode;
-    VC_Element *epnode;
-    VE_Element *pedge;
-    //connected_segment_hash::iterator itc;
-    std::map<std::string, connector_segment *>::iterator itce;
-    std::map<std::string, connector_segment *>::iterator itec;
-    std::map<std::string, connector_segment *>::iterator itcc;
+//    printf("time2 %f\n", sw.GetTime());
     
-    for( itce = ce_connector_hash.begin(); itce != ce_connector_hash.end(); ++itce )
+    //      Now iterate on the hashmaps, adding the connector segments in the temporary vector to the VBO buffer
+    //      At the  same time, populate a vector, storing the pcs pointers to allow destruction at this class dtor.
+    //      This will allow us to destroy (automatically) the pcs hashmaps, and save some storage
+    
+    std::unordered_map<std::string, connector_segment *>::iterator iter;
+    
+    for( iter = ce_connector_hash.begin(); iter != ce_connector_hash.end(); ++iter )
     {
- //       std::string key = itce->first;
-        connector_segment *pcs = itce->second;
+        connector_segment *pcs = iter->second;
+        m_pcs_vector.push_back(pcs);
         
-        switch(pcs->type){
-            case TYPE_CE:
-                ipnode = (VC_Element *)pcs->start;
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                pedge = (VE_Element *)pcs->end;
-                e1 = pedge->pPoints[ 0 ];
-                n1 = pedge->pPoints[ 1 ];
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                break;
-                
-            default:
-                break;
-        }
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        *lvr++ = pair.e0;
+        *lvr++ = pair.n0;
+        *lvr++ = pair.e1;
+        *lvr++ = pair.n1;
+
+        pcs->vbo_offset = offset;
+        offset += 4 * sizeof(float);
     }
 
-    for( itec = ec_connector_hash.begin(); itec != ec_connector_hash.end(); ++itec )
+    for( iter = ec_connector_hash.begin(); iter != ec_connector_hash.end(); ++iter )
     {
-//        std::string key = itec->first;
-        connector_segment *pcs = itec->second;
+        connector_segment *pcs = iter->second;
+        m_pcs_vector.push_back(pcs);
         
-        switch(pcs->type){
-            case TYPE_EC:
-                pedge = (VE_Element *)pcs->start;
-                e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        *lvr++ = pair.e0;
+        *lvr++ = pair.n0;
+        *lvr++ = pair.e1;
+        *lvr++ = pair.n1;
                 
-                epnode = (VC_Element *)pcs->end;
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-            default:
-                break;
-        }
+        pcs->vbo_offset = offset;
+        offset += 4 * sizeof(float);
     }
     
-    for( itcc = cc_connector_hash.begin(); itcc != cc_connector_hash.end(); ++itcc )
+    for( iter = cc_connector_hash.begin(); iter != cc_connector_hash.end(); ++iter )
     {
- //       std::string key = itcc->first;
-        connector_segment *pcs = itcc->second;
+        connector_segment *pcs = iter->second;
+        m_pcs_vector.push_back(pcs);
         
-        switch(pcs->type){
-            case TYPE_CC:
-                ipnode = (VC_Element *)pcs->start;
-                epnode = (VC_Element *)pcs->end;
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        *lvr++ = pair.e0;
+        *lvr++ = pair.n0;
+        *lvr++ = pair.e1;
+        *lvr++ = pair.n1;
                 
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-                
-             default:
-                break;
-        }
+        pcs->vbo_offset = offset;
+        offset += 4 * sizeof(float);
     }
     
+    // And so we can empty the temp buffer
+    connector_segment_vector.clear();
     
-    
-    
-    
-    // Now ready to walk the object array again, building the per-object list of renderable segments
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            ObjRazRules *top = razRules[i][j];
-            while( top != NULL ) {
-                S57Obj *obj = top->obj;
-                
-                line_segment_element list_top;
-                list_top.n_points = 0;
-                list_top.next = 0;
-                
-                line_segment_element *le_current = &list_top;
-                
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    VE_Element *pedge = 0;
-                    pedge = m_ve_hash[venode];
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    //  Get first connected node
-                    VC_Element *ipnode = 0;
-                    ipnode = m_vc_hash[inode];
-                    
-                    //  Get end connected node
-                    VC_Element *epnode = 0;
-                    epnode = m_vc_hash[enode];
-                    
-//                    double e0=0, n0=0, e1, n1;
-                    
-                    if( ipnode ) {
-//                        double *ppt = ipnode->pPoint;
-//                        e0 = *ppt++;
-//                        n0 = *ppt;
-                        
-                        if(pedge && pedge->nCount)
-                        {
-                            //wxString key;
-                            //key.Printf(_T("CE%d%d"), inode, venode);
-                            char buf[40];
-                            snprintf(buf, sizeof(buf), "CE%d_%d", inode, venode);
-                            std::string key(buf);
-                            
-                            
-                            if(ce_connector_hash.find( key ) != ce_connector_hash.end()){
-                                
-                                connector_segment *pcs = ce_connector_hash[key];
-                                
-                                line_segment_element *pls = new line_segment_element;
-                                pls->next = 0;
-                                pls->vbo_offset = pcs->vbo_offset;
-                                pls->n_points = 2;
-                                pls->priority = 0;
-                                pls->private0 = pcs;
-                                pls->type = TYPE_CE;
-                                
-                                //  Get the bounding box
-                                e1 = pedge->pPoints[0];
-                                n1 = pedge->pPoints[1];
-                                
-                                wxBoundingBox box;
-                                double lat, lon;
-                                fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                box.Expand(lon, lat);
-                                fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                box.Expand(lon, lat);
-                                
-                                pls->lat_max = box.GetMaxY();
-                                pls->lat_min = box.GetMinY();
-                                pls->lon_max = box.GetMaxX();
-                                pls->lon_min = box.GetMinX();
-                                
-                                
-                                le_current->next = pls;             // hook it up
-                                le_current = pls;
-                            }
-                        }
-                    }
-                    
-                    if(pedge && pedge->nCount){
-                        line_segment_element *pls = new line_segment_element;
-                        pls->next = 0;
-                        pls->vbo_offset = pedge->vbo_offset;
-                        pls->n_points = pedge->nCount;
-                        pls->priority = 0;
-                        pls->lat_max = pedge->edgeBBox.GetMaxY();
-                        pls->lat_min = pedge->edgeBBox.GetMinY();
-                        pls->lon_max = pedge->edgeBBox.GetMaxX();
-                        pls->lon_min = pedge->edgeBBox.GetMinX();
-                        pls->private0 = pedge;
-                        pls->type = TYPE_EE;
-                        
-                        le_current->next = pls;             // hook it up
-                        le_current = pls;
-                        
-                        e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                        n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                        
-                        
-                    }   //pedge
-                    
-                    // end node
-                    if( epnode ) {
-//                        double *ppt = epnode->pPoint;
-//                        e1 = *ppt++;
-//                        n1 = *ppt;
-                        
-                        if(ipnode){
-                            if(pedge && pedge->nCount){
-                                
-                                //wxString key;
-                                //key.Printf(_T("EC%d%d"), venode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "EC%d_%d", venode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(ec_connector_hash.find( key ) != ec_connector_hash.end()){
-                                    connector_segment *pcs = ec_connector_hash[key];
-                                    
-                                    line_segment_element *pls = new line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_EC;
-                                    
-                                    wxBoundingBox box;
-                                    double lat, lon;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    
-                                    pls->lat_max = box.GetMaxY();
-                                    pls->lat_min = box.GetMinY();
-                                    pls->lon_max = box.GetMaxX();
-                                    pls->lon_min = box.GetMinX();
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                            else {
-                                //wxString key;
-                                //key.Printf(_T("CC%d%d"), inode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "CC%d_%d", inode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(cc_connector_hash.find( key ) != cc_connector_hash.end()){
-                                    connector_segment *pcs = cc_connector_hash[key];
-                                    
-                                    line_segment_element *pls = new line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_CC;
-                                    
-                                    wxBoundingBox box;
-                                    double lat, lon;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    
-                                    pls->lat_max = box.GetMaxY();
-                                    pls->lat_min = box.GetMinY();
-                                    pls->lon_max = box.GetMaxX();
-                                    pls->lon_min = box.GetMinX();
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                        }
-                    }
-                }  // for
-                
-                //  All done, so assign the list to the object
-                obj->m_ls_list = list_top.next;    // skipping the empty first placeholder element
-                
-                
-                top = top->next;
-            }
-        }
-    }
-   
-   // TODO destroy the contents of the helper maps.
-   //  Need refactor, sine we have to keep the contents (connector_segment structs) around to keep track of priorities.
-}
-
-#if 0
-void eSENCChart::AssembleLineGeometry( void )
-{
-    // Walk the hash tables to get the required buffer size
-    
-    //  Start with the edge hash table
-    size_t nPoints = 0;
-    VE_Hash::iterator it;
+    // Wwe can convert the edge hashmap to a vector, to allow  us to destroy the hashmap
+    // and at the same time free up the point storage in the VE_Elements, since all the points
+    // are now in the VBO buffer
     for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
         VE_Element *pedge = it->second;
-        if( pedge ) {
-            nPoints += pedge->nCount;
-        }
-    }
-    
-    /* 
-     *    // Determine hash key length required
-     *    int max_node = 0;
-     *    for( int i = 0; i < PRIO_NUM; ++i ) {
-     *        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-     *            ObjRazRules *top = razRules[i][j];
-     *            while( top != NULL ) {
-     *                S57Obj *obj = top->obj;
-     *                
-     *                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-     *                    int seg_index = iseg * 3;
-     *                    int *index_run = &obj->m_lsindex_array[seg_index];
-     *                    
-     *                    //  Get first connected node
-     *                    unsigned int inode = *index_run++;
-     *                    
-     *                    //  Get the edge
-     *                    unsigned int venode = *index_run++;
-     *                    
-     *                    //  Get end connected node
-     *                    unsigned int enode = *index_run++;
-     *                    
-     *                    max_node = wxMax(max_node, inode);
-     *                    max_node = wxMax(max_node, enode);
-     *                    
-     }                    
-     
-     top = top->next;
-     }
-     }
-     }
-     */    
-    
-    
-    std::map<std::string, connector_segment *> connector_hash;
-    
-    int ndelta = 0;
-    //  Get the end node connected segments.  To do this, we
-    //  walk the Feature array and process each feature that potetially has a LINE type element
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            ObjRazRules *top = razRules[i][j];
-            while( top != NULL ) {
-                S57Obj *obj = top->obj;
-                
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    VE_Element *pedge = 0;
-                    pedge = m_ve_hash[venode];
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    //  Get first connected node
-                    VC_Element *ipnode = 0;
-                    ipnode = m_vc_hash[inode];
-                    
-                    //  Get end connected node
-                    VC_Element *epnode = 0;
-                    epnode = m_vc_hash[enode];
-                    
-                    double e0, n0, e1, n1;
-                    
-                    if( ipnode ) {
-                        double *ppt = ipnode->pPoint;
-                        e0 = *ppt++;
-                        n0 = *ppt;
-                        if(pedge && pedge->nCount)
-                        {
-                            e1 = pedge->pPoints[0];
-                            n1 = pedge->pPoints[1];
-                            
-                            //      The initial node exists and connects to the start of an edge
-                            //wxString key;
-                            //key.Printf(_T("CE%d%d"), inode, venode);
-                            
-                            char buf[40];
-                            snprintf(buf, sizeof(buf), "CE%d_%d", inode, venode);
-                            std::string key(buf);
-                            
-                            if(connector_hash.find( key ) == connector_hash.end()){
-                                ndelta += 2;
-                                connector_segment *pcs = new connector_segment;
-                                pcs->type = TYPE_CE;
-                                pcs->start = ipnode;
-                                pcs->end = pedge;
-                                connector_hash[key] = pcs;
-                            }
-                        }
-                    }
-                    
-                    if(pedge && pedge->nCount){
-                        e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                        n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                        
-                    }   //pedge
-                    
-                    // end node
-                    if( epnode ) {
-                        double *ppt = epnode->pPoint;
-                        e1 = *ppt++;
-                        n1 = *ppt;
-                        
-                        if(ipnode){
-                            if(pedge && pedge->nCount){
-                                
-                                //wxString key;
-                                //key.Printf(_T("EC%d%d"), venode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "EC%d_%d", venode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(connector_hash.find( key ) == connector_hash.end()){
-                                    ndelta += 2;
-                                    connector_segment *pcs = new connector_segment;
-                                    pcs->type = TYPE_EC;
-                                    pcs->start = pedge;
-                                    pcs->end = epnode;
-                                    connector_hash[key] = pcs;
-                                }
-                            }
-                            else {
-                                //wxString key;
-                                //key.Printf(_T("CC%d%d"), inode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "CC%d_%d", inode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(connector_hash.find( key ) == connector_hash.end()){
-                                    ndelta += 2;
-                                    connector_segment *pcs = new connector_segment;
-                                    pcs->type = TYPE_CC;
-                                    pcs->start = ipnode;
-                                    pcs->end = epnode;
-                                    connector_hash[key] = pcs;
-                                }
-                            }
-                        }
-                    }
-                }  // for
-                
-                
-                top = top->next;
-            }
-        }
-    }
-    
-    //  We have the total VBO point count, and a nice hashmap of the connector segments
-    nPoints += ndelta;
-    
-    size_t vbo_byte_length = 2 * nPoints * sizeof(float);
-    m_vbo_byte_length = vbo_byte_length;
-    
-    m_line_vertex_buffer = (float *)malloc( vbo_byte_length);
-    float *lvr = m_line_vertex_buffer;
-    size_t offset = 0;
-    
-    //      Copy and convert the edge points from doubles to floats,
-    //      and recording each segment's offset in the array
-    for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
-        VE_Element *pedge = it->second;
-        if( pedge ) {
-            double *pp = pedge->pPoints;
-            for(size_t i = 0 ; i < pedge->nCount ; i++){
-                double x = *pp++;
-                double y = *pp++;
-                
-                *lvr++ = (float)x;
-                *lvr++ = (float)y;
-            }
-            
-            pedge->vbo_offset = offset;
-            offset += pedge->nCount * 2 * sizeof(float);
-            
-        }
-    }
-    
-    //      Now iterate on the hashmap, adding the connector segments in the hashmap to the VBO buffer
-    double e0, n0, e1, n1;
-    double *ppt;
-    VC_Element *ipnode;
-    VC_Element *epnode;
-    VE_Element *pedge;
-    //connected_segment_hash::iterator itc;
-    std::map<std::string, connector_segment *>::iterator itc;
-    
-    for( itc = connector_hash.begin(); itc != connector_hash.end(); ++itc )
-    {
-        //wxString key = itc->first;
-        std::string key = itc->first;
-        connector_segment *pcs = itc->second;
+        m_pve_vector.push_back(pedge);
         
-        switch(pcs->type){
-            case TYPE_CC:
-                ipnode = (VC_Element *)pcs->start;
-                epnode = (VC_Element *)pcs->end;
-                
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-                
-            case TYPE_CE:
-                ipnode = (VC_Element *)pcs->start;
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                pedge = (VE_Element *)pcs->end;
-                e1 = pedge->pPoints[ 0 ];
-                n1 = pedge->pPoints[ 1 ];
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                break;
-                
-            case TYPE_EC:
-                pedge = (VE_Element *)pcs->start;
-                e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                
-                epnode = (VC_Element *)pcs->end;
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-            default:
-                break;
-        }
+        free(pedge->pPoints);
     }
+    m_ve_hash.clear();
     
-    // Now ready to walk the object array again, building the per-object list of renderable segments
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            ObjRazRules *top = razRules[i][j];
-            while( top != NULL ) {
-                S57Obj *obj = top->obj;
-                
-                line_segment_element list_top;
-                list_top.n_points = 0;
-                list_top.next = 0;
-                
-                line_segment_element *le_current = &list_top;
-                
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    VE_Element *pedge = 0;
-                    pedge = m_ve_hash[venode];
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    //  Get first connected node
-                    VC_Element *ipnode = 0;
-                    ipnode = m_vc_hash[inode];
-                    
-                    //  Get end connected node
-                    VC_Element *epnode = 0;
-                    epnode = m_vc_hash[enode];
-                    
-                    double e0=0, n0=0, e1, n1;
-                    
-                    if( ipnode ) {
-                        double *ppt = ipnode->pPoint;
-                        e0 = *ppt++;
-                        n0 = *ppt;
-                        
-                        if(pedge && pedge->nCount)
-                        {
-                            //wxString key;
-                            //key.Printf(_T("CE%d%d"), inode, venode);
-                            char buf[40];
-                            snprintf(buf, sizeof(buf), "CE%d_%d", inode, venode);
-                            std::string key(buf);
-                            
-                            
-                            if(connector_hash.find( key ) != connector_hash.end()){
-                                
-                                connector_segment *pcs = connector_hash[key];
-                                
-                                line_segment_element *pls = new line_segment_element;
-                                pls->next = 0;
-                                pls->vbo_offset = pcs->vbo_offset;
-                                pls->n_points = 2;
-                                pls->priority = 0;
-                                pls->private0 = pcs;
-                                pls->type = TYPE_CE;
-                                
-                                //  Get the bounding box
-                                e1 = pedge->pPoints[0];
-                                n1 = pedge->pPoints[1];
-                                
-                                wxBoundingBox box;
-                                double lat, lon;
-                                fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                box.Expand(lon, lat);
-                                fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                box.Expand(lon, lat);
-                                
-                                pls->lat_max = box.GetMaxY();
-                                pls->lat_min = box.GetMinY();
-                                pls->lon_max = box.GetMaxX();
-                                pls->lon_min = box.GetMinX();
-                                
-                                
-                                le_current->next = pls;             // hook it up
-                                le_current = pls;
-                            }
-                        }
-                    }
-                    
-                    if(pedge && pedge->nCount){
-                        line_segment_element *pls = new line_segment_element;
-                        pls->next = 0;
-                        pls->vbo_offset = pedge->vbo_offset;
-                        pls->n_points = pedge->nCount;
-                        pls->priority = 0;
-                        pls->lat_max = pedge->edgeBBox.GetMaxY();
-                        pls->lat_min = pedge->edgeBBox.GetMinY();
-                        pls->lon_max = pedge->edgeBBox.GetMaxX();
-                        pls->lon_min = pedge->edgeBBox.GetMinX();
-                        pls->private0 = pedge;
-                        pls->type = TYPE_EE;
-                        
-                        le_current->next = pls;             // hook it up
-                        le_current = pls;
-                        
-                        e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                        n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                        
-                        
-                    }   //pedge
-                    
-                    // end node
-                    if( epnode ) {
-                        double *ppt = epnode->pPoint;
-                        e1 = *ppt++;
-                        n1 = *ppt;
-                        
-                        if(ipnode){
-                            if(pedge && pedge->nCount){
-                                
-                                //wxString key;
-                                //key.Printf(_T("EC%d%d"), venode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "EC%d_%d", venode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(connector_hash.find( key ) != connector_hash.end()){
-                                    connector_segment *pcs = connector_hash[key];
-                                    
-                                    line_segment_element *pls = new line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_EC;
-                                    
-                                    wxBoundingBox box;
-                                    double lat, lon;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    
-                                    pls->lat_max = box.GetMaxY();
-                                    pls->lat_min = box.GetMinY();
-                                    pls->lon_max = box.GetMaxX();
-                                    pls->lon_min = box.GetMinX();
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                            else {
-                                //wxString key;
-                                //key.Printf(_T("CC%d%d"), inode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "CC%d_%d", inode, enode);
-                                std::string key(buf);
-                                
-                                
-                                if(connector_hash.find( key ) != connector_hash.end()){
-                                    connector_segment *pcs = connector_hash[key];
-                                    
-                                    line_segment_element *pls = new line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_CC;
-                                    
-                                    wxBoundingBox box;
-                                    double lat, lon;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat, &lon );
-                                    box.Expand(lon, lat);
-                                    
-                                    pls->lat_max = box.GetMaxY();
-                                    pls->lat_min = box.GetMinY();
-                                    pls->lon_max = box.GetMaxX();
-                                    pls->lon_min = box.GetMinX();
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                        }
-                    }
-                }  // for
-                
-                //  All done, so assign the list to the object
-                obj->m_ls_list = list_top.next;    // skipping the empty first placeholder element
-                
-                
-                top = top->next;
-            }
-        }
+    
+    // and we can empty the connector hashmap,
+    // and at the same time free up the point storage in the VC_Elements, since all the points
+    // are now in the VBO buffer
+    for( VC_Hash::iterator itc = m_vc_hash.begin(); itc != m_vc_hash.end(); ++itc ) {
+        VC_Element *pcs = itc->second;
+        free(pcs->pPoint);
     }
+    m_vc_hash.clear();
     
- }
-#endif    
+    
+    
+//    printf("time3 %f\n", sw.GetTime());
+    
+    
+    
 
-
-
-
-#if 0
-void eSENCChart::AssembleLineGeometry( void )
-{
-    // Walk the hash tables to get the required buffer size
-    
-    //  Start with the edge hash table
-    size_t nPoints = 0;
-    PI_VE_Hash::iterator it;
-    for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
-        PI_VE_Element *pedge = it->second;
-        if( pedge ) {
-            nPoints += pedge->nCount;
-        }
-    }
-    
-    
-    int ndelta = 0;
-    //  Get the end node connected segments.  To do this, we
-    //  walk the Feature array and process each feature that potetially has a LINE type element
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            S57Obj *obj = razRules[i][j];
-            while(obj)
-            {
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    PI_VE_Element *pedge = 0;
-                    pedge = m_ve_hash[venode];
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    //  Get first connected node
-                    PI_VC_Element *ipnode = 0;
-                    ipnode = m_vc_hash[inode];
-                    
-                    //  Get end connected node
-                    PI_VC_Element *epnode = 0;
-                    epnode = m_vc_hash[enode];
-                    
-                    if( ipnode ) {
-                        if(pedge && pedge->nCount)
-                        {
-                            //      The initial node exists and connects to the start of an edge
-                            wxString key;
-                            key.Printf(_T("CE%d%d"), inode, venode);
-                            
-                            if(m_connector_hash.find( key ) == m_connector_hash.end()){
-                                ndelta += 2;
-                                PI_connector_segment *pcs = new PI_connector_segment;
-                                pcs->type = TYPE_CE;
-                                pcs->start = ipnode;
-                                pcs->end = pedge;
-                                m_connector_hash[key] = pcs;
-                            }
-                        }
-                    }
-                    
-                    if(pedge && pedge->nCount){
-                        
-                    }   //pedge
-                    
-                    // end node
-                    if( epnode ) {
-                        if(ipnode){
-                            if(pedge && pedge->nCount){
-                                
-                                wxString key;
-                                key.Printf(_T("EC%d%d"), venode, enode);
-                                
-                                if(m_connector_hash.find( key ) == m_connector_hash.end()){
-                                    ndelta += 2;
-                                    PI_connector_segment *pcs = new PI_connector_segment;
-                                    pcs->type = TYPE_EC;
-                                    pcs->start = pedge;
-                                    pcs->end = epnode;
-                                    m_connector_hash[key] = pcs;
-                                }
-                            }
-                            else {
-                                wxString key;
-                                key.Printf(_T("CC%d%d"), inode, enode);
-                                
-                                if(m_connector_hash.find( key ) == m_connector_hash.end()){
-                                    ndelta += 2;
-                                    PI_connector_segment *pcs = new PI_connector_segment;
-                                    pcs->type = TYPE_CC;
-                                    pcs->start = ipnode;
-                                    pcs->end = epnode;
-                                    m_connector_hash[key] = pcs;
-                                }
-                            }
-                        }
-                    }
-                }  // for
-                obj = obj->next;
-            }
-        }
-    }
-    
-    //  We have the total VBO point count, and a nice hashmap of the connector segments
-    nPoints += ndelta;
-    
-    size_t vbo_byte_length = 2 * nPoints * sizeof(float);
-    m_vbo_byte_length = vbo_byte_length;
-    
-    m_line_vertex_buffer = (float *)malloc( vbo_byte_length);
-    float *lvr = m_line_vertex_buffer;
-    size_t offset = 0;
-    
-    //      Copy and convert the edge points from doubles to floats,
-    //      and recording each segment's offset in the array
-    for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
-        PI_VE_Element *pedge = it->second;
-        if( pedge ) {
-            double *pp = pedge->pPoints;
-            for(int i = 0 ; i < pedge->nCount ; i++){
-                double x = *pp++;
-                double y = *pp++;
-                
-                *lvr++ = (float)x;
-                *lvr++ = (float)y;
-            }
-            
-            pedge->vbo_offset = offset;
-            offset += pedge->nCount * 2 * sizeof(float);
-            
-        }
-    }
-    
-    //      Now iterate on the hashmap, adding the connector segments in the hashmap to the VBO buffer
-    double e0, n0, e1, n1;
-    double *ppt;
-    PI_VC_Element *ipnode;
-    PI_VC_Element *epnode;
-    PI_VE_Element *pedge;
-    PI_connected_segment_hash::iterator itc;
-    for( itc = m_connector_hash.begin(); itc != m_connector_hash.end(); ++itc )
-    {
-        wxString key = itc->first;
-        PI_connector_segment *pcs = itc->second;
-        
-        switch(pcs->type){
-            case TYPE_CC:
-                ipnode = (PI_VC_Element *)pcs->start;
-                epnode = (PI_VC_Element *)pcs->end;
-                
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-                
-            case TYPE_CE:
-                ipnode = (PI_VC_Element *)pcs->start;
-                ppt = ipnode->pPoint;
-                e0 = *ppt++;
-                n0 = *ppt;
-                
-                pedge = (PI_VE_Element *)pcs->end;
-                e1 = pedge->pPoints[ 0 ];
-                n1 = pedge->pPoints[ 1 ];
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                break;
-                
-            case TYPE_EC:
-                pedge = (PI_VE_Element *)pcs->start;
-                e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                
-                epnode = (PI_VC_Element *)pcs->end;
-                ppt = epnode->pPoint;
-                e1 = *ppt++;
-                n1 = *ppt;
-                
-                *lvr++ = (float)e0;
-                *lvr++ = (float)n0;
-                *lvr++ = (float)e1;
-                *lvr++ = (float)n1;
-                
-                pcs->vbo_offset = offset;
-                offset += 4 * sizeof(float);
-                
-                break;
-            default:
-                break;
-        }
-    }
-    
-    // Now ready to walk the object array again, building the per-object list of renderable segments
-    for( int i = 0; i < PRIO_NUM; ++i ) {
-        for( int j = 0; j < LUPNAME_NUM; j++ ) {
-            S57Obj *obj = razRules[i][j];
-            while (obj)
-            {
-                PI_line_segment_element *list_top = new PI_line_segment_element;
-                list_top->n_points = 0;
-                list_top->next = 0;
-                
-                PI_line_segment_element *le_current = list_top;
-                
-                for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
-                    int *index_run = &obj->m_lsindex_array[seg_index];
-                    
-                    //  Get first connected node
-                    unsigned int inode = *index_run++;
-                    
-                    //  Get the edge
-                    unsigned int venode = *index_run++;
-                    PI_VE_Element *pedge = 0;
-                    pedge = m_ve_hash[venode];
-                    
-                    //  Get end connected node
-                    unsigned int enode = *index_run++;
-                    
-                    //  Get first connected node
-                    PI_VC_Element *ipnode = 0;
-                    ipnode = m_vc_hash[inode];
-                    
-                    //  Get end connected node
-                    PI_VC_Element *epnode = 0;
-                    epnode = m_vc_hash[enode];
-                    
-                    double e0, n0, e1, n1;
-                    
-                    if( ipnode ) {
-                        double *ppt = ipnode->pPoint;
-                        e0 = *ppt++;
-                        n0 = *ppt;
-                        
-                        if(pedge && pedge->nCount)
-                        {
-                            wxString key;
-                            key.Printf(_T("CE%d%d"), inode, venode);
-                            
-                            if(m_connector_hash.find( key ) != m_connector_hash.end()){
-                                
-                                PI_connector_segment *pcs = m_connector_hash[key];
-                                
-                                PI_line_segment_element *pls = new PI_line_segment_element;
-                                pls->next = 0;
-                                pls->vbo_offset = pcs->vbo_offset;
-                                pls->n_points = 2;
-                                pls->priority = 0;
-                                pls->private0 = pcs;
-                                pls->type = TYPE_CE;
-                                
-                                //  Get the bounding box
-                                e1 = pedge->pPoints[0];
-                                n1 = pedge->pPoints[1];
-                                
-                                double lat0, lon0, lat1, lon1;
-                                fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat0, &lon0 );
-                                fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat1, &lon1 );
-                                
-                                pls->lat_max = wxMax(lat0, lat1);
-                                pls->lat_min = wxMin(lat0, lat1);
-                                pls->lon_max = wxMax(lon0, lon1);
-                                pls->lon_min = wxMin(lon0, lon1);
-                                
-                                le_current->next = pls;             // hook it up
-                                le_current = pls;
-                            }
-                        }
-                    }
-                    
-                    if(pedge && pedge->nCount){
-                        PI_line_segment_element *pls = new PI_line_segment_element;
-                        pls->next = 0;
-                        pls->vbo_offset = pedge->vbo_offset;
-                        pls->n_points = pedge->nCount;
-                        pls->priority = 0;
-                        pls->private0 = pedge;
-                        pls->type = TYPE_EE;
- 
-                        double lat_max = -100;
-                        double lat_min = 100;
-                        double lon_max = -400;
-                        double lon_min = 400;
-                        
-                        for(int i= 0 ; i < pedge->nCount ; i++){
-                            double lat, lon;
-                            e0 = pedge->pPoints[ (2 * i)];
-                            n0 = pedge->pPoints[ (2 * i) + 1];
-                            
-                            fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat, &lon );
-                            lat_max = wxMax(lat_max, lat);
-                            lat_min = wxMin(lat_min, lat);
-                            lon_max = wxMax(lon_max, lon);
-                            lon_min = wxMin(lon_min, lon);
-                        }
-
-                        pls->lat_max = lat_max;
-                        pls->lat_min = lat_min;
-                        pls->lon_max = lon_max;
-                        pls->lon_min = lon_min;
-                        
-                        le_current->next = pls;             // hook it up
-                        le_current = pls;
-                        
-                        e0 = pedge->pPoints[ (2 * (pedge->nCount - 1))];
-                        n0 = pedge->pPoints[ (2 * (pedge->nCount - 1)) + 1];
-                        
-                        
-                    }   //pedge
-                    
-                    // end node
-                    if( epnode ) {
-                        double *ppt = epnode->pPoint;
-                        e1 = *ppt++;
-                        n1 = *ppt;
-                        
-                        if(ipnode){
-                            if(pedge && pedge->nCount){
-                                
-                                wxString key;
-                                key.Printf(_T("EC%d%d"), venode, enode);
-                                
-                                if(m_connector_hash.find( key ) != m_connector_hash.end()){
-                                    PI_connector_segment *pcs = m_connector_hash[key];
-                                    
-                                    PI_line_segment_element *pls = new PI_line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_EC;
-                                    
-                                    double lat0, lon0, lat1, lon1;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat0, &lon0 );
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat1, &lon1 );
-                                    
-                                    pls->lat_max = wxMax(lat0, lat1);
-                                    pls->lat_min = wxMin(lat0, lat1);
-                                    pls->lon_max = wxMax(lon0, lon1);
-                                    pls->lon_min = wxMin(lon0, lon1);
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                            else {
-                                wxString key;
-                                key.Printf(_T("CC%d%d"), inode, enode);
-                                
-                                if(m_connector_hash.find( key ) != m_connector_hash.end()){
-                                    PI_connector_segment *pcs = m_connector_hash[key];
-                                    
-                                    PI_line_segment_element *pls = new PI_line_segment_element;
-                                    pls->next = 0;
-                                    pls->vbo_offset = pcs->vbo_offset;
-                                    pls->n_points = 2;
-                                    pls->priority = 0;
-                                    pls->private0 = pcs;
-                                    pls->type = TYPE_CC;
-                                    
-                                    double lat0, lon0, lat1, lon1;
-                                    fromSM_Plugin( e0, n0, m_ref_lat, m_ref_lon, &lat0, &lon0 );
-                                    fromSM_Plugin( e1, n1, m_ref_lat, m_ref_lon, &lat1, &lon1 );
-                                    
-                                    pls->lat_max = wxMax(lat0, lat1);
-                                    pls->lat_min = wxMin(lat0, lat1);
-                                    pls->lon_max = wxMax(lon0, lon1);
-                                    pls->lon_min = wxMin(lon0, lon1);
-                                    
-                                    le_current->next = pls;             // hook it up
-                                    le_current = pls;
-                                }
-                            }
-                        }
-                    }
-                }  // for
-                
-                //  All done, so assign the list to the object
-                obj->m_ls_list = list_top->next;    // skipping the empty first placeholder element
-                delete list_top;
-
-                obj = obj->next;
-                
-            }
-        }
-    }
-    
 }
-#endif
+
+
+
+
+
 
 void eSENCChart::BuildLineVBO( void )
 {
@@ -8160,14 +7121,13 @@ void eSENCChart::BuildLineVBO( void )
 ListOfS57Obj *eSENCChart::GetAssociatedObjects( S57Obj *obj )
 {
     
-    //int disPrioIdx;
-    //bool gotit;
+    int disPrioIdx;
+    bool gotit;
     
     ListOfS57Obj *pobj_list = new ListOfS57Obj;
     pobj_list->Clear();
-    //TODO
-    return pobj_list;
-#if 0    
+    
+#if 1    
     double lat, lon;
     fromSM_Plugin( ( obj->x * obj->x_rate ) + obj->x_origin, ( obj->y * obj->y_rate ) + obj->y_origin,
             m_ref_lat, m_ref_lon, &lat, &lon );
@@ -8189,7 +7149,7 @@ ListOfS57Obj *eSENCChart::GetAssociatedObjects( S57Obj *obj )
             top = razRules[disPrioIdx][3];     // PLAIN_BOUNDARIES
             while( top != NULL ) {
                 if( top->obj->bIsAssociable ) {
-                    if( top->obj->BBObj.PointInBox( lon, lat, 0.0 ) ) {
+                    if( top->obj->BBObj.Contains( lat, lon ) ) {
                         if( IsPointInObjArea( lat, lon, 0.0, top->obj ) ) {
                             pobj_list->Append( top->obj );
                             gotit = true;
@@ -8206,7 +7166,7 @@ ListOfS57Obj *eSENCChart::GetAssociatedObjects( S57Obj *obj )
                 top = razRules[disPrioIdx][4];     // SYMBOLIZED_BOUNDARIES
                 while( top != NULL ) {
                     if( top->obj->bIsAssociable ) {
-                        if( top->obj->BBObj.PointInBox( lon, lat, 0.0 ) ) {
+                        if( top->obj->BBObj.Contains( lat, lon ) ) {
                             if( IsPointInObjArea( lat, lon, 0.0, top->obj ) ) {
                                 pobj_list->Append( top->obj );
                                 break;
@@ -8807,7 +7767,7 @@ PI_S57ObjX::~PI_S57ObjX()
 //----------------------------------------------------------------------------------
 //      PI_S57ObjX CTOR from SENC file
 //----------------------------------------------------------------------------------
-
+#if 0
 PI_S57ObjX::PI_S57ObjX( char *first_line, CryptInputStream *fpx, int senc_file_version )
 {
     att_array = NULL;
@@ -9359,6 +8319,7 @@ PI_S57ObjX::PI_S57ObjX( char *first_line, CryptInputStream *fpx, int senc_file_v
 bail_out:
     return;
 }
+#endif
 
 //-------------------------------------------------------------------------------------------
 //      Attributes in SENC file may not be needed, and can be safely ignored when creating PI_S57Obj
@@ -9512,7 +8473,7 @@ int PI_S57ObjX::my_bufgetlx( char *ib_read, char *ib_end, char *buf, int buf_len
     return nLineLen;
 }
 
-int PI_S57ObjX::GetAttributeIndex( const char *AttrSeek ) {
+int S57Obj::GetAttributeIndex( const char *AttrSeek ) {
     char *patl = att_array;
 
     for(int i=0 ; i < n_attr ; i++) {
@@ -9528,7 +8489,7 @@ int PI_S57ObjX::GetAttributeIndex( const char *AttrSeek ) {
 }
 
 
-wxString PI_S57ObjX::GetAttrValueAsString( const char *AttrName )
+wxString S57Obj::GetAttrValueAsString( const char *AttrName )
 {
     wxString str;
 
@@ -9750,7 +8711,7 @@ S57Obj::~S57Obj()
         
         if( pPolyTessGeo ) {
             #ifdef ocpnUSE_GL 
-            bool b_useVBO = pi_b_EnableVBO  && !auxParm1;    // VBO allowed?
+            bool b_useVBO = g_b_EnableVBO  && !auxParm1;    // VBO allowed?
             
             PolyTriGroup *ppg_vbo = pPolyTessGeo->Get_PolyTriGroup_head();
             //TODO
@@ -9836,6 +8797,10 @@ S57Obj::S57Obj( const char* featureName )
     
     strncpy( FeatureName, featureName, 6 );
     FeatureName[6] = 0;
+    
+    if( !strncmp( FeatureName, "DEPARE", 6 )
+        || !strncmp( FeatureName, "DRGARE", 6 ) ) bIsAssociable = true;
+    
 }
 
 
@@ -9854,6 +8819,10 @@ bool S57Obj::AddIntegerAttribute( const char *acronym, int val ){
     n_attr++;
     
     attVal->Add( pattValTmp );
+
+    //  TODO  This will be a bit slow, do better?
+    if(!strncmp(acronym, "SCAMIN", 6))
+        Scamin = val;
     
     return true;
 }
@@ -9956,7 +8925,7 @@ bool S57Obj::SetLineGeometry( LineGeometryDescriptor *pGeo, GeoPrim_t geoType, d
     
     //  Set the edge and connected node table indices
     m_n_lsindex = pGeo->indexCount;
-    m_lsindex_array = pGeo->indexTable;
+    m_lsindex_array = pGeo->indexTable;         // object owns this array now.
     
     m_n_edge_max_points = 0; //TODO this could be precalulated and added to next SENC format
     
@@ -10034,723 +9003,4 @@ bool S57Obj::SetMultipointGeometry( MultipointGeometryDescriptor *pGeo, double r
 //----------------------------------------------------------------------------------
 //      S57Obj CTOR from SENC file
 //----------------------------------------------------------------------------------
-
-S57Obj::S57Obj( char *first_line, wxInputStream *pfpx, double dummy, double dummy2, int senc_file_version )
-{
-    att_array = NULL;
-    attVal = NULL;
-    n_attr = 0;
-    auxParm0 = 0;
-    auxParm1 = 0;
-    auxParm2 = 0;
-    auxParm3 = 0;
-    
-    pPolyTessGeo = NULL;
-    //pPolyTrapGeo = NULL;
-    bCS_Added = 0;
-    CSrules = NULL;
-    FText = NULL;
-    bFText_Added = 0;
-    bIsClone = false;
-    
-    geoPtMulti = NULL;
-    geoPtz = NULL;
-    geoPt = NULL;
-    Scamin = 10000000;                              // ten million enough?
-    nRef = 0;
-    bIsAton = false;
-    bIsAssociable = false;
-    m_n_lsindex = 0;
-    m_lsindex_array = NULL;
-    m_ls_list = 0;
-    
-    //        Set default (unity) auxiliary transform coefficients
-    x_rate = 1.0;
-    y_rate = 1.0;
-    x_origin = 0.0;
-    y_origin = 0.0;
-    
-    if( strlen( first_line ) == 0 ) return;
-    
-    int FEIndex;
-    
-    int MAX_LINE = 499999;
-    char *buf = (char *) malloc( MAX_LINE + 1 );
-    int llmax = 0;
-    
-    char *br;
-    char szAtt[20];
-    char geoMatch[20];
-    
-    bool bMulti = false;
-    
-    char *hdr_buf = (char *) malloc( 1 );
-    
-    strcpy( buf, first_line );
-    
-    //    while(!dun)
-    {
-        
-        if( !strncmp( buf, "OGRF", 4 ) ) {
-            attVal = new wxArrayOfS57attVal();
-            
-            FEIndex = atoi( buf + 19 );
-            
-            strncpy( FeatureName, buf + 11, 6 );
-            FeatureName[6] = 0;
-            
-            //      Build/Maintain a list of found OBJL types for later use
-            //      And back-reference the appropriate list index in S57Obj for Display Filtering
-            
-            iOBJL = -1; // deferred, done by OBJL filtering in the PLIB as needed
-            
-            //      Walk thru the attributes, adding interesting ones
-            int hdr_len = 0;
-            char *mybuf_ptr = NULL;
-            char *hdr_end = NULL;
-            
-            int prim = -1;
-            int attdun = 0;
-            
-            strcpy( geoMatch, "Dummy" );
-            
-            while( !attdun ) {
-                if( hdr_len ) {
-                    int nrl = my_bufgetl( mybuf_ptr, hdr_end, buf, MAX_LINE );
-                    mybuf_ptr += nrl;
-                    if( 0 == nrl ) {
-                        attdun = 1;
-                        my_fgets( buf, MAX_LINE, *pfpx );     // this will be PolyGeo
-                        break;
-                    }
-                }
-                
-                else
-                    my_fgets( buf, MAX_LINE, *pfpx );
-                
-                if( !strncmp( buf, "HDRLEN", 6 ) ) {
-                    hdr_len = atoi( buf + 7 );
-                    char * tmp = hdr_buf;
-                    hdr_buf = (char *) realloc( hdr_buf, hdr_len );
-                    if (NULL == hdr_buf)
-                    {
-                        free ( tmp );
-                        tmp = NULL;
-                    }
-                    else
-                    {
-                        pfpx->Read( hdr_buf, hdr_len );
-                        mybuf_ptr = hdr_buf;
-                        hdr_end = hdr_buf + hdr_len;
-                    }
-                }
-                
-                else if( !strncmp( buf, geoMatch, 6 ) ) {
-                    attdun = 1;
-                    break;
-                }
-                
-                else if( !strncmp( buf, "  MULT", 6 ) )         // Special multipoint
-                        {
-                            bMulti = true;
-                            attdun = 1;
-                            break;
-                        }
-                        
-                        else if( !strncmp( buf, "  PRIM", 6 ) ) {
-                            prim = atoi( buf + 13 );
-                            switch( prim ){
-                                case 1: {
-                                    strcpy( geoMatch, "  POIN" );
-                                    break;
-                                }
-                                
-                                case 2:                            // linestring
-                        {
-                            strcpy( geoMatch, "  LINE" );
-                            break;
-                        }
-                        
-                                case 3:                            // area as polygon
-                        {
-                            strcpy( geoMatch, "  POLY" );
-                            break;
-                        }
-                        
-                                default:                            // unrecognized
-                        {
-                            break;
-                        }
-                        
-                            }       //switch
-                            }               // if PRIM
-                            
-                            bool iua = IsUsefulAttribute( buf );
-                            
-                            szAtt[0] = 0;
-                            
-                            if( iua ) {
-                                S57attVal *pattValTmp = new S57attVal;
-                                
-                                if( buf[10] == 'I' ) {
-                                    br = buf + 2;
-                                    int i = 0;
-                                    while( *br != ' ' ) {
-                                        szAtt[i++] = *br;
-                                        br++;
-                                    }
-                                    
-                                    szAtt[i] = 0;
-                                    
-                                    while( *br != '=' )
-                                        br++;
-                                    
-                                    br += 2;
-                                    
-                                    int AValInt = atoi( br );
-                                    int *pAVI = (int *) malloc( sizeof(int) );         //new int;
-                                    *pAVI = AValInt;
-                                    pattValTmp->valType = OGR_INT;
-                                    pattValTmp->value = pAVI;
-                                    
-                                    //      Capture SCAMIN on the fly during load
-                                    if( !strcmp( szAtt, "SCAMIN" ) ) Scamin = AValInt;
-                                }
-                                
-                                else if( buf[10] == 'S' ) {
-                                    strncpy( szAtt, &buf[2], 6 );
-                                    szAtt[6] = 0;
-                                    
-                                    br = buf + 15;
-                                    
-                                    int nlen = strlen( br );
-                                    br[nlen - 1] = 0;                                 // dump the NL char
-                                    char *pAVS = (char *) malloc( nlen + 1 );
-                                    ;
-                                    strcpy( pAVS, br );
-                                    
-                                    pattValTmp->valType = OGR_STR;
-                                    pattValTmp->value = pAVS;
-                                }
-                                
-                                else if( buf[10] == 'R' ) {
-                                    br = buf + 2;
-                                    int i = 0;
-                                    while( *br != ' ' ) {
-                                        szAtt[i++] = *br;
-                                        br++;
-                                    }
-                                    
-                                    szAtt[i] = 0;
-                                    
-                                    while( *br != '=' )
-                                        br++;
-                                    
-                                    br += 2;
-                                    
-                                    float AValfReal;
-                                    sscanf( br, "%f", &AValfReal );
-                                    
-                                    double AValReal = AValfReal;        //FIXME this cast leaves trash in double
-                                    
-                                    double *pAVR = (double *) malloc( sizeof(double) );   //new double;
-                                    *pAVR = AValReal;
-                                    
-                                    pattValTmp->valType = OGR_REAL;
-                                    pattValTmp->value = pAVR;
-                                }
-                                
-                                else {
-                                    // unknown attribute type
-                                    //                        CPLError((CPLErr)0, 0,"Unknown Attribute Type %s", buf);
-                                }
-                                
-                                if( strlen( szAtt ) ) {
-                                    wxASSERT( strlen(szAtt) == 6);
-                                    att_array = (char *)realloc(att_array, 6*(n_attr + 1));
-                                    
-                                    strncpy(att_array + (6 * sizeof(char) * n_attr), szAtt, 6);
-                                    n_attr++;
-                                    
-                                    attVal->Add( pattValTmp );
-                                } else
-                                    delete pattValTmp;
-                                
-                            }        //useful
-                            }               // while attdun
-                            
-                            //              Develop Geometry
-                            
-                            
-                            switch( prim ){
-                                case 1: {
-                                    if( !bMulti ) {
-                                        Primitive_type = GEO_POINT;
-                                        
-                                        char tbuf[40];
-                                        float point_ref_lat, point_ref_lon;
-                                        sscanf( buf, "%s %f %f", tbuf, &point_ref_lat, &point_ref_lon );
-                                    
-                                    my_fgets( buf, MAX_LINE, *pfpx );
-                                    int wkb_len = atoi( buf + 2 );
-                                    // ARM need 32 bits alignment, may be faster on some x86 too
-                                    unsigned int align = 3;
-                                    pfpx->Read( buf +align, wkb_len );
-                                    
-                                    float easting, northing;
-                                    npt = 1;
-                                    
-                                    float *pfs = (float *) ( buf + 5 +align );     // point to the point
-                                    
-                                    easting = *pfs++;
-                                    northing = *pfs;
-                                    x = easting;                                    // and save as SM
-                                    y = northing;
-                                    
-                                    //  Convert from SM to lat/lon for bbox
-                                    double xll, yll;
-                                    fromSM_Plugin( easting, northing, point_ref_lat, point_ref_lon, &yll, &xll );
-                                    
-                                    m_lon = xll;
-                                    m_lat = yll;
-                                    
-                                    ///BBObj.SetMin( m_lon - .25, m_lat - .25 );
-                                    ///BBObj.SetMax( m_lon + .25, m_lat + .25 );
-                                    bBBObj_valid = false;
-                                    
-                                    } else {
-                                        Primitive_type = GEO_POINT;
-                                        
-                                        char tbuf[40];
-                                        float point_ref_lat, point_ref_lon;
-                                        sscanf( buf, "%s %f %f", tbuf, &point_ref_lat, &point_ref_lon );
-                                    
-                                    my_fgets( buf, MAX_LINE, *pfpx );
-                                    int wkb_len = atoi( buf + 2 );
-                                    // ARM need 32 bits alignment, may be faster on some x86 too
-                                    unsigned int align = 3;
-                                    pfpx->Read( buf +align, wkb_len );
-                                    
-                                    npt = *( (int *) ( buf + 5 +align) );
-                                    
-                                    geoPtz = (double *) malloc( npt * 3 * sizeof(double) );
-                                    geoPtMulti = (double *) malloc( npt * 2 * sizeof(double) );
-                                    
-                                    double *pdd = geoPtz;
-                                    double *pdl = geoPtMulti;
-                                    
-                                    float *pfs = (float *) ( buf + 9 +align);                 // start of data
-                                    for( int ip = 0; ip < npt; ip++ ) {
-                                        float easting, northing;
-                                        easting = *pfs++;
-                                        northing = *pfs++;
-                                        float depth = *pfs++;
-                                        
-                                        *pdd++ = easting;
-                                        *pdd++ = northing;
-                                        *pdd++ = depth;
-                                        
-                                        //  Convert point from SM to lat/lon for later use in decomposed bboxes
-                                        double xll, yll;
-                                        fromSM_Plugin( easting, northing, point_ref_lat, point_ref_lon, &yll, &xll );
-                                        
-                                        *pdl++ = xll;
-                                        *pdl++ = yll;
-                                    }
-                                    // Capture bbox limits recorded in SENC record as lon/lat
-                                    //float xmax = *pfs++;
-                                    //float xmin = *pfs++;
-                                    //float ymax = *pfs++;
-                                    //float ymin = *pfs;
-                                    
-                                    ///BBObj.SetMin( xmin, ymin );
-                                    ///BBObj.SetMax( xmax, ymax );
-                                    bBBObj_valid = true;
-                                    
-                                    }
-                                    break;
-                                }
-                                
-                                case 2:                                                // linestring
-                {
-                    Primitive_type = GEO_LINE;
-                    
-                    if( !strncmp( buf, "  LINESTRING", 12 ) ) {
-                        
-                        char tbuf[40];
-                        float line_ref_lat, line_ref_lon;
-                        sscanf( buf, "%s %f %f", tbuf, &line_ref_lat, &line_ref_lon );
-                        
-                        my_fgets( buf, MAX_LINE, *pfpx );
-                        int sb_len = atoi( buf + 2 );
-                        unsigned char *buft;
-                        // ARM need 32 bits alignment, may be faster on some x86 too
-                        int align = 3;
-                        if (sb_len > MAX_LINE + align) 
-                            buft = (unsigned char *) malloc( sb_len +align);
-                        else
-                            buft = (unsigned char *) buf;
-                        
-                        pfpx->Read( buft +align, sb_len );
-                        
-                        npt = *( (int *) ( buft + 5 +align) );
-                        
-                        geoPt = (pt*) malloc( ( npt ) * sizeof(pt) );
-                        pt *ppt = geoPt;
-                        float *pf = (float *) ( buft + 9 +align);
-                        float xmax, xmin, ymax, ymin;
-                        
-                        
-                        // Capture SM points
-                        for( int ip = 0; ip < npt; ip++ ) {
-                            ppt->x = *pf++;
-                            ppt->y = *pf++;
-                            ppt++;
-                        }
-                        
-                        // Capture bbox limits recorded as lon/lat
-                        xmax = *pf++;
-                        xmin = *pf++;
-                        ymax = *pf++;
-                        ymin = *pf;
-                        
-                        if (sb_len > MAX_LINE +align) 
-                            free( buft );
-                        
-                        // set s57obj bbox as lat/lon
-                            BBObj.Set(ymin, xmin, ymax, xmax);
-                            
-                            bBBObj_valid = true;
-                            
-                            //  and declare x/y of the object to be average east/north of all points
-                            double e1, e2, n1, n2;
-                            toSM_Plugin( ymax, xmax, line_ref_lat, line_ref_lon, &e1, &n1 );
-                            toSM_Plugin( ymin, xmin, line_ref_lat, line_ref_lon, &e2, &n2 );
-                            
-                            x = ( e1 + e2 ) / 2.;
-                            y = ( n1 + n2 ) / 2.;
-                            
-                            //  Set the object base point
-                            double xll, yll;
-                            fromSM_Plugin( x, y, line_ref_lat, line_ref_lon, &yll, &xll );
-                            m_lon = xll;
-                            m_lat = yll;
-                            
-                            //  Capture the edge and connected node table indices
-                            my_fgets( buf, MAX_LINE, *pfpx );     // this will be "\n"
-                            my_fgets( buf, MAX_LINE, *pfpx );     // this will be "LSINDEXLIST nnn"
-                            
-                            //                          char test[100];
-                            //                          strncpy(test, buf, 98);
-                            //                          strcat(test, "\n");
-                            //                          printf("%s", test);
-                            
-                            sscanf( buf, "%s %d ", tbuf, &m_n_lsindex );
-                            
-                            m_lsindex_array = (int *) malloc( 3 * m_n_lsindex * sizeof(int) );
-                            pfpx->Read( m_lsindex_array, 3 * m_n_lsindex * sizeof(int) );
-                            m_n_edge_max_points = 0; //TODO this could be precalulated and added to next SENC format
-                            
-                            my_fgets( buf, MAX_LINE, *pfpx );     // this should be \n
-                            
-                    }
-                    
-                    break;
-                }
-                
-                case 3:                                                           // area as polygon
-                {
-                    Primitive_type = GEO_AREA;
-                    
-                    if( !strncmp( FeatureName, "DEPARE", 6 )
-                        || !strncmp( FeatureName, "DRGARE", 6 ) ) bIsAssociable = true;
-                    
-                    int ll = strlen( buf );
-                    if( ll > llmax ) llmax = ll;
-                    
-                    my_fgets( buf, MAX_LINE, *pfpx );     // this will be "  POLYTESSGEO"
-                    
-                    if( !strncmp( buf, "  POLYTESSGEO", 13 ) ) {
-                        float area_ref_lat, area_ref_lon;
-                        int nrecl;
-                        char tbuf[40];
-                        
-                        sscanf( buf, " %s %d %f %f", tbuf, &nrecl, &area_ref_lat, &area_ref_lon );
-                        
-                        if( nrecl ) {
-                            unsigned char *polybuf;
-                            if (nrecl > MAX_LINE)
-                                polybuf = (unsigned char *) malloc( nrecl + 1 );
-                            else
-                                polybuf = (unsigned char *)buf;
-                            
-                            pfpx->Read( polybuf, nrecl );
-                            polybuf[nrecl] = 0;                     // endit
-                            PolyTessGeo *ppg = new PolyTessGeo( polybuf, nrecl, FEIndex, senc_file_version );
-                            if (nrecl > MAX_LINE)
-                                free( polybuf );
-                            
-                            pPolyTessGeo = ppg;
-                            
-                            //  Set the s57obj bounding box as lat/lon
-//                            BBObj.SetMin( ppg->Get_xmin(), ppg->Get_ymin() );
-//                            BBObj.SetMax( ppg->Get_xmax(), ppg->Get_ymax() );
-                            BBObj.Set(ppg->Get_ymin(), ppg->Get_xmin(), ppg->Get_ymax(), ppg->Get_xmax());
-                            
-                            bBBObj_valid = true;
-                            
-                            //  and declare x/y of the object to be average east/north of all points
-                            double e1, e2, n1, n2;
-                            toSM_Plugin( ppg->Get_ymax(), ppg->Get_xmax(), area_ref_lat, area_ref_lon, &e1,
-                                  &n1 );
-                            toSM_Plugin( ppg->Get_ymin(), ppg->Get_xmin(), area_ref_lat, area_ref_lon, &e2,
-                                  &n2 );
-                            
-                            x = ( e1 + e2 ) / 2.;
-                            y = ( n1 + n2 ) / 2.;
-                            
-                            //  Set the object base point
-                            double xll, yll;
-                            fromSM_Plugin( x, y, area_ref_lat, area_ref_lon, &yll, &xll );
-                            m_lon = xll;
-                            m_lat = yll;
-                            
-                            //  Capture the edge and connected node table indices
-                            //                            my_fgets(buf, MAX_LINE, *pfpx);     // this will be "\n"
-                            my_fgets( buf, MAX_LINE, *pfpx );     // this will be "LSINDEXLIST nnn"
-                            
-                            sscanf( buf, "%s %d ", tbuf, &m_n_lsindex );
-                            
-                            m_lsindex_array = (int *) malloc( 3 * m_n_lsindex * sizeof(int) );
-                            pfpx->Read( m_lsindex_array, 3 * m_n_lsindex * sizeof(int) );
-                            m_n_edge_max_points = 0; //TODO this could be precalulated and added to next SENC format
-                            
-                            my_fgets( buf, MAX_LINE, *pfpx );     // this should be \n
-                            
-                        }
-                    }
-                    else {                      // not "POLYTESSGEO"
-                        pfpx->Ungetch(buf, strlen(buf) );
-                    }
-                    
-                    break;
-                }
-                            }       //switch
-                            
-                            if( prim > 0 ) {
-                                Index = FEIndex;
-                            }
-                            }               //OGRF
-                            }                       //while(!dun)
-                            
-                            free( buf );
-                            free( hdr_buf );
-                            
-                            }
-                            
-                            //-------------------------------------------------------------------------------------------
-                            //      Attributes in SENC file may not be needed, and can be safely ignored when creating S57Obj
-                            //      Look at a buffer, and return true or false according to a (default) definition
-                            //-------------------------------------------------------------------------------------------
-                            
-                            bool S57Obj::IsUsefulAttribute( char *buf )
-                            {
-                                
-                                if( !strncmp( buf, "HDRLEN", 6 ) ) return false;
-                                
-                                //      Dump the first 8 standard attributes
-                                /* -------------------------------------------------------------------- */
-                                /*      RCID                                                            */
-                                /* -------------------------------------------------------------------- */
-                                if( !strncmp( buf + 2, "RCID", 4 ) ) return false;
-                                
-                                /* -------------------------------------------------------------------- */
-                                /*      LNAM                                                            */
-                                /* -------------------------------------------------------------------- */
-                                if( !strncmp( buf + 2, "LNAM", 4 ) ) return false;
-                                
-                                /* -------------------------------------------------------------------- */
-                                /*      PRIM                                                            */
-                                /* -------------------------------------------------------------------- */
-                                else if( !strncmp( buf + 2, "PRIM", 4 ) ) return false;
-                                
-                                /* -------------------------------------------------------------------- */
-                                /*      SORDAT                                                          */
-                                /* -------------------------------------------------------------------- */
-                                else if( !strncmp( buf + 2, "SORDAT", 6 ) ) return false;
-                                
-                                /* -------------------------------------------------------------------- */
-                                /*      SORIND                                                          */
-                                /* -------------------------------------------------------------------- */
-                                else if( !strncmp( buf + 2, "SORIND", 6 ) ) return false;
-                                
-                                //      All others are "Useful"
-                                else
-                                    return true;
-                                
-                                #if (0)
-                                    /* -------------------------------------------------------------------- */
-                                    /*      GRUP                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  GRUP", 6))
-                                        return false;
-                                    
-                                    /* -------------------------------------------------------------------- */
-                                    /*      OBJL                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  OBJL", 6))
-                                        return false;
-                                    
-                                    /* -------------------------------------------------------------------- */
-                                    /*      RVER                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  RVER", 6))
-                                        return false;
-                                    
-                                    /* -------------------------------------------------------------------- */
-                                    /*      AGEN                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  AGEN", 6))
-                                        return false;
-                                    
-                                    /* -------------------------------------------------------------------- */
-                                    /*      FIDN                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  FIDN", 6))
-                                        return false;
-                                    
-                                    /* -------------------------------------------------------------------- */
-                                    /*      FIDS                                                            */
-                                    /* -------------------------------------------------------------------- */
-                                    else if(!strncmp(buf, "  FIDS", 6))
-                                        return false;
-                                    
-                                    //      UnPresent data
-                                        else if(strstr(buf, "(null)"))
-                                            return false;
-                                        
-                                        else
-                                            return true;
-                                        #endif
-                            }
-                            
-                            //------------------------------------------------------------------------------
-                            //      Local version of fgets for Binary Mode (SENC) file
-                            //------------------------------------------------------------------------------
-                            int S57Obj::my_fgets( char *buf, int buf_len_max, wxInputStream& ifs )
-                            
-                            {
-                                char chNext;
-                                int nLineLen = 0;
-                                char *lbuf;
-                                
-                                lbuf = buf;
-                                
-                                while( !ifs.Eof() && nLineLen < buf_len_max ) {
-                                    chNext = (char) ifs.GetC();
-                                    
-                                    /* each CR/LF (or LF/CR) as if just "CR" */
-                                    if( chNext == 10 || chNext == 13 ) {
-                                        chNext = '\n';
-                                    }
-                                    
-                                    *lbuf = chNext;
-                                    lbuf++, nLineLen++;
-                                    
-                                    if( chNext == '\n' ) {
-                                        *lbuf = '\0';
-                                        return nLineLen;
-                                    }
-                                }
-                                
-                                *( lbuf ) = '\0';
-                                
-                                return nLineLen;
-                            }
-                            
-                            //------------------------------------------------------------------------------
-                            //      Local version of bufgetl for Binary Mode (SENC) file
-                            //------------------------------------------------------------------------------
-                            int S57Obj::my_bufgetl( char *ib_read, char *ib_end, char *buf, int buf_len_max )
-                            {
-                                char chNext;
-                                int nLineLen = 0;
-                                char *lbuf;
-                                char *ibr = ib_read;
-                                
-                                lbuf = buf;
-                                
-                                while( ( nLineLen < buf_len_max ) && ( ibr < ib_end ) ) {
-                                    chNext = *ibr++;
-                                    
-                                    /* each CR/LF (or LF/CR) as if just "CR" */
-                                    if( chNext == 10 || chNext == 13 ) chNext = '\n';
-                                    
-                                    *lbuf++ = chNext;
-                                    nLineLen++;
-                                    
-                                    if( chNext == '\n' ) {
-                                        *lbuf = '\0';
-                                        return nLineLen;
-                                    }
-                                }
-                                
-                                *( lbuf ) = '\0';
-                                return nLineLen;
-                            }
-                            
-                            int S57Obj::GetAttributeIndex( const char *AttrSeek ) {
-                                char *patl = att_array;
-                                
-                                for(int i=0 ; i < n_attr ; i++) {
-                                    if(!strncmp(patl, AttrSeek, 6)){
-                                        return i;
-                                        break;
-                                    }
-                                    
-                                    patl += 6;
-                                }
-                                
-                                return -1;
-                            }
-                            
-                            
-                            wxString S57Obj::GetAttrValueAsString( const char *AttrName )
-                            {
-                                wxString str;
-                                
-                                int idx = GetAttributeIndex(AttrName);
-                                
-                                if(idx >= 0) {
-                                    
-                                    //      using idx to get the attribute value
-                                    
-                                    S57attVal *v = attVal->Item( idx );
-                                    
-                                    switch( v->valType ){
-                                        case OGR_STR: {
-                                            char *val = (char *) ( v->value );
-                                            str.Append( wxString( val, wxConvUTF8 ) );
-                                            break;
-                                        }
-                                        case OGR_REAL: {
-                                            double dval = *(double*) ( v->value );
-                                            str.Printf( _T("%g"), dval );
-                                            break;
-                                        }
-                                        case OGR_INT: {
-                                            int ival = *( (int *) v->value );
-                                            str.Printf( _T("%d"), ival );
-                                            break;
-                                        }
-                                        default: {
-                                            str.Printf( _T("Unknown attribute type") );
-                                            break;
-                                        }
-                                    }
-                                }
-                                return str;
-                            }
-                            
-                            
 

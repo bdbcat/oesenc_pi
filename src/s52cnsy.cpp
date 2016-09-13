@@ -58,7 +58,7 @@ bool GetDoubleAttr(S57Obj *obj, const char *AttrName, double &val);
 // size of attributes value list buffer
 #define LISTSIZE   32   // list size
 
-extern pi_s52plib  *ps52plib;
+extern s52plib  *ps52plib;
 
 wxString *CSQUAPNT01(S57Obj *obj);
 wxString *CSQUALIN01(S57Obj *obj);
@@ -3543,7 +3543,7 @@ static wxString _LITDSN01(S57Obj *obj)
 // JUMP TABLE SECTION
 //
 //--------------------------------
-Cond pi_condTable[] = {
+Cond condTable[] = {
    {"CLRLIN01",CLRLIN01},
    {"DATCVR01",DATCVR01},
    {"DATCVR01",DATCVR01},

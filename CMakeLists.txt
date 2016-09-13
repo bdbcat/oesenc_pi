@@ -20,8 +20,8 @@ SET(PACKAGE_NAME oesenc_pi)
 SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
-SET(VERSION_MAJOR "1")
-SET(VERSION_MINOR "0")
+SET(VERSION_MAJOR "0")
+SET(VERSION_MINOR "1")
 SET(VERSION_PATCH "0")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
@@ -51,7 +51,7 @@ IF (NOT WIN32)
 
     IF (EXISTS /etc/debian_version)
       SET (PACKAGE_FORMAT "DEB")
-      SET (PACKAGE_DEPS "libc6, libwxgtk2.8-0 (>= 2.8.7.1), libglu1-mesa (>= 7.0.0), libgl1-mesa-glx (>= 7.0.0), zlib1g, bzip2")
+      SET (PACKAGE_DEPS "libc6, libwxgtk3.0-0, libglu1-mesa (>= 7.0.0),  zlib1g, bzip2")
       SET (LIB_INSTALL_DIR "lib")
       IF (CMAKE_SIZEOF_VOID_P MATCHES "8")
         SET (ARCH "amd64")
@@ -101,7 +101,7 @@ ENDIF(UNIX)
 #  IF NOT DEBUGGING CFLAGS="-O2 -march=native"
 IF(NOT WIN32)
 # ADD_DEFINITIONS( "-Wall -g -fexceptions -fvisibility=hidden -O0" )
- ADD_DEFINITIONS( "-Wall -g -fexceptions -O0" )
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -O0 -std=c++0x " )
 
  IF(NOT APPLE)
   SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic -g")
@@ -243,7 +243,7 @@ SET(PREFIX_PARENTBIN bin)
 INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PLUGINS})
 
 IF (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")
-INSTALL(FILES "buildlinux64/oeserved/oeserverd"
+INSTALL(FILES "buildlinux64/oeserverd/oeserverd"
        PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
        DESTINATION ${PREFIX_PARENTBIN})
 ELSE (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")

@@ -30,6 +30,8 @@
 
 #include "pi_s52s57.h"                 //types
 
+#include "ocpn_plugin.h"
+
 class wxGLContext;
 
 #include "LLRegion.h"
@@ -110,10 +112,10 @@ private:
 //    s52plib definition
 //-----------------------------------------------------------------------------
 
-class pi_s52plib {
+class s52plib {
 public:
-    pi_s52plib( const wxString& PLib, bool b_forceLegacy = false );
-    ~pi_s52plib();
+    s52plib( const wxString& PLib, bool b_forceLegacy = false );
+    ~s52plib();
 
     void SetPPMM( float ppmm ) { canvas_pix_per_mm = ppmm;}
     float GetPPMM() { return canvas_pix_per_mm; }
@@ -150,7 +152,7 @@ public:
     void RestoreColorScheme( void ) {}
 
 //    Rendering stuff
-    void PrepareForRender( void );
+    void PrepareForRender( const PlugIn_ViewPort& VPoint );
     void AdjustTextList( int dx, int dy, int screenw, int screenh );
     void ClearTextList( void );
     int SetLineFeaturePriority( ObjRazRules *rzRules, int npriority );
@@ -327,7 +329,9 @@ private:
     bool GetPointPixArray( ObjRazRules *rzRules, wxPoint2DDouble* pd, wxPoint *pp, int nv, ViewPort *vp );
     bool GetPointPixSingle( ObjRazRules *rzRules, float north, float east, wxPoint *r, ViewPort *vp );
     void GetPixPointSingle( int pixx, int pixy, double *plat, double *plon, ViewPort *vp );
-    
+
+    bool IsTextEnabled(const PlugIn_ViewPort& VPoint);
+        
     wxString m_plib_file;
 
     float canvas_pix_per_mm; // Set by parent, used to scale symbols/lines/patterns
@@ -376,15 +380,15 @@ private:
 
 class RenderFromHPGL {
 public:
-    RenderFromHPGL( pi_s52plib* plibarg );
+    RenderFromHPGL( s52plib* plibarg );
 
     void SetTargetDC( wxDC* pdc );
     void SetTargetOpenGl();
 #if wxUSE_GRAPHICS_CONTEXT
     void SetTargetGCDC( wxGCDC* gdc );
 #endif
-    bool Render(char *str, char *col, wxPoint &r, wxPoint &pivot, double rot_angle = 0);
-
+    bool Render(char *str, char *col, wxPoint &r, wxPoint &pivot, float scale, double rot_angle);
+    
 private:
     const char* findColorNameInRef( char colorCode, char* col );
     void RotatePoint( wxPoint& point, double angle );
@@ -394,7 +398,7 @@ private:
     void Circle( wxPoint center, int radius, bool filled = false );
     void Polygon();
 
-    pi_s52plib* plib;
+    s52plib* plib;
     int scaleFactor;
 
     wxDC* targetDC;

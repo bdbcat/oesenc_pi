@@ -489,24 +489,42 @@ public:
     int auxParm1;
     int auxParm2;
     int auxParm3;
+    
+    
 };
 
+
+typedef enum
+{
+    TYPE_CE = 0,
+    TYPE_CC,
+    TYPE_EC,
+    TYPE_EE
+} SegmentType;
+
+
+class connector_segment
+{
+public:
+    int vbo_offset;
+    int max_priority_cs;
+    float               cs_lat_avg;                // segment centroid
+    float               cs_lon_avg;
+    
+};
 
 class line_segment_element
 {
 public:
-    size_t              vbo_offset;
-    size_t              n_points;
     int                 priority;
-    float               lat_max;                // segment bounding box
-    float               lat_min;
-    float               lon_max;
-    float               lon_min;
-    void                *private0;
-    int                 type;
+    union{              connector_segment   *pcs;
+                        VE_Element          *pedge;
+    };
+    SegmentType         ls_type;
     
     line_segment_element *next;
 };
+
 
 //----------------------------------------------------------------------------------
 //          Used for s52 Fast Polygon Renderer
@@ -533,22 +551,6 @@ public:
     bool                    b_revrgb;
 };
 
-typedef enum
-{
-    TYPE_CE = 0,
-    TYPE_CC,
-    TYPE_EC,
-    TYPE_EE
-} SegmentType;
 
-class connector_segment
-{
-public:
-    void *start;
-    void *end;
-    SegmentType type;
-    int vbo_offset;
-    int max_priority_cs;
-};
 
 #endif

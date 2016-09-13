@@ -552,7 +552,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
     float *pfp = llpoints;
 
     
-    wxPoint p = GetPixFromLL( pfp[0], pfp[1] );
+    //wxPoint p = GetPixFromLL( pfp[0], pfp[1] );
     int poly_x_max, poly_y_max, poly_x_min, poly_y_min;
     
     bool valid = false;

@@ -31,9 +31,10 @@ class ViewPort;
 #include "pi_s52s57.h"
 #include "viewport.h"
 
-WX_DECLARE_HASH_MAP( unsigned int, VE_Element *, wxIntegerHash, wxIntegerEqual, VE_Hash );
+#include <vector>
+
+WX_DECLARE_HASH_MAP( int, VE_Element *, wxIntegerHash, wxIntegerEqual, VE_Hash );
 WX_DECLARE_HASH_MAP( unsigned int, VC_Element *, wxIntegerHash, wxIntegerEqual, VC_Hash );
-WX_DECLARE_STRING_HASH_MAP( connector_segment *, connected_segment_hash );
 
 WX_DEFINE_ARRAY_DOUBLE(double, ArrayOfSortedDoubles);
 
@@ -325,7 +326,6 @@ protected:
       VE_Hash     m_ve_hash;
       VC_Hash     m_vc_hash;
 
-//      connected_segment_hash m_connector_hash;
       float      *m_line_vertex_buffer;
       size_t      m_vbo_byte_length;
       int         m_LineVBO_name;
@@ -355,6 +355,8 @@ protected:
       double            m_next_safe_contour;
       bool              m_bexpired;
 
+      std::vector<connector_segment *> m_pcs_vector;
+      std::vector<VE_Element *> m_pve_vector;
 };
 
 class PI_S57ObjX : public PI_S57Obj

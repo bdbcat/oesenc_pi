@@ -572,7 +572,7 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
     
     S57Obj *obj = 0;
     int featureID;
-    int primitiveType;
+    uint32_t primitiveType;
     
     printf("First Read\n");
     
@@ -599,9 +599,11 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
                 return ERROR_SIGNATURE_FAILURE;
             
             //  Is the oeSENC version compatible?
-                if(!m_senc_file_read_version == 200)
+                 if(m_senc_file_read_version != 200)
                     return ERROR_SENC_VERSION_MISMATCH;
         }
+        else
+            return ERROR_SENC_CORRUPT;        
     }
     else
         return ERROR_SENC_CORRUPT;        
@@ -837,7 +839,7 @@ int Osenc::ingest200(const wxString &senc_file_name,
     
     S57Obj *obj = 0;
     int featureID;
-    int primitiveType;
+    uint32_t primitiveType;
     
     int dun = 0;
     printf("First Read\n");
@@ -865,9 +867,12 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 return ERROR_SIGNATURE_FAILURE;
             
         //  Is the oeSENC version compatible?
-            if(!m_senc_file_read_version == 200)
+            if(m_senc_file_read_version != 200)
                 return ERROR_SENC_VERSION_MISMATCH;
         }
+        else
+            return ERROR_SENC_CORRUPT;        
+        
     }
     else
         return ERROR_SENC_CORRUPT;        
@@ -1062,7 +1067,7 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 
                 //  The primitive type of the Feature is encoded in the SENC as an attribute of defined type.
                 if( ATTRIBUTE_ID_PRIM == attributeTypeCode ){
-                    primitiveType = *(int*)&(pPayload->attribute_value);
+                    primitiveType = pPayload->attribute_value_int;
                 }
                 
                     
@@ -1071,13 +1076,14 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 
                 int attributeValueType = pPayload->attribute_value_type;
 
+                
                 if( acronym.length() ){
                     switch(attributeValueType){
                         case 0:
                         {
-                            int val = *(int*)&(pPayload->attribute_value);
+                            uint32_t val = pPayload->attribute_value_int;
                             if(obj){
-                                obj->AddIntegerAttribute( acronym.c_str(), val );
+                                obj->AddIntegerAttribute( acronym.c_str(), (int)val );
                             }
                             break;
                         }
@@ -1092,7 +1098,7 @@ int Osenc::ingest200(const wxString &senc_file_name,
                         }
                         case 2:             // Single double precision real
                         {
-                            double val = *(double*)&(pPayload->attribute_value);
+                            double val = pPayload->attribute_value_double;
                             if(obj)
                                 obj->AddDoubleAttribute( acronym.c_str(), val );
                             break;
@@ -1106,7 +1112,7 @@ int Osenc::ingest200(const wxString &senc_file_name,
                         
                         case 4:             // Ascii String
                         {
-                            char *val = (char *)&pPayload->attribute_value;
+                            char *val = (char *)&pPayload->attribute_value_char_ptr;
                             if(obj)
                                 obj->AddStringAttribute( acronym.c_str(), val );
                                 
@@ -1282,8 +1288,9 @@ int Osenc::ingest200(const wxString &senc_file_name,
 
             case VECTOR_CONNECTED_NODE_TABLE_RECORD:
             {
-                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
-                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                int buf_len = record.record_length - sizeof(OSENC_Record_Base);
+                unsigned char *buf = getBuffer( buf_len);
+                if(!fpx.Read(buf, buf_len).IsOk()){
                     dun = 1; break;
                 }
                 
@@ -1296,6 +1303,7 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 
                 for(int i=0 ; i < nCount ; i++ ) {
                     int featureIndex = *(int*)pRun;
+                    
                     pRun += sizeof(int);
 #if 0                    
                     double *pPoint = (double *) malloc( 2 * sizeof(double) );
@@ -3274,7 +3282,7 @@ PolyTessGeo *Osenc::BuildPolyTessGeo(_OSENC_AreaGeometry_Record_Payload *record,
     
 
     //  Read Raw Geometry
-    ppg->pgroup_geom = NULL;
+//    ppg->pgroup_geom = NULL;
     
     
     //  Now the triangle primitives

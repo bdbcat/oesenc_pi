@@ -39,8 +39,8 @@
 #include <wx/notebook.h>
 #include "TexFont.h"
 
-#define     PLUGIN_VERSION_MAJOR    1
-#define     PLUGIN_VERSION_MINOR    0
+#define     PLUGIN_VERSION_MAJOR    0
+#define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    11
@@ -408,6 +408,11 @@ public:
 #define ID_GETIP_IP 8203
 #define ID_GETIP_TEST 8204
 
+#define LEGEND_NONE             0
+#define LEGEND_FIRST            1
+#define LEGEND_SECOND           2
+#define LEGEND_THIRD            3
+
 
 ////@end control identifiers
 
@@ -422,7 +427,7 @@ class SENCGetUserKeyDialog: public wxDialog
 public:
     /// Constructors
     SENCGetUserKeyDialog( );
-    SENCGetUserKeyDialog( wxWindow* parent, wxWindowID id = SYMBOL_GETIP_IDNAME,
+    SENCGetUserKeyDialog( int legendID, wxWindow* parent, wxWindowID id = SYMBOL_GETIP_IDNAME,
                           const wxString& caption = SYMBOL_GETIP_TITLE_KEY,
                                 const wxPoint& pos = SYMBOL_GETIP_POSITION,
                                 const wxSize& size = SYMBOL_GETIP_SIZE,
@@ -431,13 +436,13 @@ public:
     ~SENCGetUserKeyDialog();
     
     /// Creation
-    bool Create( wxWindow* parent, wxWindowID id = SYMBOL_GETIP_IDNAME,
+    bool Create( int legendID, wxWindow* parent, wxWindowID id = SYMBOL_GETIP_IDNAME,
                  const wxString& caption = SYMBOL_GETIP_TITLE,
                  const wxPoint& pos = SYMBOL_GETIP_POSITION,
                  const wxSize& size = SYMBOL_GETIP_SIZE, long style = SYMBOL_GETIP_STYLE );
     
     
-    void CreateControls();
+    void CreateControls( int legendID );
     
     void OnCancelClick( wxCommandEvent& event );
     void OnOkClick( wxCommandEvent& event );

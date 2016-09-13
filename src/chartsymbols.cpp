@@ -753,7 +753,7 @@ void ChartSymbols::BuildSymbol( ChartSymbol& symbol )
 
 }
 
-bool ChartSymbols::LoadConfigFile(pi_s52plib* plibArg, const wxString & s52ilePath)
+bool ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePath)
 {
     TiXmlDocument doc;
 

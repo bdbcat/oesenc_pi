@@ -73,7 +73,7 @@ oesenc_pi                       *g_pi;
 wxString                        g_pi_filename;
 wxString                        g_SENCdir;
 
-bool                            g_bsuppress_log;
+//bool                            g_bsuppress_log;
 wxProgressDialog                *g_pprog;
 wxString                        g_old_installpermit;
 wxString                        g_old_userpermit;
@@ -89,8 +89,26 @@ bool                            g_bshown_sse15;
 bool                            g_brendered_expired;
 bool                            g_bnoShow_sse25;
 
-wxString                        g_fpr_file;
+//wxString                        g_fpr_file;
 wxString                        g_UserKey;
+wxString                        g_old_UserKey;
+
+bool                            g_PIbDebugS57;
+
+double g_overzoom_emphasis_base;
+bool g_oz_vector_scale;
+float g_ChartScaleFactorExp;
+
+float g_GLMinCartographicLineWidth;
+bool  g_b_EnableVBO;
+float g_GLMinSymbolLineWidth;
+GLenum pi_texture_rectangle_format;
+bool pi_bopengl;
+
+extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
+extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
+extern PFNGLBUFFERDATAPROC                 s_glBufferData;
+extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 
 #if 0
 //      A prototype of the default IHO.PUB public key file
@@ -106,9 +124,9 @@ wxString i7(_T("963F 14E3 2BA5 3729 28F2 4F15 B073 0C49 D31B 28E5 C764 1002 564D
 
 s57RegistrarMgr                 *pi_poRegistrarMgr;
 S57ClassRegistrar               *pi_poRegistrar;
-pi_s52plib                         *ps52plib;
+s52plib                         *ps52plib;
 wxFileConfig                    *g_pconfig;
-wxString                        pi_g_csv_locn;
+wxString                        g_csv_locn;
 
 long                            g_serverProc;
 
@@ -427,7 +445,7 @@ bool oesenc_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 //      Options Dialog Page management
 
 void oesenc_pi::OnSetupOptions(){
-
+#if 0
     //  Create the S63 Options panel, and load it
 
     m_s63chartPanelWinTop = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("S63 Charts") );
@@ -650,7 +668,7 @@ void oesenc_pi::OnSetupOptions(){
     g_benable_screenlog = true;
 
     m_buttonImportPermit->SetFocus();
-
+#endif
 }
 
 void oesenc_pi::OnCloseToolboxPanel(int page_sel, int ok_apply_cancel)
@@ -1447,12 +1465,12 @@ finish:
 
 void oesenc_pi::Set_FPR()
 {
-    if(g_fpr_file.Length()){
-        m_fpr_text->SetLabel(g_fpr_file);
-        m_buttonNewFPR->Disable();
-    }
-    else
-        m_fpr_text->SetLabel(_T(" "));
+//     if(g_fpr_file.Length()){
+//         m_fpr_text->SetLabel(g_fpr_file);
+//         m_buttonNewFPR->Disable();
+//     }
+//     else
+//         m_fpr_text->SetLabel(_T(" "));
 }
 
 
@@ -2115,7 +2133,7 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("S63CommonDataDir"), &g_CommonDataDir);
         pConf->Read( _T("ShowScreenLog"), &g_buser_enable_screenlog);
         pConf->Read( _T("NoShowSSE25"), &g_bnoShow_sse25);
-        pConf->Read( _T("LastFPRFile"), &g_fpr_file);
+//         pConf->Read( _T("LastFPRFile"), &g_fpr_file);
         
         pConf->Read( _T("UserKey"), &g_UserKey );
         
@@ -2299,7 +2317,7 @@ void s63_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("S63_PI Message"), wxOK);
         }
 
-        g_fpr_file = fpr_file;
+//         g_fpr_file = fpr_file;
 
         m_parent->Set_FPR();
     }
@@ -2833,8 +2851,8 @@ void S63ScreenLog::OnSocketEvent(wxSocketEvent& event)
 
             if(rlen) {
                 wxString msg(buf, wxConvUTF8);
-                if(!g_bsuppress_log)
-                    LogMessage(msg);
+//                 if(!g_bsuppress_log)
+//                     LogMessage(msg);
             }
 
             // Enable input events again.
@@ -3322,14 +3340,14 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
  {
  }
 
- SENCGetUserKeyDialog::SENCGetUserKeyDialog( wxWindow* parent, wxWindowID id, const wxString& caption,
+ SENCGetUserKeyDialog::SENCGetUserKeyDialog( int legendID, wxWindow* parent, wxWindowID id, const wxString& caption,
                                          const wxPoint& pos, const wxSize& size, long style )
  {
 
      long wstyle = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER;
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
 
-     CreateControls();
+     CreateControls(legendID);
      GetSizer()->SetSizeHints( this );
      Centre();
 
@@ -3344,7 +3362,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
   * SENCGetUserKeyDialog creator
   */
 
- bool SENCGetUserKeyDialog::Create( wxWindow* parent, wxWindowID id, const wxString& caption,
+ bool SENCGetUserKeyDialog::Create( int legendID, wxWindow* parent, wxWindowID id, const wxString& caption,
                                   const wxPoint& pos, const wxSize& size, long style )
  {
      SetExtraStyle( GetExtraStyle() | wxWS_EX_BLOCK_EVENTS );
@@ -3358,7 +3376,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
 
      SetTitle( _("OpenCPN SENC UserKey Required"));
 
-     CreateControls();
+     CreateControls( legendID );
      GetSizer()->SetSizeHints( this );
      Centre();
 
@@ -3369,7 +3387,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
   * Control creation for SENCGetUserKeyDialog
   */
 
- void SENCGetUserKeyDialog::CreateControls()
+ void SENCGetUserKeyDialog::CreateControls( int legendID )
  {
      SENCGetUserKeyDialog* itemDialog1 = this;
 
@@ -3381,14 +3399,51 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
      wxStaticBoxSizer* itemStaticBoxSizer4 = new wxStaticBoxSizer( itemStaticBoxSizer4Static, wxVERTICAL );
      itemBoxSizer2->Add( itemStaticBoxSizer4, 0, wxEXPAND | wxALL, 5 );
 
-     wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _T(""),
-     wxDefaultPosition, wxDefaultSize, 0 );
+     wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _T(""), wxDefaultPosition, wxDefaultSize, 0 );
      itemStaticBoxSizer4->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
 
      m_UserKeyCtl = new wxTextCtrl( itemDialog1, ID_GETIP_IP, _T(""), wxDefaultPosition,
      wxSize( 180, -1 ), 0 );
      itemStaticBoxSizer4->Add( m_UserKeyCtl, 0,  wxALIGN_LEFT | wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 5 );
 
+     wxStaticText *itemStaticTextLegend = NULL;
+     switch(legendID){
+         case LEGEND_NONE:
+             break;
+             
+         case LEGEND_FIRST:
+             itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
+_("A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n\
+Your OESENC UserKey may be obtained from your chart provider."),
+                                                      wxDefaultPosition, wxDefaultSize, 0);
+             break;
+         case LEGEND_SECOND:
+             itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
+_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\
+Please verify your UserKey and try again.\n\n\
+A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\
+Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+                                                      wxDefaultPosition, wxDefaultSize, 0);
+             break;
+         case LEGEND_THIRD:
+             itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
+_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\n\
+OESENC charts will be disabled for this session.\n\
+Please verify your UserKey and restart OpenCPN.\n\n\
+Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+                                                    wxDefaultPosition, wxDefaultSize, 0);
+             
+             m_UserKeyCtl->Disable();
+             break;
+         default:
+             break;
+     }
+                                       
+     if(itemStaticTextLegend){
+         itemBoxSizer2->Add( itemStaticTextLegend, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     }
+         
+                                       
 #if 0     
      wxBoxSizer* itemBoxSizerTest = new wxBoxSizer( wxVERTICAL );
      itemBoxSizer2->Add( itemBoxSizerTest, 0, wxALIGN_LEFT | wxALL | wxEXPAND, 5 );
@@ -3421,7 +3476,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
      wxDefaultSize, 0 );
      itemBoxSizer16->Add( m_OKButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
 
-     m_UserKeyCtl->AppendText(g_old_installpermit);
+     m_UserKeyCtl->AppendText(g_old_UserKey);
  }
 
 
@@ -3450,15 +3505,17 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
 
 
 
-wxString GetUserKey( bool bforceNew)
+wxString GetUserKey( int legendID, bool bforceNew)
 {
     if(g_UserKey.Len() && !bforceNew)
         return g_UserKey;
     else
     {
-        SENCGetUserKeyDialog dlg(NULL);
+        g_old_UserKey = g_UserKey;
+        SENCGetUserKeyDialog dlg( legendID, NULL);
         dlg.SetSize(500,-1);
         dlg.Centre();
+        
         int ret = dlg.ShowModal();
         if(ret == 0)
             return g_UserKey;
@@ -3475,6 +3532,10 @@ void LoadS57Config()
     
     int read_int;
     double dval;
+    
+    g_pconfig->SetPath( _T ( "/Settings" ) );
+    g_pconfig->Read( _T ( "DebugS57" ), &g_PIbDebugS57, 0 );         // Show LUP and Feature info in object query
+    
     g_pconfig->SetPath( _T ( "/Settings/GlobalState" ) );
     
     g_pconfig->Read( _T ( "bShowS57Text" ), &read_int, 0 );
@@ -3584,11 +3645,6 @@ void LoadS57Config()
 
 
 
-extern bool  pi_b_EnableVBO;
-extern float pi_GLMinCartographicLineWidth;
-extern float g_GLMinSymbolLineWidth;
-       GLenum pi_texture_rectangle_format;
-       bool pi_bopengl;
        
 static GLboolean QueryExtension( const char *extName )
 {
@@ -3624,6 +3680,11 @@ static GLboolean QueryExtension( const char *extName )
 
 void initLibraries(void)
 {
+    // General variables
+    g_overzoom_emphasis_base = 0;
+    g_oz_vector_scale = false;
+    g_ChartScaleFactorExp = 1;
+    
     // OpenGL variables
     
     char *p = (char *) glGetString( GL_EXTENSIONS );
@@ -3633,8 +3694,8 @@ void initLibraries(void)
         pi_bopengl = true;
     
     
-    pi_b_EnableVBO = false;
-    pi_GLMinCartographicLineWidth = 1.0;
+    g_b_EnableVBO = false;
+    g_GLMinCartographicLineWidth = 1.0;
     g_GLMinSymbolLineWidth = 1.0;
     
     if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
@@ -3653,8 +3714,8 @@ void initLibraries(void)
         pi_poRegistrarMgr = new s57RegistrarMgr( csv_dir, NULL );
     }
 
-    pi_g_csv_locn = *GetpSharedDataLocation();
-    pi_g_csv_locn += _T("s57data");
+    g_csv_locn = *GetpSharedDataLocation();
+    g_csv_locn += _T("s57data");
     
     //  S52 Plib
     if(ps52plib) // already loaded?
@@ -3680,7 +3741,7 @@ void initLibraries(void)
     plib_data = *GetpSharedDataLocation();
     plib_data += _T("s57data/"); //TODO use sep
     
-    ps52plib = new pi_s52plib( plib_data, b_force_legacy );
+    ps52plib = new s52plib( plib_data, b_force_legacy );
 
 
     if( ps52plib->m_bOK ) {

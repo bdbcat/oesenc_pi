@@ -210,6 +210,9 @@ void TexFont::RenderGlyph( wchar_t c )
         dc.SetFont( m_font );
         wxCoord gw, gh;
         dc.GetTextExtent( c, &gw, &gh ); // measure the text
+        if((gw ==0) || (gh == 0))
+            return;
+        
         wxBitmap bmp(gw, gh);
         dc.SelectObject(bmp);
         dc.SetBackground( wxBrush( wxColour( 0, 0, 0 ) ) );

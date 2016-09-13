@@ -315,7 +315,7 @@ ErrorCode = PolyTessGeoTri(poly, bSENC_SM, ref_lat, ref_lon);
 }
 #endif
 
-
+#if 0
 //      Build PolyGeo Object from SENC file record
 PolyTessGeo::PolyTessGeo(unsigned char *polybuf, int nrecl, int index,  int senc_file_version)
 {
@@ -490,6 +490,7 @@ PolyTessGeo::PolyTessGeo(unsigned char *polybuf, int nrecl, int index,  int senc
 
 }
 
+#endif
 
 //      Build PolyTessGeo Object from OGR Polygon
 //      Using internal Triangle tesselator
@@ -2412,7 +2413,7 @@ void PolyTessGeoTrap::BuildTess()
 PolyTriGroup::PolyTriGroup()
 {
     pn_vertex = NULL;             // pointer to array of poly vertex counts
-    pgroup_geom = NULL;           // pointer to Raw geometry, used for contour line drawing
+//    pgroup_geom = NULL;           // pointer to Raw geometry, used for contour line drawing
     tri_prim_head = NULL;         // head of linked list of TriPrims
     m_bSMSENC = false;
     bsingle_alloc = false;
@@ -2425,7 +2426,7 @@ PolyTriGroup::PolyTriGroup()
 PolyTriGroup::~PolyTriGroup()
 {
     free(pn_vertex);
-    free(pgroup_geom);
+//    free(pgroup_geom);
     //Walk the list of TriPrims, deleting as we go
     TriPrim *tp_next;
     TriPrim *tp = tri_prim_head;
