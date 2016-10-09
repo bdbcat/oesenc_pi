@@ -475,10 +475,6 @@ IMPLEMENT_DYNAMIC_CLASS(eSENCChart, PlugInChartBase)
 
 eSENCChart::eSENCChart()
 {
-//    initLibraries();
-
-//    validate_SENC_server();
-    
     m_senc_dir =  g_SENCdir;
     
     // Create ATON arrays, needed by S52PLIB
