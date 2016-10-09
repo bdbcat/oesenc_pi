@@ -278,6 +278,8 @@ Osenc_instream::~Osenc_instream()
     //    close(privatefifo);
     
     //unlink(privatefifo_name);
+    if((HANDLE)-1 != hPipe)
+        CloseHandle(hPipe);
 }
 
 bool Osenc_instream::isAvailable()
@@ -297,8 +299,10 @@ bool Osenc_instream::isAvailable()
         
         return false;
     }
-    else
+    else{
+        wxLogMessage(_T("Osenc_instream OPEN() failed"));
         return false;
+    }
     
 }
 
@@ -567,7 +571,12 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
     Osenc_instream fpx;
     
     if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
-        return ERROR_SENCFILE_NOT_FOUND;
+        wxLogMessage(_T("ingestHeader Open failed first"));
+        wxMilliSleep(100);
+        if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
+            wxLogMessage(_T("ingestHeader Open failed second"));
+            return ERROR_SENCFILE_NOT_FOUND;
+        }
     }
     
     S57Obj *obj = 0;
@@ -832,9 +841,16 @@ int Osenc::ingest200(const wxString &senc_file_name,
 //    if(!fpx.isAvailable())
 //        return ERROR_SENCSERVER_UNAVAILABLE;
     
+    
     if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
-        return ERROR_SENCFILE_NOT_FOUND;
+        wxLogMessage(_T("ingest200 Open failed first"));
+        wxMilliSleep(100);
+        if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
+            wxLogMessage(_T("ingest200 Open failed second"));
+            return ERROR_SENCFILE_NOT_FOUND;
+        }
     }
+    
 #endif    
     
     S57Obj *obj = 0;

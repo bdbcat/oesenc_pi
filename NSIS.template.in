@@ -48,9 +48,9 @@ CMake variables
 	!define OUTPUT_FILE_NAME "@CPACK_NSIS_PACKAGE_NAME_LC@_@CPACK_PACKAGE_VERSION@_setup.exe"
 	!define INST_DIR "@CPACK_TEMPORARY_DIRECTORY@"
 	!define REG_ROOT_KEY "Software"
-	!define REG_KEY "Software\s63_pi"
+	!define REG_KEY "Software\oesenc_pi"
 	!define REG_ROOT_KEY_UN "Software\Microsoft\Windows\CurrentVersion\Uninstall"
-	!define REG_KEY_UN "Software\Microsoft\Windows\CurrentVersion\Uninstall\s63_pi @CPACK_PACKAGE_VERSION@"
+	!define REG_KEY_UN "Software\Microsoft\Windows\CurrentVersion\Uninstall\oesenc_pi @CPACK_PACKAGE_VERSION@"
 	!define CSIDL_LOCAL_APPDATA "0x1C"
 	!define Explode "!insertmacro Explode"
 	!define unExplode "!insertmacro unExplode"
@@ -189,9 +189,9 @@ CMake variables
   OutFile "@CPACK_TOPLEVEL_DIRECTORY@/${OUTPUT_FILE_NAME}"
 
   ;# Default installation folder
-  InstallDir "$PROGRAMFILES\s63_pi"
+  InstallDir "$PROGRAMFILES\oesenc_pi"
 
-  BrandingText /TRIMLEFT "s63_pi $(Installer) v${OCPN_INSTALLER_VERSION}"
+  BrandingText /TRIMLEFT "oesenc_pi $(Installer) v${OCPN_INSTALLER_VERSION}"
 ;--------------------------------
 ;# Interface Settings
   !define MUI_CUSTOMFUNCTION_GUIINIT myGuiInit
@@ -853,7 +853,7 @@ Section "-Install Section" SecInstall
 ;       Record the root of the target install directory to enable language file copies
                 StrCpy $R1 0
                 Push $INSTDIR
-                Push "\plugins\s63_pi"
+                Push "\plugins\oesenc_pi"
                 Push ">"
                 Call StrLoc
                 Pop $0
@@ -865,15 +865,14 @@ Section "-Install Section" SecInstall
       ;Program Files/OpenCPN
 
       ;MessageBox MB_OK|MB_ICONSTOP "Install lang source $INSTDIR"
-      ;Program Files\OpenCPN\plugins\s63_pi
 
 ;       Manually move language (.mo) files to the opencpn share location
-	CopyFiles "$INSTDIR\share\locale\de\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\de\LC_MESSAGES"
-        CopyFiles "$INSTDIR\share\locale\fr\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\fr\LC_MESSAGES"
-        CopyFiles "$INSTDIR\share\locale\es\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\es\LC_MESSAGES"
-        CopyFiles "$INSTDIR\share\locale\et\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\et\LC_MESSAGES"
-        CopyFiles "$INSTDIR\share\locale\pl\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\pl\LC_MESSAGES"
-        CopyFiles "$INSTDIR\share\locale\ru\LC_MESSAGES\opencpn-s63_pi.mo" "$INSTROOT\share\locale\ru\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\de\LC_MESSAGES\opencpn-oesenc_pii.mo" "$INSTROOT\share\locale\de\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\fr\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT\share\locale\fr\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\es\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT\share\locale\es\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\et\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT\share\locale\et\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\pl\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT\share\locale\pl\LC_MESSAGES"
+CopyFiles "$INSTDIR\share\locale\ru\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT\share\locale\ru\LC_MESSAGES"
 
         RMDir /r  "$INSTDIR\share"
 
@@ -888,7 +887,7 @@ Section "-Install Section" SecInstall
 	${StrRep} $R1 $INSTDIR "\"  ""
 
 
-        StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\s63_pi @CPACK_PACKAGE_VERSION@at"
+        StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\oesenc_pi @CPACK_PACKAGE_VERSION@at"
         StrCpy $THIS_UN "$R0 $R1"
 
 ;        MessageBox MB_OK|MB_ICONSTOP "THIS_UN $THIS_UN"
@@ -917,6 +916,12 @@ Section "-Install Section" SecInstall
 		WriteRegStr SHCTX $THIS_UN "InstallAdminUser" "$USERNAME"
 	${EndIf}
 
+	;  Install the helper service
+	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/registerService' '$INSTDIR' ''
+	
+	;  Modify the DACL of the service, to allow starting without admin priveleges
+	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/openDACL' '$INSTDIR' ''
+	
 	;# Save the log file
 	StrCpy $0 "$INSTDIR\install.log"
 	Push $0
@@ -945,7 +950,7 @@ Section "-un.Uninstall" UnSecUninstall
         ;# Replace "\" by "*" in new registry key
         ${WordReplace} "$INSTDIR" "\" "" "+" $R1
 
-        StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\s63_pi @CPACK_PACKAGE_VERSION@at"
+        StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\oesenc_pi @CPACK_PACKAGE_VERSION@at"
         StrCpy $THIS_UN "$R0 $R1"
 
 ;        MessageBox MB_OK|MB_ICONSTOP "THIS_UN unin: $THIS_UN"
@@ -1099,7 +1104,7 @@ Function .onInit
 	${StrFilter} "@CPACK_PACKAGE_VERSION_MINOR@" "1" "" "" $MINOR_D
 	${StrFilter} "@CPACK_PACKAGE_VERSION_PATCH@" "1" "" "" $PATCH_D
 
-        StrCpy $INSTDIR "$PROGRAMFILES\OpenCPN\plugins\s63_pi"
+	StrCpy $INSTDIR "$PROGRAMFILES\OpenCPN\plugins\oesenc_pi"
 
 	;Call GetAllUsers
 FunctionEnd
@@ -1465,13 +1470,13 @@ FunctionEnd
                 ${OrIf} $TI_PARALLEL == 1
                     StrCpy $R1 0
                      Push $INSTDIR
-                     Push "OpenCPN\plugins\s63_pi"
+                     Push "OpenCPN\plugins\oesenc_pi"
                      Push ">"
                      Call StrLoc
                      Pop $0
 
                     StrCpy $R1 $INSTDIR $0
-                    StrCpy $R1 "$R1OpenCPN\plugins\s63_pi"
+                    StrCpy $R1 "$R1OpenCPN\plugins\oesenc_pi"
                     StrLen $R2 $INSTDIR
                     StrLen $R3 $R1
 
@@ -2648,7 +2653,7 @@ FunctionEnd
 				StrLen $R2 $R1
 				${WordFind} "$R1" " " "+1" $R3
 				IntOp $R0 $R0 + 1
-				${If} $R3 == "s63_pi"
+				${If} $R3 == "oesenc_pi"
 				${AndIf} $R2 > 7
 
 					ReadRegStr $R4 SHCTX "${REG_ROOT_KEY_UN}\$R1" "CompareVersion"
@@ -3496,7 +3501,7 @@ Var explArrCount
 
 	LangString SecShortcutDesktop_Desc ${LANG_ENGLISH} "Creates a shortcut for OpenCPN on the Desktop."
 
-	LangString SecSetConfig_Desc ${LANG_ENGLISH} "Preconfigure the language setting and the chart dir(s) for s63_pi. When selected a separate page is shown for configuration."
+        LangString SecSetConfig_Desc ${LANG_ENGLISH} "Preconfigure the language setting and the chart dir(s) for oesenc_pi. When selected a separate page is shown for configuration."
 
   ;Uninstaller Descriptions
 	LangString UnSecDeleteConfigFolder_Desc ${LANG_ENGLISH} "Deletes the config folder and all its files and subdirectories."
@@ -3516,34 +3521,34 @@ Var explArrCount
 	LangString Page_TypeInst_Title_1 ${LANG_ENGLISH} "Already Installed"
 
 	;Subtitle
-    LangString Page_TypeInst_Subtitle_1 ${LANG_ENGLISH} "Found installed version of s63_pi.$\r$\n"
+	LangString Page_TypeInst_Subtitle_1 ${LANG_ENGLISH} "Found installed version of oesenc_pi.$\r$\n"
 
   ;Version exists
     ;Title
 	LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 
 	;Subtitle
-    LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "s63_pi @CPACK_PACKAGE_VERSION@ is already installed.$\r$\nChoose how you want to install s63_pi."
+	LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "oesenc_pi @CPACK_PACKAGE_VERSION@ is already installed.$\r$\nChoose how you want to install oesenc_pi."
 
 	;Label
-	LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "s63_pi @CPACK_PACKAGE_VERSION@ is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+	LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "oesenc_pi @CPACK_PACKAGE_VERSION@ is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
 
 	;Radio button 'Reinstall'
 	LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 
   ;Version newer
 	;Label
-    LangString Label_TypeInst_Upgrade_Text ${LANG_ENGLISH} "An older version of s63_pi is installed on your system. Click Next to continue upgrade."
+	LangString Label_TypeInst_Upgrade_Text ${LANG_ENGLISH} "An older version of oesenc_pi is installed on your system. Click Next to continue upgrade."
 
 	;Radio button 'Upgrade'
-	LangString RB_Upgrade_TypeInst_Text ${LANG_ENGLISH} "Upgrade s63_pi using previous settings (recommended)"
+        LangString RB_Upgrade_TypeInst_Text ${LANG_ENGLISH} "Upgrade oesenc_pi using previous settings (recommended)"
 
   ;Version older
 	;Label
-    LangString Label_TypeInst_Downgrade_Text ${LANG_ENGLISH} "A newer version of s63_pi is installed on your system. It is not recommended to downgrade to an older version. Select the installation type you want to perform and click Next to continue."
+	LangString Label_TypeInst_Downgrade_Text ${LANG_ENGLISH} "A newer version of oesenc_pi is installed on your system. It is not recommended to downgrade to an older version. Select the installation type you want to perform and click Next to continue."
 
 	;Radio button 'Downgrade'
-	LangString RB_Downgrade_TypeInst_Text ${LANG_ENGLISH} "Downgrade s63_pi using previous settings (recommended)"
+        LangString RB_Downgrade_TypeInst_Text ${LANG_ENGLISH} "Downgrade oesenc_pi using previous settings (recommended)"
 
   ;Multiple versions
 	;Label
@@ -3575,9 +3580,9 @@ Var explArrCount
 
 	LangString Msg_Path_Invalid ${LANG_ENGLISH} "The entered path is invalid!$\r$\n$\r$\nPlease check your input."
 
-	LangString Msg_Path_Installation_Exists ${LANG_ENGLISH} "There already exists an installation of s63_pi in the given path.$\r$\nIf you wish to use this path, first uninstall the version. Or select another path for this installation."
+        LangString Msg_Path_Installation_Exists ${LANG_ENGLISH} "There already exists an installation of oesenc_pi in the given path.$\r$\nIf you wish to use this path, first uninstall the version. Or select another path for this installation."
 
-	LangString Msg_Uninstall_Old_Versions ${LANG_ENGLISH} "Setup has detected at least one older version of s63_pi which is not compatible with the new version control.$\r$\n\
+        LangString Msg_Uninstall_Old_Versions ${LANG_ENGLISH} "Setup has detected at least one older version of oesenc_pi which is not compatible with the new version control.$\r$\n\
 		It is recommended to first uninstall all of these installations (this does not affect your Config files) and clean-up the Registry.$\r$\n\
 		If you click Yes on the next page a listbox with all installation locations will be shown and you will have the possibility to select the installations you wish to uninstall.$\r$\n\
 		If you are unsure about possible other previous installations than those shown in the listbox, you can also perform a scan of the entire \

@@ -102,25 +102,14 @@ float g_ChartScaleFactorExp;
 float g_GLMinCartographicLineWidth;
 bool  g_b_EnableVBO;
 float g_GLMinSymbolLineWidth;
-GLenum pi_texture_rectangle_format;
+GLenum g_texture_rectangle_format;
 bool pi_bopengl;
 
-extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
-extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
-extern PFNGLBUFFERDATAPROC                 s_glBufferData;
-extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
+PFNGLGENBUFFERSPROC                 s_glGenBuffers;
+PFNGLBINDBUFFERPROC                 s_glBindBuffer;
+PFNGLBUFFERDATAPROC                 s_glBufferData;
+PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 
-#if 0
-//      A prototype of the default IHO.PUB public key file
-wxString i0(_T("// BIG p"));
-wxString i1(_T("FCA6 82CE 8E12 CABA 26EF CCF7 110E 526D B078 B05E DECB CD1E B4A2 08F3 AE16 17AE 01F3 5B91 A47E 6DF6 3413 C5E1 2ED0 899B CD13 2ACD 50D9 9151 BDC4 3EE7 3759 2E17."));
-wxString i2(_T("// BIG q"));
-wxString i3(_T("962E DDCC 369C BA8E BB26 0EE6 B6A1 26D9 346E 38C5."));
-wxString i4(_T("// BIG g"));
-wxString i5(_T("6784 71B2 7A9C F44E E91A 49C5 147D B1A9 AAF2 44F0 5A43 4D64 8693 1D2D 1427 1B9E 3503 0B71 FD73 DA17 9069 B32E 2935 630E 1C20 6235 4D0D A20A 6C41 6E50 BE79 4CA4."));
-wxString i6(_T("// BIG y"));
-wxString i7(_T("963F 14E3 2BA5 3729 28F2 4F15 B073 0C49 D31B 28E5 C764 1002 564D B959 95B1 5CF8 800E D54E 3548 67B8 2BB9 597B 1582 69E0 79F0 C4F4 926B 1776 1CC8 9EB7 7C9B 7EF8."));
-#endif
 
 s57RegistrarMgr                 *pi_poRegistrarMgr;
 S57ClassRegistrar               *pi_poRegistrar;
@@ -187,8 +176,9 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       wxFileName fn_exe(GetOCPN_ExePath());
 
       //        Specify the location of the oeserverd helper.
-      g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
-
+      //g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
+      g_sencutil_bin = _T("/home/dsr/Projects/oeserver_dp/build/oeserverd");
+      
 
 #ifdef __WXMSW__
       g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
@@ -294,6 +284,11 @@ int oesenc_pi::Init(void)
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
     g_benable_screenlog = g_buser_enable_screenlog;
+    
+#ifdef __WXMSW__
+    wxExecute(_T("net start oeserverd"));              // exec asynchronously
+#endif    
+    
 
     return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
             | WANTS_OVERLAY_CALLBACK | WANTS_OPENGL_OVERLAY_CALLBACK  );
@@ -3699,11 +3694,11 @@ void initLibraries(void)
     g_GLMinSymbolLineWidth = 1.0;
     
     if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
-        pi_texture_rectangle_format = GL_TEXTURE_2D;
+        g_texture_rectangle_format = GL_TEXTURE_2D;
     else if( QueryExtension( "GL_OES_texture_npot" ) )
-        pi_texture_rectangle_format = GL_TEXTURE_2D;
+        g_texture_rectangle_format = GL_TEXTURE_2D;
     else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
-        pi_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+        g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
     
     //  Class Registrar Manager
     
@@ -3785,10 +3780,28 @@ void initLibraries(void)
 
 bool validate_SENC_server(void)
 {
+    return true;
+    
+    wxLogMessage(_T("validate_SENC_server"));
+    
     // Check to see if the server is already running, and available
     Osenc_instream testAvail;
-    if(testAvail.isAvailable())
+    if(testAvail.isAvailable()){
+        wxLogMessage(_T("Available TRUE"));
         return true;
+    }
+
+    wxLogMessage(_T("Available FALSE, retry..."));
+    wxMilliSleep(500);
+    if(testAvail.isAvailable()){
+        wxLogMessage(_T("Available TRUE"));
+        return true;
+    }
+    
+    
+#ifdef __WXMSW__
+    return false;
+#endif
     
     // Not running, so start it up...
     
@@ -3882,6 +3895,11 @@ bool validate_SENC_server(void)
 
     // now start the server...
     wxString cmds = g_sencutil_bin;
+
+#ifndef __WXMSW__    
+    cmds += _T(" --daemon");
+#endif
+    
     g_serverProc = wxExecute(cmds);              // exec asynchronously
     wxMilliSleep(100);
     
