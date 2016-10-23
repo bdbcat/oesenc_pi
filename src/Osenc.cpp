@@ -110,140 +110,182 @@ private:
 //--------------------------------------------------------------------------
 Osenc_instream::Osenc_instream()
 {
+    Init();
+}
+
+Osenc_instream::~Osenc_instream()
+{
+    Close();
+}
+
+void Osenc_instream::Init()
+{
     privatefifo = -1;
     m_OK = true;
     m_lastBytesRead = 0;
     m_lastBytesReq = 0;
-    
+    m_uncrypt_stream = 0;
 }
 
-Osenc_instream::~Osenc_instream()
+void Osenc_instream::Close()
 {
     if(-1 != privatefifo)
         close(privatefifo);
     
     unlink(privatefifo_name);
+    
+    if(m_uncrypt_stream){
+        delete m_uncrypt_stream;
+    }
+    
+    Init();             // In case it want to be used again
 }
+
 
 bool Osenc_instream::isAvailable()
 {
     printf("TestAvail\n");
-    if( Open(CMD_TEST_AVAIL, _T(""), _T("")) ){
-        char response[8];
-        memset( response, 0, 8);
-        int nTry = 5;
-        do{
-            if( Read(response, 2).IsOk() ){
-                return( !strncmp(response, "OK", 2) );
-            }
-            
-            wxMilliSleep(100);
-            nTry--;
-        }while(nTry);
-        
-        return false;
+
+    if(m_uncrypt_stream){
+        return m_uncrypt_stream->IsOk();
     }
-    else
-        return false;
+    else{
+        if( Open(CMD_TEST_AVAIL, _T(""), _T("?")) ){
+            char response[8];
+            memset( response, 0, 8);
+            int nTry = 5;
+            do{
+                if( Read(response, 2).IsOk() ){
+                    return( !strncmp(response, "OK", 2) );
+                }
+                
+                wxMilliSleep(100);
+                nTry--;
+            }while(nTry);
+            
+            return false;
+        }
+        else
+            return false;
+    }
 
 }
 
 void Osenc_instream::Shutdown()
 {
-    Open(CMD_EXIT,  _T(""), _T("")) ;
-    char response[8];
-    memset( response, 0, 8);
-    Read(response, 3);
-        
+//     if(!m_uncrypt_stream){
+//         Open(CMD_EXIT,  _T(""), _T("")) ;
+//         char response[8];
+//         memset( response, 0, 8);
+//         Read(response, 3);
+//     }
+
+    if(Open(CMD_EXIT,  _T(""), _T("?"))) {
+        char response[8];
+        memset( response, 0, 8);
+        Read(response, 3);
+    }
 }
 
 
 bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString crypto_key )
 {
-    printf("Osenc_instream::Open...\n");
-    fifo_msg msg;
+    if(crypto_key.Length()){
+        fifo_msg msg;
 
-    // Create a unique name for the private (i.e. data) pipe, valid for this session
-    wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
-    
-    snprintf(privatefifo_name, sizeof(privatefifo_name), tmp_file.mb_str()  );
-    
-    // Create the private FIFO
-//     if( mkfifo(privatefifo_name, 0666) < 0 ) 
-//         return false;
-    mkfifo(privatefifo_name, 0666);
-    
-    // Open the well known public FIFO for writing
-    if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
-          return false;
-          //if( errno == ENXIO )
-    }
-    
-    //  Send the command over the public pipe
-    strncpy(msg.fifo_name, privatefifo_name, sizeof(privatefifo_name));
+        // Create a unique name for the private (i.e. data) pipe, valid for this session
+        wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
+        wxCharBuffer bufn = tmp_file.ToUTF8();
+        if(bufn.data()) 
+            strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
         
-    wxCharBuffer buf = senc_file_name.ToUTF8();
-    if(buf.data()) 
-        strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
-    
-    buf = crypto_key.ToUTF8();
-    if(buf.data()) 
-        strncpy(msg.senc_key, buf.data(), sizeof(msg.senc_key));
-    
-    msg.cmd = cmd;
-    
-    write(publicfifo, (char*) &msg, sizeof(msg));
-    
-    // Open the private FIFO for reading to get output of command
-    // from the server.
-    if((privatefifo = open(privatefifo_name, O_RDONLY) ) == -1) {
-        return false;
+        // Create the private FIFO
+        mkfifo(privatefifo_name, 0666);
+        
+        // Open the well known public FIFO for writing
+        if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
+            return false;
+            //if( errno == ENXIO )
+        }
+        
+        //  Send the command over the public pipe
+        strncpy(msg.fifo_name, privatefifo_name, sizeof(privatefifo_name));
+            
+        wxCharBuffer buf = senc_file_name.ToUTF8();
+        if(buf.data()) 
+            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
+        
+        buf = crypto_key.ToUTF8();
+        if(buf.data()) 
+            strncpy(msg.senc_key, buf.data(), sizeof(msg.senc_key));
+        
+        msg.cmd = cmd;
+        
+        write(publicfifo, (char*) &msg, sizeof(msg));
+        
+        // Open the private FIFO for reading to get output of command
+        // from the server.
+        if((privatefifo = open(privatefifo_name, O_RDONLY) ) == -1) {
+            return false;
+        }
+        
+        return true;
     }
-    
-    return true;
+    else{                        // not encrypted
+        m_uncrypt_stream = new wxFileInputStream(senc_file_name);
+        return m_uncrypt_stream->IsOk();
+    }
 }
 
 Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
 {
 #define READ_SIZE 64000;
 #define MAX_TRIES 100;
-    size_t max_read = READ_SIZE;
-//    bool blk = fcntl(privatefifo, F_GETFL) & O_NONBLOCK;
-    
-    if( -1 != privatefifo){
-        int remains = size;
-        char *bufRun = (char *)buffer;
-        int totalBytesRead = 0;
-        int nLoop = MAX_TRIES;
-        do{
-            int bytes_to_read = MIN(remains, max_read);
-            if(bytes_to_read > 10000)
-                int yyp = 2;
-            
-            int bytesRead = read(privatefifo, bufRun, bytes_to_read );
-
-            // Server may not have opened the Write end of the FIFO yet
-            if(bytesRead == 0){
-//                printf("miss %d %d %d\n", nLoop, bytes_to_read, size);
-                nLoop --;
-                wxMilliSleep(1);
-            }
-            else
-                nLoop = MAX_TRIES;
-            
-            remains -= bytesRead;
-            bufRun += bytesRead;
-            totalBytesRead += bytesRead;
-        } while( (remains > 0) && (nLoop) );
+    if(!m_uncrypt_stream){
+        size_t max_read = READ_SIZE;
+    //    bool blk = fcntl(privatefifo, F_GETFL) & O_NONBLOCK;
         
-        m_OK = (totalBytesRead == size);
-        if(!m_OK)
-            int yyp = 4;
-        m_lastBytesRead = totalBytesRead;
-        m_lastBytesReq = size;
+        if( -1 != privatefifo){
+            int remains = size;
+            char *bufRun = (char *)buffer;
+            int totalBytesRead = 0;
+            int nLoop = MAX_TRIES;
+            do{
+                int bytes_to_read = MIN(remains, max_read);
+                if(bytes_to_read > 10000)
+                    int yyp = 2;
+                
+                int bytesRead = read(privatefifo, bufRun, bytes_to_read );
+
+                // Server may not have opened the Write end of the FIFO yet
+                if(bytesRead == 0){
+    //                printf("miss %d %d %d\n", nLoop, bytes_to_read, size);
+                    nLoop --;
+                    wxMilliSleep(1);
+                }
+                else
+                    nLoop = MAX_TRIES;
+                
+                remains -= bytesRead;
+                bufRun += bytesRead;
+                totalBytesRead += bytesRead;
+            } while( (remains > 0) && (nLoop) );
+            
+            m_OK = (totalBytesRead == size);
+            if(!m_OK)
+                int yyp = 4;
+            m_lastBytesRead = totalBytesRead;
+            m_lastBytesReq = size;
+        }
+        
+        return *this;
     }
-    
-    return *this;
+    else{
+        if(m_uncrypt_stream->IsOk())
+            m_uncrypt_stream->Read(buffer, size);
+        m_OK = m_uncrypt_stream->IsOk();
+        return *this;
+    }
 }
 
 bool Osenc_instream::IsOk()
@@ -265,22 +307,31 @@ bool Osenc_instream::IsOk()
 
 Osenc_instream::Osenc_instream()
 {
-    hPipe = (HANDLE)-1;
-    m_OK = true;
-    m_lastBytesRead = 0;
-    m_lastBytesReq = 0;
-    
+    Init();
 }
 
 Osenc_instream::~Osenc_instream()
 {
-    //if(-1 != privatefifo)
-    //    close(privatefifo);
-    
-    //unlink(privatefifo_name);
+    Close();
+}
+
+void Osenc_instream::Init()
+{
+    hPipe = (HANDLE)-1;
+    m_OK = true;
+    m_lastBytesRead = 0;
+    m_lastBytesReq = 0;
+}
+
+
+void Osenc_instream::Close()
+{
     if((HANDLE)-1 != hPipe)
         CloseHandle(hPipe);
+    
+    Init();             // In case it wants to be reused....
 }
+
 
 bool Osenc_instream::isAvailable()
 {
@@ -320,9 +371,10 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
     fifo_msg msg;
     
     LPTSTR lpvMessage=TEXT("Default message from client."); 
-    TCHAR  chBuf[BUFSIZE]; 
+//    TCHAR  chBuf[BUFSIZE]; 
     BOOL   fSuccess = FALSE; 
-    DWORD  cbRead, cbToWrite, cbWritten, dwMode; 
+//    DWORD  cbRead, cbToWrite, cbWritten, dwMode; 
+    DWORD  cbToWrite, cbWritten; 
     LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe"); 
     
     
@@ -463,7 +515,7 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
         int yyp = 4;
     
     if( (HANDLE)-1 != hPipe){
-        int remains = size;
+        size_t remains = size;
         char *bufRun = (char *)buffer;
         int totalBytesRead = 0;
         DWORD bytesRead;
@@ -543,6 +595,81 @@ void Osenc::init( void )
     
 }
 
+int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
+{
+    if(!fpx.IsOk())
+        return ERROR_SENC_CORRUPT;
+    
+  
+    //  We read the first record, and confirm the compatible SENC version number
+    OSENC_Record_Base first_record;
+    fpx.Read(&first_record, sizeof(OSENC_Record_Base));
+    
+    //  Bad read?
+    if(!fpx.IsOk()){
+        return ERROR_SENC_CORRUPT;        
+    }
+    
+    if(( first_record.record_type == HEADER_SENC_VERSION ) && (first_record.record_length < 16) ){
+        unsigned char *buf = getBuffer( first_record.record_length - sizeof(OSENC_Record_Base));
+        if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+            return ERROR_SENC_CORRUPT;        
+        }
+        uint16_t *pint = (uint16_t*)buf;
+        m_senc_file_read_version = *pint;
+        
+        //  Is there a Signature error?
+        if(m_senc_file_read_version == 1024)
+            return ERROR_SIGNATURE_FAILURE;
+        
+        //  Is the oeSENC version compatible?
+            if(m_senc_file_read_version != 200)
+                return ERROR_SENC_VERSION_MISMATCH;
+    }
+    else{
+        fpx.Close();
+        //  Try  with empty key, in case the SENC is unencrypted
+        if( !fpx.Open(CMD_READ_ESENC, senc_file_name, _T("")) ){    
+            wxLogMessage(_T("ingestHeader Open failed forth"));
+            return ERROR_SENC_CORRUPT;        
+        }
+        
+        fpx.Read(&first_record, sizeof(OSENC_Record_Base));
+        
+        //  Bad read?
+        if(!fpx.IsOk()){
+            return ERROR_SENC_CORRUPT;        
+        }
+        
+        if( first_record.record_type == HEADER_SENC_VERSION ){
+            if(first_record.record_length < 16){
+                unsigned char *buf = getBuffer( first_record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk())
+                    return ERROR_SENC_CORRUPT;        
+                
+                uint16_t *pint = (uint16_t*)buf;
+                m_senc_file_read_version = *pint;
+                
+                //  Is there a Signature error?
+                if(m_senc_file_read_version == 1024)
+                    return ERROR_SIGNATURE_FAILURE;
+                
+                //  Is the oeSENC version compatible?
+                    if(m_senc_file_read_version != 200)
+                        return ERROR_SENC_VERSION_MISMATCH;
+            }
+        }
+        else
+            return ERROR_SENC_CORRUPT;        
+        
+        
+    }
+    
+    return SENC_NO_ERROR;
+    
+
+}
+
 
 int Osenc::ingestHeader(const wxString &senc_file_name)
 {
@@ -553,13 +680,9 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
     int ret_val = SENC_NO_ERROR;                    // default is OK
     
     wxFileName fn(senc_file_name);
-    //m_ID = fn.GetName();                          // This will be the NOAA File name, usually
     
-    //    Sanity check for existence of file
     
-    int nProg = 0;
     
-    wxString ifs( senc_file_name );
     
 /*    
     wxFFileInputStream fpx_u( ifs );
@@ -578,45 +701,14 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
             return ERROR_SENCFILE_NOT_FOUND;
         }
     }
+
+    int verify_val = verifySENC(fpx, senc_file_name);
     
+    if(verify_val != SENC_NO_ERROR)
+        return verify_val;
+    
+
     S57Obj *obj = 0;
-    int featureID;
-    uint32_t primitiveType;
-    
-    printf("First Read\n");
-    
-    //  We read the first record, and confirm the compatible SENC version number
-    OSENC_Record_Base first_record;
-    fpx.Read(&first_record, sizeof(OSENC_Record_Base));
-    
-    //  Bad read?
-    if(!fpx.IsOk()){
-        return ERROR_SENC_CORRUPT;        
-    }
-    
-    if( first_record.record_type == HEADER_SENC_VERSION ){
-        if(first_record.record_length < 16){
-            unsigned char *buf = getBuffer( first_record.record_length - sizeof(OSENC_Record_Base));
-            if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
-                return ERROR_SENC_CORRUPT;        
-            }
-            uint16_t *pint = (uint16_t*)buf;
-            m_senc_file_read_version = *pint;
-            
-            //  Is there a Signature error?
-            if(m_senc_file_read_version == 1024)
-                return ERROR_SIGNATURE_FAILURE;
-            
-            //  Is the oeSENC version compatible?
-                 if(m_senc_file_read_version != 200)
-                    return ERROR_SENC_VERSION_MISMATCH;
-        }
-        else
-            return ERROR_SENC_CORRUPT;        
-    }
-    else
-        return ERROR_SENC_CORRUPT;        
-    
     
     //  Read the rest of the records in the header
     int dun = 0;
@@ -828,18 +920,13 @@ int Osenc::ingest200(const wxString &senc_file_name,
     
     wxString ifs( senc_file_name );
 
-#if 0    
-     wxFFileInputStream fpx_u( ifs );
-     if (!fpx_u.IsOk()) {
-         return ERROR_SENCFILE_NOT_FOUND;
-     }
-     wxBufferedInputStream fpx( fpx_u );
-#else
-
+//      wxFFileInputStream fpx_u( ifs );
+//      if (!fpx_u.IsOk()) {
+//          return ERROR_SENCFILE_NOT_FOUND;
+//      }
+//      wxBufferedInputStream fpx( fpx_u );
 
     Osenc_instream fpx;
-//    if(!fpx.isAvailable())
-//        return ERROR_SENCSERVER_UNAVAILABLE;
     
     
     if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
@@ -847,53 +934,26 @@ int Osenc::ingest200(const wxString &senc_file_name,
         wxMilliSleep(100);
         if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
             wxLogMessage(_T("ingest200 Open failed second"));
-            return ERROR_SENCFILE_NOT_FOUND;
+
+            //  Try  with empty key, in case the SENC is unencrypted
+            if( !fpx.Open(CMD_READ_ESENC, senc_file_name, _T("")) ){    
+                wxLogMessage(_T("ingest200 Open failed third"));
+                return ERROR_SENCFILE_NOT_FOUND;
+            }
         }
     }
     
-#endif    
     
+    int verify_val = verifySENC(fpx, senc_file_name);
+
+    if(verify_val != SENC_NO_ERROR)
+        return verify_val;
+
     S57Obj *obj = 0;
     int featureID;
     uint32_t primitiveType;
-    
-    int dun = 0;
-    printf("First Read\n");
-    
-    //  We read the first record, and confirm the compatible SENC version number
-    OSENC_Record_Base first_record;
-    fpx.Read(&first_record, sizeof(OSENC_Record_Base));
-    
-    //  Bad read?
-    if(!fpx.IsOk()){
-        return ERROR_SENC_CORRUPT;        
-    }
-    
-    if( first_record.record_type == HEADER_SENC_VERSION ){
-        if(first_record.record_length < 16){
-            unsigned char *buf = getBuffer( first_record.record_length - sizeof(OSENC_Record_Base));
-            if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
-                return ERROR_SENC_CORRUPT;        
-            }
-            uint16_t *pint = (uint16_t*)buf;
-            m_senc_file_read_version = *pint;
-    
-        //  Is there a Signature error?
-            if(m_senc_file_read_version == 1024)
-                return ERROR_SIGNATURE_FAILURE;
-            
-        //  Is the oeSENC version compatible?
-            if(m_senc_file_read_version != 200)
-                return ERROR_SENC_VERSION_MISMATCH;
-        }
-        else
-            return ERROR_SENC_CORRUPT;        
         
-    }
-    else
-        return ERROR_SENC_CORRUPT;        
-    
-    
+    int dun = 0;
         
     while( !dun ) {
         

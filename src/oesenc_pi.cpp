@@ -285,9 +285,9 @@ int oesenc_pi::Init(void)
 
     g_benable_screenlog = g_buser_enable_screenlog;
     
-#ifdef __WXMSW__
-    wxExecute(_T("net start oeserverd"));              // exec asynchronously
-#endif    
+// #ifdef __WXMSW__
+//     wxExecute(_T("net start oeserverd"));              // exec asynchronously
+// #endif    
     
 
     return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
@@ -2448,9 +2448,9 @@ void initLibraries(void)
 
 bool validate_SENC_server(void)
 {
-#ifdef __WXMSW    
-    return true;        // started as service earlier
-#endif    
+// #ifdef __WXMSW    
+//     return true;        // started as service earlier
+// #endif    
 
     wxLogMessage(_T("validate_SENC_server"));
     
@@ -2565,8 +2565,13 @@ bool validate_SENC_server(void)
 #ifndef __WXMSW__    
     cmds += _T(" --daemon");
 #endif
+
+    int flags = wxEXEC_ASYNC;
+#ifdef __WXMSW__    
+	flags |= wxEXEC_HIDE_CONSOLE;
+#endif
     
-    g_serverProc = wxExecute(cmds);              // exec asynchronously
+    g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
     wxMilliSleep(100);
     
     // Check to see if the server function is available
@@ -2621,10 +2626,10 @@ bool validate_SENC_server(void)
 
 bool shutdown_SENC_server( void )
 {
-#ifdef __WXMSW__
-    wxExecute(_T("net stop oeserverd"));              // exec asynchronously
-    return true;
-#else    
+// #ifdef __WXMSW__
+//     wxExecute(_T("net stop oeserverd"));              // exec asynchronously
+//     return true;
+// #else    
     
     // Check to see if the server is already running, and available
     Osenc_instream testAvail;
@@ -2635,7 +2640,7 @@ bool shutdown_SENC_server( void )
     else{
         return false;
     }
-#endif    
+// #endif    
     
 }
 

@@ -917,10 +917,10 @@ CopyFiles "$INSTDIR\share\locale\ru\LC_MESSAGES\opencpn-oesenc_pi.mo" "$INSTROOT
 	${EndIf}
 
 	;  Install the helper service
-	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/registerService' '$INSTDIR' ''
+;	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/registerService' '$INSTDIR' ''
 	
 	;  Modify the DACL of the service, to allow starting without admin priveleges
-	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/openDACL' '$INSTDIR' ''
+;	!insertmacro UAC_AsUser_ExecShell 'open' '$INSTDIR\oeserverd.exe' '/openDACL' '$INSTDIR' ''
 	
 	;# Save the log file
 	StrCpy $0 "$INSTDIR\install.log"

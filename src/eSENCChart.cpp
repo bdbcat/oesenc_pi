@@ -37,7 +37,6 @@
 #include <algorithm>          // for std::sort
 #include <string>
 #include <map>
-#include <unordered_map>
 
 #include "oesenc_pi.h"
 #include "eSENCChart.h"
@@ -6650,6 +6649,10 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     
 }
 
+typedef struct segment_pair{
+    float e0, n0, e1, n1;
+}_segment_pair;
+
 
 void eSENCChart::AssembleLineGeometry( void )
 {
@@ -6672,17 +6675,14 @@ void eSENCChart::AssembleLineGeometry( void )
     
     
     
-    std::unordered_map<std::string, connector_segment *> ce_connector_hash;
-    std::unordered_map<std::string, connector_segment *> ec_connector_hash;
-    std::unordered_map<std::string, connector_segment *> cc_connector_hash;
+    std::map<std::string, connector_segment *> ce_connector_hash;
+    std::map<std::string, connector_segment *> ec_connector_hash;
+    std::map<std::string, connector_segment *> cc_connector_hash;
     
     int ndelta = 0;
     
     //  Define a vector to temporarily hold the geometry for the created pcs elements
     
-    typedef struct segment_pair{
-        float e0, n0, e1, n1;
-    };
     std::vector<segment_pair> connector_segment_vector;
     size_t seg_pair_index = 0;
     
@@ -6743,7 +6743,7 @@ void eSENCChart::AssembleLineGeometry( void )
                             std::string key(buf);
 
                             connector_segment *pcs = NULL;
-                            std::unordered_map<std::string, connector_segment *>::iterator itce;
+                            std::map<std::string, connector_segment *>::iterator itce;
                             itce = ce_connector_hash.find( key );
                             if( itce == ce_connector_hash.end() ){
                                 ndelta += 2;
@@ -6823,7 +6823,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                 std::string key(buf);
                                 
                                 connector_segment *pcs = NULL;
-                                std::unordered_map<std::string, connector_segment *>::iterator itec;
+                                std::map<std::string, connector_segment *>::iterator itec;
                                 itec = ec_connector_hash.find( key );
                                 if( itec == ec_connector_hash.end() ){
                                     ndelta += 2;
@@ -6884,7 +6884,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                 
                                 
                                 connector_segment *pcs = NULL;
-                                std::unordered_map<std::string, connector_segment *>::iterator itcc;
+                                std::map<std::string, connector_segment *>::iterator itcc;
                                 itcc = cc_connector_hash.find( key );
                                 if( itcc == cc_connector_hash.end() ){
                                     ndelta += 2;
@@ -6978,7 +6978,7 @@ void eSENCChart::AssembleLineGeometry( void )
     //      At the  same time, populate a vector, storing the pcs pointers to allow destruction at this class dtor.
     //      This will allow us to destroy (automatically) the pcs hashmaps, and save some storage
     
-    std::unordered_map<std::string, connector_segment *>::iterator iter;
+    std::map<std::string, connector_segment *>::iterator iter;
     
     for( iter = ce_connector_hash.begin(); iter != ce_connector_hash.end(); ++iter )
     {
@@ -7033,12 +7033,12 @@ void eSENCChart::AssembleLineGeometry( void )
     // are now in the VBO buffer
     for( it = m_ve_hash.begin(); it != m_ve_hash.end(); ++it ) {
         VE_Element *pedge = it->second;
-        m_pve_vector.push_back(pedge);
-        
-        free(pedge->pPoints);
+        if(pedge){
+            m_pve_vector.push_back(pedge);
+            free(pedge->pPoints);
+        }
     }
     m_ve_hash.clear();
-    
     
     // and we can empty the connector hashmap,
     // and at the same time free up the point storage in the VC_Elements, since all the points

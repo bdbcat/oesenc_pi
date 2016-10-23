@@ -338,6 +338,7 @@ const char *MyCSVGetField( const char * pszFilename,
 class wxProgressDialog;
 class S57ClassRegistrar;
 class PolyTessGeo;
+class Osenc_instream;
 
 //--------------------------------------------------------------------------
 //      Osenc definition
@@ -359,15 +360,7 @@ public:
     wxString getLastError(){ return errorMessage; }
     
     int ingestHeader(const wxString &senc_file_name);
-    int ingest(const wxString &senc_file_name,
-               S57ObjVector *pObjectVector,
-               VE_ElementVector *pVEArray,
-               VC_ElementVector *pVCArray);
-    
-    int ingest200(const wxString &senc_file_name,
-               S57ObjVector *pObjectVector,
-               VE_ElementVector *pVEArray,
-               VC_ElementVector *pVCArray);
+    int ingest200(const wxString &senc_file_name, S57ObjVector *pObjectVector, VE_ElementVector *pVEArray, VC_ElementVector *pVCArray);
     
     //  SENC creation, by Version desired...
     int createSenc124(const wxString& FullPath000, const wxString& SENCFileName, bool b_showProg = true);
@@ -381,8 +374,6 @@ public:
     wxString getBaseDate(){ return m_sdate000; }
     
     wxString getSENCFileCreateDate(){ return m_readFileCreateDate; }
-    //wxULongLong getFileSize000(){ return m_FileSize000; }
-    //wxString getsFileSize000(){ return m_sFileSize000; }
 
     int getSencReadVersion(){ return m_senc_file_read_version; }
     wxString getSENCReadBaseEdition(){ return m_read_base_edtn; }
@@ -408,8 +399,8 @@ public:
         
 private:
     void init();
+    int verifySENC(Osenc_instream &fpx,  const wxString &senc_file_name);
     
-    int my_fgets( char *buf, int buf_len_max, wxInputStream& ifs );
     int ingestCell( OGRS57DataSource *poS57DS, const wxString &FullPath000, const wxString &working_dir );
     int ValidateAndCountUpdates( const wxFileName file000, const wxString CopyDir,
                                  wxString &LastUpdateDate, bool b_copyfiles);
@@ -421,7 +412,6 @@ private:
     bool CreateCOVRTables( S57Reader *pENCReader, S57ClassRegistrar *poRegistrar );
     bool CreateCovrRecords(FILE *fileOut);
     
-    void CreateSENCRecord124( OGRFeature *pFeature, FILE * fpOut, int mode, S57Reader *poReader );
     void  CreateSENCVectorEdgeTable(FILE * fpOut, S57Reader *poReader);
     void  CreateSENCConnNodeTable(FILE * fpOut, S57Reader *poReader);
 
@@ -523,6 +513,8 @@ public:
     Osenc_instream();
     ~Osenc_instream();
     
+    void Init();
+    void Close();
     bool Open( unsigned char cmd, wxString senc_file_name, wxString crypto_key );
     
     Osenc_instream &Read(void *buffer, size_t size);
@@ -542,6 +534,7 @@ private:
     HANDLE hPipe; 
     #endif    
     
+    wxFileInputStream *m_uncrypt_stream;
 };
 
 

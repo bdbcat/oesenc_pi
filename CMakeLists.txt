@@ -101,7 +101,7 @@ ENDIF(UNIX)
 #  IF NOT DEBUGGING CFLAGS="-O2 -march=native"
 IF(NOT WIN32)
 # ADD_DEFINITIONS( "-Wall -g -fexceptions -fvisibility=hidden -O0" )
- ADD_DEFINITIONS( "-Wall -g -fexceptions -O0 -std=c++0x " )
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -O0 " )
 
  IF(NOT APPLE)
   SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic -g")
