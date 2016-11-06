@@ -1234,7 +1234,7 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         return false;
     }
     
-    if(g_UserKey.Length() == 0){
+    if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
         g_UserKey = GetUserKey( LEGEND_FIRST, true );
     }
         
@@ -3450,7 +3450,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     VE_ElementVector VEs;
     VC_ElementVector VCs;
     
-    if(g_UserKey.Length() == 0){
+    if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
         g_UserKey = GetUserKey( LEGEND_FIRST, true );
     }
     

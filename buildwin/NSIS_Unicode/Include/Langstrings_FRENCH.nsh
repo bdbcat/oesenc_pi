@@ -13,8 +13,8 @@ LangString Installer_Running ${LANG_FRENCH} "L'installation est déjà en cours.
 #LangString Uninstaller_Running ${LANG_ENGLISH} "The uninstaller is already running."
 LangString Uninstaller_Running ${LANG_FRENCH} "La désinstallation déjà est en cours."
 
-#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 1.0.0 Installation"
-LangString LangDialog_Title ${LANG_FRENCH} "OESENC_PI 1.0.0 Installation"
+#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.0 Installation"
+LangString LangDialog_Title ${LANG_FRENCH} "OESENC_PI 0.1.0 Installation"
 
 #LangString LangDialog_Text ${LANG_ENGLISH} "Please select a language:"
 LangString LangDialog_Text ${LANG_FRENCH} "Veuillez sélectionner une langue:"
@@ -43,8 +43,8 @@ LangString Type_Downgrade ${LANG_FRENCH} "Retour version précédente"
 #LangString Type_Fresh_Installation ${LANG_ENGLISH} "New installation"
 LangString Type_Fresh_Installation ${LANG_FRENCH} "Nouvelle installation"
 
-#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 1.0.0"
-LangString Uninstall_Link ${LANG_FRENCH} "Désinstalle OESENC_PI 1.0.0"
+#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.0"
+LangString Uninstall_Link ${LANG_FRENCH} "Désinstalle OESENC_PI 0.1.0"
 
 #LangString Page_TypeInst_Title_1 ${LANG_ENGLISH} "Already Installed"
 LangString Page_TypeInst_Title_1 ${LANG_FRENCH} "Déjà installé"
@@ -52,14 +52,14 @@ LangString Page_TypeInst_Title_1 ${LANG_FRENCH} "Déjà installé"
 #LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 LangString Page_TypeInst_Title_Exists ${LANG_FRENCH} "Version déjà installée"
 
-#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed."
-LangString Page_TypeInst_Subtitle_Exists ${LANG_FRENCH} "OESENC_PI 1.0.0 est déjà installé."
+#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed."
+LangString Page_TypeInst_Subtitle_Exists ${LANG_FRENCH} "OESENC_PI 0.1.0 est déjà installé."
 
 #LangString Page_TypeInst_Subtitle_1 ${LANG_ENGLISH} "Found installed version of OESENC_PI."
 LangString Page_TypeInst_Subtitle_1 ${LANG_FRENCH} "Version OESENC_PI déjà installée."
 
-#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
-LangString Label_TypeInst_Reinstall_Text ${LANG_FRENCH} "OESENC_PI 1.0.0 est déjà installé. Vous pouvez réinstaller cette version en utilisant les paramètres existants. Si vous voulez changer les paramètres , arrêtez l'installation et commencez par désinstaller la version existante . Cliquez sur 'Suivant' pour continuer."
+#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+LangString Label_TypeInst_Reinstall_Text ${LANG_FRENCH} "OESENC_PI 0.1.0 est déjà installé. Vous pouvez réinstaller cette version en utilisant les paramètres existants. Si vous voulez changer les paramètres , arrêtez l'installation et commencez par désinstaller la version existante . Cliquez sur 'Suivant' pour continuer."
 
 #LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 LangString RB_Reinstall_TypeInst_Text ${LANG_FRENCH} "Réinstaller avec les paramètres existants"
@@ -99,8 +99,8 @@ LangString Msg_Error_Remove_InstDir ${LANG_FRENCH} "Le répertoire d'installatio
 LangString Msg_Path_Invalid ${LANG_FRENCH} "L'adresse est invalide!$\r$\n$\r$\Veuillez vérifier votre saisie."
 
 ;added on 2011-06-13
-#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 1.0.0"
-LangString ^NameDA ${LANG_FRENCH} "OESENC_PI Version 1.0.0"
+#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.0"
+LangString ^NameDA ${LANG_FRENCH} "OESENC_PI Version 0.1.0"
 
 ;added on 2011-07-24
 #LangString License_Message ${LANG_ENGLISH} "OpenCPN is software libre. You are encouraged and legally entitled to copy, reinstall, modify, and redistribute this program for yourself and your friends under the terms of the GPL. $\r$\nSmooth sailing!"
@@ -109,8 +109,8 @@ LangString License_Message ${LANG_FRENCH} "OpenCpn est un logiciel libre. Vous �
 #LangString Installer_Unsupported_XP_SP_Version ${LANG_ENGLISH} "Your Windows XP Service Pack version is not supported (it's too old)!$\r$\nYou need at least Windows XP SP3."
 LangString Installer_Unsupported_XP_SP_Version ${LANG_FRENCH} "Votre version de Windows XP Service Pack version n'est pas supportée (car trop ancienne)!$\r$\nVous avez besoin d'au moins Windows XP SP3."
 
-#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 1.0.0."
-LangString Label_TypeInst_Parallel_Text ${LANG_FRENCH} "Plusieurs versions ont été détectées de OESENC_PI sur votre système.Sur l'écran suivant, vous serez invité à choisir l'emplacement d'installation souhaité pour OESENC_PI Version 1.0.0."
+#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
+LangString Label_TypeInst_Parallel_Text ${LANG_FRENCH} "Plusieurs versions ont été détectées de OESENC_PI sur votre système.Sur l'écran suivant, vous serez invité à choisir l'emplacement d'installation souhaité pour OESENC_PI Version 0.1.0."
 
 #LangString Type_Parallel_Installation ${LANG_ENGLISH} "Parallel installation"
 LangString Type_Parallel_Installation ${LANG_FRENCH} "Installation parallèle"

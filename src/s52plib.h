@@ -332,7 +332,8 @@ private:
     void GetPixPointSingleNoRotate( int pixx, int pixy, double *plat, double *plon, ViewPort *vpt );
     
     bool IsTextEnabled(const PlugIn_ViewPort& VPoint);
-        
+    bool IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val);
+    
     wxString m_plib_file;
 
     float canvas_pix_per_mm; // Set by parent, used to scale symbols/lines/patterns

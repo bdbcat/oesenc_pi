@@ -176,8 +176,8 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       wxFileName fn_exe(GetOCPN_ExePath());
 
       //        Specify the location of the oeserverd helper.
-      //g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
-      g_sencutil_bin = _T("/home/dsr/Projects/oeserver_dp/build/oeserverd");
+      g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
+      //g_sencutil_bin = _T("/home/dsr/Projects/oeserver_dp/build/oeserverd");
       
 
 #ifdef __WXMSW__

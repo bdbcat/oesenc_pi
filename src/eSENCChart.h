@@ -188,7 +188,7 @@ class  eSENCChart : public PlugInChartBaseGL
                                                                  PlugIn_ViewPort *VPoint);
       wxString CreateObjDescriptions( ListOfPI_S57Obj* obj_list );
       wxString GetObjectAttributeValueAsString( PI_S57Obj *obj, int iatt, wxString curAttrName );
-      wxString GetAttributeDecode( wxString& att, int ival );
+      static wxString GetAttributeDecode( wxString& att, int ival );
       
 
       wxString          m_extended_error;

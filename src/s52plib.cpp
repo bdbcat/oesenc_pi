@@ -1414,7 +1414,7 @@ char *_getParamVal( ObjRazRules *rzRules, char *str, char *buf, int bsz )
                     if( !ps52plib->m_natsur_hash[i].IsEmpty() )            // entry available?
                         nat = ps52plib->m_natsur_hash[i];
                     else {
-                        nat = _T("TODO"); //s57chart::GetAttributeDecode( natsur_att, (int)i );
+                        nat = eSENCChart::GetAttributeDecode( natsur_att, (int)i );
                         ps52plib->m_natsur_hash[i] = nat;            // cache the entry
                     }
                         
@@ -8086,6 +8086,73 @@ bool s52plib::IsTextEnabled(const PlugIn_ViewPort& VPoint)
     
 }
 
+/*      TODO
+ *      This is a bit of a hack
+ *      The state of the S57 Soundings toggle is not stored in the config file until the app exits.
+ *      So, we can't directly detect toggle state changes.
+ *      Toggling the setting does, however, induce a change in the library state hash.  But
+ *      since this is a private hash function, we cannot certainly determine the toggle state.
+ *      So, using the PlugIn ENC chart interface, we try to render a fake sounding item, and see if it actually 
+ *      happened by looking at the resulting context structure for this fake object.
+ * 
+ *      This is pretty ugly, and can go away, and be done better, when the PlugIn API is updated post-O44.
+ */
+
+bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
+{
+    PI_S57Obj *po = new PI_S57Obj;
+    strncpy(po->FeatureName, "SOUNDG", 6);
+    po->FeatureName[6] = 0;
+    po->m_chart_context = 0;
+    po->lat_min = VPoint.clat;
+    po->lat_max = VPoint.clat + .001;
+    po->lon_min = VPoint.clon;
+    po->lon_max = VPoint.clon + .001;
+    
+    po->m_DisplayCat = PI_DISPLAYBASE;
+    po->Scamin = 1000000;
+    po->npt = 1;
+    
+    double *p1 = (double *)malloc(3 * sizeof(double));
+    po->geoPtz = p1;
+    double *ptz = p1;
+    *ptz++ = 0;
+    *ptz++ = 0;
+    *ptz = 1;
+    
+    double *p2 = (double *)malloc(2 * sizeof(double));
+    po->geoPtMulti = p2;
+    ptz = p2;
+    *ptz++ = VPoint.clon;
+    *ptz = VPoint.clat;
+    
+    PI_PLIBSetContext(po);
+    S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
+ 
+    if(current_val)
+        ctx->bCS_Added = true;
+    else
+        ctx->bCS_Added = false;
+    
+    wxScreenDC dc;
+    PlugIn_ViewPort pivp = VPoint;
+    PI_PLIBRenderObjectToDC( &dc, po, &pivp );
+    
+    bool sounding_on;
+    
+    if(current_val)
+        sounding_on = (NULL != ctx->CSrules);
+    else
+        sounding_on = ctx->bCS_Added;
+    
+    PI_PLIBFreeContext(po->S52_Context);
+    delete po;
+
+    return sounding_on;
+}
+
+
+
 //    Do all those things necessary to prepare for a new rendering
 void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
 {
@@ -8099,8 +8166,11 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
     
     int core_config = PI_GetPLIBStateHash();
     if(core_config != m_myConfig){
+        bool current_bsoundings = m_bShowSoundg;
         LoadS57Config();
         m_bShowS57Text = IsTextEnabled(VPoint);
+        m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
+        
         m_myConfig = PI_GetPLIBStateHash();
     }
    

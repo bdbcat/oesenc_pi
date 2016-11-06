@@ -13,8 +13,8 @@ LangString Installer_Running ${LANG_GERMAN} "Das Installationsprogramm wird bere
 #LangString Uninstaller_Running ${LANG_ENGLISH} "The uninstaller is already running."
 LangString Uninstaller_Running ${LANG_GERMAN} "Das Deinstallationsprogramm wird bereits ausgeführt."
 
-#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 1.0.0 Installation"
-LangString LangDialog_Title ${LANG_GERMAN} "OESENC_PI 1.0.0 Installation"
+#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.0 Installation"
+LangString LangDialog_Title ${LANG_GERMAN} "OESENC_PI 0.1.0 Installation"
 
 #LangString LangDialog_Text ${LANG_ENGLISH} "Please select a language:"
 LangString LangDialog_Text ${LANG_GERMAN} "Bitte wählen Sie die gewünschte Sprache:"
@@ -43,8 +43,8 @@ LangString Type_Downgrade ${LANG_GERMAN} "Downgrade"
 #LangString Type_Fresh_Installation ${LANG_ENGLISH} "New installation"
 LangString Type_Fresh_Installation ${LANG_GERMAN} "Neue Installation"
 
-#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 1.0.0"
-LangString Uninstall_Link ${LANG_GERMAN} "OESENC_PI 1.0.0 deinstallieren"
+#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.0"
+LangString Uninstall_Link ${LANG_GERMAN} "OESENC_PI 0.1.0 deinstallieren"
 
 #LangString Page_TypeInst_Title_1 ${LANG_ENGLISH} "Already Installed"
 LangString Page_TypeInst_Title_1 ${LANG_GERMAN} "Installation bereits vorhanden"
@@ -55,11 +55,11 @@ LangString Page_TypeInst_Subtitle_1 ${LANG_GERMAN} "Installation von OESENC_PI g
 #LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 LangString Page_TypeInst_Title_Exists ${LANG_GERMAN} "Version bereits vorhanden"
 
-#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed."
-LangString Page_TypeInst_Subtitle_Exists ${LANG_GERMAN} "OESENC_PI 1.0.0 ist bereits installiert."
+#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed."
+LangString Page_TypeInst_Subtitle_Exists ${LANG_GERMAN} "OESENC_PI 0.1.0 ist bereits installiert."
 
-#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
-LangString Label_TypeInst_Reinstall_Text ${LANG_GERMAN} "OESENC_PI 1.0.0 ist bereits auf Ihrem System installiert. Sie können die Version jetzt mit den vorherigen Einstellungen erneut installieren. Wenn Sie das Programm mit anderen Einstellungen neu installieren möchten, brechen Sie die Installation ab und deinstallieren Sie zuerst die vorhandene Version. Klicken Sie auf Weiter, um fortzufahren."
+#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+LangString Label_TypeInst_Reinstall_Text ${LANG_GERMAN} "OESENC_PI 0.1.0 ist bereits auf Ihrem System installiert. Sie können die Version jetzt mit den vorherigen Einstellungen erneut installieren. Wenn Sie das Programm mit anderen Einstellungen neu installieren möchten, brechen Sie die Installation ab und deinstallieren Sie zuerst die vorhandene Version. Klicken Sie auf Weiter, um fortzufahren."
 
 #LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 LangString RB_Reinstall_TypeInst_Text ${LANG_GERMAN} "Reinstallation mit den vorherigen Einstellungen"
@@ -100,8 +100,8 @@ LangString Msg_Path_Invalid ${LANG_GERMAN} "Der angegebene Pfad ist ungültig!$\
 #LangString Banner_Installation_Found_Plural ${LANG_ENGLISH} "Found $counter_tmp installations"
 LangString Banner_Installation_Found_Plural ${LANG_GERMAN} "$counter_tmp Installationen gefunden"
 
-#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 1.0.0"
-LangString ^NameDA ${LANG_GERMAN} "OESENC_PI Version 1.0.0"
+#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.0"
+LangString ^NameDA ${LANG_GERMAN} "OESENC_PI Version 0.1.0"
 
 ;added on 2011-07-24
 #LangString License_Message ${LANG_ENGLISH} "OpenCPN is software libre. You are encouraged and legally entitled to copy, reinstall, modify, and redistribute this program for yourself and your friends under the terms of the GPL. $\r$\nSmooth sailing!"
@@ -110,8 +110,8 @@ LangString License_Message ${LANG_GERMAN} "OpenCPN ist Freie Software. Sie werde
 #LangString Installer_Unsupported_XP_SP_Version ${LANG_ENGLISH} "Your Windows XP Service Pack version is not supported (it's too old)!$\r$\nYou need at least Windows XP SP3."
 LangString Installer_Unsupported_XP_SP_Version ${LANG_GERMAN} "Deine Windows XP Service Pack Version ist nicht anerkannt. (Sie ist zu alt!)$\r$\nDu brauchst mindestens Windows XP SP3."
 
-#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 1.0.0."
-LangString Label_TypeInst_Parallel_Text ${LANG_GERMAN} "Setup hat mehrere installierte Versionen von OESENC_PI auf Ihrem System gefunden. On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 1.0.0."
+#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
+LangString Label_TypeInst_Parallel_Text ${LANG_GERMAN} "Setup hat mehrere installierte Versionen von OESENC_PI auf Ihrem System gefunden. On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
 
 #LangString Type_Parallel_Installation ${LANG_ENGLISH} "Parallel installation"
 LangString Type_Parallel_Installation ${LANG_GERMAN} "Parallel-Installation"

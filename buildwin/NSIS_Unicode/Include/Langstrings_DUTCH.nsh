@@ -8,7 +8,7 @@
 
 #LangString Uninstaller_Running ${LANG_ENGLISH} "The uninstaller is already running."
 
-#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 1.0.0 Installation"
+#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.0 Installation"
 
 #LangString LangDialog_Text ${LANG_ENGLISH} "Please select a language:"
 
@@ -28,7 +28,7 @@
 
 #LangString Type_Fresh_Installation ${LANG_ENGLISH} "New installation"
 
-#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 1.0.0"
+#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.0"
 
 #LangString Page_TypeInst_Title_1 ${LANG_ENGLISH} "Already Installed"
 
@@ -36,9 +36,9 @@
 
 #LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 
-#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed."
+#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed."
 
-#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 1.0.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
 
 #LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 
@@ -66,14 +66,14 @@
 #LangString Msg_Path_Invalid ${LANG_ENGLISH} "The entered path is invalid!$\r$\n$\r$\nPlease check your input."
 
 ;added on 2011-06-13
-#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 1.0.0"
+#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.0"
 
 ;added on 2011-07-24
 #LangString License_Message ${LANG_ENGLISH} "OpenCPN is software libre. You are encouraged and legally entitled to copy, reinstall, modify, and redistribute this program for yourself and your friends under the terms of the GPL. $\r$\nSmooth sailing!"
 
 #LangString Installer_Unsupported_XP_SP_Version ${LANG_ENGLISH} "Your Windows XP Service Pack version is not supported (it's too old)!$\r$\nYou need at least Windows XP SP3."
 
-#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 1.0.0."
+#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
 
 #LangString Type_Parallel_Installation ${LANG_ENGLISH} "Parallel installation"
 
