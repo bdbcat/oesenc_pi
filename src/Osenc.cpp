@@ -597,9 +597,12 @@ void Osenc::init( void )
 
 int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
 {
-    if(!fpx.IsOk())
-        return ERROR_SENC_CORRUPT;
+    wxLogMessage(_T("verifySENC"));
     
+    if(!fpx.IsOk()){
+        wxLogMessage(_T("verifySENC E1"));
+        return ERROR_SENC_CORRUPT;
+    }
   
     //  We read the first record, and confirm the compatible SENC version number
     OSENC_Record_Base first_record;
@@ -607,6 +610,7 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
     
     //  Bad read?
     if(!fpx.IsOk()){
+        wxLogMessage(_T("verifySENC E2"));
         return ERROR_SENC_CORRUPT;        
     }
     
@@ -619,18 +623,25 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
         m_senc_file_read_version = *pint;
         
         //  Is there a Signature error?
-        if(m_senc_file_read_version == 1024)
+        if(m_senc_file_read_version == 1024){
+            wxLogMessage(_T("verifySENC E3"));
             return ERROR_SIGNATURE_FAILURE;
+        }
         
         //  Is the oeSENC version compatible?
-            if(m_senc_file_read_version != 200)
-                return ERROR_SENC_VERSION_MISMATCH;
+        if(m_senc_file_read_version != 200){
+            wxLogMessage(_T("verifySENC E4"));
+            return ERROR_SENC_VERSION_MISMATCH;
+        }
     }
     else{
+        
+        wxLogMessage(_T("verifySENC E5"));
+        
         fpx.Close();
         //  Try  with empty key, in case the SENC is unencrypted
         if( !fpx.Open(CMD_READ_ESENC, senc_file_name, _T("")) ){    
-            wxLogMessage(_T("ingestHeader Open failed forth"));
+            wxLogMessage(_T("ingestHeader Open failed "));
             return ERROR_SENC_CORRUPT;        
         }
         
@@ -638,32 +649,48 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
         
         //  Bad read?
         if(!fpx.IsOk()){
+            wxLogMessage(_T("verifySENC E6"));
             return ERROR_SENC_CORRUPT;        
         }
         
         if( first_record.record_type == HEADER_SENC_VERSION ){
             if(first_record.record_length < 16){
                 unsigned char *buf = getBuffer( first_record.record_length - sizeof(OSENC_Record_Base));
-                if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk())
+                if(!fpx.Read(buf, first_record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    wxLogMessage(_T("verifySENC E7"));
                     return ERROR_SENC_CORRUPT;        
+                }
                 
                 uint16_t *pint = (uint16_t*)buf;
                 m_senc_file_read_version = *pint;
                 
                 //  Is there a Signature error?
-                if(m_senc_file_read_version == 1024)
+                if(m_senc_file_read_version == 1024){
+                    wxLogMessage(_T("verifySENC E8"));
                     return ERROR_SIGNATURE_FAILURE;
+                }
                 
                 //  Is the oeSENC version compatible?
-                    if(m_senc_file_read_version != 200)
-                        return ERROR_SENC_VERSION_MISMATCH;
+                if(m_senc_file_read_version != 200){
+                    wxLogMessage(_T("verifySENC E9"));
+                    return ERROR_SENC_VERSION_MISMATCH;
+                }
             }
+            else{
+                wxLogMessage(_T("verifySENC E10"));
+                return ERROR_SENC_CORRUPT;
+            }
+                
         }
-        else
-            return ERROR_SENC_CORRUPT;        
+        else{
+            wxLogMessage(_T("verifySENC E11"));
+            return ERROR_SENC_CORRUPT;
+        }
         
         
     }
+    
+    wxLogMessage(_T("verifySENC NE2"));
     
     return SENC_NO_ERROR;
     

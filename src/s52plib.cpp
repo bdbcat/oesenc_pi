@@ -970,6 +970,11 @@ void s52plib::ClearRulesCache( Rule *pR ) //  Clear out any existing cached symb
             pR->parm0 = ID_EMPTY;
             break;
         }
+        case ID_GLIST: {
+            pR->pixelPtr = NULL;
+            pR->parm0 = ID_EMPTY;
+            break;
+        }
         case ID_EMPTY:
         default:
             break;
@@ -4609,8 +4614,8 @@ int s52plib::RenderCARC_DisplayList( ObjRazRules *rzRules, Rules *rules, ViewPor
     
     Rule *prule = rules->razRule;
     
-    //Instantiate the symbol if necessary
-    if( ( rules->razRule->pixelPtr == NULL ) || ( rules->razRule->parm1 != m_colortable_index ) ) {
+    //Instantiate the symbol if necessary, note last condition applies on switch from GL to DC modes
+    if( ( rules->razRule->pixelPtr == NULL ) || ( rules->razRule->parm1 != m_colortable_index ) || ((rules->razRule->parm0 == ID_GLIST) && (m_pdc != 0))  ) {
         //  Render the sector light to a bitmap
         
         rad = (int) ( radius * canvas_pix_per_mm );

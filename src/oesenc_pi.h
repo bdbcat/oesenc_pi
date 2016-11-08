@@ -67,26 +67,7 @@ extern "C++" wxArrayString exec_SENCutil_sync( wxString cmd, bool bshowlog );
 class   oesenc_pi;
 class   OCPNPermitList;
 class   OCPNCertificateList;
-
-// An Event handler class to catch events from S63 UI dialog
-class s63_pi_event_handler : public wxEvtHandler
-{
-public:
-
-    s63_pi_event_handler(oesenc_pi *parent);
-    ~s63_pi_event_handler();
-
-    void OnImportPermitClick( wxCommandEvent &event );
-    void OnRemovePermitClick( wxCommandEvent &event );
-    void OnImportCellsClick( wxCommandEvent &event );
-    void OnSelectPermit( wxListEvent& event );
-    void OnNewUserpermitClick( wxCommandEvent& event );
-    void OnNewInstallpermitClick( wxCommandEvent& event );
-    void OnImportCertClick( wxCommandEvent &event );
-    void OnNewFPRClick( wxCommandEvent &event );
-
-    oesenc_pi  *m_parent;
-};
+class oesenc_pi_event_handler;
 
 
 class Catalog_Entry31
@@ -131,17 +112,18 @@ public:
 
     void OnSetupOptions();
     void OnCloseToolboxPanel(int page_sel, int ok_apply_cancel);
-
+    void ShowPreferencesDialog( wxWindow* parent );
+    
     void SetPluginMessage(wxString &message_id, wxString &message_body);
-    int ImportCellPermits( void );
-    int RemoveCellPermit( void );
-    int ImportCells( void );
-    int ImportCert( void );
+//     int ImportCellPermits( void );
+//     int RemoveCellPermit( void );
+//     int ImportCells( void );
+//     int ImportCert( void );
     void Set_FPR();
 
-    void EnablePermitRemoveButton(bool benable){ m_buttonRemovePermit->Enable(benable); }
-    void GetNewUserpermit(void);
-    void GetNewInstallpermit(void);
+//     void EnablePermitRemoveButton(bool benable){ m_buttonRemovePermit->Enable(benable); }
+//     void GetNewUserpermit(void);
+//     void GetNewInstallpermit(void);
 
     bool SaveConfig( void );
 
@@ -151,11 +133,13 @@ public:
     wxStaticText        *m_ip_text;
     wxStaticText        *m_fpr_text;
 
-    wxScrolledWindow    *m_s63chartPanelWinTop;
-    wxPanel             *m_s63chartPanelWin;
-    wxPanel             *m_s63chartPanelKeys;
-    wxNotebook          *m_s63NB;
+//     wxScrolledWindow    *m_s63chartPanelWinTop;
+//     wxPanel             *m_s63chartPanelWin;
+//     wxPanel             *m_s63chartPanelKeys;
+//     wxNotebook          *m_s63NB;
 
+    void OnNewFPRClick( wxCommandEvent &event );
+    
 private:
     wxString GetPermitDir();
 
@@ -172,7 +156,7 @@ private:
 
     wxBitmap          *m_pplugin_icon;
 
-    s63_pi_event_handler *m_event_handler;
+    oesenc_pi_event_handler *m_event_handler;
 
     OCPNPermitList      *m_permit_list;
     wxButton            *m_buttonImportPermit;
@@ -180,9 +164,6 @@ private:
     wxButton            *m_buttonNewUP;
     wxButton            *m_buttonImportCells;
     wxButton            *m_buttonNewIP;
-    wxButton            *m_buttonNewFPR;
-
-    wxString            m_SelectPermit_dir;
 
     wxString            m_userpermit;
 
@@ -194,12 +175,50 @@ private:
 
     bool                m_bSSE26_shown;
     TexFont             m_TexFontMessage;
-
+    
 
 
 };
 
 
+
+class oesencPrefsDialog : public wxDialog 
+{
+private:
+    
+protected:
+    wxStdDialogButtonSizer* m_sdbSizer1;
+    wxButton* m_sdbSizer1OK;
+    wxButton* m_sdbSizer1Cancel;
+    
+public:
+    
+    
+    oesencPrefsDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("oeSENC_PI Preferences"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDEFAULT_DIALOG_STYLE ); 
+    ~oesencPrefsDialog();
+    void OnPrefsOkClick(wxCommandEvent& event);
+    
+    wxButton *m_buttonNewFPR;
+    wxStaticText *m_fpr_text;
+    
+    DECLARE_EVENT_TABLE()
+    
+    
+    
+};
+
+// An Event handler class to catch events from UI dialog
+class oesenc_pi_event_handler : public wxEvtHandler
+{
+public:
+    
+    oesenc_pi_event_handler(oesenc_pi *parent);
+    ~oesenc_pi_event_handler();
+    
+    void OnNewFPRClick( wxCommandEvent &event );
+    
+    oesenc_pi  *m_parent;
+};
 
 class S63ScreenLog : public wxWindow
 {
@@ -412,6 +431,7 @@ public:
 #define LEGEND_FIRST            1
 #define LEGEND_SECOND           2
 #define LEGEND_THIRD            3
+#define LEGEND_FOURTH           4
 
 
 ////@end control identifiers

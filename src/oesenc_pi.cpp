@@ -94,6 +94,9 @@ wxString                        g_UserKey;
 wxString                        g_old_UserKey;
 
 bool                            g_PIbDebugS57;
+wxString                        g_fpr_file;
+
+oesenc_pi_event_handler         *g_event_handler;
 
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
@@ -171,7 +174,7 @@ oesenc_pi::oesenc_pi(void *ppimgr)
 
       g_pi = this;              // Store a global handle to the PlugIn itself
 
-      m_event_handler = new s63_pi_event_handler(this);
+      g_event_handler = new oesenc_pi_event_handler(this);
 
       wxFileName fn_exe(GetOCPN_ExePath());
 
@@ -291,7 +294,7 @@ int oesenc_pi::Init(void)
     
 
     return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
-            | WANTS_OVERLAY_CALLBACK | WANTS_OPENGL_OVERLAY_CALLBACK  );
+    | WANTS_OVERLAY_CALLBACK | WANTS_OPENGL_OVERLAY_CALLBACK | WANTS_PREFERENCES );
 
 }
 
@@ -362,10 +365,6 @@ wxArrayString oesenc_pi::GetDynamicChartClassNameArray()
 
 void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
-    if(message_id == _T("S63_CALLBACK_PRIVATE_1") ){
-        ImportCells();
-    }
-
 }
 
 bool oesenc_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
@@ -666,6 +665,78 @@ void oesenc_pi::OnSetupOptions(){
 #endif
 }
 
+void oesenc_pi::OnNewFPRClick( wxCommandEvent &event )
+{
+    
+    wxString msg = _("To obtain an Install Permit, you must generate a unique System Identifier File.\n");
+    msg += _("This file is also known as a\"fingerprint\" file.\n");
+    msg += _("The fingerprint file contains information to uniquely identifiy this computer.\n\n");
+    msg += _("After creating this file, you will need it to generate your InstallPermit at the o-charts.org shop.\n");
+    msg += _("Proceed to create Fingerprint file?");
+    
+    int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
+    
+    if(ret == wxID_YES){
+#if 0        
+        wxString fpr_file;
+        wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
+        #ifdef __WXMSW__
+        
+        //  On XP, we simply use the root directory, since any other directory may be hidden
+        int major, minor;
+        ::wxGetOsVersion( &major, &minor );
+        if( (major == 5) && (minor == 1) )
+            fpr_dir = _T("C:\\");
+        #endif        
+            
+            wxString cmd;
+            cmd += _T(" -w ");                  // validate cell permit
+            
+            cmd += _T(" -o ");
+            cmd += fpr_dir;
+            
+            ::wxBeginBusyCursor();
+            
+            wxArrayString valup_result = exec_SENCutil_sync( cmd, false);
+            
+            ::wxEndBusyCursor();
+            
+            bool berr = false;
+            for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
+                wxString line = valup_result[i];
+                if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
+                    berr = true;
+                    break;
+                }
+                if(line.Upper().Find(_T("FPR")) != wxNOT_FOUND){
+                    fpr_file = line.AfterFirst(':');
+                }
+                
+            }
+            
+            
+            if(!berr && fpr_file.Length()){
+                wxString msg1 = _("Fingerprint file created.\n");
+                msg1 += fpr_file;
+                
+                OCPNMessageBox_PlugIn(NULL, msg1, _("S63_PI Message"), wxOK);
+            }
+            else{
+                wxLogMessage(_T("S63_pi: OCPNsenc results:"));
+                for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
+                    wxString line = valup_result[i];
+                    wxLogMessage( line );
+                }
+                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("S63_PI Message"), wxOK);
+            }
+            
+            g_fpr_file = fpr_file;
+            
+            m_parent->Set_FPR();
+#endif            
+    }
+}
+
 void oesenc_pi::OnCloseToolboxPanel(int page_sel, int ok_apply_cancel)
 {
     m_up_text = NULL;
@@ -681,6 +752,7 @@ void oesenc_pi::OnCloseToolboxPanel(int page_sel, int ok_apply_cancel)
 
 }
 
+#if 0
 wxString oesenc_pi::GetPermitDir()
 {
     wxString os63_dirname = g_CommonDataDir;
@@ -738,10 +810,10 @@ Catalog31 *oesenc_pi::CreateCatalog31(const wxString &file31)
 
     return rv;
 }
+#endif
 
 
-
-
+#if 0
 int oesenc_pi::ImportCells( void )
 {
 
@@ -749,9 +821,6 @@ int oesenc_pi::ImportCells( void )
 }
 
 
-void oesenc_pi::Set_FPR()
-{
-}
 
 
 int oesenc_pi::ImportCert(void)
@@ -767,9 +836,12 @@ int oesenc_pi::ImportCellPermits(void)
     return 0;
 }
 
+#endif
 
 
-
+void oesenc_pi::Set_FPR()
+{
+}
 
 
 int oesenc_pi::pi_error( wxString msg )
@@ -788,7 +860,6 @@ bool oesenc_pi::LoadConfig( void )
         g_installpermit = _T("Y");
         g_userpermit = _T("X");
 
-        pConf->Read( _T("PermitDir"), &m_SelectPermit_dir );
         pConf->Read( _T("Userpermit"), &g_userpermit );
         pConf->Read( _T("Installpermit"), &g_installpermit );
         pConf->Read( _T("LastENCROOT"), &m_last_enc_root_dir);
@@ -811,12 +882,68 @@ bool oesenc_pi::SaveConfig( void )
     if( pConf ) {
         pConf->SetPath( _T("/PlugIns/oesenc") );
 
-        pConf->Write( _T("PermitDir"), m_SelectPermit_dir );
         pConf->Write( _T("UserKey"), g_UserKey );
 
     }
 
     return true;
+}
+
+void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
+{
+    oesencPrefsDialog *dialog = new oesencPrefsDialog( parent, wxID_ANY, _("oeSENC_PI Preferences"), wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+    dialog->Fit();
+    wxColour cl;
+    GetGlobalColor(_T("DILG1"), &cl);
+    dialog->SetBackgroundColour(cl);
+    
+//     dialog->m_comboPort->SetValue(m_serialPort);
+//     dialog->m_wpComboPort->SetValue(m_trackedWP);
+//     
+//     dialog->m_comboIcon->SetValue(m_tenderIconType);
+//     
+//     wxString val;
+//     
+//     val.Printf(_T("%4d"), m_tenderGPS_x);
+//     dialog->m_pTenderGPSOffsetX->SetValue(val);
+//     val.Printf(_T("%4d"), m_tenderGPS_y);
+//     dialog->m_pTenderGPSOffsetY->SetValue(val);
+//     val.Printf(_T("%4d"), m_tenderLength);
+//     dialog->m_pTenderLength->SetValue(val);
+//     val.Printf(_T("%4d"), m_tenderWidth);
+//     dialog->m_pTenderWidth->SetValue(val);
+    
+    
+    
+    if(dialog->ShowModal() == wxID_OK)
+    {
+/*        m_serialPort = dialog->m_comboPort->GetValue();
+        
+        m_trackedWP = dialog->m_trackedPointName;
+        m_trackedWPGUID = dialog->m_trackedPointGUID;
+        
+        m_tenderIconType = dialog->m_comboIcon->GetValue();
+        
+        long val;
+        wxString str;
+        str = dialog->m_pTenderGPSOffsetX->GetValue();
+        if(str.ToLong(&val)) { m_tenderGPS_x = val; }
+        
+        str = dialog->m_pTenderGPSOffsetY->GetValue();
+        if(str.ToLong(&val)) { m_tenderGPS_y = val; }
+        
+        str = dialog->m_pTenderLength->GetValue();
+        if(str.ToLong(&val)) { m_tenderLength = val; }
+        
+        str = dialog->m_pTenderWidth->GetValue();
+        if(str.ToLong(&val)) { m_tenderWidth = val; }
+ */       
+        SaveConfig();
+        
+//        setTrackedWPSelect(m_trackedWPGUID);
+        
+    }
+    delete dialog;
 }
 
 #if 0
@@ -863,6 +990,7 @@ void oesenc_pi::GetNewInstallpermit(void)
 
 #endif
 
+#if 0
 // An Event handler class to catch events from S63 UI dialog
 //      Implementation
 
@@ -875,7 +1003,6 @@ s63_pi_event_handler::~s63_pi_event_handler()
 {
 }
 
-#if 0
 void s63_pi_event_handler::OnImportPermitClick( wxCommandEvent &event )
 {
     m_parent->ImportCellPermits();
@@ -914,77 +1041,6 @@ void s63_pi_event_handler::OnImportCertClick( wxCommandEvent &event )
     m_parent->ImportCert();
 }
 #endif
-
-void s63_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
-{
-
-    wxString msg = _("To obtain an Install Permit, you must generate a unique System Identifier File.\n");
-    msg += _("This file is also known as a\"fingerprint\" file.\n");
-    msg += _("The fingerprint file contains information to uniquely identifiy this computer.\n\n");
-    msg += _("After creating this file, you will need it to generate your InstallPermit at the o-charts.org shop.\n");
-    msg += _("Proceed to create Fingerprint file?");
-
-    int ret = OCPNMessageBox_PlugIn(NULL, msg, _("S63_PI Message"), wxYES_NO);
-
-    if(ret == wxID_YES){
-
-        wxString fpr_file;
-        wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
-#ifdef __WXMSW__
-
-        //  On XP, we simply use the root directory, since any other directory may be hidden
-        int major, minor;
-        ::wxGetOsVersion( &major, &minor );
-        if( (major == 5) && (minor == 1) )
-            fpr_dir = _T("C:\\");
-#endif
-
-        wxString cmd;
-        cmd += _T(" -w ");                  // validate cell permit
-
-        cmd += _T(" -o ");
-        cmd += fpr_dir;
-
-        ::wxBeginBusyCursor();
-
-        wxArrayString valup_result = exec_SENCutil_sync( cmd, false);
-
-        ::wxEndBusyCursor();
-
-        bool berr = false;
-        for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
-            wxString line = valup_result[i];
-            if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
-                berr = true;
-                break;
-            }
-            if(line.Upper().Find(_T("FPR")) != wxNOT_FOUND){
-                fpr_file = line.AfterFirst(':');
-            }
-
-        }
-
-
-        if(!berr && fpr_file.Length()){
-            wxString msg1 = _("Fingerprint file created.\n");
-            msg1 += fpr_file;
-
-            OCPNMessageBox_PlugIn(NULL, msg1, _("S63_PI Message"), wxOK);
-        }
-        else{
-            wxLogMessage(_T("S63_pi: OCPNsenc results:"));
-            for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
-                wxString line = valup_result[i];
-                wxLogMessage( line );
-            }
-            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("S63_PI Message"), wxOK);
-        }
-
-//         g_fpr_file = fpr_file;
-
-        m_parent->Set_FPR();
-    }
-}
 
 
 //      Private logging functions
@@ -2098,6 +2154,13 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
              
              m_UserKeyCtl->Disable();
              break;
+             
+         case LEGEND_FOURTH:
+             itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
+                                                      _("UserKey accepted.\n\n"),
+                                                      wxDefaultPosition, wxDefaultSize, 0);
+             break;
+                                                      
          default:
              break;
      }
@@ -2166,26 +2229,75 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
      }
  }
 
-
-
-wxString GetUserKey( int legendID, bool bforceNew)
+ wxString GetUserKey( int legendID, bool bforceNew)
+ {
+     if(g_UserKey.Len() && !bforceNew)
+         return g_UserKey;
+     else
+     {
+         g_old_UserKey = g_UserKey;
+         SENCGetUserKeyDialog dlg( legendID, NULL);
+         dlg.SetSize(500,-1);
+         dlg.Centre();
+         
+         int ret = dlg.ShowModal();
+         if(ret == 0)
+             return g_UserKey;
+         else
+             return _T("Invalid");
+     }
+ }
+ 
+ 
+bool validateUserKey( wxString sencFileName)
 {
-    if(g_UserKey.Len() && !bforceNew)
-        return g_UserKey;
-    else
-    {
-        g_old_UserKey = g_UserKey;
-        SENCGetUserKeyDialog dlg( legendID, NULL);
-        dlg.SetSize(500,-1);
-        dlg.Centre();
-        
-        int ret = dlg.ShowModal();
-        if(ret == 0)
-            return g_UserKey;
-        else
-            return _T("Invalid");
+    wxLogMessage(_T("validateUserKey"));
+    
+    bool b_Set = true;
+    if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
+        b_Set = false;
+        g_UserKey = GetUserKey( LEGEND_FIRST, true );
     }
+    
+    // Try to read the header of the supplied oeSENC file name
+    Osenc senc;
+    senc.setKey(g_UserKey);
+
+    int retCode = senc.ingestHeader( sencFileName );
+
+    if(retCode != SENC_NO_ERROR){
+        wxLogMessage(_T("validateUserKey E1"));
+        
+    
+        if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
+        
+            wxLogMessage(_T("validateUserKey E2"));
+            //  On a signature error, we try once more, allowing user to enter a new key
+            wxString key = GetUserKey( LEGEND_SECOND, true );
+            senc.setKey(key);
+            int retCode_retry = senc.ingestHeader( sencFileName );
+            if(retCode_retry != SENC_NO_ERROR){
+                GetUserKey( LEGEND_THIRD, true );                  // Bail out
+                return false;
+            }
+            else{
+                wxLogMessage(_T("validateUserKey E3"));
+                
+                if(!b_Set)
+                    GetUserKey( LEGEND_FOURTH, true );                  // Inform the user
+                g_UserKey = key;
+            }
+        }
+    }
+    else{
+        wxLogMessage(_T("validateUserKey E4"));
+        
+        if(!b_Set)
+            GetUserKey( LEGEND_FOURTH, true );                  // Inform the user
+    }
+    return true;
 }
+
 
 
 void LoadS57Config()
@@ -2644,6 +2756,270 @@ bool shutdown_SENC_server( void )
     
 }
 
+
+BEGIN_EVENT_TABLE( oesencPrefsDialog, wxDialog )
+EVT_BUTTON( wxID_OK, oesencPrefsDialog::OnPrefsOkClick )
+END_EVENT_TABLE()
+
+oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+    
+        this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+        
+        wxBoxSizer* bSizer2;
+        bSizer2 = new wxBoxSizer( wxVERTICAL );
+        
+        //  FPR File Permit
+        wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
+        m_fpr_text = new wxStaticText(this, wxID_ANY, _T(" "));
+        if(g_fpr_file.Len())
+            m_fpr_text->SetLabel( g_fpr_file );
+        sbSizerFPR->Add(m_fpr_text, wxEXPAND);
+        
+        m_buttonNewFPR = new wxButton( this, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
+        sbSizerFPR->Add( m_buttonNewFPR, 0, wxALL | wxALIGN_RIGHT, 5 );
+        
+        bSizer2->AddSpacer( 5 );
+        bSizer2->Add( sbSizerFPR, 0, wxEXPAND, 5 );
+        
+        m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
+        
+        
+#if 0
+        wxStaticBoxSizer* sbSizerP = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Tender GPS Serial Port") ), wxVERTICAL );
+        
+        m_comboPort = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+        sbSizerP->Add(m_comboPort, 0, wxEXPAND | wxTOP, 5);
+
+        bSizer2->Add( sbSizerP, 0, wxALL|wxEXPAND, 5 );
+        
+        m_pSerialArray = NULL;
+        m_pSerialArray = EnumerateSerialPorts();
+        
+        if (m_pSerialArray) {
+            m_comboPort->Clear();
+            for (size_t i = 0; i < m_pSerialArray->Count(); i++) {
+                m_comboPort->Append(m_pSerialArray->Item(i));
+            }
+        }
+ 
+        // Get the global waypoint list
+        
+        wxStaticBoxSizer* sbSizerwP = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Tracked Waypoint (by Name)") ), wxVERTICAL );
+        
+        m_wpComboPort = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+        sbSizerwP->Add(m_wpComboPort, 0, wxEXPAND | wxTOP, 5);
+        
+        bSizer2->Add( sbSizerwP, 0, wxALL|wxEXPAND, 5 );
+        
+        wxArrayString guidArray = GetWaypointGUIDArray();
+        
+        m_wpComboPort->Clear();
+        for(unsigned int i=0 ; i < guidArray.GetCount() ; i++){
+            wxString name = getWaypointName( guidArray[i] );
+            if(name.Length())
+                m_wpComboPort->Append(name);
+        }
+        
+
+        // Icon type
+        wxStaticBoxSizer* sbSizerIcon = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Tender Icon") ), wxVERTICAL );
+        
+        m_comboIcon = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+        sbSizerIcon->Add(m_comboIcon, 0, wxEXPAND | wxTOP, 5);
+        
+        bSizer2->Add( sbSizerIcon, 0, wxALL|wxEXPAND, 5 );
+        
+        
+        m_comboIcon->Clear();
+        for (size_t i = 0; i < g_iconTypeArray.Count(); i++) {
+            m_comboIcon->Append(g_iconTypeArray.Item(i));
+        }
+        
+        // Icon parameters
+        wxStaticBoxSizer* sbSizerDimensions = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Tender Dimensions") ), wxVERTICAL );
+        bSizer2->Add( sbSizerDimensions, 1, wxALL|wxEXPAND, 5 );
+        
+        wxFlexGridSizer *realSizes = new wxFlexGridSizer(5, 2, 4, 4);
+        realSizes->AddGrowableCol(1);
+        
+        sbSizerDimensions->Add(realSizes, 0, wxEXPAND | wxLEFT, 30);
+        
+        realSizes->Add( new wxStaticText(this, wxID_ANY, _("Length Over All (m)")), 1, wxALIGN_LEFT);
+        m_pTenderLength = new wxTextCtrl(this, 1);
+        realSizes->Add(m_pTenderLength, 1, wxALIGN_RIGHT | wxALL, 4);
+        
+        realSizes->Add( new wxStaticText(this, wxID_ANY, _("Width Over All (m)")), 1, wxALIGN_LEFT);
+        m_pTenderWidth = new wxTextCtrl(this, wxID_ANY);
+        realSizes->Add(m_pTenderWidth, 1, wxALIGN_RIGHT | wxALL, 4);
+            
+        realSizes->Add( new wxStaticText(this, wxID_ANY, _("GPS Offset from Bow (m)")),1, wxALIGN_LEFT);
+        m_pTenderGPSOffsetY = new wxTextCtrl(this, wxID_ANY);
+        realSizes->Add(m_pTenderGPSOffsetY, 1, wxALIGN_RIGHT | wxALL, 4);
+                
+        realSizes->Add(new wxStaticText(this, wxID_ANY, _("GPS Offset from Midship (m)")), 1, wxALIGN_LEFT);
+        m_pTenderGPSOffsetX = new wxTextCtrl(this, wxID_ANY);
+        realSizes->Add(m_pTenderGPSOffsetX, 1, wxALIGN_RIGHT | wxALL, 4);
+                                                
+                
+ /*       
+        wxString m_rbViewTypeChoices[] = { _("Extended"), _("Variation only") };
+        int m_rbViewTypeNChoices = sizeof( m_rbViewTypeChoices ) / sizeof( wxString );
+        m_rbViewType = new wxRadioBox( this, wxID_ANY, _("View"), wxDefaultPosition, wxDefaultSize, m_rbViewTypeNChoices, m_rbViewTypeChoices, 2, wxRA_SPECIFY_COLS );
+        m_rbViewType->SetSelection( 1 );
+        bSizer2->Add( m_rbViewType, 0, wxALL|wxEXPAND, 5 );
+        
+        m_cbShowPlotOptions = new wxCheckBox( this, wxID_ANY, _("Show Plot Options"), wxDefaultPosition, wxDefaultSize, 0 );
+        bSizer2->Add( m_cbShowPlotOptions, 0, wxALL, 5 );
+        
+        m_cbShowAtCursor = new wxCheckBox( this, wxID_ANY, _("Show also data at cursor position"), wxDefaultPosition, wxDefaultSize, 0 );
+        bSizer2->Add( m_cbShowAtCursor, 0, wxALL, 5 );
+        
+        m_cbShowIcon = new wxCheckBox( this, wxID_ANY, _("Show toolbar icon"), wxDefaultPosition, wxDefaultSize, 0 );
+        bSizer2->Add( m_cbShowIcon, 0, wxALL, 5 );
+        
+        m_cbLiveIcon = new wxCheckBox( this, wxID_ANY, _("Show data in toolbar icon"), wxDefaultPosition, wxDefaultSize, 0 );
+        bSizer2->Add( m_cbLiveIcon, 0, wxALL, 5 );
+        
+        wxStaticBoxSizer* sbSizer4;
+        sbSizer4 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Window transparency") ), wxVERTICAL );
+        
+        m_sOpacity = new wxSlider( this, wxID_ANY, 255, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE );
+        sbSizer4->Add( m_sOpacity, 0, wxBOTTOM|wxEXPAND|wxTOP, 5 );
+        
+        
+        bSizer2->Add( sbSizer4, 1, wxALL|wxEXPAND, 5 );
+*/
+ 
+#endif 
+        m_sdbSizer1 = new wxStdDialogButtonSizer();
+        m_sdbSizer1OK = new wxButton( this, wxID_OK );
+        m_sdbSizer1->AddButton( m_sdbSizer1OK );
+        m_sdbSizer1Cancel = new wxButton( this, wxID_CANCEL );
+        m_sdbSizer1->AddButton( m_sdbSizer1Cancel );
+        m_sdbSizer1->Realize();
+        
+        bSizer2->Add( m_sdbSizer1, 0, wxBOTTOM|wxEXPAND|wxTOP, 5 );
+        
+        
+        this->SetSizer( bSizer2 );
+        this->Layout();
+        bSizer2->Fit( this );
+        
+        this->Centre( wxBOTH );
+}
+
+oesencPrefsDialog::~oesencPrefsDialog()
+{
+}
+
+void oesencPrefsDialog::OnPrefsOkClick(wxCommandEvent& event)
+{
+#if 0    
+    m_trackedPointName = m_wpComboPort->GetValue();
+    
+    wxArrayString guidArray = GetWaypointGUIDArray();
+    for(unsigned int i=0 ; i < guidArray.GetCount() ; i++){
+        wxString name = getWaypointName( guidArray[i] );
+        if(name.Length()){
+            if(name.IsSameAs(m_trackedPointName)){
+                m_trackedPointGUID = guidArray[i];
+                break;
+            }
+        }
+    }
+#endif
+    EndModal( wxID_OK );
+ 
+}
+
+// An Event handler class to catch events from UI dialog
+//      Implementation
+
+oesenc_pi_event_handler::oesenc_pi_event_handler(oesenc_pi *parent)
+{
+    m_parent = parent;
+}
+
+oesenc_pi_event_handler::~oesenc_pi_event_handler()
+{
+}
+
+
+
+
+
+void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
+{
+    
+    wxString msg = _("To obtain an Install Permit, you must generate a unique System Identifier File.\n");
+    msg += _("This file is also known as a\"fingerprint\" file.\n");
+    msg += _("The fingerprint file contains information to uniquely identifiy this computer.\n\n");
+    msg += _("After creating this file, you will need it to generate your InstallPermit at the o-charts.org shop.\n");
+    msg += _("Proceed to create Fingerprint file?");
+    
+    int ret = OCPNMessageBox_PlugIn(NULL, msg, _("S63_PI Message"), wxYES_NO);
+    
+    if(ret == wxID_YES){
+#if 0       
+        wxString fpr_file;
+        wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
+        #ifdef __WXMSW__
+        
+        //  On XP, we simply use the root directory, since any other directory may be hidden
+        int major, minor;
+        ::wxGetOsVersion( &major, &minor );
+        if( (major == 5) && (minor == 1) )
+            fpr_dir = _T("C:\\");
+        #endif        
+            
+            wxString cmd;
+            cmd += _T(" -w ");                  // validate cell permit
+            
+            cmd += _T(" -o ");
+            cmd += fpr_dir;
+            
+            ::wxBeginBusyCursor();
+            
+            wxArrayString valup_result = exec_SENCutil_sync( cmd, false);
+            
+            ::wxEndBusyCursor();
+            
+            bool berr = false;
+            for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
+                wxString line = valup_result[i];
+                if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
+                    berr = true;
+                    break;
+                }
+                if(line.Upper().Find(_T("FPR")) != wxNOT_FOUND){
+                    fpr_file = line.AfterFirst(':');
+                }
+                
+            }
+            
+            
+            if(!berr && fpr_file.Length()){
+                wxString msg1 = _("Fingerprint file created.\n");
+                msg1 += fpr_file;
+                
+                OCPNMessageBox_PlugIn(NULL, msg1, _("S63_PI Message"), wxOK);
+            }
+            else{
+                wxLogMessage(_T("S63_pi: OCPNsenc results:"));
+                for(unsigned int i=0 ; i < valup_result.GetCount() ; i++){
+                    wxString line = valup_result[i];
+                    wxLogMessage( line );
+                }
+                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("S63_PI Message"), wxOK);
+            }
+            
+            g_fpr_file = fpr_file;
+            
+            m_parent->Set_FPR();
+#endif            
+    }
+}
 
 
 

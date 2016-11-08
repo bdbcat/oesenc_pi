@@ -127,7 +127,8 @@ extern bool              g_b_EnableVBO;
 
 extern void initLibraries(void);
 extern bool validate_SENC_server( void );
-extern wxString GetUserKey( int legendID, bool bforceNew);
+//extern wxString GetUserKey( int legendID, bool bforceNew);
+extern bool validateUserKey( wxString sencFileName);
 
 // ----------------------------------------------------------------------------
 // Random Prototypes
@@ -597,12 +598,12 @@ eSENCChart::~eSENCChart()
       }
       m_vc_hash.clear();
 
-      for(int i=0 ; i < m_pcs_vector.size() ; i++)
+      for(unsigned int i=0 ; i < m_pcs_vector.size() ; i++)
           delete m_pcs_vector.at(i);                    // destroy the connector segments
           
       m_pcs_vector.clear();
 
-      for(int i=0 ; i < m_pve_vector.size() ; i++)
+      for(unsigned int i=0 ; i < m_pve_vector.size() ; i++)
           delete m_pve_vector.at(i);                    // destroy the edges segments
           
       m_pve_vector.clear();
@@ -1234,10 +1235,13 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         return false;
     }
     
-    if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
-        g_UserKey = GetUserKey( LEGEND_FIRST, true );
+    if(!validateUserKey(m_SENCFileName.GetFullPath())){
+        wxString msg( _T("   UserKey Invalid for SENC file ") );
+        msg.Append( m_SENCFileName.GetFullPath() );
+        wxLogMessage( msg );
+        return false;
     }
-        
+    
     
     Osenc senc;
     senc.setKey(g_UserKey);
@@ -1246,30 +1250,12 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         
     if(retCode != SENC_NO_ERROR){
             
-            //
-            if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
+          wxString msg( _T("   Cannot load SENC file ") );
+          msg.Append( m_SENCFileName.GetFullPath() );
+          wxLogMessage( msg );
                 
-                //  On a signature error, we try once more, allowing user to enter a new key
-                wxString key = GetUserKey( LEGEND_SECOND, true );
-                senc.setKey(key);
-                int retCode_retry = senc.ingestHeader( m_SENCFileName.GetFullPath() );
-                if(retCode_retry != SENC_NO_ERROR){
-                    GetUserKey( LEGEND_THIRD, true );                  // Bail out
-                    g_Disable = true;
-                    return false;
-                }
-                else{
-                    g_UserKey = key;
-                }
-            }
-            else{
-                wxString msg( _T("   Cannot load SENC file ") );
-                msg.Append( m_SENCFileName.GetFullPath() );
-                wxLogMessage( msg );
-                
-                return false;
-            }
-        }
+          return false;
+    }
     
     //  Header has loaded OK
     {
@@ -1377,6 +1363,8 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
         //for the case where depth(height) units change
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
+        ps52plib->FlushSymbolCaches();
+        
     }
     
     if( VPoint.view_scale_ppm != m_last_vp.view_scale_ppm ) {
@@ -1525,6 +1513,8 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         UpdateLUPs( this );                             // and update the LUPs
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
+        ps52plib->FlushSymbolCaches();
+        
         m_plib_state_hash = PI_GetPLIBStateHash();
 
     }
@@ -3440,6 +3430,10 @@ void eSENCChart::UpdateLUPsOnStateChange( void )
 
 int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKey )
 {
+    if(!validateUserKey( FullPath )){
+        return ERROR_SIGNATURE_FAILURE;
+    }
+    
     int ret_val = 0;                    // default is OK
     
     Osenc sencfile;
@@ -3450,9 +3444,10 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     VE_ElementVector VEs;
     VC_ElementVector VCs;
     
-    if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
-        g_UserKey = GetUserKey( LEGEND_FIRST, true );
-    }
+    
+//     if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
+//         g_UserKey = GetUserKey( LEGEND_FIRST, true );
+//     }
     
     sencfile.setRegistrarMgr( pi_poRegistrarMgr );
     sencfile.setKey(userKey);
@@ -4283,11 +4278,12 @@ PI_InitReturn eSENCChart::PostInit( int flags, int cs )
     if(retCode != SENC_NO_ERROR){
     
         //
-        if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
-            wxString permit = GetUserKey( LEGEND_FIRST, false );
-            return PI_INIT_FAIL_RETRY;
-        }
-        else{
+//         if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
+//             wxString permit = GetUserKey( LEGEND_FIRST, false );
+//             return PI_INIT_FAIL_RETRY;
+//         }
+//        else
+        {
             wxString msg( _T("   Cannot load SENC file ") );
             msg.Append( m_SENCFileName.GetFullPath() );
             wxLogMessage( msg );
