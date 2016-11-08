@@ -13,8 +13,8 @@ LangString Installer_Running ${LANG_RUSSIAN} "Программа установ�
 #LangString Uninstaller_Running ${LANG_ENGLISH} "The uninstaller is already running."
 LangString Uninstaller_Running ${LANG_RUSSIAN} "Программа удаления уже запущена."
 
-#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.0 Installation"
-LangString LangDialog_Title ${LANG_RUSSIAN} "Установка OESENC_PI 0.1.0"
+#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.1106 Installation"
+LangString LangDialog_Title ${LANG_RUSSIAN} "Установка OESENC_PI 0.1.1106"
 
 #LangString LangDialog_Text ${LANG_ENGLISH} "Please select a language:"
 LangString LangDialog_Text ${LANG_RUSSIAN} "Выберите язык диалога:"
@@ -43,8 +43,8 @@ LangString Type_Downgrade ${LANG_RUSSIAN} "Переход на старую в�
 #LangString Type_Fresh_Installation ${LANG_ENGLISH} "New installation"
 LangString Type_Fresh_Installation ${LANG_RUSSIAN} "Новая установка"
 
-#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.0"
-LangString Uninstall_Link ${LANG_RUSSIAN} "Удаление OESENC_PI 0.1.0"
+#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.1106"
+LangString Uninstall_Link ${LANG_RUSSIAN} "Удаление OESENC_PI 0.1.1106"
 
 #LangString Page_TypeInst_Title_1 ${LANG_ENGLISH} "Already Installed"
 LangString Page_TypeInst_Title_1 ${LANG_RUSSIAN} "Программа уже установлена"
@@ -55,11 +55,11 @@ LangString Page_TypeInst_Subtitle_1 ${LANG_RUSSIAN} "Обнаружена уст
 #LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 LangString Page_TypeInst_Title_Exists ${LANG_RUSSIAN} "Уже установленная версия"
 
-#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed."
-LangString Page_TypeInst_Subtitle_Exists ${LANG_RUSSIAN} "Программа OESENC_PI 0.1.0 уже установлена."
+#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.1106 is already installed."
+LangString Page_TypeInst_Subtitle_Exists ${LANG_RUSSIAN} "Программа OESENC_PI 0.1.1106 уже установлена."
 
-#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
-LangString Label_TypeInst_Reinstall_Text ${LANG_RUSSIAN} "Программа OESENC_PI 0.1.0 уже установлена на вашем компьютере. Вы можете переустановить эту версию с сохранением имеющейся конфигурации. Чтобы установить программу с новой конфигурацией, отмените текущую установку и затем удалите имеющуюся версию. Нажмите «Далее» для продолжения."
+#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.1106 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+LangString Label_TypeInst_Reinstall_Text ${LANG_RUSSIAN} "Программа OESENC_PI 0.1.1106 уже установлена на вашем компьютере. Вы можете переустановить эту версию с сохранением имеющейся конфигурации. Чтобы установить программу с новой конфигурацией, отмените текущую установку и затем удалите имеющуюся версию. Нажмите «Далее» для продолжения."
 
 #LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 LangString RB_Reinstall_TypeInst_Text ${LANG_RUSSIAN} "Переустановить с сохранением конфигурации"
@@ -98,8 +98,8 @@ LangString Msg_Error_Remove_InstDir ${LANG_RUSSIAN} "Установочная п
 LangString Msg_Path_Invalid ${LANG_RUSSIAN} "Введённый путь некорректен.$\r$\n$\r$\nПроверьте вводимый текст."
 
 ;added on 2011-06-13
-#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.0"
-LangString ^NameDA ${LANG_RUSSIAN} "OESENC_PI, версия 0.1.0"
+#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.1106"
+LangString ^NameDA ${LANG_RUSSIAN} "OESENC_PI, версия 0.1.1106"
 
 ;added on 2011-07-24
 #LangString License_Message ${LANG_ENGLISH} "OpenCPN is software libre. You are encouraged and legally entitled to copy, reinstall, modify, and redistribute this program for yourself and your friends under the terms of the GPL. $\r$\nSmooth sailing!"
@@ -109,8 +109,8 @@ LangString License_Message ${LANG_RUSSIAN} "OpenCPN является свобо�
 #LangString Installer_Unsupported_XP_SP_Version ${LANG_ENGLISH} "Your Windows XP Service Pack version is not supported (it's too old)!$\r$\nYou need at least Windows XP SP3."
 LangString Installer_Unsupported_XP_SP_Version ${LANG_RUSSIAN} "Ваша версия пакета обновлений Windows XP слишком старая и не поддерживается.$\r$\nТребуется Windows XP с пакетом обновления 3 или более современные системы."
 
-#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
-LangString Label_TypeInst_Parallel_Text ${LANG_RUSSIAN} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
+#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.1106."
+LangString Label_TypeInst_Parallel_Text ${LANG_RUSSIAN} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.1106."
 
 #LangString Type_Parallel_Installation ${LANG_ENGLISH} "Parallel installation"
 LangString Type_Parallel_Installation ${LANG_RUSSIAN} "Parallel installation"

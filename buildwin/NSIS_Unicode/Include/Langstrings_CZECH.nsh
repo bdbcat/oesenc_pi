@@ -13,8 +13,8 @@ LangString Installer_Running ${LANG_CZECH} "Instalátor již je spuštěn."
 #LangString Uninstaller_Running ${LANG_ENGLISH} "The uninstaller is already running."
 LangString Uninstaller_Running ${LANG_CZECH} "Deinstalátor již je spuštěn."
 
-#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.0 Installation"
-LangString LangDialog_Title ${LANG_CZECH} "Instalace OESENC_PI 0.1.0"
+#LangString LangDialog_Title ${LANG_ENGLISH} "OESENC_PI 0.1.1106 Installation"
+LangString LangDialog_Title ${LANG_CZECH} "Instalace OESENC_PI 0.1.1106"
 
 #LangString LangDialog_Text ${LANG_ENGLISH} "Please select a language:"
 LangString LangDialog_Text ${LANG_CZECH} "Prosím vyberte jazyk:"
@@ -43,8 +43,8 @@ LangString Type_Downgrade ${LANG_CZECH} "Downgrade"
 #LangString Type_Fresh_Installation ${LANG_ENGLISH} "New installation"
 LangString Type_Fresh_Installation ${LANG_CZECH} "Nová instalace"
 
-#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.0"
-LangString Uninstall_Link ${LANG_CZECH} "Odinstalovat OESENC_PI 0.1.0"
+#LangString Uninstall_Link ${LANG_ENGLISH} "Uninstall OESENC_PI 0.1.1106"
+LangString Uninstall_Link ${LANG_CZECH} "Odinstalovat OESENC_PI 0.1.1106"
 
 #LangString Page_TypeInst_Title ${LANG_ENGLISH} "Previous Installations"
 LangString Page_TypeInst_Title ${LANG_CZECH} "Předchozí instalace"
@@ -58,11 +58,11 @@ LangString Page_TypeInst_Subtitle_1 ${LANG_CZECH} "Nalezena nainstalovaná verze
 #LangString Page_TypeInst_Title_Exists ${LANG_ENGLISH} "Version Already Installed"
 LangString Page_TypeInst_Title_Exists ${LANG_CZECH} "Verze již nainstalována"
 
-#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed."
-LangString Page_TypeInst_Subtitle_Exists ${LANG_CZECH} "OESENC_PI 0.1.0 je již nainstalováno."
+#LangString Page_TypeInst_Subtitle_Exists ${LANG_ENGLISH} "OESENC_PI 0.1.1106 is already installed."
+LangString Page_TypeInst_Subtitle_Exists ${LANG_CZECH} "OESENC_PI 0.1.1106 je již nainstalováno."
 
-#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.0 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
-LangString Label_TypeInst_Reinstall_Text ${LANG_CZECH} "OESENC_PI 0.1.0 je již na Vašem systému nainstalováno. Nyní můžete přeinstalovat verzi s původní nastavením. Pokud chcete nainstalovat program s jiným nastavením, zrušte instalaci a odinstalujte napřed původní verzi. Klikněte na Další pro pokračování."
+#LangString Label_TypeInst_Reinstall_Text ${LANG_ENGLISH} "OESENC_PI 0.1.1106 is already installed on your system. You can reinstall the version now using the previous settings. If you wish to install the program with different settings, cancel installation and un-install the existing version first. Click Next to continue."
+LangString Label_TypeInst_Reinstall_Text ${LANG_CZECH} "OESENC_PI 0.1.1106 je již na Vašem systému nainstalováno. Nyní můžete přeinstalovat verzi s původní nastavením. Pokud chcete nainstalovat program s jiným nastavením, zrušte instalaci a odinstalujte napřed původní verzi. Klikněte na Další pro pokračování."
 
 #LangString RB_Reinstall_TypeInst_Text ${LANG_ENGLISH} "Reinstall using previous settings"
 LangString RB_Reinstall_TypeInst_Text ${LANG_CZECH} "Přeinstalovat s původním nastavením"
@@ -99,8 +99,8 @@ LangString Msg_Error_Remove_InstDir ${LANG_CZECH} "Instalační složka$\r$\n'$I
 LangString Msg_Path_Invalid ${LANG_CZECH} "Zadaná cesta je neplatná!$\r$\n$\r$\nZkontrolujte prosím své zadání."
 
 ;added on 2011-06-13
-#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.0"
-LangString ^NameDA ${LANG_CZECH} "OESENC_PI Verze 0.1.0"
+#LangString ^NameDA ${LANG_ENGLISH} "OESENC_PI Version 0.1.1106"
+LangString ^NameDA ${LANG_CZECH} "OESENC_PI Verze 0.1.1106"
 
 ;added on 2011-07-24
 #LangString License_Message ${LANG_ENGLISH} "OpenCPN is software libre. You are encouraged and legally entitled to copy, reinstall, modify, and redistribute this program for yourself and your friends under the terms of the GPL. $\r$\nSmooth sailing!"
@@ -109,8 +109,8 @@ LangString License_Message ${LANG_CZECH} "OpenCPN je svobodný software. Můžet
 #LangString Installer_Unsupported_XP_SP_Version ${LANG_ENGLISH} "Your Windows XP Service Pack version is not supported (it's too old)!$\r$\nYou need at least Windows XP SP3."
 LangString Installer_Unsupported_XP_SP_Version ${LANG_CZECH} "Verze instalovaného service packu Windows XP není podporována (je prříliš stará)!$\r$\nPotřebuješ alespoŇ Windows XP SP3."
 
-#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
-LangString Label_TypeInst_Parallel_Text ${LANG_CZECH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.0."
+#LangString Label_TypeInst_Parallel_Text ${LANG_ENGLISH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.1106."
+LangString Label_TypeInst_Parallel_Text ${LANG_CZECH} "Setup has detected several installed versions of OESENC_PI on your system.  On the next screen, you will be asked to choose the desired install location for OESENC_PI Version 0.1.1106."
 
 #LangString Type_Parallel_Installation ${LANG_ENGLISH} "Parallel installation"
 LangString Type_Parallel_Installation ${LANG_CZECH} "Parallel installation"
