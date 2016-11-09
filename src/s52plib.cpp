@@ -8050,6 +8050,7 @@ bool s52plib::IsTextEnabled(const PlugIn_ViewPort& VPoint)
 {
     PI_S57Obj *po = new PI_S57Obj;
     strncpy(po->FeatureName, "BUAARE", 6);
+    po->iOBJL = -1;
     po->FeatureName[6] = 0;
     po->m_chart_context = 0;
     po->lat_min = VPoint.clat;
@@ -8081,7 +8082,7 @@ bool s52plib::IsTextEnabled(const PlugIn_ViewPort& VPoint)
     PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
-    bool text_on = ctx->bFText_Added;
+    bool text_on = (ctx->bFText_Added == 1 );
     
     PI_PLIBFreeContext(po->S52_Context);
     delete po;
@@ -8148,7 +8149,7 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     if(current_val)
         sounding_on = (NULL != ctx->CSrules);
     else
-        sounding_on = ctx->bCS_Added;
+        sounding_on = ( ctx->bCS_Added == 1);
     
     PI_PLIBFreeContext(po->S52_Context);
     delete po;
