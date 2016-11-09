@@ -8109,6 +8109,7 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     PI_S57Obj *po = new PI_S57Obj;
     strncpy(po->FeatureName, "SOUNDG", 6);
     po->FeatureName[6] = 0;
+    po->iOBJL = -1;
     po->m_chart_context = 0;
     po->lat_min = VPoint.clat;
     po->lat_max = VPoint.clat + .001;
@@ -8118,6 +8119,7 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     po->m_DisplayCat = PI_DISPLAYBASE;
     po->Scamin = 1000000;
     po->npt = 1;
+    po->m_bcategory_mutable = 0;
     
     double *p1 = (double *)malloc(3 * sizeof(double));
     po->geoPtz = p1;
@@ -8135,21 +8137,17 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
  
-    if(current_val)
-        ctx->bCS_Added = true;
-    else
-        ctx->bCS_Added = false;
+    ctx->bCS_Added = false;
     
     wxScreenDC dc;
     PlugIn_ViewPort pivp = VPoint;
+    PI_PLIBSetRenderCaps( PLIB_CAPS_OBJCATMUTATE );
+    
     PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
     bool sounding_on;
     
-    if(current_val)
-        sounding_on = (NULL != ctx->CSrules);
-    else
-        sounding_on = ( ctx->bCS_Added == 1);
+    sounding_on = ( ctx->bCS_Added == 1);
     
     PI_PLIBFreeContext(po->S52_Context);
     delete po;
@@ -8174,8 +8172,8 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
     if(core_config != m_myConfig){
         bool current_bsoundings = m_bShowSoundg;
         LoadS57Config();
-        m_bShowS57Text = IsTextEnabled(VPoint);
         m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
+        m_bShowS57Text = IsTextEnabled(VPoint);
         
         m_myConfig = PI_GetPLIBStateHash();
     }
