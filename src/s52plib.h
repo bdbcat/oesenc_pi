@@ -333,6 +333,7 @@ private:
     
     bool IsTextEnabled(const PlugIn_ViewPort& VPoint);
     bool IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val);
+    bool IsLightsEnabled(const PlugIn_ViewPort& VPoint);
     
     wxString m_plib_file;
 

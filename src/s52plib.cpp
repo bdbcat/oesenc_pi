@@ -8155,6 +8155,65 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     return sounding_on;
 }
 
+/*      TODO
+ *      This is a bit of a hack
+ *      The state of the S57 Light toggle is not stored in the config file until the app exits.
+ *      So, we can't directly detect toggle state changes.
+ *      Toggling the setting does, however, induce a change in the library state hash.  But
+ *      since this is a private hash function, we cannot certainly determine the toggle state.
+ *      So, using the PlugIn ENC chart interface, we try to render a fake item, and see if it actually 
+ *      happened by looking at the resulting context structure for this fake object.
+ * 
+ *      This is pretty ugly, and can go away, and be done better, when the PlugIn API is updated post-O44.
+ */
+
+bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
+{
+    PI_S57Obj *po = new PI_S57Obj;
+    strncpy(po->FeatureName, "LIGHTS", 6);
+    po->FeatureName[6] = 0;
+    po->iOBJL = -1;
+    po->m_chart_context = 0;
+    po->lat_min = VPoint.clat;
+    po->lat_max = VPoint.clat + .001;
+    po->lon_min = VPoint.clon;
+    po->lon_max = VPoint.clon + .001;
+    
+    po->m_DisplayCat = PI_DISPLAYBASE;
+    po->Scamin = 1000000;
+
+    char *pAVS = (char *) malloc( 2 );
+    strcpy( pAVS, "9" );
+    
+    po->attVal = new wxArrayOfS57attVal;
+    S57attVal *pattValTmp = new S57attVal;
+    pattValTmp->valType = OGR_STR;
+    pattValTmp->value = pAVS;
+    po->attVal->Add( pattValTmp );
+    
+    po->att_array = (char *)malloc(6);
+    strncpy(po->att_array, "CATLIT", 6);
+    po->n_attr = 1;
+    
+    
+    PI_PLIBSetContext(po);
+    S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
+    
+    ctx->bCS_Added = false;
+    
+    wxScreenDC dc;
+    PlugIn_ViewPort pivp = VPoint;
+    
+    PI_PLIBRenderObjectToDC( &dc, po, &pivp );
+    
+    bool lights_on = ( ctx->bCS_Added == 1);
+    
+    PI_PLIBFreeContext(po->S52_Context);
+    delete po;
+    
+    return lights_on;
+}
+
 
 
 //    Do all those things necessary to prepare for a new rendering
@@ -8174,6 +8233,27 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         LoadS57Config();
         m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
         m_bShowS57Text = IsTextEnabled(VPoint);
+
+        // Detect and manage "LIGHTS" toggle
+        OBJLElement *pOLE = NULL;
+        for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+            pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+            if( !strncmp( pOLE->OBJLName, "LIGHTS", 6 ) ) {
+                break;
+            }
+            pOLE = NULL;
+        }
+            
+        bool bshow_lights = IsLightsEnabled(VPoint);
+        
+        if(!bshow_lights)                     // On, going off
+            AddObjNoshow("LIGHTS");
+        else{                                   // Off, going on
+            if(pOLE)
+                pOLE->nViz = 1;
+            RemoveObjNoshow("LIGHTS");
+        }
+                
         
         m_myConfig = PI_GetPLIBStateHash();
     }
