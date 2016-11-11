@@ -3430,13 +3430,10 @@ void eSENCChart::UpdateLUPsOnStateChange( void )
 
 int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKey )
 {
-    if(!validateUserKey( FullPath )){
-        return ERROR_SIGNATURE_FAILURE;
-    }
     
     int ret_val = 0;                    // default is OK
     
-    Osenc sencfile;
+    Osenc *sencfile = new Osenc();;
     
     // Set up the containers for ingestion results.
     // These will be populated by Osenc, and owned by the caller (this).
@@ -3445,23 +3442,40 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     VC_ElementVector VCs;
     
     
-//     if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
-//         g_UserKey = GetUserKey( LEGEND_FIRST, true );
-//     }
+   
+    sencfile->setRegistrarMgr( pi_poRegistrarMgr );
+    sencfile->setKey(userKey);
     
-    sencfile.setRegistrarMgr( pi_poRegistrarMgr );
-    sencfile.setKey(userKey);
-    
-    int srv = sencfile.ingest200(FullPath, &Objects, &VEs, &VCs);
+    int srv = sencfile->ingest200(FullPath, &Objects, &VEs, &VCs);
     
     if(srv != SENC_NO_ERROR){
-        wxLogMessage( sencfile.getLastError() );
-        //TODO  Clean up here, or massive leaks result
-        return srv;
+        if(( ERROR_SIGNATURE_FAILURE == srv )  || ( ERROR_SENC_CORRUPT == srv ) ){
+            
+            // Give user one chance to fix the key, then bail out..
+            if(!validateUserKey( FullPath )){
+                return ERROR_SIGNATURE_FAILURE;
+            }
+            else{
+                delete sencfile;
+                Objects.clear();
+                VEs.clear();
+                VCs.clear();
+                sencfile = new Osenc();
+                sencfile->setRegistrarMgr( pi_poRegistrarMgr );
+                sencfile->setKey(g_UserKey);            // the new key
+                
+                int srvb = sencfile->ingest200(FullPath, &Objects, &VEs, &VCs);
+                if(srvb != SENC_NO_ERROR){
+                    wxLogMessage( sencfile->getLastError() );
+                    delete sencfile;
+                    return srvb;
+                }
+            }
+        }
     }
     
     //  Get the cell Ref point
-    Extent ext = sencfile.getReadExtent();
+    Extent ext = sencfile->getReadExtent();
     
     m_FullExtent.ELON = ext.ELON;
     m_FullExtent.WLON = ext.WLON;
@@ -3642,12 +3656,12 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     //   Decide on pub date to show
     
     wxDateTime d000;
-    d000.ParseFormat( sencfile.getBaseDate(), _T("%Y%m%d") );
+    d000.ParseFormat( sencfile->getBaseDate(), _T("%Y%m%d") );
     if( !d000.IsValid() )
         d000.ParseFormat( _T("20000101"), _T("%Y%m%d") );
     
     wxDateTime updt;
-    updt.ParseFormat( sencfile.getUpdateDate(), _T("%Y%m%d") );
+    updt.ParseFormat( sencfile->getUpdateDate(), _T("%Y%m%d") );
     if( !updt.IsValid() )
         updt.ParseFormat( _T("20000101"), _T("%Y%m%d") );
     
@@ -3660,7 +3674,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     
     //    Set some base class values
         // Scale
-        m_Chart_Scale = sencfile.getSENCReadScale();
+        m_Chart_Scale = sencfile->getSENCReadScale();
         
        
         
@@ -3671,18 +3685,18 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         upd.ResetTime();
         m_EdDate = upd;
         
-        m_SE = sencfile.getSENCReadBaseEdition();
+        m_SE = sencfile->getSENCReadBaseEdition();
         
         wxString supdate;
-        supdate.Printf(_T(" / %d"), sencfile.getSENCReadLastUpdate());
+        supdate.Printf(_T(" / %d"), sencfile->getSENCReadLastUpdate());
         m_SE += supdate;
         
         
         m_datum_str = _T("WGS84");
         
         m_SoundingsDatum = _T("MEAN LOWER LOW WATER");
-        m_ID = sencfile.getReadID();
-        m_Name = sencfile.getReadName();
+        m_ID = sencfile->getReadID();
+        m_Name = sencfile->getReadName();
         
         
         // Validate hash maps....

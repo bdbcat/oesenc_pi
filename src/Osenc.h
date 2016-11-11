@@ -503,6 +503,7 @@ struct fifo_msg {
 #define CMD_READ_ESENC          0
 #define CMD_TEST_AVAIL          1
 #define CMD_EXIT                2
+#define CMD_READ_ESENC_HDR      3
 
 //--------------------------------------------------------------------------
 //      Osenc_instream definition

@@ -129,8 +129,10 @@ void Osenc_instream::Init()
 
 void Osenc_instream::Close()
 {
-    if(-1 != privatefifo)
+    if(-1 != privatefifo){
+        //printf("           Close private fifo: %s \n", privatefifo_name);
         close(privatefifo);
+    }
     
     unlink(privatefifo_name);
     
@@ -193,6 +195,12 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
     if(crypto_key.Length()){
         fifo_msg msg;
 
+        wxCharBuffer buf = senc_file_name.ToUTF8();
+        if(buf.data()) 
+            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
+        
+        //printf("\n\n            Opening senc: %s\n", msg.senc_name);
+        
         // Create a unique name for the private (i.e. data) pipe, valid for this session
         wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
         wxCharBuffer bufn = tmp_file.ToUTF8();
@@ -200,7 +208,10 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
             strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
         
         // Create the private FIFO
-        mkfifo(privatefifo_name, 0666);
+        if(!mkfifo(privatefifo_name, 0666))
+            int yyp = 4;
+        
+        //printf("           Open private fifo: %s\n", privatefifo_name);
         
         // Open the well known public FIFO for writing
         if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
@@ -211,9 +222,6 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         //  Send the command over the public pipe
         strncpy(msg.fifo_name, privatefifo_name, sizeof(privatefifo_name));
             
-        wxCharBuffer buf = senc_file_name.ToUTF8();
-        if(buf.data()) 
-            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
         
         buf = crypto_key.ToUTF8();
         if(buf.data()) 
@@ -246,6 +254,8 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
     //    bool blk = fcntl(privatefifo, F_GETFL) & O_NONBLOCK;
         
         if( -1 != privatefifo){
+//            printf("           Read private fifo: %s, %d bytes\n", privatefifo_name, size);
+            
             int remains = size;
             char *bufRun = (char *)buffer;
             int totalBytesRead = 0;
@@ -259,7 +269,7 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
 
                 // Server may not have opened the Write end of the FIFO yet
                 if(bytesRead == 0){
-    //                printf("miss %d %d %d\n", nLoop, bytes_to_read, size);
+//                    printf("miss %d %d %d\n", nLoop, bytes_to_read, size);
                     nLoop --;
                     wxMilliSleep(1);
                 }
@@ -610,8 +620,14 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
     
     //  Bad read?
     if(!fpx.IsOk()){
+        printf("verifySENC E2\n");
         wxLogMessage(_T("verifySENC E2"));
-        return ERROR_SENC_CORRUPT;        
+        
+        // Server may be slow, so try the read again
+        fpx.Read(&first_record, sizeof(OSENC_Record_Base));
+        
+        if(!fpx.IsOk())
+            return ERROR_SENC_CORRUPT;        
     }
     
     if(( first_record.record_type == HEADER_SENC_VERSION ) && (first_record.record_length < 16) ){
@@ -720,10 +736,10 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
  */   
     Osenc_instream fpx;
     
-    if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
+    if( !fpx.Open(CMD_READ_ESENC_HDR, senc_file_name, m_key) ){
         wxLogMessage(_T("ingestHeader Open failed first"));
         wxMilliSleep(100);
-        if( !fpx.Open(CMD_READ_ESENC, senc_file_name, m_key) ){
+        if( !fpx.Open(CMD_READ_ESENC_HDR, senc_file_name, m_key) ){
             wxLogMessage(_T("ingestHeader Open failed second"));
             return ERROR_SENCFILE_NOT_FOUND;
         }
