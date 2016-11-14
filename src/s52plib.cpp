@@ -34,7 +34,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-//#include "dychart.h"
 #include "georef.h"
 #include "viewport.h"
 
@@ -105,6 +104,8 @@ WX_DEFINE_LIST( TextObjList );
 //    Implement all arrays
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(ArrayOfNoshow);
+
+
 
 //-----------------------------------------------------------------------------
 //      Comparison Function for LUPArray sorting
@@ -287,6 +288,8 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     GenerateStateHash();
 
     HPGL = new RenderFromHPGL( this );
+    
+    m_FontList = new PI_OCPNwxFontList();
 
 }
 
@@ -313,6 +316,10 @@ s52plib::~s52plib()
     ChartSymbols::DeleteGlobals();
 
     delete HPGL;
+    
+    m_FontList->FreeAll();
+    delete m_FontList;
+    
 }
 
 //      Various static helper methods
@@ -2091,7 +2098,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
                 // In no case should font size be less than 10, since it becomes unreadable
                 fontSize = wxMax(10, fontSize);
 
-                text->pFont = wxTheFontList->FindOrCreateFont( fontSize, wxFONTFAMILY_SWISS,
+                text->pFont = m_FontList->FindOrCreateFont( fontSize, wxFONTFAMILY_DEFAULT,
                         templateFont->GetStyle(), fontweight, false, templateFont->GetFaceName() );
             }
         }
@@ -8706,3 +8713,102 @@ bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, f
 #endif    
     return true;
 }
+
+
+bool PI_OCPNwxFontList::isSame(wxFont *font, int pointSize, wxFontFamily family,
+                            wxFontStyle style,
+                            wxFontWeight weight,
+                            bool underline,
+                            const wxString& facename,
+                            wxFontEncoding encoding)
+{
+    if (
+        font->GetPointSize () == pointSize &&
+        font->GetStyle () == style &&
+        font->GetWeight () == weight &&
+        font->GetUnderlined () == underline )
+    {
+        bool same;
+        
+        // empty facename matches anything at all: this is bad because
+        // depending on which fonts are already created, we might get back
+        // a different font if we create it with empty facename, but it is
+        // still better than never matching anything in the cache at all
+        // in this case
+        if ( !facename.empty() )
+        {
+            const wxString& fontFace = font->GetFaceName();
+            
+            // empty facename matches everything
+            same = !fontFace || fontFace == facename;
+        }
+        else 
+        {
+            same = font->GetFamily() == family;
+        }
+        if ( same && (encoding != wxFONTENCODING_DEFAULT) )
+        {
+            // have to match the encoding too
+            same = font->GetEncoding() == encoding;
+        }
+        return same;
+    }
+    return false;
+}
+
+wxFont *PI_OCPNwxFontList::FindOrCreateFont(int pointSize,
+                                         wxFontFamily family,
+                                         wxFontStyle style,
+                                         wxFontWeight weight,
+                                         bool underline,
+                                         const wxString& facename,
+                                         wxFontEncoding encoding)
+{
+    // from wx source code
+    // In all ports but wxOSX, the effective family of a font created using
+    // wxFONTFAMILY_DEFAULT is wxFONTFAMILY_SWISS so this is what we need to
+    // use for comparison.
+    //
+    // In wxOSX the original wxFONTFAMILY_DEFAULT seems to be kept and it uses
+    // a different font than wxFONTFAMILY_SWISS anyhow so we just preserve it.
+    #ifndef __WXOSX__
+    if ( family == wxFONTFAMILY_DEFAULT )
+        family = wxFONTFAMILY_SWISS;
+    #endif // !__WXOSX__
+        
+        wxFont *font;
+        wxList::compatibility_iterator node;
+        for (node = list.GetFirst(); node; node = node->GetNext())
+        {
+            font = (wxFont *)node->GetData();
+            if (isSame(font, pointSize, family, style, weight, underline, facename, encoding))
+                return font;
+        }
+        
+        // font not found, create the new one
+        font = NULL;
+        wxFont fontTmp(pointSize, family, style, weight, underline, facename, encoding);
+        if (fontTmp.IsOk())
+        {
+            font = new wxFont(fontTmp);
+            list.Append(font);
+            
+            // double check the font really roundtrip
+            //  Removed after verification.
+            //wxASSERT(isSame(font, pointSize, family, style, weight, underline, facename, encoding));
+        }
+        
+        return font;
+}
+
+void PI_OCPNwxFontList::FreeAll( void )
+{
+    wxFont *font;
+    wxList::compatibility_iterator node;
+    for (node = list.GetFirst(); node; node = node->GetNext())
+    {
+        font = (wxFont *)node->GetData();
+        delete font;
+    }
+}
+

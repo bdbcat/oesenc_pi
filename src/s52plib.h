@@ -84,6 +84,28 @@ public:
 
 WX_DECLARE_OBJARRAY(noshow_element, ArrayOfNoshow);
 
+
+class  PI_OCPNwxFontList: public wxGDIObjListBase
+{
+public:
+    wxFont *FindOrCreateFont(int pointSize,
+                             wxFontFamily family,
+                             wxFontStyle style,
+                             wxFontWeight weight,
+                             bool underline = false,
+                             const wxString& face = wxEmptyString,
+                             wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
+    void FreeAll( void );
+    
+private:
+    bool isSame(wxFont *font, int pointSize, wxFontFamily family,
+                wxFontStyle style,
+                wxFontWeight weight,
+                bool underline,
+                const wxString& facename,
+                wxFontEncoding encoding);
+};
+
 //-----------------------------------------------------------------------------
 //      LUP Array container, and friends
 //-----------------------------------------------------------------------------
@@ -371,6 +393,7 @@ private:
     RenderFromHPGL* HPGL;
 
     TexFont *m_txf;
+    PI_OCPNwxFontList *m_FontList;
     
     bool m_benableGLLS;
     DisCat m_nDisplayCategory;
