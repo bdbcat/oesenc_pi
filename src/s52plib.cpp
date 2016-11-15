@@ -2899,6 +2899,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         priority_current = rzRules->obj->m_DPRI;
     
     line_segment_element *ls_list = rzRules->obj->m_ls_list;
+/*
     while( ls_list){
         
         if( (ls_list->priority == priority_current) )   
@@ -2934,7 +2935,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     
     if(!bdraw)
         return 0;
-        
+*/
     char *str = (char*) rules->INSTstr;
     S52color *c = getColor( str + 7 ); // Colour
     int w = atoi( str + 5 ); // Width
@@ -3025,15 +3026,16 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                     
             }
             else{
-                if((BBView.GetMinLat() < ls_list->pcs->cs_lat_avg && BBView.GetMaxLat() > ls_list->pcs->cs_lat_avg) &&
-                    ((BBView.GetMinLon() <= ls_list->pcs->cs_lon_avg && BBView.GetMaxLon() >= ls_list->pcs->cs_lon_avg) ||
-                    (BBView.GetMaxLon() >=  180 && BBView.GetMaxLon() - 360 > ls_list->pcs->cs_lon_avg) ||
-                    (BBView.GetMinLon() <= -180 && BBView.GetMinLon() + 360 < ls_list->pcs->cs_lon_avg))) {
+//                 if((BBView.GetMinLat() < ls_list->pcs->cs_lat_avg && BBView.GetMaxLat() > ls_list->pcs->cs_lat_avg) &&
+//                     ((BBView.GetMinLon() <= ls_list->pcs->cs_lon_avg && BBView.GetMaxLon() >= ls_list->pcs->cs_lon_avg) ||
+//                     (BBView.GetMaxLon() >=  180 && BBView.GetMaxLon() - 360 > ls_list->pcs->cs_lon_avg) ||
+//                     (BBView.GetMinLon() <= -180 && BBView.GetMinLon() + 360 < ls_list->pcs->cs_lon_avg)))
+                {
                     // render the segment
                         b_drawit = true;
                         seg_vbo_offset = ls_list->pcs->vbo_offset;
                         point_count = 2;
-                    }
+                }
             }
             
             
