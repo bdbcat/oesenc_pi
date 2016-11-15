@@ -1356,7 +1356,7 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
     
     ps52plib->PrepareForRender(VPoint);
     
-    if( m_plib_state_hash != ps52plib->GetStateHash() ) {
+    if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
         UpdateLUPs( this );                               // and update the LUPs
         ClearRenderedTextCache();                       // and reset the text renderer,
@@ -1364,7 +1364,9 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
         ps52plib->FlushSymbolCaches();
+        m_last_vp.bValid = 0;
         
+        m_plib_state_hash = PI_GetPLIBStateHash();
     }
     
     if( VPoint.view_scale_ppm != m_last_vp.view_scale_ppm ) {
@@ -1526,6 +1528,9 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
     SetLinePriorities();
 
+    //        Clear the text declutter list
+    ps52plib->ClearTextList();
+    
     //    How many rectangles in the Region?
     int n_rect = 0;
     wxRegionIterator clipit( Region );
@@ -4972,7 +4977,7 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                             }
                                             
                                             //      Calculate the desired rectangle in the last cached image space
-                                            if( 0/*m_last_vp.IsValid()*/ ) {
+                                            if( m_last_vp.bValid ) {
                                                 easting_ul = m_easting_vp_center - ( ( VPoint.pix_width / 2 ) / m_view_scale_ppm );
                                                 northing_ul = m_northing_vp_center + ( ( VPoint.pix_height / 2 ) / m_view_scale_ppm );
                                                 easting_lr = easting_ul + ( VPoint.pix_width / m_view_scale_ppm );
@@ -5049,12 +5054,12 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                                 wxBitmap *pDIBNew = new wxBitmap( VPoint.pix_width, VPoint.pix_height, BPP );
                                                 dc_new.SelectObject( *pDIBNew );
                                                 
-                                                //        printf("reuse blit %d %d %d %d %d %d\n",desx, desy, wu, hu,  srcx, srcy);
+                                                //printf("reuse blit %d %d %d %d %d %d\n",desx, desy, wu, hu,  srcx, srcy);
                                                 dc_new.Blit( desx, desy, wu, hu, (wxDC *) &dc_last, srcx, srcy, wxCOPY );
                                                 
                                                 //        Ask the plib to adjust the persistent text rectangle list for this canvas shift
                                                 //        This ensures that, on pans, the list stays in registration with the new text renders to come
-                                                //        ps52plib->AdjustTextList( desx - srcx, desy - srcy, VPoint.pix_width, VPoint.pix_height );
+                                                        ps52plib->AdjustTextList( desx - srcx, desy - srcy, VPoint.pix_width, VPoint.pix_height );
                                                 
                                                 dc_new.SelectObject( wxNullBitmap );
                                                 dc_last.SelectObject( wxNullBitmap );
@@ -5065,7 +5070,6 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                                 //              OK, now have the re-useable section in place
                                                 //              Next, build the new sections
                                                 
-//                                                pDIB->SelectIntoDC( dc );
                                                 dc.SelectObject( *pDIB );
                                                 wxRegion rgn_delta( 0, 0, VPoint.pix_width, VPoint.pix_height );
                                                 wxRegion rgn_reused( desx, desy, wu, hu );
@@ -5108,7 +5112,7 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                                     //            temp_vp.GetBBox().EnLarge( margin );
                                                     
                                                     //      And Render it new piece on the target dc
-                                                    //     printf("New Render, rendering %d %d %d %d \n", rect.x, rect.y, rect.width, rect.height);
+                                                    //printf("New Render, rendering %d %d %d %d \n", rect.x, rect.y, rect.width, rect.height);
                                                     
                                                     DCRenderRect( dc, temp_vp, &rect );
                                                     
@@ -5126,15 +5130,13 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                             
                                             else if( bNewVP || ( NULL == pDIB ) ) {
                                                 delete pDIB;
-//                                                pDIB = new PixelCache( VPoint.pix_width, VPoint.pix_height, BPP );     // destination
                                                 pDIB = new wxBitmap( VPoint.pix_width, VPoint.pix_height, BPP );     // destination
                                                 
                                                 wxRect full_rect( 0, 0, VPoint.pix_width, VPoint.pix_height );
-//                                                pDIB->SelectIntoDC( dc );
                                                 dc.SelectObject( *pDIB );
                                                 
                                                 //        Clear the text declutter list
-                                                //        ps52plib->ClearTextList();
+                                                        ps52plib->ClearTextList();
                                                 
                                                 DCRenderRect( dc, VPoint, &full_rect );
                                                 
@@ -5161,6 +5163,9 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
     ObjRazRules *crnt;
     
     PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
+    
+    ViewPort cvp = CreateCompatibleViewport( vp );
+    cvp.GetBBox().Set(vp.lat_min, vp.lon_min, vp.lat_max, vp.lon_max);
     
     
     render_canvas_parms pb_spec;
@@ -5227,7 +5232,7 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     crnt = top;
                     top = top->next;               // next object
                     crnt->sm_transform_parms = &vp_transform;
-                    ps52plib->RenderAreaToDC( &dcinput, crnt, &m_cvp, &pb_spec );
+                    ps52plib->RenderAreaToDC( &dcinput, crnt, &cvp, &pb_spec );
 
                 }
     }
@@ -5275,12 +5280,15 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
     ObjRazRules *crnt;
     //PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
     
+    ViewPort cvp = CreateCompatibleViewport( vp );
+    cvp.GetBBox().Set(vp.lat_min, vp.lon_min, vp.lat_max, vp.lon_max);
+    
     for( i = 0; i < PI_PRIO_NUM; ++i ) {
         //      Set up a Clipper for Lines
         wxDCClipper *pdcc = NULL;
         if( rect ) {
-            //            wxRect nr = *rect;
-            //         pdcc = new wxDCClipper(dcinput, nr);
+                        wxRect nr = *rect;
+                     pdcc = new wxDCClipper(dcinput, nr);
         }
         
         if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
@@ -5291,7 +5299,7 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     crnt = top;
                     top = top->next;               // next object
                     crnt->sm_transform_parms = &vp_transform;
-                    ps52plib->RenderObjectToDC( &dcinput, crnt, &m_cvp );
+                    ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
                 }
                 
                 top = razRules[i][2];           //LINES
@@ -5300,7 +5308,7 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     top = top->next;
                      
                     crnt->sm_transform_parms = &vp_transform;
-                    ps52plib->RenderObjectToDC( &dcinput, crnt, &m_cvp );
+                    ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
                 }
                 
                 if( PI_GetPLIBSymbolStyle() == PI_SIMPLIFIED )
@@ -5312,7 +5320,7 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                             crnt = top;
                             top = top->next;
                             crnt->sm_transform_parms = &vp_transform;
-                            ps52plib->RenderObjectToDC( &dcinput, crnt, &m_cvp );
+                            ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
                         }
                         
                         //      Destroy Clipper
@@ -8888,8 +8896,8 @@ bool S57Obj::SetPointGeometry( double lat, double lon, double ref_lat, double re
     m_lon = lon;
     m_lat = lat;
     
-    //  Set initial BoundingBox limits fairly large...
-    BBObj.Set(m_lat - .25, m_lon - .25, m_lat + .25, m_lon + .25);
+    //  Set initial Point BoundingBox limits quite small...
+    BBObj.Set(m_lat - .001, m_lon - .001, m_lat + .001, m_lon + .001);
     bBBObj_valid = false;
     
     //  Calculate SM from chart common reference point

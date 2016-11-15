@@ -2109,9 +2109,24 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
 
         wxRect rect;
 
-        bool bwas_drawn = RenderText( m_pdc, text, r.x, r.y, &rect, rzRules->obj, m_bDeClutterText,
-                vp );
+        bool bwas_drawn = RenderText( m_pdc, text, r.x, r.y, &rect, rzRules->obj, m_bDeClutterText, vp );
 
+        //  Update the object Bounding box
+        //  so that subsequent drawing operations will redraw the item fully
+        //  and so that cursor hit testing includes both the text and the object
+        
+        //            if ( rzRules->obj->Primitive_type == GEO_POINT )
+        {
+            double latmin, lonmin, latmax, lonmax, extent = 0;
+            
+            GetPixPointSingleNoRotate( rect.GetX(), rect.GetY() + rect.GetHeight(), &latmin, &lonmin, vp );
+            GetPixPointSingleNoRotate( rect.GetX() + rect.GetWidth(), rect.GetY(), &latmax, &lonmax, vp );
+            LLBBox bbtext;
+            bbtext.Set( latmin, lonmin, latmax, lonmax );
+            
+            rzRules->obj->BBObj.Expand( bbtext );
+        }
+        
         //    If this is an un-cached text object render, then do not update the text object in any way
         if( b_free_text ) {
             delete text;
@@ -2137,22 +2152,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
             }
         }
 
-        //  Update the object Bounding box
-        //  so that subsequent drawing operations will redraw the item fully
-        //  and so that cursor hit testing includes both the text and the object
-
-//            if ( rzRules->obj->Primitive_type == GEO_POINT )
-        {
-            double latmin, lonmin, latmax, lonmax, extent = 0;
-
-            GetPixPointSingleNoRotate( rect.GetX(), rect.GetY() + rect.GetHeight(), &latmin, &lonmin, vp );
-            GetPixPointSingleNoRotate( rect.GetX() + rect.GetWidth(), rect.GetY(), &latmax, &lonmax, vp );
-            LLBBox bbtext;
-            bbtext.Set( latmin, lonmin, latmax, lonmax );
-
-            rzRules->obj->BBObj.Expand( bbtext );
-        }
-    }
+     }
 
     return 1;
 }
@@ -2226,7 +2226,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         xscale = wxMin(xscale, 1.0);
         xscale = wxMax(.4, xscale);
         
-        printf("scaled length: %g   xscale: %g\n", scaled_length, xscale);
+//        printf("scaled length: %g   xscale: %g\n", scaled_length, xscale);
         
         
         fsf *= xscale;
@@ -4985,12 +4985,12 @@ int s52plib::RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, Vi
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
- //   if(rzRules->obj->Index == 534)
- //       int yyp = 0;
+//    if(rzRules->obj->Index == 778)
+//        int yyp = 0;
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
-    
+
     if( IsObjNoshow( rzRules->LUP->OBCL) )
         return 0;
         
