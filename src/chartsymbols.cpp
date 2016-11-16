@@ -61,6 +61,15 @@ int ColorTableIndex;
 WX_DECLARE_STRING_HASH_MAP( wxRect, symbolGraphicsHashMap );
 
 symbolGraphicsHashMap* pi_symbolGraphicLocations;
+
+//  Some refined HPGL vector rendering strings allowing direct OpenGL rendering without pre-tesselation
+
+char fix3501[] = {"SPA;ST3;PU1944,1950;PM0;PD2245,1500;PD2553,1950;PD1944,1950;PM2;FP;\
+PU2096,1940;PM0;PD2096,2566;PD2401,2566;PD2401,1940;PD2096,1940;PM2;FP;\
+PU1944,2546;PM0;PD2245,2999;PD2553,2546;PD1944,2546;PM2;FP;\
+SPA;SW1;PU2096,1950;PD1944,1950;PD2245,1500;PD2553,1950;PD2401,1950;PD2401,2546;PD2563,2546;PD2252,2999;PD1947,2546;PD2096,2546;PD2096,1950;\
+"};
+
 //--------------------------------------------------------------------------------------
 
 ChartSymbols::ChartSymbols( void )
@@ -681,7 +690,12 @@ void ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
                         goto nextVector;
                     }
                     if( vectornodeType == _T("HPGL") ) {
-                        symbol.HPGL = wxString( vectorNodes->GetText(), wxConvUTF8 );
+                        
+                        // Substitute some vector rendering strings
+                        if(symbol.RCID == 3501)
+                            symbol.HPGL = wxString( fix3501, wxConvUTF8 );
+                        else
+                            symbol.HPGL = wxString( vectorNodes->GetText(), wxConvUTF8 );
                     }
                     nextVector: vectorNodes = vectorNodes->NextSiblingElement();
                 }
