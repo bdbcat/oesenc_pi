@@ -8114,7 +8114,7 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     
     po->m_DisplayCat = PI_DISPLAYBASE;
     po->Scamin = 1000000;
-    po->npt = 1;
+    po->npt = 0;        // Causes all rendering skip, as desired
     po->m_bcategory_mutable = 0;
     
     double *p1 = (double *)malloc(3 * sizeof(double));
@@ -8127,8 +8127,8 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     double *p2 = (double *)malloc(2 * sizeof(double));
     po->geoPtMulti = p2;
     ptz = p2;
-    *ptz++ = VPoint.clon;
-    *ptz = VPoint.clat;
+    *ptz++ = 0;//VPoint.clon;
+    *ptz = 88; //VPoint.clat;
     
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
