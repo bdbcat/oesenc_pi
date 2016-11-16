@@ -3486,28 +3486,15 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                      direction = -1;
                 else{
                     // next segment is discontinuous, so render what is available
-//                    if(ndraw++ < 2)
-                    {
-                        draw_lc_poly( m_pdc, color, w, ptp, nls, sym_len, sym_factor, rules->razRule, vp );
-//                        printf("DrawDisc\n\n");
-                    }
-//                     else{
-//                         printf("DoneDrawDisc\n\n");
-//                         wxColour color( 0,0,0 );
-//                         
-//                         draw_lc_poly( m_pdc, color, w, ptp, nls, sym_len, sym_factor, rules->razRule, vp );
-//                     }
-                    
+                     draw_lc_poly( m_pdc, color, w, ptp, nls, sym_len, sym_factor, rules->razRule, vp );
+                     
                      nls = 0;
                      index = 0;
                  }
-                    
-                
             }
             else{
                 // no more segments, so render what is available
-//                draw_lc_poly( m_pdc, color, w, ptp, nls, sym_len, sym_factor, rules->razRule, vp );
-//                printf("DrawNormal\n\n");
+                draw_lc_poly( m_pdc, color, w, ptp, nls, sym_len, sym_factor, rules->razRule, vp );
             }
             
             ls = ls->next;
