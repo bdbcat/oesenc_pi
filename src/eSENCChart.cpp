@@ -3492,7 +3492,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     m_ref_lon = (ext.ELON + ext.WLON) / 2.;
     
     //  Process the Edge feature arrays.
-    
+   
     //    Create a hash map of VE_Element pointers as a chart class member
     int n_ve_elements = VEs.size();
     
@@ -7063,7 +7063,8 @@ void eSENCChart::AssembleLineGeometry( void )
     // are now in the VBO buffer
     for( VC_Hash::iterator itc = m_vc_hash.begin(); itc != m_vc_hash.end(); ++itc ) {
         VC_Element *pcs = itc->second;
-        free(pcs->pPoint);
+        if(pcs)
+            free(pcs->pPoint);
     }
     m_vc_hash.clear();
     
