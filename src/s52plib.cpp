@@ -2127,11 +2127,6 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
             rzRules->obj->BBObj.Expand( bbtext );
         }
         
-        //    If this is an un-cached text object render, then do not update the text object in any way
-        if( b_free_text ) {
-            delete text;
-            return 1;
-        }
 
         text->rText = rect;
 
@@ -2147,11 +2142,19 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
                         break;
                     }
                 }
-                if( !b_found )
+                if( !b_found ){
+                    b_free_text = false;                // override, we need to preserve the instance for the list
                     m_textObjList.Append( text );
+                }
             }
         }
 
+        //    If this is an un-cached text object render, and not needed for decluttering, then we can free it
+        //TODO  This will result in memory growth, since the new, unmatched temporary text objects will be appended to the declutter list each time they are rendered.
+        if( b_free_text ) {
+            delete text;
+        }
+        
      }
 
     return 1;
@@ -4974,8 +4977,8 @@ int s52plib::RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, Vi
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
-//    if(rzRules->obj->Index == 778)
-//        int yyp = 0;
+    if(rzRules->obj->Index == 2216)
+        int yyp = 0;
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
@@ -5318,24 +5321,26 @@ int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
         
         int *index_run = rzRules->obj->m_lsindex_array;
 
-        for( int iseg = 0; iseg < rzRules->obj->m_n_lsindex; iseg++ ) {
-            //  Get first connected node
-            int inode = *index_run++;
+        if(index_run){
+            for( int iseg = 0; iseg < rzRules->obj->m_n_lsindex; iseg++ ) {
+                //  Get first connected node
+                int inode = *index_run++;
 
-            VE_Element *pedge = 0;
-            //  Get the edge
-            int enode = *index_run++;
-            if(enode)
-                pedge = (*edge_hash)[enode];
+                VE_Element *pedge = 0;
+                //  Get the edge
+                int enode = *index_run++;
+                if(enode)
+                    pedge = (*edge_hash)[enode];
 
-            //    Set priority
-            if(pedge){
-                pedge->max_priority = npriority;
+                //    Set priority
+                if(pedge){
+                    pedge->max_priority = npriority;
+                }
+
+                //  Get last connected node
+                inode = *index_run++;
+
             }
-
-            //  Get last connected node
-            inode = *index_run++;
-
         }
     }
 
@@ -7309,8 +7314,8 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 
 int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp )
 {
-//    if(!strncmp("DEPARE", rzRules->obj->FeatureName, 6))
-//        return 0;
+    if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
+        int yyp = 0;
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
@@ -7668,9 +7673,11 @@ int s52plib::RenderToBufferAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp,
     return 1;
 }
 
-int s52plib::RenderAreaToDC( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp,
-        render_canvas_parms *pb_spec )
+int s52plib::RenderAreaToDC( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp, render_canvas_parms *pb_spec )
 {
+    if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
+        int yyp = 0;
+    
 
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
