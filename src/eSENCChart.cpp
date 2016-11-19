@@ -5223,10 +5223,10 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
     
     //      Render the areas quickly
     for( i = 0; i < PI_PRIO_NUM; ++i ) {
-//        TODO if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
-//            top = razRules[i][4]; // Area Symbolized Boundaries
-//            else
-                top = razRules[i][3];           // Area Plain Boundaries
+        if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
+            top = razRules[i][4]; // Area Symbolized Boundaries
+        else
+            top = razRules[i][3];           // Area Plain Boundaries
                 
                 while( top != NULL ) {
                     crnt = top;
