@@ -2150,7 +2150,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
         }
 
         //    If this is an un-cached text object render, and not needed for decluttering, then we can free it
-        //TODO  This will result in memory growth, since the new, unmatched temporary text objects will be appended to the declutter list each time they are rendered.
+        //fixme//TODO  This will result in memory growth, since the new, unmatched temporary text objects will be appended to the declutter list each time they are rendered.
         if( b_free_text ) {
             delete text;
         }

@@ -84,6 +84,7 @@ extern bool             g_bSENCutil_valid;
  
 extern wxString         g_UserKey;
 extern bool             g_PIbDebugS57;
+extern bool             g_bEULA_OK;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
 
@@ -129,6 +130,7 @@ extern void initLibraries(void);
 extern bool validate_SENC_server( void );
 //extern wxString GetUserKey( int legendID, bool bforceNew);
 extern bool validateUserKey( wxString sencFileName);
+extern bool CheckEULA( void );
 
 // ----------------------------------------------------------------------------
 // Random Prototypes
@@ -475,6 +477,8 @@ IMPLEMENT_DYNAMIC_CLASS(eSENCChart, PlugInChartBase)
 
 eSENCChart::eSENCChart()
 {
+    CheckEULA();
+    
     m_senc_dir =  g_SENCdir;
     
     // Create ATON arrays, needed by S52PLIB
@@ -830,6 +834,10 @@ int eSENCChart::Init( const wxString& name, int init_flags )
 {
 //    if(++nInit < 3)
 //        return PI_INIT_FAIL_NOERROR;
+    
+    if(!CheckEULA()){
+        return PI_INIT_FAIL_REMOVE;
+    }
     
     if(g_Disable){
         return PI_INIT_FAIL_REMOVE;

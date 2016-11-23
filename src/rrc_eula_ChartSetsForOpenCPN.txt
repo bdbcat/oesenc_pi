@@ -1,0 +1,203 @@
+﻿End User License Agreement
+
+
+This is an agreement between
+
+the End User, you, the original purchaser of this Chart Set for OpenCPN
+and
+Renate Rosner Consult S.L., Av. Carl Friedrich Gauss, 11, 08860 Castelldefels, Spain.
+
+By installing this Chart Set for OpenCPN you are deemed to have agreed to the terms of this license.
+In case you do not agree with the terms of this license you are obliged to deinstall the chart set as you are not allowed to use it.
+
+1. Purpose and sources of the Chart Sets for OpenCPN
+
+These installable chart set has been produced for the use with OpenCPN on an individual PC or system and should not be used for any other purposes.
+
+The Chart Sets for OpenCPN are build from material licensed from different Hydrographic Offices.
+
+Please read carefully the statements of the licensors:
+
+The UK Hydrographic Office (UKHO) and its licensors make no warranties or representations, express or implied, with respect to this product. The UKHO and its licensors have not verified the information in this product or quality assured it. British Crown Copyright, 2016.
+
+
+WARNUNG: Das Bundesamt für Seeschifffahrt und Hydrographie (BSH) hat die in diesem Produkt enthaltenen Angaben nicht geprüft und haftet nicht für ihre Richtigkeit oder die Richtigkeit späterer Datenänderungen. Das Bundesamt für Seeschifffahrt und Hydrographie (BSH) garantiert nicht, dass dieses Produkt nationale oder internationale Vorschriften für die navigatorische Eignung solcher Produkte erfüllt.
+Unter Verwendung von Datenmaterial des Bundesamts für Seeschifffahrt und Hydrographie (BSH) hergestellt [Lizenznr.: 1112/002/2016-05]
+
+{Warning: The Bundesamt für Seeschifffahrt und Hydrographie (BSH) has not verified the content of this product and can not be held liable for it's correctness or the correctness of introduced modifications. The Bundesamt für Seeschifffahrt und Hydrographie (BSH) does not guarantee that the product complies with national or international standards of products for navigation.
+Produced using data material of the Bundesamt für Seeschifffahrt und Hydrographie (BSH) under the license 1112/002/2016-05) }
+
+Aucun service hydrographique officiel n’a vérifié les informations contenues dans ce document et ne peut être tenu responsable de la fidélité de leur reproduction ou de toute modification ultérieure. La possession de ce produit dérivé n’exonère pas de l’obligation d’utiliser les documents nautiques appropriés prévus par les règlements nationaux ou internationaux.
+Ce produit intègre des données © SHOM – n/20nn – reproduites avec l’autorisation n°x/xxxx
+
+{"No official Hydrographic Office has verified the information contained in this document and can not be held responsible for the accuracy of reproduction or any subsequent amendment. Possession of this derivative does not exempt you from the obligation to use appropriate nautical documents required by national or international  laws".
+"This product incorporates data © SHOM - January 20nn - reproduced with authorization No. x/xxxx "}
+
+
+
+2. Allowable usage:
+
+The chart sets are intended to be used primarily for voyage and route planning and aid to navigation under OpenCPN. Training, simulation or other fields are in the scope of application.
+
+Please refer to the conditions of usage of OpenCPN, which excludes any explicit or implicit liability for using it and neither assures any specific compliance with standards or envisaged or intended usages.
+The same conditions do apply for Chart Sets for OpenCPN.
+Refer to the national regulations for carriage requirements valid for your vessel and assure that you are compliant. This is your obligation and Chart Sets for OpenCPN does not exempt you from this duty nor guarantees any explicit or implicit compliance with standards or requirements.
+Chart Sets for OpenCPN cannot be used to comply with carriage requirements for vessels under SOLAS rules.
+
+Chart Sets for OpenCPN requires OpenCPN with a version >= 4.4.0 and the correspondent plug-in for OpenCPN and has been tested in this environment.
+
+Chart Sets:
+Expiry and update:
+You are licensed to use this Chart Set for OpenCPN and have during one year from the purchase date access to updates when those become available. The update period varies for the different Hydrographic offices from twice to four times/year.
+The release note of the Chart Set for OpenCPN carries the release information.
+Refer to Notes to Mariners to obtain information about modifications or warnings in place in the meantime.
+In case you want to have the most recent chart material you can license S-63 charts for OpenCPN as an alternative or in addition to the Chart Sets for OpenCPN
+The Chart Sets for OpenCPN will not disappear after the years period. The same policy as for official charts in the S-63 format is in place.
+
+Use:
+The Chart Sets for OpenCPN are licensed for one install on one machine. You will be able to make ONE back-up for safety reasons.
+Refer to the web-shop at o-charts.org or the documentation at OpenCPN.org for eventual complementary information.
+
+In case you want to print the screen content the following restrictions apply:
+Maximum size: A3, for your personal use only, not to be used for navigation.
+
+Failing to comply with this conditions invalids the license.
+
+Intellectual Property Rights:
+All Intellectual Property Rights contained in this product are owned by or licensed to Renate Rosner Consult S.L.
+No Intellectual Property Right contained in the product is intended to, and shall not be deemed to, transfer to any person who uses the it.
+
+You are explicitly forbidden to copy, pass on, or distribute (in electronic or paper form) any Chart images or data.
+You are forbidden to attempt to decompile, or otherwise interfere with any encryption systems, programs, or content of the Charts Sets for OpenCPN and the plug-ins and helper programs.
+
+
+
+Acknowledgements:
+This product has been derived in part from material obtained from the UK Hydrograpic Office with the permission of the UK Hydrographic Office and Her Magesty's Stationery Office and the following authorities:
+United Kingdom
+.Aberdeen Harbour Board
+.Argyll & Bute Council
+.Associated British Ports – Ayr & Troon
+.Associated British Ports – Barrow
+.Associated British Ports – Cardiff & Barry
+.Associated British Ports – Fleetwood
+.Associated British Ports – Garston
+.Associated British Ports – Humber
+.Associated British Ports – Ipswich
+.Associated British Ports – King’s Lynn
+.Associated British Ports – Lowestoft
+.Associated British Ports – Newport
+.Associated British Ports – Plymouth
+.Associated British Ports – Silloth
+.Associated British Ports – Southampton
+.Associated British Ports – Swansea & Port Talbot
+.Associated British Ports – Teignmouth
+.Belfast Harbour Commissioners
+.Blyth Harbour Commission
+.Brightlingsea Harbour Commissioners
+.Cattewater Harbour Commissioners (Cattewater, Plymouth)
+.Chichester Harbour Conservancy
+.Clydeport Operations Limited
+.Corporation of Trinity House
+.Cowes Harbour Commission
+.Cromarty Firth Port Authority
+.Dart Harbour and Navigation Authority
+.Dover Harbour Board
+.Falmouth Harbour Commissioners
+.First Corporate Shipping Limited (Bristol)
+.Folkestone Harbour Company (Folkestone)
+.Forth Ports plc
+.Fowey Harbour Commissioners
+.Fraserburgh Harbour Commissioners
+.Gloucester Harbour Trustees
+.Great Yarmouth Port Authority (Great Yarmouth)
+.Hampshire County Council (Hamble, River Hamble)
+.Harwich Haven Authority
+.Heysham Port Limited
+.Highland Council Harbours Authority (Gairloch, Helmsdale,
+Kinlochbervie, Kyle of Lochalsh, Lochinver, Portree & Uig)
+.Imerys Minerals Ltd (Par)
+.Inverness Harbour Trust (Inverness, Inverness Firth)
+.King's Lynn Conservancy Board
+.Langstone Harbour
+.Larne Harbour Limited
+.Lerwick Port Authority
+.Littlehampton Harbour Board
+.Londonderry Port and Harbour Commissioners
+.Lymington Harbour Commissioners
+.Manchester Ship Canal Company
+.Mersey Docks & Harbour Company (Mersey, Liverpool, Birkenhead)
+.Milford Haven Port Authority
+.Montrose Port Authority
+.Neath Port Authority
+.Newhaven Port and Properties Limited
+.Northern Lighthouse Board
+.Orkney Islands Council
+.Padstow Harbour Commissioners
+.PD Teesport
+.Peel Ports Medway (Port of Sheerness Ltd)
+.Peterhead Port Authority (Peterhead Bay, Peterhead Harbour)
+.Poole Harbour Commissioners
+.Port of Boston Limited
+.Port of Cairnryan Limited
+.Port of London Authority
+.Port of Mostyn Ltd
+.Port of Sunderland
+.Port of Tyne Authority (Tyne)
+.Port of Wisbech Authority
+.Port of Workington
+.Portland Harbour Authority Limited
+.Ports of Truro & Penryn
+.Portsmouth Commercial Port
+.Salcombe Harbour
+.Scrabster Harbour Trust (Scrabster)
+.Seaham Harbour Dock Company
+.Shetland Islands Council
+.Shoreham Port Authority
+.Stena Line Ports Limited (Fishguard, Fleetwood, Holyhead, Stranraer)
+.Teignmouth Harbour Commission
+.Thanet District Council (Ramsgate)
+.Torbay Council Marine Services (Tor Bay; Torquay, Brixham,
+Paignton)
+.Torridge District Council (Bideford)
+.Ullapool Harbour Trustees
+.Warrenpoint Harbour Authority
+.Weymouth & Portland Borough Council
+.Whitstable Harbour
+Channel Islands
+· Jersey Harbours
+· States of Alderney Harbour Authority
+· States of Guernsey Harbour Authority
+Isle of Man
+· Isle of Man Harbours Division
+Republic of Ireland
+· Bantry Bay Harbour Commissioners
+· Commissioner of Irish Lights
+· Drogheda Port Company
+· Dublin Port Company
+· Dun Laoghaire Harbour Company
+· Galway Harbour Company
+· Iarnrod Eireann – Rosslare Europort
+· Kinsale Harbour Commissioners (Kinsale)
+· Port of Cork Company
+· Port of New Ross
+· Port of Waterford Company (Waterford)
+· Shannon Foynes Port Company (River Shannon, Limerick, Foynes)
+· Wicklow Port Company
+
+“This product has been derived in part from material obtained from the Netherlands and UK Hydrographic Offices with their permission.”
+ “© Copyright Netherlands Hydrographic Office, 2015. All rights reserved. “
+"This product has been derived in part from material obtained from the Vlaamse Hydrografie and the UK Hydrographic Office with their permission.”
+ “© Vlaamse Hydrografie, 2015 . All rights reserved. “
+
+Contact:
+
+Renate Rosner Consult S.L.
+Av. Carl Friedrich Gauss, 11
+08860 Castelldefels
+Spain
+
+tel. +34 93 635 0345
+info@o-charts.org (for chart products)
+charts@rr-consult.net
+NIF/VAT-ID (ES) B66823386

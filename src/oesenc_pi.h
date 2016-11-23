@@ -37,6 +37,8 @@
 #include <wx/fileconf.h>
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
+#include <wx/html/htmlwin.h>
+
 #include "TexFont.h"
 
 #define     PLUGIN_VERSION_MAJOR    0
@@ -539,6 +541,68 @@ private:
     bool m_bGauge;
 
     DECLARE_EVENT_TABLE()
+};
+
+
+//      Constants
+
+#define ID_DIALOG 10001
+
+#define SYMBOL_ABOUT_TITLE _("oeSENC_PI Information")
+
+#define xID_OK          10009
+#define xID_CANCEL      10010
+
+#define ID_NOTEBOOK_HELP 10002
+
+
+class oesenc_pi_about: public wxDialog
+{
+    DECLARE_DYNAMIC_CLASS( about )
+    DECLARE_EVENT_TABLE()
+    
+public:
+    explicit oesenc_pi_about( );
+    explicit oesenc_pi_about( wxWindow* parent, 
+                    wxWindowID id = ID_DIALOG,
+                    const wxString& caption = SYMBOL_ABOUT_TITLE,
+                    const wxPoint& pos = wxDefaultPosition,
+                    const wxSize& size = wxSize(500, 500),
+                    long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
+    bool Create( wxWindow* parent,
+                 wxWindowID id = ID_DIALOG,
+                 const wxString& caption = SYMBOL_ABOUT_TITLE,
+                 const wxPoint& pos = wxDefaultPosition,
+                 const wxSize& size = wxSize(500, 500),
+                 long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
+    
+    void RecalculateSize( void );
+    
+private:
+    void CreateControls( void );
+    void Populate( void );
+    void OnXidOkClick( wxCommandEvent& event );
+    void OnXidRejectClick( wxCommandEvent& event );
+    void OnPageChange(wxNotebookEvent& event);
+    void OnClose( wxCloseEvent& event );
+    
+    wxWindow *m_parent;
+    bool m_btips_loaded;
+    
+    wxPanel* itemPanelAbout;
+    wxPanel* itemPanelAuthors;
+    wxPanel* itemPanelLicense;
+    wxPanel* itemPanelTips;
+    
+    wxTextCtrl *pAuthorTextCtl;
+    wxTextCtrl *pLicenseTextCtl;
+    wxNotebook *pNotebook;
+    wxHtmlWindow *pAboutHTMLCtl;
+    wxHtmlWindow *pLicenseHTMLCtl;
+    wxHtmlWindow *pAuthorHTMLCtl;
+    
+    //wxSize m_displaySize;
+    
 };
 
 #endif
