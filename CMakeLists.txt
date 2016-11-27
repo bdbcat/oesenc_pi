@@ -17,6 +17,7 @@ ENDIF (COMMAND cmake_policy)
 PROJECT(oesenc_pi)
 
 SET(PACKAGE_NAME oesenc_pi)
+SET(VERBOSE_NAME oesenc)
 SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
@@ -295,6 +296,10 @@ SET(CMAKE_INSTALL_PREFIX "/tmp")
 INSTALL(FILES "buildosx/oeserverd/oeserverd"
        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ WORLD_EXECUTE
        DESTINATION "oesenc_pi/oesenc_pi")
+
+INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+      DESTINATION "oesenc_pi/oesenc_pi" )
 
 INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION "oesenc_pi/oesenc_pi")
 ENDIF(APPLE)
