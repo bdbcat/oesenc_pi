@@ -284,7 +284,7 @@
 																		<key>GID</key>
 																		<integer>80</integer>
 																		<key>PATH</key>
-																		<string>/Volumes/dsr/Projects/oesenc_pi/src/rrc_eula_ChartSetsForOpenCPN.txt</string>
+																		<string>rrc_eula_ChartSetsForOpenCPN.txt</string>
 																		<key>PATH_TYPE</key>
 																		<integer>3</integer>
 																		<key>PERMISSIONS</key>
