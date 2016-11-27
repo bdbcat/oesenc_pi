@@ -141,7 +141,8 @@ public:
 //     wxNotebook          *m_s63NB;
 
     void OnNewFPRClick( wxCommandEvent &event );
-    
+    void OnShowFPRClick( wxCommandEvent &event );
+
 private:
     wxString GetPermitDir();
 
@@ -201,6 +202,7 @@ public:
     void OnPrefsOkClick(wxCommandEvent& event);
     
     wxButton *m_buttonNewFPR;
+    wxButton *m_buttonShowFPR;
     wxStaticText *m_fpr_text;
     
     DECLARE_EVENT_TABLE()
@@ -218,7 +220,8 @@ public:
     ~oesenc_pi_event_handler();
     
     void OnNewFPRClick( wxCommandEvent &event );
-    
+    void OnShowFPRClick( wxCommandEvent &event );
+
     oesenc_pi  *m_parent;
 };
 
