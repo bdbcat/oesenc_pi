@@ -94,7 +94,6 @@ bool                            g_bshown_sse15;
 bool                            g_brendered_expired;
 bool                            g_bnoShow_sse25;
 
-//wxString                        g_fpr_file;
 wxString                        g_UserKey;
 wxString                        g_old_UserKey;
 
@@ -666,11 +665,20 @@ void oesenc_pi::OnSetupOptions(){
     m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
                             wxCommandEventHandler(s63_pi_event_handler::OnNewFPRClick), NULL, m_event_handler );
 
+#ifdef __WXMAC__
+    m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
+            wxCommandEventHandler(s63_pi_event_handler::OnShowFPRClick), NULL, m_event_handler );
+#endif
 
     g_benable_screenlog = true;
 
     m_buttonImportPermit->SetFocus();
 #endif
+}
+
+void oesenc_pi::OnShowFPRClick( wxCommandEvent &event )
+{
+    wxExecute( wxString::Format("open -R %s", g_fpr_file) );
 }
 
 void oesenc_pi::OnNewFPRClick( wxCommandEvent &event )
@@ -850,6 +858,7 @@ int oesenc_pi::ImportCellPermits(void)
 void oesenc_pi::Set_FPR()
 {
     g_prefs_dialog->EndModal( wxID_OK );
+    g_prefs_dialog->m_buttonShowFPR->Enable( g_fpr_file != wxEmptyString );
 }
 
 
@@ -875,7 +884,9 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("S63CommonDataDir"), &g_CommonDataDir);
         pConf->Read( _T("ShowScreenLog"), &g_buser_enable_screenlog);
         pConf->Read( _T("NoShowSSE25"), &g_bnoShow_sse25);
-//         pConf->Read( _T("LastFPRFile"), &g_fpr_file);
+        pConf->Read( _T("LastFPRFile"), &g_fpr_file);
+        if( !wxFileExists(g_fpr_file) )
+            g_fpr_file = wxEmptyString;
         
         pConf->Read( _T("UserKey"), &g_UserKey );
         pConf->Read( _T("EULA_Accepted"), &g_bEULA_OK, false );
@@ -895,7 +906,7 @@ bool oesenc_pi::SaveConfig( void )
 
         pConf->Write( _T("UserKey"), g_UserKey );
         pConf->Write( _T("EULA_Accepted"), g_bEULA_OK );
-        
+        pConf->Write( _T("LastFPRFile"), g_fpr_file);
     }
 
     return true;
@@ -2747,25 +2758,34 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         bSizer2 = new wxBoxSizer( wxVERTICAL );
         
         //  FPR File Permit
-//        wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
-//         m_fpr_text = new wxStaticText(this, wxID_ANY, _T(" "));
-//         if(g_fpr_file.Len())
-//             m_fpr_text->SetLabel( g_fpr_file );
-//         else
-//             m_fpr_text->SetLabel( _T("                  "));
-//         
-//         sbSizerFPR->Add(m_fpr_text, wxEXPAND);
-        
+        wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
+        m_fpr_text = new wxStaticText(this, wxID_ANY, _T(" "));
+        if(g_fpr_file.Len())
+             m_fpr_text->SetLabel( wxFileName::FileName(g_fpr_file).GetFullName() );
+        else
+             m_fpr_text->SetLabel( _T("                  "));
+         
+        sbSizerFPR->Add(m_fpr_text, wxEXPAND);
+        bSizer2->Add(sbSizerFPR, 0, wxEXPAND, 50 );
+
         m_buttonNewFPR = new wxButton( this, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
-//        sbSizerFPR->Add( m_buttonNewFPR, 0, wxALL | wxALIGN_RIGHT, 5 );
         
         bSizer2->AddSpacer( 20 );
         bSizer2->Add( m_buttonNewFPR, 0, wxEXPAND, 50 );
         
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
-        
-        
 
+#ifdef __WXMAC__
+        m_buttonShowFPR = new wxButton( this, wxID_ANY, _("Show In Finder"), wxDefaultPosition, wxDefaultSize, 0 );
+#else
+        m_buttonShowFPR = new wxButton( this, wxID_ANY, _("Show on disk"), wxDefaultPosition, wxDefaultSize, 0 );
+#endif
+	bSizer2->AddSpacer( 20 );
+	bSizer2->Add( m_buttonShowFPR, 0, wxEXPAND, 50 );
+
+	m_buttonShowFPR->Enable( g_fpr_file != wxEmptyString );
+
+	m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
         m_sdbSizer1 = new wxStdDialogButtonSizer();
 //         m_sdbSizer1OK = new wxButton( this, wxID_OK );
 //         m_sdbSizer1->AddButton( m_sdbSizer1OK );
@@ -2821,7 +2841,18 @@ oesenc_pi_event_handler::~oesenc_pi_event_handler()
 
 
 
-
+void oesenc_pi_event_handler::OnShowFPRClick( wxCommandEvent &event )
+{
+#ifdef __WXMAC__
+    wxExecute( wxString::Format("open -R %s", g_fpr_file) );
+#endif
+#ifdef __WXMSW__		 
+    wxExecute( wxString::Format("explorer.exe /select,%s", g_fpr_file) );
+#endif
+#ifdef __WXGTK__
+    wxExecute( wxString::Format("xdg-open %s", wxFileName::FileName(g_fpr_file).GetPath()) );
+#endif
+}
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 {
@@ -2958,7 +2989,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             }
             
             g_fpr_file = fpr_file;
-            
+
             if (!berror)
                 m_parent->Set_FPR();
            
