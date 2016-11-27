@@ -44,7 +44,7 @@
 #include "mygdal/cpl_string.h"
 
 #include "mygeom63.h"
-#include <../opencpn/plugins/chartdldr_pi/src/unrar/rartypes.hpp>
+//#include <../opencpn/plugins/chartdldr_pi/src/unrar/rartypes.hpp>
 //#include "georef.h"
 
 //extern wxString                 g_csv_locn;
