@@ -1502,9 +1502,6 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
 #ifdef ocpnUSE_GL
     
-    if(VPoint.chart_scale > m_Chart_Scale * 4)
-        return 0;
-    
     m_cvp = CreateCompatibleViewport( VPoint );
         
     SetVPParms( VPoint );
