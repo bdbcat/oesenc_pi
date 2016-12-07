@@ -5551,14 +5551,14 @@ int s52plib::dda_tri( wxPoint *ptp, S52color *c, render_canvas_parms *pb_spec,
 
     //      Create edge arrays using fast integer DDA
     int m, x, dy, count;
-    bool dda8 = false;
+//    bool dda8 = false;
     bool cw;
 
-    if( ( abs( xmax - xmin ) > 32768 ) || ( abs( xmid - xmin ) > 32768 )
-            || ( abs( xmax - xmid ) > 32768 ) || ( abs( ymax - ymin ) > 32768 )
-            || ( abs( ymid - ymin ) > 32768 ) || ( abs( ymax - ymid ) > 32768 ) || ( xmin > 32768 )
-            || ( xmid > 32768 ) ) {
-        dda8 = true;
+     if( ( abs( xmax - xmin ) > 32768 ) || ( abs( xmid - xmin ) > 32768 )
+             || ( abs( xmax - xmid ) > 32768 ) || ( abs( ymax - ymin ) > 32768 )
+             || ( abs( ymid - ymin ) > 32768 ) || ( abs( ymax - ymid ) > 32768 ) || ( xmin > 32768 )
+             || ( xmid > 32768 ) ) {
+//         dda8 = true;
 
         dy = ( ymax - ymin );
         if( dy ) {
@@ -6366,10 +6366,6 @@ void s52plib::RenderToBufferFilledPolygon( ObjRazRules *rzRules, S57Obj *obj, S5
         wxPoint *ptp = (wxPoint *) malloc(
                 ( obj->pPolyTessGeo->GetnVertexMax() + 1 ) * sizeof(wxPoint) );
 
-        //  Allow a little slop in calculating whether a triangle
-        //  is within the requested Viewport
-        double margin = BBView.GetLonRange() * .05;
-
         PolyTriGroup *ppg = obj->pPolyTessGeo->Get_PolyTriGroup_head();
 
         TriPrim *p_tp = ppg->tri_prim_head;
@@ -6915,13 +6911,7 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     double z_clip_geom = 1.0;
     double z_tex_geom = 0.;
 
-    GLuint clip_list = 0;
-
     LLBBox BBView = vp->GetBBox();
-
-    //  Allow a little slop in calculating whether a triangle
-    //  is within the requested Viewport
-    double margin = BBView.GetLonRange() * .05;
 
     wxPoint *ptp;
     if( rzRules->obj->pPolyTessGeo ) {
@@ -7193,10 +7183,6 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 #ifdef ocpnUSE_GL
 
     LLBBox BBView = vp->GetBBox();
-
-    //  Allow a little slop in calculating whether a triangle
-    //  is within the requested Viewport
-    double margin = BBView.GetLonRange() * .05;
 
     int obj_xmin = 10000;
     int obj_xmax = -10000;
@@ -8196,15 +8182,61 @@ bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
     return lights_on;
 }
 
+bool s52plib::isAnchorEnabled( const PlugIn_ViewPort& VPoint )
+{
+    bool retval = false;
+
+    PI_S57Obj *po = new PI_S57Obj;
+    strncpy(po->FeatureName, "SBDARE", 6);
+    po->FeatureName[6] = 0;
+    po->iOBJL = -1;
+    po->m_chart_context = 0;
+    po->lat_min = VPoint.clat;
+    po->lat_max = VPoint.clat + .001;
+    po->lon_min = VPoint.clon;
+    po->lon_max = VPoint.clon + .001;
+    
+    po->m_DisplayCat = PI_DISPLAYBASE;
+    po->Scamin = 1000000;
+    
+    char *pAVS = (char *) malloc( 2 );
+    strcpy( pAVS, "9" );
+    
+    po->attVal = new wxArrayOfS57attVal;
+    S57attVal *pattValTmp = new S57attVal;
+    pattValTmp->valType = OGR_STR;
+    pattValTmp->value = pAVS;
+    po->attVal->Add( pattValTmp );
+    
+    po->att_array = (char *)malloc(6);
+    strncpy(po->att_array, "NATSUR", 6);
+    po->n_attr = 1;
+    
+    
+    PI_PLIBSetContext(po);
+    S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
+    
+    ctx->bCS_Added = false;
+    
+    wxScreenDC dc;
+    PlugIn_ViewPort pivp = VPoint;
+    
+    PI_PLIBRenderObjectToDC( &dc, po, &pivp );
+    
+    retval = ( ctx->bFText_Added == 1);
+    
+    PI_PLIBFreeContext(po->S52_Context);
+    delete po;
+ 
+    return retval;
+}
 
 
 //    Do all those things necessary to prepare for a new rendering
 void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
 {
     m_benableGLLS = true;               // default is to always use RenderToGLLS (VBO support)
- 
- //  TODO
-    //m_benableGLLS = false;
+    
  
     // Has the core S52PLIB configuration changed?
     //  If it has, reload from global preferences file.
@@ -8235,6 +8267,37 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
                 pOLE->nViz = 1;
             RemoveObjNoshow("LIGHTS");
         }
+        
+        // Handle Anchor are toggle
+        bool bAnchor = isAnchorEnabled(VPoint);
+        
+        const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
+        unsigned int num = sizeof(categories) / sizeof(categories[0]);
+        
+        if(!bAnchor){                            
+            for( unsigned int c = 0; c < num; c++ ) {
+                ps52plib->AddObjNoshow(categories[c]);
+            }
+        }
+        else{                                   
+            for( unsigned int c = 0; c < num; c++ ) {
+                ps52plib->RemoveObjNoshow(categories[c]);
+            }
+            
+            unsigned int cnt = 0;
+            for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
+                OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+                for( unsigned int c = 0; c < num; c++ ) {
+                    if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
+                        pOLE->nViz = 1;         // force on
+                        cnt++;
+                        break;
+                    }
+                }
+                if( cnt == num ) break;
+            }
+        }
+        
                 
         
         m_myConfig = PI_GetPLIBStateHash();
