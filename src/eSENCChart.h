@@ -272,7 +272,6 @@ protected:
       
       int               my_fgets( char *buf, int buf_len_max, CryptInputStream &ifs );
 
-      int               m_global_color_scheme;
       wxBitmap          *m_pBMPThumb;
 
       double            m_ppm_avg;

@@ -85,6 +85,7 @@ extern bool             g_bSENCutil_valid;
 extern wxString         g_UserKey;
 extern bool             g_PIbDebugS57;
 extern bool             g_bEULA_OK;
+extern int              global_color_scheme;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
 
@@ -973,7 +974,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
         initLibraries();
         
         m_SENCFileName = name;
-        ret_val = PostInit( init_flags, m_global_color_scheme );
+        ret_val = PostInit( init_flags, global_color_scheme );
         
 #if 0
         //  Verify that the eHdr exists, if not, then rebuild it.
@@ -1114,7 +1115,8 @@ double eSENCChart::GetNearestPreferredScalePPM(double target_scale_ppm)
 void eSENCChart::SetColorScheme(int cs, bool bApplyImmediate)
 {
 
-    m_global_color_scheme = cs;
+    if(ps52plib)
+        ps52plib->SetPLIBColorScheme((ColorScheme)cs);
 
     if( bApplyImmediate ) {
         delete pDIB;        // Toss any current cache
@@ -4349,7 +4351,6 @@ PI_InitReturn eSENCChart::PostInit( int flags, int cs )
 #endif
 
     //    Set the color scheme
-    m_global_color_scheme = cs;
     SetColorScheme( cs, false );
 
 //    Build array of contour values for later use by conditional symbology

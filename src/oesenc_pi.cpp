@@ -102,6 +102,7 @@ wxString                        g_fpr_file;
 bool                            g_bEULA_OK = false;
 
 oesenc_pi_event_handler         *g_event_handler;
+int                             global_color_scheme;
 
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
@@ -372,6 +373,14 @@ wxArrayString oesenc_pi::GetDynamicChartClassNameArray()
 
 void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
+}
+
+void oesenc_pi::SetColorScheme(PI_ColorScheme cs)
+{
+    global_color_scheme = cs;
+    
+    if(ps52plib)
+        ps52plib-> SetPLIBColorScheme((ColorScheme)cs);
 }
 
 bool oesenc_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)

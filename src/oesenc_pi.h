@@ -115,6 +115,7 @@ public:
     void OnSetupOptions();
     void OnCloseToolboxPanel(int page_sel, int ok_apply_cancel);
     void ShowPreferencesDialog( wxWindow* parent );
+    void SetColorScheme(PI_ColorScheme cs);
     
     void SetPluginMessage(wxString &message_id, wxString &message_body);
 //     int ImportCellPermits( void );
