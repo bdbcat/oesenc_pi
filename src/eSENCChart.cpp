@@ -5929,7 +5929,7 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
         //  For single Point objects, the integral object bounding box contains the lat/lon of the object,
         //  possibly expanded by text or symbol rendering
         case GEO_POINT: {
-            if( !obj->bBBObj_valid ) return false;
+            if( !obj->BBObj.GetValid() ) return false;
             
             if( 1 == obj->npt ) {
                 //  Special case for LIGHTS
@@ -5957,7 +5957,6 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
             //  For MultiPoint objects, make a bounding box from each point's lat/lon
             //  and check it
             else {
-                if( !obj->bBBObj_valid ) return false;
                 
                 //  Coarse test first
                 if( !obj->BBObj.ContainsMarge( lat, lon, select_radius ) ) return false;
@@ -8904,7 +8903,7 @@ bool S57Obj::SetPointGeometry( double lat, double lon, double ref_lat, double re
     
     //  Set initial Point BoundingBox limits quite small...
     BBObj.Set(m_lat - .001, m_lon - .001, m_lat + .001, m_lon + .001);
-    bBBObj_valid = false;
+    bBBObj_valid = true;
     
     //  Calculate SM from chart common reference point
     double easting, northing;

@@ -3991,27 +3991,6 @@ int s52plib::RenderMPS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
    
     
 
-    //  I don't think we ever need to adjust the MPS bounding box more precisely than
-    //  was recorded in the SENC processing.
-    //  But if we do, here is one way to estimate it
-#if 0    
-    double *pdlbb = rzRules->obj->geoPtMulti; // and corresponding lat/lon
-    
-    if(!point_obj->bBBObj_valid) {
-        for( int ip = 0; ip < npt; ip++ ) {
-            double lon = *pdlbb++;
-            double lat = *pdlbb++;
-            
-            point_obj->BBObj.Expand(lon, lat);
-            
-            const int b_width = 29, b_height = 29;
-            double plat, plon;
-            GetPixPointSingle( b_width, b_height, &plat, &plon, vp );
-            point_obj->BBObj.Expand(lon + plon, lat + plat);
-        }
-        point_obj->bBBObj_valid = true;
-    }
-#endif
 
     double *pdl = rzRules->obj->geoPtMulti; // and corresponding lat/lon
 
@@ -8010,7 +7989,7 @@ class S52PLIB_Context
 {
 public:
     S52PLIB_Context(){
-        bBBObj_valid = false;
+        ctx_bBBObj_valid = false;
         bCS_Added = false;
         bFText_Added = false;
         CSrules = NULL;
@@ -8022,8 +8001,8 @@ public:
     
     ~S52PLIB_Context(){};
     
-    wxBoundingBox           BBObj;                  // lat/lon BBox of the rendered object
-    bool                    bBBObj_valid;           // set after the BBObj has been calculated once.
+    wxBoundingBox           ctx_BBObj;              // lat/lon BBox of the rendered object
+    bool                    ctx_bBBObj_valid;       // set after the BBObj has been calculated once.
     
     Rules                   *CSrules;               // per object conditional symbology
     int                     bCS_Added;
