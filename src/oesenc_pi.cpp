@@ -101,6 +101,7 @@ bool                            g_PIbDebugS57;
 wxString                        g_fpr_file;
 bool                            g_bEULA_OK = false;
 bool                            g_bEULA_Rejected = false;
+bool                            g_bDeclaredInvalid = false;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
@@ -2249,6 +2250,9 @@ bool validateUserKey( wxString sencFileName)
 {
     wxLogMessage(_T("validateUserKey"));
     
+    if(g_bDeclaredInvalid)
+        return false;
+    
     bool b_Set = true;
     if((g_UserKey.Length() == 0) || (g_UserKey == _T("Invalid"))){
         b_Set = false;
@@ -2274,6 +2278,7 @@ bool validateUserKey( wxString sencFileName)
             int retCode_retry = senc.ingestHeader( sencFileName );
             if(retCode_retry != SENC_NO_ERROR){
                 GetUserKey( LEGEND_THIRD, true );                  // Bail out
+                g_bDeclaredInvalid = true;
                 return false;
             }
             else{
