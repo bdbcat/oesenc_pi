@@ -100,6 +100,7 @@ wxString                        g_old_UserKey;
 bool                            g_PIbDebugS57;
 wxString                        g_fpr_file;
 bool                            g_bEULA_OK = false;
+bool                            g_bEULA_Rejected = false;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
@@ -3007,7 +3008,10 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 
 bool CheckEULA( void )
 {
-    if(g_bEULA_OK)
+    if(g_bEULA_Rejected)
+        return false;
+    
+    if(g_bEULA_OK && g_UserKey.Length())
         return true;
        
     wxString shareLocn =*GetpSharedDataLocation() +
@@ -3017,6 +3021,12 @@ bool CheckEULA( void )
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow() );
     g_bEULA_OK = (pab->ShowModal() == 0);
 
+    if(!g_bEULA_OK)
+        g_bEULA_Rejected = true;
+
+    if(g_bEULA_OK && (0 == g_UserKey.Length()) )
+        g_UserKey = _T("Pending");
+        
     pab->Destroy();
     
     return g_bEULA_OK;
@@ -3363,6 +3373,7 @@ void oesenc_pi_about::OnXidRejectClick( wxCommandEvent& event )
 
 void oesenc_pi_about::OnClose( wxCloseEvent& event )
 {
+    EndModal(1);
     Destroy();
 }
 
