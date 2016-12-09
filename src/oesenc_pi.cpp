@@ -148,7 +148,7 @@ extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
 }
 
 
-
+/*
 static int ExtensionCompare( const wxString& first, const wxString& second )
 {
     wxFileName fn1( first );
@@ -158,7 +158,7 @@ static int ExtensionCompare( const wxString& first, const wxString& second )
 
     return ext1.Cmp( ext2 );
 }
-
+*/
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -2882,6 +2882,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
     
     if(ret == wxID_YES){
        
+        wxString msg1;
         wxString fpr_file;
         wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
         
@@ -2905,7 +2906,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             ::wxBeginBusyCursor();
             
             wxArrayString ret_array;      
-            long rv = wxExecute(cmd, ret_array, ret_array );
+            wxExecute(cmd, ret_array, ret_array );
             
             ::wxEndBusyCursor();
             
@@ -2923,20 +2924,52 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             }
             
             bool berror = false;
-            
+             
             if(!berr && fpr_file.Length()){
 
                 bool bcopy = false;
-                #ifdef __WXMSW__
-                wchar_t *desktop_path = 0;
-                if(S_OK == SHGetKnownFolderPath( FOLDERID_Desktop, 0, 0, &desktop_path)){
+                wxString sdesktop_path;
+                
+#ifdef __WXMSW__
+                TCHAR desktop_path[MAX_PATH*2] = { 0 };
+                bool bpathGood = false;
+                HRESULT  hr;
+                HANDLE ProcToken = NULL;
+                OpenProcessToken( GetCurrentProcess(), TOKEN_READ, &ProcToken );
+                
+                hr = SHGetFolderPath( NULL,  CSIDL_DESKTOPDIRECTORY, ProcToken, 0, desktop_path);
+                if (SUCCEEDED(hr))    
+                    bpathGood = true;
+                
+                CloseHandle( ProcToken );
+                
+//                wchar_t *desktop_path = 0;
+//                bool bpathGood = false;
+                
+//               if( (major == 5) && (minor == 1) ){             //XP
+//                    if(S_OK == SHGetFolderPath( (HWND)0,  CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, desktop_path))
+//                        bpathGood = true;
+                    
+                    
+//                 }
+//                 else{
+//                     if(S_OK == SHGetKnownFolderPath( FOLDERID_Desktop, 0, 0, &desktop_path))
+//                         bpathGood = true;
+//                 }
+                
+                
+                if(bpathGood){
                     
                     char str[128];
                     wcstombs(str, desktop_path, 128);
                     wxString desktop_fpr(str, wxConvUTF8);
+                    sdesktop_path = desktop_fpr;
                     if( desktop_fpr.Last() != wxFileName::GetPathSeparator() )
                          desktop_fpr += wxFileName::GetPathSeparator();
 
+                    wxFileName fn(fpr_file);
+                    wxString desktop_fpr_file = desktop_fpr + fn.GetFullName();
+                    
                     wxString wcmd = g_sencutil_bin;
                     wcmd += _T(" -f ");                  // Make fingerprint
                     wcmd += desktop_fpr;
@@ -2949,7 +2982,15 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     const wchar_t *wexe = exe.wc_str(wxConvUTF8);
                     const wchar_t *wparms = parms.wc_str(wxConvUTF8);
                     
-                    {
+                    if( (major == 5) && (minor == 1) ){             //XP
+                        // For some reason, this does not work...
+                        //8:43:13 PM: Error: Failed to copy the file 'C:\oc01W_1481247791.fpr' to '"C:\Documents and Settings\dsr\Desktop\oc01W_1481247791.fpr"'
+                        //                (error 123: the filename, directory name, or volume label syntax is incorrect.)
+                        //8:43:15 PM: oesenc fpr file created as: C:\oc01W_1481247791.fpr
+                        
+                        bcopy = wxCopyFile(fpr_file.Trim(false), _T("\"") + desktop_fpr_file + _T("\""));
+                    }
+                    else{
                         ::wxBeginBusyCursor();
                         
                         // Launch oeserverd as admin
@@ -2978,19 +3019,31 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                         
                     }  
                 }
-                #endif            
+#endif            
+#ifdef __WXOSX__
+                wxFileName fn(fpr_file);
+                wxString desktop_fpr_path = ::wxGetHomeDir() + wxFileName::GetPathSeparator() +
+                                _T("Desktop") + wxFileName::GetPathSeparator() + fn.GetFullName();
                 
-                if(!berror){
-                    wxString msg1 = _("Fingerprint file created.\n");
+                bcopy =  ::wxCopyFile(fpr_file.Trim(false), desktop_fpr_path);
+                sdesktop_path = desktop_fpr_path;
+                msg1 += _("\n\n OSX ");
+#endif
+
+                
+                {
+                    msg1 += _("Fingerprint file created.\n");
                     msg1 += fpr_file;
 
-                #ifdef __WXMSW__
                     if(bcopy)
                         msg1 += _("\n\n Fingerprint file is also copied to desktop.");
-                #endif
-                
+                    
                     OCPNMessageBox_PlugIn(NULL, msg1, _("oesenc_pi Message"), wxOK);
                 }
+                
+                wxLogMessage(_T("oesenc fpr file created as: ") + fpr_file);
+                if(bcopy)
+                    wxLogMessage(_T("oesenc fpr file created in desktop folder: ") + sdesktop_path);
             }
             else{
                 wxLogMessage(_T("oesenc_pi: oeserverd results:"));
@@ -3260,7 +3313,7 @@ void oesenc_pi_about::RecalculateSize( void )
 void oesenc_pi_about::CreateControls( void )
 {
     //  Set the nominal vertical size of the embedded controls
-    int v_size = 300; //g_bresponsive ? -1 : 300;
+    //int v_size = 300; //g_bresponsive ? -1 : 300;
 
     wxBoxSizer* mainSizer = new wxBoxSizer( wxVERTICAL );
     SetSizer( mainSizer );
