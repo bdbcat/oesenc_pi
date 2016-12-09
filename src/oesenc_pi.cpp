@@ -2578,7 +2578,8 @@ bool validate_SENC_server(void)
     printf("      validate_SENC_server, retry\n");
     wxLogMessage(_T("Available FALSE, retry..."));
     wxMilliSleep(500);
-    if(testAvail.isAvailable()){
+    Osenc_instream testAvailRetry;
+    if(testAvailRetry.isAvailable()){
         wxLogMessage(_T("Available TRUE"));
         return true;
     }
@@ -2693,9 +2694,9 @@ bool validate_SENC_server(void)
     if(g_serverProc){
         bool bAvail = false;
         int nLoop = 10;
-        Osenc_instream testAvail_One;
 
         while(nLoop){
+            Osenc_instream testAvail_One;
             if(!testAvail_One.isAvailable())
                 wxSleep(1);
             else{

@@ -130,7 +130,7 @@ void Osenc_instream::Init()
 void Osenc_instream::Close()
 {
     if(-1 != privatefifo){
-        //printf("           Close private fifo: %s \n", privatefifo_name);
+        printf("           Close private fifo: %s \n", privatefifo_name);
         close(privatefifo);
     }
     
@@ -203,6 +203,8 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         
         // Create a unique name for the private (i.e. data) pipe, valid for this session
         wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
+//         if(tmp_file.Length())
+//             wxRemoveFile( tmp_file );
         wxCharBuffer bufn = tmp_file.ToUTF8();
         if(bufn.data()) 
             strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
@@ -211,7 +213,7 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         if(!mkfifo(privatefifo_name, 0666))
             int yyp = 4;
         
-        //printf("           Open private fifo: %s\n", privatefifo_name);
+        printf("           Open private fifo: %s\n", privatefifo_name);
         
         // Open the well known public FIFO for writing
         if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
