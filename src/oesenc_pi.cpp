@@ -40,6 +40,7 @@
 #include "wx/wfstream.h"
 #include <wx/statline.h>
 #include <wx/progdlg.h>
+#include "wx/artprov.h"
 
 #include "oesenc_pi.h"
 #include "eSENCChart.h"
@@ -102,6 +103,11 @@ wxString                        g_fpr_file;
 bool                            g_bEULA_OK = false;
 bool                            g_bEULA_Rejected = false;
 bool                            g_bDeclaredInvalid = false;
+
+wxString                        g_infoRule;
+bool                            g_binfoShown;
+wxString                        g_infoRaw;
+bool                            g_bUserKeyHintTaken;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
@@ -168,6 +174,7 @@ static int ExtensionCompare( const wxString& first, const wxString& second )
 //---------------------------------------------------------------------------------------------------------
 
 #include "default_pi.xpm"
+#include <../pavuk-0.9.35/src/tr.h>
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -896,11 +903,13 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("ShowScreenLog"), &g_buser_enable_screenlog);
         pConf->Read( _T("NoShowSSE25"), &g_bnoShow_sse25);
         pConf->Read( _T("LastFPRFile"), &g_fpr_file);
+        
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
         
         pConf->Read( _T("UserKey"), &g_UserKey );
         pConf->Read( _T("EULA_Accepted"), &g_bEULA_OK, false );
+        pConf->Read( _T("ChartInfo"), &g_infoRaw);
         
         
     }
@@ -918,6 +927,8 @@ bool oesenc_pi::SaveConfig( void )
         pConf->Write( _T("UserKey"), g_UserKey );
         pConf->Write( _T("EULA_Accepted"), g_bEULA_OK );
         pConf->Write( _T("LastFPRFile"), g_fpr_file);
+        pConf->Write( _T("ChartInfo"), g_infoRaw);
+        
     }
 
     return true;
@@ -2190,10 +2201,13 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
      wxBoxSizer* itemBoxSizer16 = new wxBoxSizer( wxHORIZONTAL );
      itemBoxSizer2->Add( itemBoxSizer16, 0, wxALIGN_RIGHT | wxALL, 5 );
 
-     m_CancelButton = new wxButton( itemDialog1, ID_GETIP_CANCEL, _("Cancel"), wxDefaultPosition,
-     wxDefaultSize, 0 );
-     itemBoxSizer16->Add( m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
-     m_CancelButton->SetDefault();
+     if( (legendID == LEGEND_FIRST) || (legendID == LEGEND_SECOND) ){
+        m_CancelButton = new wxButton( itemDialog1, ID_GETIP_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+        itemBoxSizer16->Add( m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
+        m_CancelButton->SetDefault();
+     }
+     else
+         m_CancelButton = NULL;
 
      m_OKButton = new wxButton( itemDialog1, ID_GETIP_OK, _("OK"), wxDefaultPosition,
      wxDefaultSize, 0 );
@@ -2274,8 +2288,16 @@ bool validateUserKey( wxString sencFileName)
             wxLogMessage(_T("validateUserKey E2"));
             //  On a signature error, we try once more, allowing user to enter a new key
             wxString key = GetUserKey( LEGEND_SECOND, true );
+            
+            if(key.Upper() == _T("INVALID")){
+                GetUserKey( LEGEND_THIRD, true );                  // Bail out on cancel
+                g_bDeclaredInvalid = true;
+                return false;
+            }
+            
             senc.setKey(key);
             int retCode_retry = senc.ingestHeader( sencFileName );
+            
             if(retCode_retry != SENC_NO_ERROR){
                 GetUserKey( LEGEND_THIRD, true );                  // Bail out
                 g_bDeclaredInvalid = true;
@@ -3438,7 +3460,255 @@ void oesenc_pi_about::OnClose( wxCloseEvent& event )
 
 
 
+class  OESENCMessageDialog: public wxDialog
+{
+    
+public:
+    OESENCMessageDialog(wxWindow *parent, const wxString& message,
+                      const wxString& caption = wxMessageBoxCaptionStr,
+                      long style = wxOK|wxCENTRE,  
+                      bool bFixedFont = false,
+                      const wxPoint& pos = wxDefaultPosition);
+    
+    void OnYes(wxCommandEvent& event);
+    void OnNo(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnClose( wxCloseEvent& event );
+    
+private:
+    int m_style;
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(OESENCMessageDialog, wxDialog)
+EVT_BUTTON(wxID_YES, OESENCMessageDialog::OnYes)
+EVT_BUTTON(wxID_NO, OESENCMessageDialog::OnNo)
+EVT_BUTTON(wxID_CANCEL, OESENCMessageDialog::OnCancel)
+EVT_CLOSE(OESENCMessageDialog::OnClose)
+END_EVENT_TABLE()
+
+
+OESENCMessageDialog::OESENCMessageDialog( wxWindow *parent,
+                                      const wxString& message,
+                                      const wxString& caption,
+                                      long style,
+                                      bool bFixedFont,
+                                      const wxPoint& pos)
+: wxDialog( parent, wxID_ANY, caption, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP )
+{
+    m_style = style;
+    if(bFixedFont){
+        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+        double font_size = dFont->GetPointSize();
+        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size,wxFONTFAMILY_TELETYPE, dFont->GetStyle(), dFont->GetWeight());
+        SetFont( *qFont );
+    }
+    
+    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+    
+    wxBoxSizer *icon_text = new wxBoxSizer( wxHORIZONTAL );
+    
+    #if wxUSE_STATBMP
+    // 1) icon
+    if (style & wxICON_MASK)
+    {
+        wxBitmap bitmap;
+        switch ( style & wxICON_MASK )
+        {
+            default:
+                wxFAIL_MSG(_T("incorrect log style"));
+                // fall through
+                
+            case wxICON_ERROR:
+                bitmap = wxArtProvider::GetIcon(wxART_ERROR, wxART_MESSAGE_BOX);
+                break;
+                
+            case wxICON_INFORMATION:
+                bitmap = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_MESSAGE_BOX);
+                break;
+                
+            case wxICON_WARNING:
+                bitmap = wxArtProvider::GetIcon(wxART_WARNING, wxART_MESSAGE_BOX);
+                break;
+                
+            case wxICON_QUESTION:
+                bitmap = wxArtProvider::GetIcon(wxART_QUESTION, wxART_MESSAGE_BOX);
+                break;
+        }
+        wxStaticBitmap *icon = new wxStaticBitmap(this, wxID_ANY, bitmap);
+        icon_text->Add( icon, 0, wxCENTER );
+    }
+    #endif // wxUSE_STATBMP
+    
+    #if wxUSE_STATTEXT
+    // 2) text
+    icon_text->Add( CreateTextSizer( message ), 0, wxALIGN_CENTER | wxLEFT, 10 );
+    
+    topsizer->Add( icon_text, 1, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
+    #endif // wxUSE_STATTEXT
+    
+    // 3) buttons
+    int AllButtonSizerFlags = wxOK|wxCANCEL|wxYES|wxNO|wxHELP|wxNO_DEFAULT;
+    int center_flag = wxEXPAND;
+    if (style & wxYES_NO)
+        center_flag = wxALIGN_CENTRE;
+    wxSizer *sizerBtn = CreateSeparatedButtonSizer(style & AllButtonSizerFlags);
+    if ( sizerBtn )
+        topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
+    
+    SetAutoLayout( true );
+    SetSizer( topsizer );
+    
+    topsizer->SetSizeHints( this );
+    topsizer->Fit( this );
+    wxSize size( GetSize() );
+    if (size.x < size.y*3/2)
+    {
+        size.x = size.y*3/2;
+        SetSize( size );
+    }
+    
+    Centre( wxBOTH | wxCENTER_FRAME);
+}
+
+void OESENCMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
+{
+    SetReturnCode(wxID_YES);
+    EndModal( wxID_YES );
+}
+
+void OESENCMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
+{
+    SetReturnCode(wxID_NO);
+    EndModal( wxID_NO );
+}
+
+void OESENCMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    // Allow cancellation via ESC/Close button except if
+    // only YES and NO are specified.
+    if ( (m_style & wxYES_NO) != wxYES_NO || (m_style & wxCANCEL) )
+    {
+        SetReturnCode(wxID_CANCEL);
+        EndModal( wxID_CANCEL );
+    }
+}
+
+void OESENCMessageDialog::OnClose( wxCloseEvent& event )
+{
+    SetReturnCode(wxID_CANCEL);
+    EndModal( wxID_CANCEL );
+}
+
+
 void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
 {
 }
+
+
+void showChartinfoDialog( wxString& info)
+{
+    if(!info.Length())
+        return;
+    
+    wxString hdr = _("The following Chart sets are available:\n\n");
+    hdr += _("Chart set                                           Version    Valid until\n");
+    hdr += _T("________________________________________________________________________\n");
+
+    // Reformat the line
+    wxString formatted;
+    wxStringTokenizer tkx(info, _T(";|"));
+    while ( tkx.HasMoreTokens() ){
+        wxString token = tkx.GetNextToken();
+        if(tkx.GetLastDelimiter() == '|')
+            formatted += _T("\n");
+        else{    
+            token += _T("                                                                                       ");
+            token.Truncate( 50 );
+            formatted += token;
+    
+            token = tkx.GetNextToken();
+            formatted += _T("  ") + token;
+            token = tkx.GetNextToken();
+            formatted += _T("    ") + token;
+            if(tkx.GetLastDelimiter() == '|')
+                formatted += _T("\n");
+                
+        }
+    }
+     
+    wxString infoString = hdr + formatted;
+     
+    OESENCMessageDialog dlg( NULL,infoString, _("oeSENC_PI Message"), wxOK, true);
+    dlg.Centre();
+    dlg.ShowModal();
+}
+    
+int processChartinfo(const wxString &oesenc_file)
+{
+    // get the Chartinfo as a wxTextFile
+    wxFileName fn(oesenc_file);
+    wxString chartInfo = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
+    chartInfo += _T("Chartinfo.txt");
+
+    
+    wxTextFile info_file( chartInfo );
+    if( info_file.Open() ){
+        wxString line = info_file.GetFirstLine();
+        g_infoRaw.Clear();              // Start afresh
+        
+        while( !info_file.Eof() ){
+            if(line.StartsWith( _T("ChartInfo:" ) ) ) {
+                wxString content = line.AfterFirst(':');
+                g_infoRaw += content + _T("|");
+            }
+            else if(line.StartsWith( _T("ChartInfoShow:" ) ) ) {
+                g_infoRule = line.AfterFirst(':');
+            }
+        
+            line = info_file.GetNextLine();
+        
+        }
+        
+        // Do we need to show the info?
+        if(g_infoRule.IsSameAs(_T("Session"))){
+            if(!g_binfoShown){
+                showChartinfoDialog( g_infoRaw );
+                g_binfoShown = true;
+            }
+             
+        }
+        return 0;    
+    }
+    else
+        return -1;
+                
+}
+
+void processUserKeyHint(const wxString &oesenc_file)
+{
+    // get the Chartinfo as a wxTextFile
+    wxFileName fn(oesenc_file);
+    wxString chartInfo = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
+    chartInfo += _T("Userkey.txt");
+    
+    
+    wxTextFile info_file( chartInfo );
+    if( info_file.Open() ){
+        wxString line = info_file.GetFirstLine();
+        
+        while( !info_file.Eof() ){
+            if(line.StartsWith( _T("UserKey:" ) ) ) {
+                wxString content = line.AfterFirst(':').Trim().Trim(false);
+                g_UserKey = content;
+                break;
+            }
+            
+            line = info_file.GetNextLine();
+        }
+        
+        g_bUserKeyHintTaken = true;
+    }
+}
+
 

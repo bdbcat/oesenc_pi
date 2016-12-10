@@ -99,7 +99,12 @@ InfoWinDialog           *g_pInfoDlg;
 wxDialog                *s_plogcontainer;
 wxTextCtrl              *s_plogtc;
 int                     nseq;
-extern s52plib                 *ps52plib;
+extern s52plib          *ps52plib;
+
+extern wxString         g_infoRaw;
+extern wxString         g_infoRule;
+extern bool             g_binfoShown;
+extern bool             g_bUserKeyHintTaken;
 
 #include <wx/arrimpl.cpp>
 WX_DEFINE_ARRAY( float*, MyFloatPtrArray );
@@ -132,6 +137,9 @@ extern bool validate_SENC_server( void );
 //extern wxString GetUserKey( int legendID, bool bforceNew);
 extern bool validateUserKey( wxString sencFileName);
 extern bool CheckEULA( void );
+extern int processChartinfo(const wxString &oesenc_file);
+extern void showChartinfoDialog( wxString& info);
+extern void processUserKeyHint(const wxString &oesenc_file);
 
 // ----------------------------------------------------------------------------
 // Random Prototypes
@@ -957,6 +965,16 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     }
 #endif
 
+    if(processChartinfo(name) < 0) {             // could not find the Chartinfo.txt file...
+        if(!g_binfoShown){
+            showChartinfoDialog( g_infoRaw );
+            g_binfoShown = true;
+        }
+    }
+    
+    if(!g_bUserKeyHintTaken)
+        processUserKeyHint(name);
+    
     validate_SENC_server();
 
     if( PI_HEADER_ONLY == init_flags ){
@@ -966,7 +984,6 @@ int eSENCChart::Init( const wxString& name, int init_flags )
             ret_val = PI_INIT_FAIL_REMOVE;
         else
             ret_val = PI_INIT_OK;
-    
     }
         
     else if( PI_FULL_INIT == init_flags ){
@@ -975,83 +992,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
         
         m_SENCFileName = name;
         ret_val = PostInit( init_flags, global_color_scheme );
-        
-#if 0
-        //  Verify that the eHdr exists, if not, then rebuild it.
-        wxString efn = Get_eHDR_Name(name_os63);
-        
-        if( !wxFileName::FileExists(efn) ){             //  we need to create the ehdr file.
-
-            wxString ebuild = Build_eHDR(name_os63);
-            if( !ebuild.Len() ) {
-                s_PI_bInS57--;
-                return PI_INIT_FAIL_REMOVE;
-            }
-        }
-        
-        // see if there is a SENC available
-        int sret = FindOrCreateSenc( m_full_base_path );
-        
-//        wxString e;
-//        e.Printf(_T("  FindOrCreateSenc returns %d\n"), sret);
-//        ScreenLogMessage( e );
-        
-        if( sret != BUILD_SENC_OK ) {
-            if( sret == BUILD_SENC_NOK_RETRY )
-                ret_val = PI_INIT_FAIL_RETRY;
-            else
-                ret_val = PI_INIT_FAIL_REMOVE;
-        } else {
-            
-            //  Finish the init process
-            ret_val = PostInit( init_flags, m_global_color_scheme );
-            
-            //  SENC may not decrypt properly
-            //  So try one more time
-            if(PI_INIT_FAIL_RETRY == ret_val) {
-                ScreenLogMessage( _T("   Warning: Retry eSENC.\n "));
-                
-                //      Establish location for SENC files
-                wxFileName SENCFileName = m_full_base_path;
-                SENCFileName.SetExt( _T("es57") );
-                
-                //      Set the proper directory for the SENC files
-                wxString SENCdir = m_senc_dir;
-                
-                if( SENCdir.Last() != wxFileName::GetPathSeparator() )
-                    SENCdir.Append( wxFileName::GetPathSeparator() );
-                
-                wxFileName tsfn( SENCdir );
-                tsfn.SetFullName( SENCFileName.GetFullName() );
-                SENCFileName = tsfn;
-                
-                wxRemoveFile( tsfn.GetFullPath() );
- 
-                int sret = FindOrCreateSenc( m_full_base_path );
-                if( sret != BUILD_SENC_OK ) {
-                    if( sret == BUILD_SENC_NOK_RETRY )
-                        ret_val = PI_INIT_FAIL_RETRY;
-                    else
-                        ret_val = PI_INIT_FAIL_REMOVE;
-                }
-                else {
-                    //  Finish the init process
-                    ret_val = PostInit( init_flags, m_global_color_scheme );
-                    if(0 != ret_val) {
-                        ScreenLogMessage( _T("   Error: eSENC decrypt failed again.\n "));
-                    }
-                        
-                }
-            }
-        }
-#endif
-
     }
-        
-        
-        
-            
-        
         
       s_PI_bInS57--;
       return ret_val;
