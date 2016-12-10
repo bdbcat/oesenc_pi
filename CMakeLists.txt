@@ -22,8 +22,8 @@ SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 SET(VERSION_MAJOR "0")
-SET(VERSION_MINOR "1")
-SET(VERSION_PATCH "1122")
+SET(VERSION_MINOR "2")
+SET(VERSION_PATCH "1209")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
 
@@ -98,6 +98,7 @@ ENDIF(WIN32)
 IF(UNIX)
 #     INCLUDE_DIRECTORIES("/home/dsr/Projects/opencpn_sf/opencpn/include")
 ENDIF(UNIX)
+
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -ansi -pedantic -Wno-variadic-macros" )
