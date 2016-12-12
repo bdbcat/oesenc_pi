@@ -4958,7 +4958,7 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
     //TODO  Debugging
     if(rzRules->obj->Index == 2216)
         int yyp = 0;
-    
+
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
 
@@ -8187,8 +8187,10 @@ bool s52plib::isAnchorEnabled( const PlugIn_ViewPort& VPoint )
     bool retval = false;
 
     PI_S57Obj *po = new PI_S57Obj;
-    strncpy(po->FeatureName, "SBDARE", 6);
+    strncpy(po->FeatureName, "ACHARE", 6);
     po->FeatureName[6] = 0;
+    po->Primitive_type = GEO_AREA;
+    
     po->iOBJL = -1;
     po->m_chart_context = 0;
     po->lat_min = VPoint.clat;
@@ -8198,20 +8200,6 @@ bool s52plib::isAnchorEnabled( const PlugIn_ViewPort& VPoint )
     
     po->m_DisplayCat = PI_DISPLAYBASE;
     po->Scamin = 1000000;
-    
-    char *pAVS = (char *) malloc( 2 );
-    strcpy( pAVS, "9" );
-    
-    po->attVal = new wxArrayOfS57attVal;
-    S57attVal *pattValTmp = new S57attVal;
-    pattValTmp->valType = OGR_STR;
-    pattValTmp->value = pAVS;
-    po->attVal->Add( pattValTmp );
-    
-    po->att_array = (char *)malloc(6);
-    strncpy(po->att_array, "NATSUR", 6);
-    po->n_attr = 1;
-    
     
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
@@ -8223,7 +8211,7 @@ bool s52plib::isAnchorEnabled( const PlugIn_ViewPort& VPoint )
     
     PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
-    retval = ( ctx->bFText_Added == 1);
+    retval = ( ctx->bCS_Added == 1);
     
     PI_PLIBFreeContext(po->S52_Context);
     delete po;
@@ -8268,9 +8256,9 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
             RemoveObjNoshow("LIGHTS");
         }
         
-        // Handle Anchor are toggle
+        // Handle Anchor area toggle
         bool bAnchor = isAnchorEnabled(VPoint);
-        
+
         const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
         unsigned int num = sizeof(categories) / sizeof(categories[0]);
         
