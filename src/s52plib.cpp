@@ -4136,6 +4136,42 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     Rule *prule = rules->razRule;
 
+    // Adjust size
+    //  Some plain lights have no SCAMIN attribute.
+    //  This causes display congestion at small viewing scales, since the objects are rendered at fixed pixel dimensions from the LUP rules.
+    //  As a correction, the idea is to not allow the rendered symbol to be larger than "X" meters on the chart.
+    //   and scale it down when rendered if necessary.
+
+    float xscale = 1.0;
+    if(1/*rzRules->obj->Scamin > 10000000*/){                        // huge (unset) SCAMIN)
+        float radius_meters_target = 200;
+    
+        float fsf = 100 / canvas_pix_per_mm;
+
+        float radius_meters = ( radius * canvas_pix_per_mm ) / vp->view_scale_ppm;
+   
+        xscale = radius_meters_target / radius_meters;
+        xscale = wxMin(xscale, 1.0);
+        xscale = wxMax(.4, xscale);
+    
+//    printf("CARC   xscale: %g  radius_meters %g\n",  xscale, radius_meters);
+        radius *= xscale;
+    }
+    
+    carc_hash += _T(".");
+    wxString xs;
+    xs.Printf( _T("%5g"), xscale );
+    carc_hash += xs;
+    
+    bool bnoCache = xscale < 1.0;
+    
+    if(bnoCache){
+        if(prule->pixelPtr){
+            delete prule->pixelPtr;
+            prule->pixelPtr = NULL;
+        }
+    }
+    
     //Instantiate the symbol if necessary
     if( ( rules->razRule->pixelPtr == NULL ) || ( rules->razRule->parm1 != m_colortable_index ) ) {
         //  Render the sector light to a bitmap
