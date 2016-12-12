@@ -8528,17 +8528,6 @@ wxPoint RenderFromHPGL::ParsePoint( wxString& argument )
 
 void RenderFromHPGL::SetPen()
 {
-    // plib->canvas_pix_per_mm;
-    scaleFactor = 100.0 / plib->GetPPMM();
-
-    // Vector rendered (HPGL) features are specified in terms of absolute dimensions on screen, and should not be scaled.
-    
-//     if(g_bresponsive){
-//         double scale_factor = 1.0;
-//         scale_factor *=  g_ChartScaleFactorExp;
-//         scaleFactor /= scale_factor;
-//     }
-    
     if( renderToDC ) {
         pen = wxThePenList->FindOrCreatePen( penColor, penWidth, wxPENSTYLE_SOLID );
         brush = wxTheBrushList->FindOrCreateBrush( penColor, wxBRUSHSTYLE_SOLID );
