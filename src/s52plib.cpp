@@ -4050,9 +4050,9 @@ int s52plib::RenderCARC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     //TODO  Empirically, I find that MSW is always faster using display list instead of VBO.
     //  I doubt this is generally true, though.  We need some smarter logic here,
     //  perhaps a runtime measurement approach to detect and use the faster method.
-#ifdef __WXMSW__
-    return RenderCARC_DisplayList(rzRules, rules, vp);
-#endif
+//#ifdef __WXMSW__
+//    return RenderCARC_DisplayList(rzRules, rules, vp);
+//#endif
     
     return RenderCARC_VBO(rzRules, rules, vp);
 }
