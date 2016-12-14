@@ -8053,21 +8053,23 @@ public:
 bool s52plib::IsTextEnabled(const PlugIn_ViewPort& VPoint)
 {
     PI_S57Obj *po = new PI_S57Obj;
-    strncpy(po->FeatureName, "BUAARE", 6);
-    po->iOBJL = -1;
+    strncpy(po->FeatureName, "SEAARE"/*"BUAARE"*/, 6);
     po->FeatureName[6] = 0;
+    po->iOBJL = -1;
     po->m_chart_context = 0;
     po->lat_min = VPoint.clat;
     po->lat_max = VPoint.clat + .001;
     po->lon_min = VPoint.clon;
     po->lon_max = VPoint.clon + .001;
+    po->chart_ref_lat = 0;
+    po->chart_ref_lon = 0;
     
     po->m_DisplayCat = PI_DISPLAYBASE;
-    po->Scamin = 1000000;
+    po->Scamin = 200000000;
     
     
     char *pAVS = (char *) malloc( 2 );
-    strcpy( pAVS, "0" );
+    strcpy( pAVS, " " );
     
     po->attVal = new wxArrayOfS57attVal;
     S57attVal *pattValTmp = new S57attVal;
@@ -8086,11 +8088,13 @@ bool s52plib::IsTextEnabled(const PlugIn_ViewPort& VPoint)
     PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
-    bool text_on = (ctx->bFText_Added == 1 );
+    bool text_on = false;
+    
+    if(ctx)
+        text_on = (ctx->bFText_Added == 1 );
     
     PI_PLIBFreeContext(po->S52_Context);
     delete po;
-    int yyp = 4;
     
     return text_on;
     
@@ -8119,9 +8123,11 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     po->lat_max = VPoint.clat + .001;
     po->lon_min = VPoint.clon;
     po->lon_max = VPoint.clon + .001;
+    po->chart_ref_lat = VPoint.clat;
+    po->chart_ref_lon = VPoint.clon;
     
     po->m_DisplayCat = PI_DISPLAYBASE;
-    po->Scamin = 1000000;
+    po->Scamin = 200000000;
     po->npt = 0;        // Causes all rendering skip, as desired
     po->m_bcategory_mutable = 0;
     
@@ -8171,6 +8177,11 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
  *      This is pretty ugly, and can go away, and be done better, when the PlugIn API is updated post-O44.
  */
 
+void *dummy (void *param)
+{
+    return NULL;
+}
+
 bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
 {
     PI_S57Obj *po = new PI_S57Obj;
@@ -8182,9 +8193,11 @@ bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
     po->lat_max = VPoint.clat + .001;
     po->lon_min = VPoint.clon;
     po->lon_max = VPoint.clon + .001;
+    po->chart_ref_lat = VPoint.clat;
+    po->chart_ref_lon = VPoint.clon;
     
     po->m_DisplayCat = PI_DISPLAYBASE;
-    po->Scamin = 1000000;
+    po->Scamin = 200000000;
 
     char *pAVS = (char *) malloc( 2 );
     strcpy( pAVS, "9" );
@@ -8207,6 +8220,10 @@ bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
     
     wxScreenDC dc;
     PlugIn_ViewPort pivp = VPoint;
+    
+    // We hack the LUP to make the CS procedure not actually render anything
+    ctx->LUP->ruleList->razRule = (Rule *)dummy;
+    ctx->LUP->DISC = DISPLAYBASE;
     
     PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
@@ -8233,14 +8250,23 @@ bool s52plib::isAnchorEnabled( const PlugIn_ViewPort& VPoint )
     po->lat_max = VPoint.clat + .001;
     po->lon_min = VPoint.clon;
     po->lon_max = VPoint.clon + .001;
+    po->chart_ref_lat = VPoint.clat;
+    po->chart_ref_lon = VPoint.clon;
     
     po->m_DisplayCat = PI_DISPLAYBASE;
-    po->Scamin = 1000000;
+    po->Scamin = 200000000;
     
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
     
     ctx->bCS_Added = false;
+    
+    // We hack the LUP to make it into a CS procedure that does not actually render anything,
+    //  but gets evaluated just the same
+    ctx->LUP->ruleList->razRule = (Rule *)dummy;
+    ctx->LUP->DISC = DISPLAYBASE;
+    ctx->LUP->ruleList->ruleType = RUL_CND_SY;
+    ctx->LUP->ruleList->next = 0;
     
     wxScreenDC dc;
     PlugIn_ViewPort pivp = VPoint;
@@ -8272,6 +8298,7 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
         m_bShowS57Text = IsTextEnabled(VPoint);
 
+        
         // Detect and manage "LIGHTS" toggle
         OBJLElement *pOLE = NULL;
         for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
@@ -8291,6 +8318,8 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
                 pOLE->nViz = 1;
             RemoveObjNoshow("LIGHTS");
         }
+
+        
         
         // Handle Anchor area toggle
         bool bAnchor = isAnchorEnabled(VPoint);
@@ -8321,7 +8350,6 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
                 if( cnt == num ) break;
             }
         }
-        
                 
         
         m_myConfig = PI_GetPLIBStateHash();
