@@ -2969,8 +2969,6 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glDisable( GL_LINE_STIPPLE );
 #endif    
 
-        glDisable( GL_LINE_STIPPLE );
-        
     glPushMatrix();
     
     // Set up the OpenGL transform matrix for this object
