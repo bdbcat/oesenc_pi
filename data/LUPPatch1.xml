@@ -1,0 +1,25 @@
+<chartsymbols>
+        <lookups>
+                <lookup id="2" RCID="32038" name="ACHARE">
+                        <type>Area</type>
+                        <disp-prio>Area 2</disp-prio>
+                        <radar-prio>Supressed</radar-prio>
+                        <table-name>Plain</table-name>
+                        <instruction>SY(ACHARE51);LS(DASH,2,CHMGF);CS(RESTRN01)</instruction>
+                        <display-cat>Standard</display-cat>
+                        <comment>26220</comment>
+                </lookup>
+
+                <lookup id="342" RCID="32377" name="ACHARE">
+                        <type>Area</type>
+                        <disp-prio>Area 2</disp-prio>
+                        <radar-prio>Supressed</radar-prio>
+                        <table-name>Symbolized</table-name>
+                        <instruction>SY(ACHARE51);LC(ACHARE51);CS(RESARE01)</instruction>
+                        <display-cat>Standard</display-cat>
+                        <comment>26220</comment>
+                </lookup>
+
+        </lookups>
+</chartsymbols>
+
