@@ -6166,6 +6166,12 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                 lightsHtml << character.BeforeFirst( wxChar( '(' ) ) << _T(" ");
             }
             
+            attrIndex = thisLight.attributeNames.Index( _T("COLOUR") );
+            if( attrIndex != wxNOT_FOUND ) {
+                lightsHtml << _T(" ") << thisLight.attributeValues.Item( attrIndex ).Upper()[0];
+                lightsHtml << _T(" ");
+            }
+            
             attrIndex = thisLight.attributeNames.Index( _T("SIGGRP") );
             if( attrIndex != wxNOT_FOUND ) {
                 lightsHtml << thisLight.attributeValues.Item( attrIndex );

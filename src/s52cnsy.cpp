@@ -1468,7 +1468,8 @@ l05_end:
             static wxString lastDescription;
             bool isFirstSector = true;
 
-            if( lastLat == obj->m_lat && lastLon == obj->m_lon ) isFirstSector = false;
+            if( lastLat == obj->m_lat && lastLon == obj->m_lon )
+                isFirstSector = false;
             lastLat = obj->m_lat;
             lastLon = obj->m_lon;
 
@@ -1485,12 +1486,12 @@ l05_end:
                         lights05.Append( _T("',3,2,3,'15110',2,0,CHBLK,23)" ) );
             }
 
-            if( !isFirstSector && lastDescription != litdsn01 ) {
-                  lastDescription = litdsn01;
-                  lights05.Append( _T(";TX('") );
-                  lights05.Append( litdsn01 );
-                  lights05.Append( _T("',3,2,3,'15110',2,1,CHBLK,23)" ) );
-            }
+//             if( !isFirstSector && lastDescription != litdsn01 ) {
+//                   lastDescription = litdsn01;
+//                   lights05.Append( _T(";TX('") );
+//                   lights05.Append( litdsn01 );
+//                   lights05.Append( _T("',3,2,3,'15110',2,1,CHBLK,23)" ) );
+//             }
       }
 
       lights05.Append( '\037' );
@@ -3405,7 +3406,8 @@ static wxString _LITDSN01(S57Obj *obj)
       double sectrTest;
       bool hasSectors = GetDoubleAttr( obj, "SECTR1", sectrTest );
 
-      if( ! hasSectors ) {
+//      if( ! hasSectors )
+      {
             GetStringAttr(obj, "COLOUR", col_str, 19);
 
             int n_cols = 0;
