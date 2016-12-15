@@ -48,6 +48,7 @@
 //#include "georef.h"
 
 //extern wxString                 g_csv_locn;
+extern int g_debugLevel;
 
 using namespace std;
 
@@ -130,9 +131,9 @@ void Osenc_instream::Init()
 void Osenc_instream::Close()
 {
     if(-1 != privatefifo){
-        printf("   Close private fifo: %s \n", privatefifo_name);
+        if(g_debugLevel)printf("   Close private fifo: %s \n", privatefifo_name);
         close(privatefifo);
-        printf("   unlink private fifo: %s \n", privatefifo_name);
+        if(g_debugLevel)printf("   unlink private fifo: %s \n", privatefifo_name);
         unlink(privatefifo_name);
     }
     
@@ -149,24 +150,24 @@ void Osenc_instream::Close()
 
 bool Osenc_instream::isAvailable()
 {
-    printf("TestAvail\n");
+    if(g_debugLevel)printf("TestAvail\n");
 
     if(m_uncrypt_stream){
         return m_uncrypt_stream->IsOk();
     }
     else{
         if( Open(CMD_TEST_AVAIL, _T(""), _T("?")) ){
-            printf("TestAvail Open OK\n");
+            if(g_debugLevel)printf("TestAvail Open OK\n");
             char response[8];
             memset( response, 0, 8);
             int nTry = 5;
             do{
                 if( Read(response, 2).IsOk() ){
-                    printf("TestAvail Response OK\n");
+                    if(g_debugLevel)printf("TestAvail Response OK\n");
                     return( !strncmp(response, "OK", 2) );
                 }
                 
-                printf("Sleep on TestAvail: %d\n", nTry);
+                if(g_debugLevel)printf("Sleep on TestAvail: %d\n", nTry);
                 wxMilliSleep(100);
                 nTry--;
             }while(nTry);
@@ -174,7 +175,7 @@ bool Osenc_instream::isAvailable()
             return false;
         }
         else{
-            printf("TestAvail Open Error\n");
+            if(g_debugLevel)printf("TestAvail Open Error\n");
             return false;
         }
     }
@@ -218,9 +219,9 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         
             // Create the private FIFO
         if(-1 == mkfifo(privatefifo_name, 0666))
-                printf("   mkfifo private failed: %s\n", privatefifo_name);
+            if(g_debugLevel)printf("   mkfifo private failed: %s\n", privatefifo_name);
         else
-                printf("   mkfifo OK: %s\n", privatefifo_name);
+            if(g_debugLevel)printf("   mkfifo OK: %s\n", privatefifo_name);
         
         
         
@@ -631,7 +632,7 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
     
     //  Bad read?
     if(!fpx.IsOk()){
-        printf("verifySENC E2\n");
+        if(g_debugLevel)printf("verifySENC E2\n");
         wxLogMessage(_T("verifySENC E2"));
         
         // Server may be slow, so try the read again

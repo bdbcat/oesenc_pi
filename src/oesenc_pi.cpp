@@ -109,6 +109,8 @@ wxString                        g_infoRule;
 bool                            g_binfoShown;
 wxString                        g_infoRaw;
 bool                            g_bUserKeyHintTaken;
+int                             g_serverDebug;
+int                             g_debugLevel;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
@@ -964,6 +966,8 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("ShowScreenLog"), &g_buser_enable_screenlog);
         pConf->Read( _T("NoShowSSE25"), &g_bnoShow_sse25);
         pConf->Read( _T("LastFPRFile"), &g_fpr_file);
+        pConf->Read( _T("DEBUG_SERVER"), &g_serverDebug);
+        pConf->Read( _T("DEBUG_LEVEL"), &g_debugLevel);
         
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
@@ -2353,7 +2357,7 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
  
 bool validateUserKey( wxString sencFileName)
 {
-    printf("\n-----------validateUserKey\n");
+    if(g_debugLevel)printf("\n-----------validateUserKey\n");
     
     wxLogMessage(_T("validateUserKey"));
     
@@ -2697,7 +2701,7 @@ bool validate_SENC_server(void)
 //     return true;        // started as service earlier
 // #endif    
 
- printf("\n-------validate_SENC_server\n");
+    if(g_debugLevel)printf("\n-------validate_SENC_server\n");
     wxLogMessage(_T("validate_SENC_server"));
     
     // Check to see if the server is already running, and available
@@ -2707,7 +2711,7 @@ bool validate_SENC_server(void)
         return true;
     }
 
-    printf("      validate_SENC_server, retry\n");
+    if(g_debugLevel)printf("      validate_SENC_server, retry\n");
     wxLogMessage(_T("Available FALSE, retry..."));
     wxMilliSleep(500);
     Osenc_instream testAvailRetry;
@@ -2811,13 +2815,16 @@ bool validate_SENC_server(void)
     wxString cmds = g_sencutil_bin;
 
 #ifndef __WXMSW__    
-    cmds += _T(" --daemon");
+//    cmds += _T(" --daemon");
 #endif
 
     int flags = wxEXEC_ASYNC;
 #ifdef __WXMSW__    
 	flags |= wxEXEC_HIDE_CONSOLE;
 #endif
+
+    if(g_serverDebug)
+        cmds += _T(" -d");
     
     g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
     wxMilliSleep(100);
@@ -3568,13 +3575,17 @@ void oesenc_pi_about::OnClose( wxCloseEvent& event )
     Destroy();
 }
 
+void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
+{
+}
 
 
-class  OESENCMessageDialog: public wxDialog
+
+class  OESENC_HTMLMessageDialog: public wxDialog
 {
     
 public:
-    OESENCMessageDialog(wxWindow *parent, const wxString& message,
+    OESENC_HTMLMessageDialog(wxWindow *parent, const wxString& message,
                       const wxString& caption = wxMessageBoxCaptionStr,
                       long style = wxOK|wxCENTRE,  
                       bool bFixedFont = false,
@@ -3590,15 +3601,15 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(OESENCMessageDialog, wxDialog)
-EVT_BUTTON(wxID_YES, OESENCMessageDialog::OnYes)
-EVT_BUTTON(wxID_NO, OESENCMessageDialog::OnNo)
-EVT_BUTTON(wxID_CANCEL, OESENCMessageDialog::OnCancel)
-EVT_CLOSE(OESENCMessageDialog::OnClose)
+BEGIN_EVENT_TABLE(OESENC_HTMLMessageDialog, wxDialog)
+EVT_BUTTON(wxID_YES, OESENC_HTMLMessageDialog::OnYes)
+EVT_BUTTON(wxID_NO, OESENC_HTMLMessageDialog::OnNo)
+EVT_BUTTON(wxID_CANCEL, OESENC_HTMLMessageDialog::OnCancel)
+EVT_CLOSE(OESENC_HTMLMessageDialog::OnClose)
 END_EVENT_TABLE()
 
 
-OESENCMessageDialog::OESENCMessageDialog( wxWindow *parent,
+OESENC_HTMLMessageDialog::OESENC_HTMLMessageDialog( wxWindow *parent,
                                       const wxString& message,
                                       const wxString& caption,
                                       long style,
@@ -3616,46 +3627,18 @@ OESENCMessageDialog::OESENCMessageDialog( wxWindow *parent,
     
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
     
-    wxBoxSizer *icon_text = new wxBoxSizer( wxHORIZONTAL );
+    wxHtmlWindow *msgWindow = new wxHtmlWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                        wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION );
+    msgWindow->SetBorders( 1 );
     
-    #if wxUSE_STATBMP
-    // 1) icon
-    if (style & wxICON_MASK)
-    {
-        wxBitmap bitmap;
-        switch ( style & wxICON_MASK )
-        {
-            default:
-                wxFAIL_MSG(_T("incorrect log style"));
-                // fall through
-                
-            case wxICON_ERROR:
-                bitmap = wxArtProvider::GetIcon(wxART_ERROR, wxART_MESSAGE_BOX);
-                break;
-                
-            case wxICON_INFORMATION:
-                bitmap = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_MESSAGE_BOX);
-                break;
-                
-            case wxICON_WARNING:
-                bitmap = wxArtProvider::GetIcon(wxART_WARNING, wxART_MESSAGE_BOX);
-                break;
-                
-            case wxICON_QUESTION:
-                bitmap = wxArtProvider::GetIcon(wxART_QUESTION, wxART_MESSAGE_BOX);
-                break;
-        }
-        wxStaticBitmap *icon = new wxStaticBitmap(this, wxID_ANY, bitmap);
-        icon_text->Add( icon, 0, wxCENTER );
-    }
-    #endif // wxUSE_STATBMP
+    topsizer->Add( msgWindow, 1, wxALIGN_CENTER_HORIZONTAL | wxEXPAND, 5 );
     
-    #if wxUSE_STATTEXT
-    // 2) text
-    icon_text->Add( CreateTextSizer( message ), 0, wxALIGN_CENTER | wxLEFT, 10 );
+    wxString html;
+    html << message;
     
-    topsizer->Add( icon_text, 1, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
-    #endif // wxUSE_STATTEXT
+    wxCharBuffer buf = html.ToUTF8();
+    if( buf.data() )                            // string OK?
+       msgWindow->SetPage( html );
     
     // 3) buttons
     int AllButtonSizerFlags = wxOK|wxCANCEL|wxYES|wxNO|wxHELP|wxNO_DEFAULT;
@@ -3666,34 +3649,30 @@ OESENCMessageDialog::OESENCMessageDialog( wxWindow *parent,
     if ( sizerBtn )
         topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
     
-    SetAutoLayout( true );
     SetSizer( topsizer );
     
-    topsizer->SetSizeHints( this );
     topsizer->Fit( this );
-    wxSize size( GetSize() );
-    if (size.x < size.y*3/2)
-    {
-        size.x = size.y*3/2;
-        SetSize( size );
-    }
+    
+    wxSize szyv = msgWindow->GetVirtualSize();
+   
+    SetClientSize(szyv.x + 20, szyv.y + 20); 
     
     Centre( wxBOTH | wxCENTER_FRAME);
 }
 
-void OESENCMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
+void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
 {
     SetReturnCode(wxID_YES);
     EndModal( wxID_YES );
 }
 
-void OESENCMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
+void OESENC_HTMLMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
 {
     SetReturnCode(wxID_NO);
     EndModal( wxID_NO );
 }
 
-void OESENCMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+void OESENC_HTMLMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
     // Allow cancellation via ESC/Close button except if
     // only YES and NO are specified.
@@ -3704,16 +3683,12 @@ void OESENCMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void OESENCMessageDialog::OnClose( wxCloseEvent& event )
+void OESENC_HTMLMessageDialog::OnClose( wxCloseEvent& event )
 {
     SetReturnCode(wxID_CANCEL);
     EndModal( wxID_CANCEL );
 }
 
-
-void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
-{
-}
 
 
 void showChartinfoDialog( void )
@@ -3721,10 +3696,30 @@ void showChartinfoDialog( void )
     if(g_binfoShown)
         return;
     
-    wxString hdr = _("The following Chart sets are available:\n\n");
-    hdr +=  _("Chart set                                           Version    Valid until\n");
-    hdr += _T("__________________________________________________________________________\n");
-
+    wxString hdr = _T("<html><body><center><font size=+2>");
+    hdr +=  _("The following Chart sets are available:");
+    hdr += _T("</font></center>");
+    
+    hdr += _T("<hr />");
+    
+    hdr += _T("<table border=0 bordercolor=#000000 style=background-color:#fbfbf9 width=600 cellpadding=3 cellspacing=3>");
+    
+    hdr += _T("<tr>");
+    
+    hdr += _T("<td><font size=+2>");
+    hdr += _("Chart set");
+    hdr += _T("</font></td>");
+ 
+    hdr += _T("<td><font size=+2>");
+    hdr += _("Version");
+    hdr += _T("</font></td>");
+    
+    hdr += _T("<td><font size=+2>");
+    hdr += _("Valid until");
+    hdr += _T("</font></td>");
+    
+    hdr += _T("</tr>");
+   
     std::map<std::string, ChartInfoItem *>::iterator iter;
     for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
     {
@@ -3734,43 +3729,34 @@ void showChartinfoDialog( void )
         std::string key = iter->first;
         wxString strk = wxString(key.c_str(), wxConvUTF8);
         wxString info = pci->config_string;
+ 
+        hdr += _T("<tr>");
         
-        // Reformat the line
-         wxStringTokenizer tkx(info, _T(";|"));
+        // Get the line fields
+         wxStringTokenizer tkx(info, _T(";"));
          while ( tkx.HasMoreTokens() ){
-            wxString token = tkx.GetNextToken();
-            if(tkx.GetLastDelimiter() == '|')
-                formatted += _T("\n");
-            else{    
-                    token += _T("                                                                                       ");
-                    token.Truncate( 50 );
-                    formatted += token;
+            wxString token = tkx.GetNextToken();        //description
+            hdr += _T("<td>") + token + _T("</td>");
                     
-                    token = tkx.GetNextToken();
-                    formatted += _T("  ") + token;
+            token = tkx.GetNextToken();         // version
+            hdr += _T("<td>") + token + _T("</td>");
                     
-                    token = tkx.GetNextToken();         // expiry date
-                    formatted += _T("              ");
-                    formatted.Truncate(63);
-                    formatted += token;
-                    
-                    if(tkx.GetLastDelimiter() == '|')
-                        formatted += _T("\n");
-                        
-            }
+            token = tkx.GetNextToken();         // expiry date
+            hdr += _T("<td><font color=#ff0000>") + token + _T("</font></td>");
         }
         
-        hdr += formatted + _T("\n");
-        
+        hdr += _T("</tr>");
     }
-    
+ 
+    hdr += _T("</table>");
+    hdr += _T("</body></html>");
      
-    OESENCMessageDialog dlg( NULL,hdr, _("oeSENC_PI Message"), wxOK, true);
+    OESENC_HTMLMessageDialog dlg( NULL,hdr, _("oeSENC_PI Message"), wxOK, true);
     dlg.Centre();
     dlg.ShowModal();
     g_binfoShown = true;
 }
-    
+
 int processChartinfo(const wxString &oesenc_file)
 {
     // get the Chartinfo as a wxTextFile

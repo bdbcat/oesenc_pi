@@ -3403,8 +3403,6 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         m_vc_hash[vcp->index] = vcp;
     }
     
-    printf("Start LUP\n");
-    
     //Walk the vector of S57Objs, associating LUPS, instructions, etc...
     
     for(unsigned int i=0 ; i < Objects.size() ; i++){
@@ -3502,8 +3500,6 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         }
         
     }   // Objects iterator
-    
-    printf("Finish LUP\n");
     
     //   Decide on pub date to show
     
@@ -3632,10 +3628,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             }
         }
 
-        printf("Start AssembleLineGeometry\n");
-        
         AssembleLineGeometry();
-        printf("Finish AssembleLineGeometry\n");
         
         return ret_val;
 }
