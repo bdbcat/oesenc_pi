@@ -3696,6 +3696,9 @@ void showChartinfoDialog( void )
     if(g_binfoShown)
         return;
     
+    if(info_hash.empty())
+        return;
+    
     wxString hdr = _T("<html><body><center><font size=+2>");
     hdr +=  _("The following Chart sets are available:");
     hdr += _T("</font></center>");
@@ -3816,11 +3819,13 @@ void processUserKeyHint(const wxString &oesenc_file)
 {
     // get the Chartinfo as a wxTextFile
     wxFileName fn(oesenc_file);
-    wxString chartInfo = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
-    chartInfo += _T("Userkey.txt");
+    wxString userkey = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
+    userkey += _T("Userkey.txt");
     
-    
-    wxTextFile info_file( chartInfo );
+    if(!wxFileExists(userkey))
+        return;
+        
+    wxTextFile info_file( userkey );
     if( info_file.Open() ){
         wxString line = info_file.GetFirstLine();
         
