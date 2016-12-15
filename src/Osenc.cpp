@@ -103,7 +103,6 @@ private:
 };
 #endif
 
-
 #ifndef __WXMSW__
 //--------------------------------------------------------------------------
 //      Osenc_instream implementation
@@ -121,6 +120,7 @@ Osenc_instream::~Osenc_instream()
 void Osenc_instream::Init()
 {
     privatefifo = -1;
+    publicfifo = -1;
     m_OK = true;
     m_lastBytesRead = 0;
     m_lastBytesReq = 0;
@@ -130,11 +130,14 @@ void Osenc_instream::Init()
 void Osenc_instream::Close()
 {
     if(-1 != privatefifo){
-        printf("           Close private fifo: %s \n", privatefifo_name);
+        printf("   Close private fifo: %s \n", privatefifo_name);
         close(privatefifo);
+        printf("   unlink private fifo: %s \n", privatefifo_name);
+        unlink(privatefifo_name);
     }
     
-    unlink(privatefifo_name);
+    if(-1 != publicfifo)
+        close(publicfifo);
     
     if(m_uncrypt_stream){
         delete m_uncrypt_stream;
@@ -153,22 +156,27 @@ bool Osenc_instream::isAvailable()
     }
     else{
         if( Open(CMD_TEST_AVAIL, _T(""), _T("?")) ){
+            printf("TestAvail Open OK\n");
             char response[8];
             memset( response, 0, 8);
             int nTry = 5;
             do{
                 if( Read(response, 2).IsOk() ){
+                    printf("TestAvail Response OK\n");
                     return( !strncmp(response, "OK", 2) );
                 }
                 
+                printf("Sleep on TestAvail: %d\n", nTry);
                 wxMilliSleep(100);
                 nTry--;
             }while(nTry);
             
             return false;
         }
-        else
+        else{
+            printf("TestAvail Open Error\n");
             return false;
+        }
     }
 
 }
@@ -202,18 +210,19 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         //printf("\n\n            Opening senc: %s\n", msg.senc_name);
         
         // Create a unique name for the private (i.e. data) pipe, valid for this session
+        
         wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
-//         if(tmp_file.Length())
-//             wxRemoveFile( tmp_file );
         wxCharBuffer bufn = tmp_file.ToUTF8();
         if(bufn.data()) 
             strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
         
-        // Create the private FIFO
-        if(!mkfifo(privatefifo_name, 0666))
-            int yyp = 4;
+            // Create the private FIFO
+        if(-1 == mkfifo(privatefifo_name, 0666))
+                printf("   mkfifo private failed: %s\n", privatefifo_name);
+        else
+                printf("   mkfifo OK: %s\n", privatefifo_name);
         
-        printf("           Open private fifo: %s\n", privatefifo_name);
+        
         
         // Open the well known public FIFO for writing
         if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
