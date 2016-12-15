@@ -284,6 +284,22 @@
 																		<key>GID</key>
 																		<integer>80</integer>
 																		<key>PATH</key>
+																		<string>data</string>
+																		<key>PATH_TYPE</key>
+																		<integer>3</integer>
+																		<key>PERMISSIONS</key>
+																		<integer>493</integer>
+																		<key>TYPE</key>
+																		<integer>3</integer>
+																		<key>UID</key>
+																		<integer>0</integer>
+																	</dict>
+																	<dict>
+																		<key>CHILDREN</key>
+																		<array/>
+																		<key>GID</key>
+																		<integer>80</integer>
+																		<key>PATH</key>
 																		<string>rrc_eula_ChartSetsForOpenCPN.txt</string>
 																		<key>PATH_TYPE</key>
 																		<integer>3</integer>
@@ -1023,10 +1039,11 @@
 					<true/>
 				</dict>
 			</array>
-			<key>NAME</key>
-			<string>${VERBOSE_NAME}-Plugin_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
-			<key>REFERENCE_FOLDER_PATH</key>
-			<string>.</string>
+                        <key>NAME</key>
+                        <string>${VERBOSE_NAME}-Plugin_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
+                        <key>REFERENCE_FOLDER_PATH</key>
+                        <string>.</string>
+
 		</dict>
 	</dict>
 	<key>TYPE</key>

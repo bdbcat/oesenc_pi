@@ -250,7 +250,7 @@ SET(PREFIX_PLUGINS ${LIB_INSTALL_DIR}/${PARENT})
 SET(PREFIX_PARENTBIN bin)
 SET(PREFIX_PARENTDATA ${PREFIX_DATA}/${PARENT})
 
-INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PLUGINS})
+#INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PLUGINS})
 
 IF (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")
 INSTALL(FILES "buildlinux64/oeserverd/oeserverd"
@@ -304,6 +304,22 @@ INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
 
 INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION "oesenc_pi/oesenc_pi")
 ENDIF(APPLE)
+
+IF(APPLE)
+    if (NOT EXISTS "${PROJECT_BINARY_DIR}/data/")
+        file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/data/")
+        message ("Generating data directory")
+        endif ()
+
+   FILE(GLOB PACKAGE_DATA_FILES ${CMAKE_SOURCE_DIR}/data/*)
+
+   FOREACH (_currentDataFile ${PACKAGE_DATA_FILES})
+        MESSAGE (STATUS "copying: ${_currentDataFile}" )
+        configure_file(${_currentDataFile} ${CMAKE_CURRENT_BINARY_DIR}/data COPYONLY)
+   ENDFOREACH (_currentDataFile )
+
+ENDIF(APPLE)
+
 
 # find src/ -name \*.cpp -or -name \*.c -or -name \*.h -or -name \*.hpp >po/POTFILES.in
 FIND_PROGRAM(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
@@ -410,4 +426,6 @@ GETTEXT_BUILD_MO(${CMAKE_SOURCE_DIR}/po/${PACKAGE_NAME}_ru_RU.po ru)
 ENDIF(GETTEXT_MSGFMT_EXECUTABLE)
 
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")
+
+INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
