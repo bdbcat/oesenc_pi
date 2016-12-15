@@ -2637,6 +2637,22 @@ void initLibraries(void)
 
 
     if( ps52plib->m_bOK ) {
+        
+        // Load up any S52 PLIB patch files found
+        wxString dataLocn =*GetpSharedDataLocation() +
+        _T("plugins") + wxFileName::GetPathSeparator() +
+        _T("oesenc_pi") + wxFileName::GetPathSeparator() +
+        _T("data");
+        
+        wxArrayString patchFiles;
+        wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
+        for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
+            ChartSymbols chartSymbols;
+            chartSymbols.PatchConfigFile( ps52plib, patchFiles.Item(i));
+        }
+            
+            
+        
 //         wxLogMessage( _T("Using s57data in ") + g_csv_locn );
 //         m_pRegistrarMan = new s57RegistrarMgr( g_csv_locn, g_Platform->GetLogFilePtr() );
 
