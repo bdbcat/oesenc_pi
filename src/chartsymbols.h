@@ -106,7 +106,8 @@ public:
 	ChartSymbols(void);
 	~ChartSymbols(void);
         bool LoadConfigFile(s52plib* plibArg, const wxString & path);
-
+        bool PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName);
+        
 	static void InitializeGlobals( void );
 	static void DeleteGlobals( void );
 	static int LoadRasterFileForColorTable( int tableNo, bool flush=false );

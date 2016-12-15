@@ -829,6 +829,57 @@ bool ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePath)
 
     return true;
 }
+
+bool ChartSymbols::PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName)
+{
+    TiXmlDocument doc;
+    
+    plib = plibArg;
+    
+    if( !wxFileName::FileExists( xmlPatchFileName ) ) {
+        wxString msg( _T("ChartSymbols PatchFile not found: ") );
+        msg += xmlPatchFileName;
+        wxLogMessage( msg );
+        return false;
+    }
+    
+    if( !doc.LoadFile( (const char *) xmlPatchFileName.mb_str() ) ) {
+        wxString msg( _T("    ChartSymbols PatchFile Failed to load ") );
+        msg += xmlPatchFileName;
+        wxLogMessage( msg );
+        return false;
+    }
+    
+    wxString msg( _T("ChartSymbols PatchFile loaded from ") );
+    msg += xmlPatchFileName;
+    wxLogMessage( msg );
+    
+    TiXmlHandle hRoot( doc.RootElement() );
+    
+    wxString root = wxString( doc.RootElement()->Value(), wxConvUTF8 );
+    if( root != _T("chartsymbols" ) ) {
+        wxLogMessage(
+            _T("    ChartSymbols::LoadConfigFile(): Expected XML Root <chartsymbols> not found.") );
+            return false;
+    }
+    
+    TiXmlElement* pElem = hRoot.FirstChild().Element();
+    
+    for( ; pElem != 0; pElem = pElem->NextSiblingElement() ) {
+        wxString child = wxString( pElem->Value(), wxConvUTF8 );
+        
+        if( child == _T("color-tables") ) ProcessColorTables( pElem );
+        if( child == _T("lookups") ) ProcessLookups( pElem );
+        if( child == _T("line-styles") ) ProcessLinestyles( pElem );
+        if( child == _T("patterns") ) ProcessPatterns( pElem );
+        if( child == _T("symbols") ) ProcessSymbols( pElem );
+                     
+    }
+    
+    return true;
+}
+
+
 void ChartSymbols::SetColorTableIndex( int index )
 {
     ColorTableIndex = index;
