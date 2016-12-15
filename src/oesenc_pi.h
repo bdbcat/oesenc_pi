@@ -49,6 +49,10 @@
 
 #include "ocpn_plugin.h"
 
+#include <algorithm>          // for std::sort
+#include <string>
+#include <map>
+
 
 enum {
     ID_BUTTONCELLIMPORT,
@@ -83,6 +87,17 @@ public:
 };
 
 WX_DECLARE_OBJARRAY(Catalog_Entry31,      Catalog31);
+
+class ChartInfoItem {
+public:
+    ChartInfoItem(){};
+    ~ChartInfoItem(){};
+    
+    wxString config_string;
+    wxString display_string;
+    bool bShown;
+    bool bAccessed;
+};
 
 
 //----------------------------------------------------------------------------------------------------------
@@ -145,9 +160,10 @@ public:
     void OnShowFPRClick( wxCommandEvent &event );
 
 private:
-    wxString GetPermitDir();
-
-    Catalog31 *CreateCatalog31(const wxString &file31);
+//    wxString GetPermitDir();
+    bool ScrubChartinfoList( void );
+    
+//    Catalog31 *CreateCatalog31(const wxString &file31);
 
     int ProcessCellPermit( wxString &permit, bool b_confirm_existing );
 //    int AuthenticateCell( const wxString & cell_file );
@@ -180,7 +196,7 @@ private:
     bool                m_bSSE26_shown;
     TexFont             m_TexFontMessage;
     
-
+    
 
 };
 
@@ -287,6 +303,8 @@ public:
     void BuildList( const wxString &cert_dir );
 //    wxArrayString       m_permit_file_array;
 };
+
+
 
 
 /*!

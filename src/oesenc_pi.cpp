@@ -51,6 +51,7 @@
 #include "s52plib.h"
 #include "s52utils.h"
 #include "Osenc.h"
+#include "chartsymbols.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -111,6 +112,8 @@ bool                            g_bUserKeyHintTaken;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
+
+std::map<std::string, ChartInfoItem *> info_hash;
 
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
@@ -229,7 +232,8 @@ oesenc_pi::oesenc_pi(void *ppimgr)
 
       m_up_text = NULL;
       LoadConfig();
-
+      ScrubChartinfoList(  );
+      
 
       //        Set up a common data location,
       //        Using a config file specified location if found
@@ -885,6 +889,63 @@ int oesenc_pi::pi_error( wxString msg )
     return 0;
 }
 
+bool oesenc_pi::ScrubChartinfoList( void )
+{
+    //  Get the list of directories that the chart database recognises.
+    wxArrayString chartArray;
+    wxFileConfig *pConf = (wxFileConfig *) g_pconfig;
+    
+    
+    pConf->SetPath( _T ( "/ChartDirectories" ) );
+    int iDirMax = pConf->GetNumberOfEntries();
+    if( iDirMax ) {
+        wxString str, val;
+        long dummy;
+        bool bCont = pConf->GetFirstEntry( str, dummy );
+        while( bCont ) {
+            pConf->Read( str, &val );              // Get a Directory name
+            
+            // remove/fix the decorations
+            wxString valAdd = val.BeforeFirst('^') + wxString(wxFileName::GetPathSeparator());
+            
+            chartArray.Add(valAdd);
+            bCont = pConf->GetNextEntry( str, dummy );
+        }
+    }
+    
+    // And walk the hashmap of ChartinfoItems, trying to find a match from the hashmap item to the directory list contents
+    
+    pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
+    std::map<std::string, ChartInfoItem *>::iterator iter;
+    for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
+    {
+        std::string key = iter->first;
+        wxString strk = wxString(key.c_str(), wxConvUTF8);
+        
+        //  Turn the key back into a directory path by removing/fixing the decorations
+        
+        wxString strt = strk.Mid(2);
+        strt.Replace('!', wxFileName::GetPathSeparator());
+        
+        bool bfound = false;
+        for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
+            wxString ts = chartArray.Item(i);
+            if(strt.IsSameAs(ts)){
+                bfound = true;
+                break;
+            }
+        }
+        
+        //  Did not find the directory, so remove corresponding entry from the hashmap.
+        //  This means that the entry will not be written to config file on app exit, so it is gone.
+        if(!bfound){
+            info_hash.erase(iter);
+        }
+    }
+    return true;
+}
+    
+
 bool oesenc_pi::LoadConfig( void )
 {
     wxFileConfig *pConf = (wxFileConfig *) g_pconfig;
@@ -909,9 +970,27 @@ bool oesenc_pi::LoadConfig( void )
         
         pConf->Read( _T("UserKey"), &g_UserKey );
         pConf->Read( _T("EULA_Accepted"), &g_bEULA_OK, false );
-        pConf->Read( _T("ChartInfo"), &g_infoRaw);
         
+        //  Load the persistent Chartinfo strings
+        pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
         
+        wxString strk;
+        wxString kval;
+        long dummyval;
+        bool bContk = pConf->GetFirstEntry( strk, dummyval );
+        while( bContk ) {
+            pConf->Read( strk, &kval );
+            std::string key = std::string(strk.c_str());
+            std::map<std::string, ChartInfoItem *>::iterator iter;
+            iter = info_hash.find( key );
+            if( iter == info_hash.end() ){
+                ChartInfoItem *pitem = new ChartInfoItem;
+                pitem->config_string = kval;
+                info_hash[key] = pitem;
+            }
+                
+            bContk = pConf->GetNextEntry( strk, dummyval );
+        }
     }
 
     return true;
@@ -927,7 +1006,19 @@ bool oesenc_pi::SaveConfig( void )
         pConf->Write( _T("UserKey"), g_UserKey );
         pConf->Write( _T("EULA_Accepted"), g_bEULA_OK );
         pConf->Write( _T("LastFPRFile"), g_fpr_file);
-        pConf->Write( _T("ChartInfo"), g_infoRaw);
+        
+        //  Save the persistent Chartinfo strings
+        pConf->DeleteGroup(_T ( "/PlugIns/oesenc/ChartinfoList"));
+        pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
+        std::map<std::string, ChartInfoItem *>::iterator iter;
+        for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
+        {
+            ChartInfoItem *pci = iter->second;
+            std::string key = iter->first;
+            wxString strk = wxString(key.c_str(), wxConvUTF8);
+            pConf->Write( strk, pci->config_string );
+            
+        }
         
     }
 
@@ -2262,6 +2353,8 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
  
 bool validateUserKey( wxString sencFileName)
 {
+    printf("\n-----------validateUserKey\n");
+    
     wxLogMessage(_T("validateUserKey"));
     
     if(g_bDeclaredInvalid)
@@ -2280,7 +2373,8 @@ bool validateUserKey( wxString sencFileName)
     int retCode = senc.ingestHeader( sencFileName );
 
     if(retCode != SENC_NO_ERROR){
-        wxLogMessage(_T("validateUserKey E1"));
+       wxASSERT( 0 );
+       wxLogMessage(_T("validateUserKey E1"));
         
     
         if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
@@ -2587,7 +2681,7 @@ bool validate_SENC_server(void)
 //     return true;        // started as service earlier
 // #endif    
 
- printf("      validate_SENC_server\n");
+ printf("\n-------validate_SENC_server\n");
     wxLogMessage(_T("validate_SENC_server"));
     
     // Check to see if the server is already running, and available
@@ -3606,42 +3700,59 @@ void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
 }
 
 
-void showChartinfoDialog( wxString& info)
+void showChartinfoDialog( void )
 {
-    if(!info.Length())
+    if(g_binfoShown)
         return;
     
     wxString hdr = _("The following Chart sets are available:\n\n");
-    hdr += _("Chart set                                           Version    Valid until\n");
-    hdr += _T("________________________________________________________________________\n");
+    hdr +=  _("Chart set                                           Version    Valid until\n");
+    hdr += _T("__________________________________________________________________________\n");
 
-    // Reformat the line
-    wxString formatted;
-    wxStringTokenizer tkx(info, _T(";|"));
-    while ( tkx.HasMoreTokens() ){
-        wxString token = tkx.GetNextToken();
-        if(tkx.GetLastDelimiter() == '|')
-            formatted += _T("\n");
-        else{    
-            token += _T("                                                                                       ");
-            token.Truncate( 50 );
-            formatted += token;
-    
-            token = tkx.GetNextToken();
-            formatted += _T("  ") + token;
-            token = tkx.GetNextToken();
-            formatted += _T("    ") + token;
+    std::map<std::string, ChartInfoItem *>::iterator iter;
+    for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
+    {
+        wxString formatted;
+        
+        ChartInfoItem *pci = iter->second;
+        std::string key = iter->first;
+        wxString strk = wxString(key.c_str(), wxConvUTF8);
+        wxString info = pci->config_string;
+        
+        // Reformat the line
+         wxStringTokenizer tkx(info, _T(";|"));
+         while ( tkx.HasMoreTokens() ){
+            wxString token = tkx.GetNextToken();
             if(tkx.GetLastDelimiter() == '|')
                 formatted += _T("\n");
-                
+            else{    
+                    token += _T("                                                                                       ");
+                    token.Truncate( 50 );
+                    formatted += token;
+                    
+                    token = tkx.GetNextToken();
+                    formatted += _T("  ") + token;
+                    
+                    token = tkx.GetNextToken();         // expiry date
+                    formatted += _T("              ");
+                    formatted.Truncate(63);
+                    formatted += token;
+                    
+                    if(tkx.GetLastDelimiter() == '|')
+                        formatted += _T("\n");
+                        
+            }
         }
+        
+        hdr += formatted + _T("\n");
+        
     }
+    
      
-    wxString infoString = hdr + formatted;
-     
-    OESENCMessageDialog dlg( NULL,infoString, _("oeSENC_PI Message"), wxOK, true);
+    OESENCMessageDialog dlg( NULL,hdr, _("oeSENC_PI Message"), wxOK, true);
     dlg.Centre();
     dlg.ShowModal();
+    g_binfoShown = true;
 }
     
 int processChartinfo(const wxString &oesenc_file)
@@ -3651,39 +3762,53 @@ int processChartinfo(const wxString &oesenc_file)
     wxString chartInfo = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
     chartInfo += _T("Chartinfo.txt");
 
+    std::string key = std::string(fn.GetPath(wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR).c_str());
     
-    wxTextFile info_file( chartInfo );
-    if( info_file.Open() ){
-        wxString line = info_file.GetFirstLine();
-        g_infoRaw.Clear();              // Start afresh
+    if(wxFileExists(chartInfo)){
+        wxTextFile info_file( chartInfo );
+        if( info_file.Open() ){
+            
+            //ChartInfo:Oesenc Charts Test Edition (UK_EU);2016/3;2016-09-30
+            int nkey = 1;
+            wxString line = info_file.GetFirstLine();
         
-        while( !info_file.Eof() ){
-            if(line.StartsWith( _T("ChartInfo:" ) ) ) {
-                wxString content = line.AfterFirst(':');
-                g_infoRaw += content + _T("|");
+            while( !info_file.Eof() ){
+                if(line.StartsWith( _T("ChartInfo:" ) ) ) {
+                    wxString content = line.AfterFirst(':');
+                
+                    wxString keyn = fn.GetPath(wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR);
+                    wxString ncnt;
+                    ncnt.Printf(_T("K%d"), nkey);
+                    keyn.Prepend( ncnt );
+                
+                    keyn.Replace(wxFileName::GetPathSeparator(), '!');
+                    
+                    std::string key = std::string(keyn.c_str());
+                    std::map<std::string, ChartInfoItem *>::iterator iter;
+                
+                    iter = info_hash.find( key );
+                    if( iter == info_hash.end() ){
+                        ChartInfoItem *pitem = new ChartInfoItem;
+                        pitem->config_string = content;
+                        info_hash[key] = pitem;
+                        g_binfoShown = false;                           // added a line, so force re-display
+                    }
+                    nkey++;
+                }
+        
+                line = info_file.GetNextLine();
+                
             }
-            else if(line.StartsWith( _T("ChartInfoShow:" ) ) ) {
-                g_infoRule = line.AfterFirst(':');
-            }
-        
-            line = info_file.GetNextLine();
-        
         }
         
-        // Do we need to show the info?
-        if(g_infoRule.IsSameAs(_T("Session"))){
-            if(!g_binfoShown){
-                showChartinfoDialog( g_infoRaw );
-                g_binfoShown = true;
-            }
              
-        }
         return 0;    
     }
     else
         return -1;
                 
 }
+
 
 void processUserKeyHint(const wxString &oesenc_file)
 {

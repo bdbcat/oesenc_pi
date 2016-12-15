@@ -138,7 +138,7 @@ extern bool validate_SENC_server( void );
 extern bool validateUserKey( wxString sencFileName);
 extern bool CheckEULA( void );
 extern int processChartinfo(const wxString &oesenc_file);
-extern void showChartinfoDialog( wxString& info);
+extern void showChartinfoDialog( void );
 extern void processUserKeyHint(const wxString &oesenc_file);
 
 // ----------------------------------------------------------------------------
@@ -867,110 +867,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     m_ChartFamily = PI_CHART_FAMILY_VECTOR;
     m_projection = PI_PROJECTION_MERCATOR;
 
-
-    //  Parse the metadata
-#if 0  
-    m_up_file_array.Clear();
-    wxTextFile meta_file( name_os63 );
-    if( meta_file.Open() ){
-        wxString line = meta_file.GetFirstLine();
-        
-        while( !meta_file.Eof() ){
-            if(line.StartsWith( _T("cellbase:" ) ) ) {
-                m_full_base_path = line.Mid(9).BeforeFirst(';');
-                wxString baseline = line.Mid(9);
-                
-                //      Capture the last update number
-                wxString ck_comt = baseline.AfterFirst(';');
-                wxStringTokenizer tkz(ck_comt, _T(","));
-                while ( tkz.HasMoreTokens() ){
-                    wxString token = tkz.GetNextToken();
-                    wxString rest;
-                    if(token.StartsWith(_T("EDTN="), &rest)){
-                        long ck_edtn = -1;
-                        rest.ToLong(&ck_edtn);
-                        m_base_edtn = ck_edtn;
-                    }
-                }
-                
-            }
-            else if(line.StartsWith( _T("cellpermit:" ) ) ) {
-                m_cell_permit = line.Mid(11);
-            }
-            else if(line.StartsWith( _T("cellupdate:" ) ) ) {
-                wxString upline = line.Mid(11);
-                wxString upfile = upline.BeforeFirst(';');
-                m_up_file_array.Add(upfile);
-                
-                //      Capture the last update number
-                wxString ck_comt = upline.AfterFirst(';');
-                wxStringTokenizer tkz(ck_comt, _T(","));
-                while ( tkz.HasMoreTokens() ){
-                    wxString token = tkz.GetNextToken();
-                    wxString rest;
-                    if(token.StartsWith(_T("UPDN="), &rest)){
-                        long ck_updn = -1;
-                        rest.ToLong(&ck_updn);
-                        m_latest_update = wxMax(m_latest_update, ck_updn);
-                    }
-                }
-            }
-            
-            line = meta_file.GetNextLine();
-        }                
-    }             
-    else{
-        
-        //      Could not find the os63 file...
-        //      So remove from database permanently to prevent thrashing
-        wxString fn = name_os63;
-//        RemoveChartFromDBInPlace( fn );
-        
-        s_PI_bInS57--;
-        return PI_INIT_FAIL_REMOVE;
-    }
-    
-    //  os63 file is a placeholder, cells have not been imported yet.
-    if( !m_full_base_path.Len() ){
-        s_PI_bInS57--;
-        return PI_INIT_FAIL_REMOVE;
-    }
-    
-    //  Base cell name may not be available, or otherwise corrupted
-    wxFileName fn(m_full_base_path);
-    if(fn.IsDir()){                             // must be a file, not a dir
-        s_PI_bInS57--;
-        return PI_INIT_FAIL_REMOVE;
-    }
-    if(!fn.FileExists()){                       // and file must exist
-        s_PI_bInS57--;
-        return PI_INIT_FAIL_REMOVE;
-    }
-    
-    //  Check the permit expiry date
-    wxDateTime permit_date;
-    wxString expiry_date = m_cell_permit.Mid(8, 8);
-    wxString ftime = expiry_date.Mid(0, 4) + _T(" ") + expiry_date.Mid(4,2) + _T(" ") + expiry_date.Mid(6,2);
-
-#if wxCHECK_VERSION(2, 9, 0)
-    wxString::const_iterator end;
-    permit_date.ParseDate(ftime, &end);
-#else
-    permit_date.ParseDate(ftime.wchar_str());
-#endif                        
-
-    if( permit_date.IsValid()){
-        wxDateTime now = wxDateTime::Now();
-        m_bexpired = now.IsLaterThan(permit_date);
-    }
-#endif
-
-    if(processChartinfo(name) < 0) {             // could not find the Chartinfo.txt file...
-        if(!g_binfoShown){
-            showChartinfoDialog( g_infoRaw );
-            g_binfoShown = true;
-        }
-    }
+    processChartinfo(name);
     
     if(!g_bUserKeyHintTaken)
         processUserKeyHint(name);
@@ -987,6 +884,8 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     }
         
     else if( PI_FULL_INIT == init_flags ){
+
+        showChartinfoDialog();
         
         initLibraries();
         
