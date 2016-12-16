@@ -27,14 +27,21 @@ SET(VERSION_PATCH "1216")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
 
-SET(CMAKE_BUILD_TYPE Release)
+#SET(CMAKE_BUILD_TYPE Release)
+
+IF( NOT CMAKE_BUILD_TYPE )
+  SET( CMAKE_BUILD_TYPE Release CACHE STRING
+       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+       FORCE )
+ENDIF( NOT CMAKE_BUILD_TYPE )
+
+MESSAGE (STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 IF (PREFIX)
  SET(CMAKE_INSTALL_PREFIX ${PREFIX})
 ENDIF (PREFIX)
-
-MESSAGE (STATUS "*** Will install to ${CMAKE_INSTALL_PREFIX}  ***")
 
 SET(PREFIX_BIN bin)
 SET(PREFIX_INCLUDE include)
@@ -48,7 +55,7 @@ IF (NOT WIN32)
     IF (PREFIX)
         SET(CMAKE_INSTALL_PREFIX ${PREFIX})
     ELSE (PREFIX )
-        SET(CMAKE_INSTALL_PREFIX "/usr/")
+        SET(CMAKE_INSTALL_PREFIX "/usr")
     ENDIF (PREFIX)
 
     MESSAGE (STATUS "*** Will install to ${CMAKE_INSTALL_PREFIX}  ***")
@@ -106,7 +113,7 @@ ENDIF(UNIX)
 #  IF NOT DEBUGGING CFLAGS="-O2 -march=native"
 IF(NOT WIN32)
 # ADD_DEFINITIONS( "-Wall -g -fexceptions -fvisibility=hidden -O0" )
- ADD_DEFINITIONS( "-Wall -g -fexceptions" )
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -O2" )
  IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     ADD_DEFINITIONS( " -O0")
  ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -243,6 +250,8 @@ ENDIF(NOT APPLE)
 
 
 
+# Install any special data files or binary helpers here....
+# The PlugIn library itself and any "data" directory (with contents) gets installed in PluginInstall.cmake later
 
 IF(UNIX AND NOT APPLE)
 SET(PARENT opencpn)
@@ -250,7 +259,6 @@ SET(PREFIX_PLUGINS ${LIB_INSTALL_DIR}/${PARENT})
 SET(PREFIX_PARENTBIN bin)
 SET(PREFIX_PARENTDATA ${PREFIX_DATA}/${PARENT})
 
-#INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION ${PREFIX_PLUGINS})
 
 IF (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")
 INSTALL(FILES "buildlinux64/oeserverd/oeserverd"
