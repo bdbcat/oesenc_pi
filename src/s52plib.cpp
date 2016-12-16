@@ -3344,7 +3344,7 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         wxPoint lp;
         float *ppt;
         
-        int direction;
+        int direction =1;
         int ndraw = 0;
         while(ls){
             if( ls->priority == priority_current  ) {  
@@ -4165,7 +4165,23 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     
     if(bnoCache){
         if(prule->pixelPtr){
-            delete prule->pixelPtr;
+            switch( prule->parm0 ){
+                case ID_wxBitmap: {
+                    wxBitmap *pbm = (wxBitmap *) ( prule->pixelPtr );
+                    delete pbm;
+                    break;
+                }
+                case ID_RGBA: {
+                    unsigned char *p = (unsigned char *) ( prule->pixelPtr );
+                    free( p );
+                    break;
+                }
+                case ID_EMPTY:
+                default:
+                    break;
+            }
+                    
+            prule->parm0 = ID_EMPTY;
             prule->pixelPtr = NULL;
         }
     }
@@ -4990,9 +5006,12 @@ int s52plib::RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, Vi
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
-    if(rzRules->obj->Index == 2216)
-        int yyp = 0;
+    //if(rzRules->obj->Index == 187)
+    //    int yyp = 0;
 
+    //if(strncmp(rzRules->obj->FeatureName, "RECTRC", 6))
+    //    int yyp = 0;
+    
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
 
