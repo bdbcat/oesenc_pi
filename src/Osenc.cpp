@@ -852,6 +852,17 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
                 break;
             }   
             
+            case HEADER_CELL_SOUNDINGDATUM:
+            {
+                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    dun = 1; break;
+                }
+                m_SoundingDatum = wxString( buf, wxConvUTF8 );
+                
+                break;
+            }   
+            
             case HEADER_CELL_SENCCREATEDATE:
             {
                 unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
@@ -1096,6 +1107,17 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 }
                 uint32_t *pint = (uint32_t*)buf;
                 m_Chart_Scale = *pint;
+                break;
+            }   
+            
+            case HEADER_CELL_SOUNDINGDATUM:
+            {
+                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    dun = 1; break;
+                }
+                m_SoundingDatum = wxString( buf, wxConvUTF8 );
+                
                 break;
             }   
             
@@ -1459,8 +1481,15 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 break;
             }
             
-            default:
+            default:                            // unrecognized record types
+            {
+                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    dun = 1; break;
+                }
+                
                 break;
+            }
                 
         }       // switch
             

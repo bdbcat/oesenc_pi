@@ -78,6 +78,7 @@ WX_DECLARE_OBJARRAY(float *,   SENCFloatPtrArray);
 #define HEADER_CELL_UPDATE              6
 #define HEADER_CELL_NATIVESCALE         7
 #define HEADER_CELL_SENCCREATEDATE      8
+#define HEADER_CELL_SOUNDINGDATUM       9
 
 #define FEATURE_ID_RECORD               64
 #define FEATURE_ATTRIBUTE_RECORD        65
@@ -382,6 +383,7 @@ public:
     wxString getReadName(){ return m_Name; }
     wxString getReadID(){ return m_ID; }
     Extent &getReadExtent(){ return m_extent; }
+    wxString getSoundingsDatumString(){ return m_SoundingDatum; }
     
     SENCFloatPtrArray &getSENCReadAuxPointArray(){ return m_AuxPtrArray;}
     wxArrayInt &getSENCReadAuxPointCountArray(){ return m_AuxCntArray;}
@@ -487,6 +489,7 @@ private:
     wxArrayInt            m_NoCovrCntArray;
     
     wxString    m_key;
+    wxString              m_SoundingDatum;
     
     
 };

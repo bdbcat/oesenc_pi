@@ -1171,8 +1171,7 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         //  Misc
         m_SE = m_edtn000;
         m_datum_str = _T("WGS84");
-        m_SoundingsDatum = _T("MEAN LOWER LOW WATER");
-        
+        m_SoundingsDatum = senc.getSoundingsDatumString();
         
         // TODO ?? int senc_file_version = senc.getSencReadVersion();
         
@@ -1226,7 +1225,7 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
     SetLinePriorities();
 
     wxMemoryDC dc;
-    bool bnew_view = DoRenderViewOnDC( dc, VPoint, force_new_view );
+    DoRenderViewOnDC( dc, VPoint, force_new_view );
 
     m_last_Region = Region;
     
@@ -3542,7 +3541,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         
         m_datum_str = _T("WGS84");
         
-        m_SoundingsDatum = _T("MEAN LOWER LOW WATER");
+        m_SoundingsDatum = sencfile->getSoundingsDatumString();
         m_ID = sencfile->getReadID();
         m_Name = sencfile->getReadName();
         
@@ -8570,9 +8569,9 @@ S57Obj::~S57Obj()
         
         if( pPolyTessGeo ) {
             #ifdef ocpnUSE_GL 
-            bool b_useVBO = g_b_EnableVBO  && !auxParm1;    // VBO allowed?
+            //bool b_useVBO = g_b_EnableVBO  && !auxParm1;    // VBO allowed?
             
-            PolyTriGroup *ppg_vbo = pPolyTessGeo->Get_PolyTriGroup_head();
+            //PolyTriGroup *ppg_vbo = pPolyTessGeo->Get_PolyTriGroup_head();
             //TODO
 //             if (b_useVBO && ppg_vbo && auxParm0 > 0 && ppg_vbo->single_buffer && s_glDeleteBuffers) {
 //                 s_glDeleteBuffers(1, (GLuint *)&auxParm0);
