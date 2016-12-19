@@ -271,6 +271,9 @@ public:
 
     wxRect m_last_clip_rect;
     int m_myConfig;
+
+    double lastLightLat;
+    double lastLightLon;
     
 private:
     int S52_load_Plib( const wxString& PLib, bool b_forceLegacy );
@@ -445,6 +448,7 @@ private:
     bool renderToDC;
     bool renderToOpenGl;
     bool renderToGCDC;
+    
 };
 
 #endif //_S52PLIB_H_

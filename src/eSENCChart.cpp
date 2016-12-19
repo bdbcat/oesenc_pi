@@ -6101,7 +6101,7 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                             wxString content = m_TXTDSC_map[value];
                             content.Replace( _T("\n"), _T("<br>") );
                             
-                            attribStr << _T("<br>") << content; _T("<br>");
+                            attribStr << _T("<br>") << content << _T("<br>");
                         }
                     }
                     

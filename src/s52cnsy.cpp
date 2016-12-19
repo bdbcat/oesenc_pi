@@ -1468,10 +1468,10 @@ l05_end:
             static wxString lastDescription;
             bool isFirstSector = true;
 
-            if( lastLat == obj->m_lat && lastLon == obj->m_lon )
-                isFirstSector = false;
-            lastLat = obj->m_lat;
-            lastLon = obj->m_lon;
+//             if( lastLat == obj->m_lat && lastLon == obj->m_lon )
+//                 isFirstSector = false;
+//             lastLat = obj->m_lat;
+//             lastLon = obj->m_lon;
 
             wxString litdsn01 = _LITDSN01( obj );
 

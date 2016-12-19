@@ -1982,6 +1982,18 @@ bool s52plib::TextRenderCheck( ObjRazRules *rzRules )
             return false;
     }
 
+    // Declutter LIGHTS descriptions
+    if( ( rzRules->obj->bIsAton ) && ( !strncmp( rzRules->obj->FeatureName, "LIGHTS", 6 ) ) ){
+        if( lastLightLat == rzRules->obj->m_lat && lastLightLon == rzRules->obj->m_lon ){
+            return false;       // only render text for the first object at this lat/lon
+        }
+        else{
+            lastLightLat = rzRules->obj->m_lat;
+            lastLightLon = rzRules->obj->m_lon;
+        }
+    }
+        
+    
 #if 0    
     //    An optimization for CM93 charts.
     //    Don't show the text associated with some objects, since CM93 database includes _texto objects aplenty
@@ -5009,15 +5021,18 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
     //if(rzRules->obj->Index == 187)
     //    int yyp = 0;
 
-    //if(strncmp(rzRules->obj->FeatureName, "RECTRC", 6))
-    //    int yyp = 0;
+    if(strncmp(rzRules->obj->FeatureName, "RECTRC", 6))
+        int yyp = 0;
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
 
     if( IsObjNoshow( rzRules->LUP->OBCL) )
         return 0;
-        
+
+    if(!strncmp(rzRules->obj->FeatureName, "LIGHTS", 6))
+        int yyp = 0;
+    
     if( !ObjectRenderCheckCat( rzRules, vp ) ) {
 
         //  If this object cannot be moved to a higher category by CS procedures,
@@ -8371,6 +8386,11 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         
         m_myConfig = PI_GetPLIBStateHash();
     }
+    
+    // Reset the LIGHTS declutter machine
+    lastLightLat = 0;
+    lastLightLon = 0;
+    
    
 }
 

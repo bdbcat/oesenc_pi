@@ -636,6 +636,7 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
         wxLogMessage(_T("verifySENC E2"));
         
         // Server may be slow, so try the read again
+        wxMilliSleep(100);
         fpx.Read(&first_record, sizeof(OSENC_Record_Base));
         
         if(!fpx.IsOk())
@@ -1520,11 +1521,11 @@ int Osenc::ingest200(const wxString &senc_file_name,
             
             default:                            // unrecognized record types
             {
-                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
-                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
-                    dun = 1; break;
-                }
-                
+//                 unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+//                 if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+//                     dun = 1; break;
+//                 }
+                dun = 1;
                 break;
             }
                 
