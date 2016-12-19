@@ -30,7 +30,7 @@ class ViewPort;
 #include "oesenc_pi.h"
 #include "pi_s52s57.h"
 #include "viewport.h"
-
+#include "Osenc.h"
 #include <vector>
 
 WX_DECLARE_HASH_MAP( int, VE_Element *, wxIntegerHash, wxIntegerEqual, VE_Hash );
@@ -356,6 +356,8 @@ protected:
 
       std::vector<connector_segment *> m_pcs_vector;
       std::vector<VE_Element *> m_pve_vector;
+      
+      wxStringHashMap   m_TXTDSC_map;           // maps file names to content
 };
 
 class PI_S57ObjX : public PI_S57Obj

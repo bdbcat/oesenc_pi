@@ -94,6 +94,7 @@ WX_DECLARE_OBJARRAY(float *,   SENCFloatPtrArray);
 #define CELL_COVR_RECORD                        98
 #define CELL_NOCOVR_RECORD                      99
 #define CELL_EXTENT_RECORD                      100
+#define CELL_TXTDSC_INFO_FILE_RECORD            101
 
 
 //--------------------------------------------------------------------------
@@ -153,6 +154,27 @@ typedef struct _OSENC_Attribute_Record_Payload{
     char *          attribute_value_char_ptr;
     };
 }OSENC_Attribute_Record_Payload;
+
+typedef struct _OSENC_TXTDSCInfo_Record_Base{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    uint32_t        file_name_length;
+    uint32_t        content_length;
+}OSENC_TXTDSCInfo_Record_Base;
+
+typedef struct _OSENC_TXTDSCInfo_Record{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    uint32_t        file_name_length;
+    uint32_t        content_length;
+    void *          payload;
+}OSENC_TXTDSCInfo_Record;
+
+typedef struct _OSENC_TXTDSCInfo_Record_Payload{
+    uint32_t        file_name_length;
+    uint32_t        content_length;
+    char *          data;
+}OSENC_TXTDSCInfo_Record_Payload;
 
 
 typedef struct _OSENC_PointGeometry_Record{
@@ -341,6 +363,8 @@ class S57ClassRegistrar;
 class PolyTessGeo;
 class Osenc_instream;
 
+WX_DECLARE_STRING_HASH_MAP( wxString, wxStringHashMap );
+
 //--------------------------------------------------------------------------
 //      Osenc definition
 //--------------------------------------------------------------------------
@@ -384,6 +408,7 @@ public:
     wxString getReadID(){ return m_ID; }
     Extent &getReadExtent(){ return m_extent; }
     wxString getSoundingsDatumString(){ return m_SoundingDatum; }
+    wxStringHashMap GetTXTDSC_Map(){ return m_TXTDSC_fileMap; }
     
     SENCFloatPtrArray &getSENCReadAuxPointArray(){ return m_AuxPtrArray;}
     wxArrayInt &getSENCReadAuxPointCountArray(){ return m_AuxCntArray;}
@@ -491,7 +516,7 @@ private:
     wxString    m_key;
     wxString              m_SoundingDatum;
     
-    
+    wxStringHashMap       m_TXTDSC_fileMap;
 };
 
 struct fifo_msg {

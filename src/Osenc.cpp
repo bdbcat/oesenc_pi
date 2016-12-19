@@ -936,6 +936,10 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
 
             default:
             {
+                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    dun = 1; break;
+                }
                 dun = 1;
                 break;
             }
@@ -1477,6 +1481,39 @@ int Osenc::ingest200(const wxString &senc_file_name,
                     pVCArray->push_back(pvce);
                 }
                 
+                
+                break;
+            }
+            
+            case CELL_TXTDSC_INFO_FILE_RECORD:
+            {
+                unsigned char *buf = getBuffer( record.record_length - sizeof(OSENC_Record_Base));
+                if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
+                    dun = 1; break;
+                }
+                
+                // Get the payload & parse it
+                OSENC_TXTDSCInfo_Record_Payload *pPayload = (OSENC_TXTDSCInfo_Record_Payload *)buf;
+                uint8_t *pRun = (uint8_t *)buf;
+                
+                int nameLength = *(uint32_t *)pRun;
+                pRun += sizeof(uint32_t);
+                int contentLength = *(uint32_t *)pRun;
+                pRun += sizeof(uint32_t);
+                
+                wxString name = wxString((char *)pRun, wxConvUTF8);
+                pRun += nameLength;
+                wxString content = wxString((char *)pRun, wxConvUTF8);
+                
+                //Might not be UTF-8 encoding, even though it should be....
+                if(!content.Len()){
+                    wxCSConv conv( _T("iso8859-1") );
+                    content = wxString((char *)pRun, conv);
+                }
+                
+                // Add the TXTDSC cfile contents to the class hashmap
+                if(content.Len())
+                    m_TXTDSC_fileMap[name] = content;
                 
                 break;
             }

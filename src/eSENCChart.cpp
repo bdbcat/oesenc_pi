@@ -3544,6 +3544,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         m_SoundingsDatum = sencfile->getSoundingsDatumString();
         m_ID = sencfile->getReadID();
         m_Name = sencfile->getReadName();
+
+        //  Get the hashmap containing any TXTDSC info file records
+        m_TXTDSC_map = sencfile->GetTXTDSC_Map();
         
         
         // Validate hash maps....
@@ -6082,14 +6085,27 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                     if( isLight ) {
                         curLight->attributeValues.Add( value );
                     } else {
-                        if( curAttrName == _T("INFORM") || curAttrName == _T("NINFOM") ) value.Replace(
-                            _T("|"), _T("<br>") );
+                        if( curAttrName == _T("INFORM") || curAttrName == _T("NINFOM") )
+                            value.Replace( _T("|"), _T("<br>") );
                         attribStr << value;
                         
                         if( !( curAttrName == _T("DRVAL1") ) ) {
                             attribStr << _T("</font></td></tr>\n");
                         }
                     }
+                    
+                    if(curAttrName == _T("TXTDSC")){
+                        //  This feature contains a TXTDSC attribute
+                        //  Is the TXTDSC Info file contents available in the local chart's map of same?
+                        if(m_TXTDSC_map.find( value ) != m_TXTDSC_map.end()){
+                            wxString content = m_TXTDSC_map[value];
+                            content.Replace( _T("\n"), _T("<br>") );
+                            
+                            attribStr << _T("<br>") << content; _T("<br>");
+                        }
+                    }
+                    
+                    
                     attrCounter++;
                     curr_att += 6;
                     
