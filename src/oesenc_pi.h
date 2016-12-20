@@ -40,9 +40,13 @@
 #include <wx/html/htmlwin.h>
 
 #include "TexFont.h"
+#include "version.h"
 
-#define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    2
+//  The version number now comes from (${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/version.h) file
+//  as configured by the CMakeLists.txt script
+
+//#define     PLUGIN_VERSION_MAJOR    0
+//#define     PLUGIN_VERSION_MINOR    2
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    11

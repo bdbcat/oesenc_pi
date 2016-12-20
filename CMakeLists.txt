@@ -22,10 +22,9 @@ SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 SET(VERSION_MAJOR "0")
-SET(VERSION_MINOR "3")
-SET(VERSION_PATCH "1216")
+SET(VERSION_MINOR "4")
+SET(VERSION_PATCH "1219")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-
 
 #SET(CMAKE_BUILD_TYPE Release)
 
@@ -164,6 +163,13 @@ INCLUDE(${wxWidgets_USE_FILE})
 
 FIND_PACKAGE(Gettext REQUIRED)
 
+#  Do the version.h configuration into the build output directory,
+#  thereby allowing building from a read-only source tree.
+IF(NOT SKIP_VERSION_CONFIG)
+    configure_file(version.h.in ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/version.h)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include)
+ENDIF(NOT SKIP_VERSION_CONFIG)
+
 # For convenience we define the sources as a variable. You can add
 # header files and cpp/c files and CMake will sort them out
 
@@ -279,7 +285,7 @@ ELSE (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")
 ENDIF (ARCH MATCHES "amd64" OR ARCH MATCHES "x86_64")
 
 
-INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
+INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN-v16-12.txt"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
       DESTINATION ${PREFIX_PARENTDATA}/plugins/${PACKAGE_NAME} )
 
