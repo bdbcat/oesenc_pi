@@ -2296,8 +2296,8 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
         int bm_width = ( gdc.MaxX() - gdc.MinX() ) + 4;
         int bm_height = ( gdc.MaxY() - gdc.MinY() ) + 4;
-        int bm_orgx = wxMax ( 0, gdc.MinX()-2 );
-        int bm_orgy = wxMax ( 0, gdc.MinY()-2 );
+        int bm_orgx = wxMax ( -10, gdc.MinX()-2 );
+        int bm_orgy = wxMax ( -10, gdc.MinY()-2 );
         int screenOriginX = r.x + ( bm_orgx - (int) ( pivot_x / fsf ) );
         int screenOriginY = r.y + ( bm_orgy - (int) ( pivot_y / fsf ) );
 
