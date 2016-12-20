@@ -8604,7 +8604,9 @@ void RenderFromHPGL::SetPen()
         glColor4ub( penColor.Red(), penColor.Green(), penColor.Blue(), penColor.Alpha() );
         glLineWidth( wxMax(g_GLMinSymbolLineWidth, (float) penWidth * 0.7) );
 #ifndef __OCPN__ANDROID__
+        glLineWidth( wxMax(g_GLMinSymbolLineWidth, (float) penWidth) );
         glEnable( GL_BLEND );
+        glEnable( GL_LINE_SMOOTH );
 #endif        
     }
 #endif    
