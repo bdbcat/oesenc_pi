@@ -897,6 +897,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
     wxArrayString chartArray;
     wxFileConfig *pConf = (wxFileConfig *) g_pconfig;
     
+    wxLogMessage(_T("Scrub1: "));
     
     pConf->SetPath( _T ( "/ChartDirectories" ) );
     int iDirMax = pConf->GetNumberOfEntries();
@@ -909,6 +910,8 @@ bool oesenc_pi::ScrubChartinfoList( void )
             
             // remove/fix the decorations
             wxString valAdd = val.BeforeFirst('^') + wxString(wxFileName::GetPathSeparator());
+
+            wxLogMessage(_T("  Dirlist  val: ") + val + _T("  valadd: ") + valAdd);
             
             chartArray.Add(valAdd);
             bCont = pConf->GetNextEntry( str, dummy );
@@ -916,10 +919,12 @@ bool oesenc_pi::ScrubChartinfoList( void )
     }
     
     // And walk the hashmap of ChartinfoItems, trying to find a match from the hashmap item to the directory list contents
+
+    wxLogMessage(_T("Scrub2: "));
     
     pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
-    std::map<std::string, ChartInfoItem *>::iterator iter;
-    for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
+    std::map<std::string, ChartInfoItem *>::iterator iter = info_hash.begin();
+    while( iter != info_hash.end())
     {
         std::string key = iter->first;
         wxString strk = wxString(key.c_str(), wxConvUTF8);
@@ -928,6 +933,9 @@ bool oesenc_pi::ScrubChartinfoList( void )
         
         wxString strt = strk.Mid(2);
         strt.Replace('!', wxFileName::GetPathSeparator());
+        
+        wxLogMessage(_T("strk: ") + strk);
+        wxLogMessage(_T("strt: ") + strt);
         
         bool bfound = false;
         for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
@@ -942,7 +950,14 @@ bool oesenc_pi::ScrubChartinfoList( void )
         //  This means that the entry will not be written to config file on app exit, so it is gone.
         if(!bfound){
             info_hash.erase(iter);
+            iter = info_hash.begin();
+            wxLogMessage(_T("    dropping: ") + strk + _T("\n"));
         }
+        else{
+            ++iter;
+            wxLogMessage(_T("    keeping: ") + strk + _T("\n"));
+        }
+        
     }
     return true;
 }
@@ -991,6 +1006,8 @@ bool oesenc_pi::LoadConfig( void )
                 ChartInfoItem *pitem = new ChartInfoItem;
                 pitem->config_string = kval;
                 info_hash[key] = pitem;
+                wxLogMessage(_T("Loadconfig adding: ") + strk);
+                
             }
                 
             bContk = pConf->GetNextEntry( strk, dummyval );
@@ -2377,7 +2394,7 @@ bool validateUserKey( wxString sencFileName)
     int retCode = senc.ingestHeader( sencFileName );
 
     if(retCode != SENC_NO_ERROR){
-       wxASSERT( 0 );
+       //wxASSERT( 0 );
        wxLogMessage(_T("validateUserKey E1"));
         
     
@@ -3392,7 +3409,8 @@ void oesenc_pi_about::Populate( void )
     _T("plugins") + wxFileName::GetPathSeparator() +
     _T("oesenc_pi") + wxFileName::GetPathSeparator();
     
-    wxTextFile license_filea( shareLocn + _T("rrc_eula_ChartSetsForOpenCPN.txt") );
+    //wxTextFile license_filea( shareLocn + _T("rrc_eula_ChartSetsForOpenCPN.txt") );
+    wxTextFile license_filea( shareLocn + _T("rrc_eula_ChartSetsForOpenCPN-v16-12.txt") );
     if ( license_filea.Open() ) {
         for ( wxString str = license_filea.GetFirstLine(); !license_filea.Eof() ; str = license_filea.GetNextLine() )
             licenseText.Append( str + _T("<br>") );
@@ -3785,7 +3803,8 @@ int processChartinfo(const wxString &oesenc_file)
                     wxString ncnt;
                     ncnt.Printf(_T("K%d"), nkey);
                     keyn.Prepend( ncnt );
-                
+                    wxLogMessage(_T("processChartInfo considering: ") + keyn);
+                    
                     keyn.Replace(wxFileName::GetPathSeparator(), '!');
                     
                     std::string key = std::string(keyn.c_str());
@@ -3796,8 +3815,14 @@ int processChartinfo(const wxString &oesenc_file)
                         ChartInfoItem *pitem = new ChartInfoItem;
                         pitem->config_string = content;
                         info_hash[key] = pitem;
+                        wxLogMessage(_T("processChartInfo adding: ") + keyn);
+                        
                         g_binfoShown = false;                           // added a line, so force re-display
                     }
+                    else{
+                        wxLogMessage(_T("processChartInfo found: ") + keyn);
+                    }
+                    
                     nkey++;
                 }
         
