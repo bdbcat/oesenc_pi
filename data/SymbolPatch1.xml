@@ -1,0 +1,25 @@
+<chartsymbols>
+
+    <symbols>
+
+                <symbol RCID="1399">
+                        <name>LIGHTS82</name>
+                        <description>floodlight</description>
+                        <bitmap width="18" height="10">
+                                <distance min="0" max="0" />
+                                <pivot x="24" y="12" />
+                                <origin x="0" y="0" />
+                                <graphics-location x="329" y="175" />
+                        </bitmap>
+                        <color-ref>ACHMGD</color-ref>
+                        <vector width="584" height="302">
+                                <distance min="0" max="0" />
+                                <pivot x="146" y="1928" />
+                                <origin x="30" y="1742" />
+                                <HPGL>SPA;SW2;PU146,1928;CI116;SPA;SW2;PU301,2031;PD514,2039;SPA;SW2;PU270,1817;PD555,1742;SPA;SW2;PU319,1923;PD614,1893;</HPGL>
+                        </vector>
+                        <definition>V</definition>
+                        <prefer-bitmap>no</prefer-bitmap>
+                </symbol>
+    </symbols>
+</chartsymbols>
