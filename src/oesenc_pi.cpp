@@ -937,13 +937,35 @@ bool oesenc_pi::ScrubChartinfoList( void )
         wxLogMessage(_T("strk: ") + strk);
         wxLogMessage(_T("strt: ") + strt);
         
+        wxFileName candidate(strt);
+        
         bool bfound = false;
         for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
             wxString ts = chartArray.Item(i);
-            if(strt.IsSameAs(ts)){
-                bfound = true;
-                break;
+            wxFileName target(ts);
+            
+            bool done = false;
+            wxString tara;
+            wxString cana;
+            while(!done){
+                tara = target.GetPath();
+                cana = candidate.GetPath();
+                
+                if(target.GetPath() == candidate.GetPath()){
+                    done = true;
+                }
+                
+                if(candidate.GetFullPath() == target.GetFullPath()){
+                    done = true;
+                    bfound = true;
+                    break;
+                }
+                candidate.RemoveLastDir();
+                if(!candidate.GetDirCount())
+                    done = true;
             }
+            if(bfound)
+                break;
         }
         
         //  Did not find the directory, so remove corresponding entry from the hashmap.
