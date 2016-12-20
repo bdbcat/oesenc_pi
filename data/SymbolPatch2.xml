@@ -1,0 +1,25 @@
+<chartsymbols>
+
+    <symbols>
+
+                <symbol RCID="3412">
+                        <name>TSSRON51</name>
+                        <description>traffic roundabout</description>
+                        <bitmap width="27" height="27">
+                                <distance min="0" max="0" />
+                                <pivot x="13" y="13" />
+                                <origin x="0" y="0" />
+                                <graphics-location x="763" y="307" />
+                        </bitmap>
+                        <color-ref>ATRFCF</color-ref>
+                        <vector width="895" height="915">
+                                <distance min="0" max="0" />
+                                <pivot x="448" y="741" />
+                                <origin x="1" y="284" />
+                                <HPGL>SPA;SW2;PU1,793;PD27,884;PD66,980;PD123,1057;PD212,1124;PD315,1180;PD430,1199;PD522,1194;PD620,1165;PD721,1112;PD800,1031;PD862,925;PD896,812;PD896,688;PD862,560;PD798,452;PD704,373;PD591,313;PD464,294;PD320,313;PD217,364;PD128,424;PD298,594;PD1,594;PD1,284;PD133,424;</HPGL>
+                        </vector>
+                        <definition>V</definition>
+                        <prefer-bitmap>no</prefer-bitmap>
+                </symbol>
+    </symbols>
+</chartsymbols>
