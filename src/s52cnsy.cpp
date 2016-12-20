@@ -1218,13 +1218,13 @@ static void *LIGHTS05 (void *param)
         _parseList(catlitstr, catlit, sizeof(colist));
 
         // FIXME: OR vs AND/OR
-        if (strpbrk(catlit, "\010\013")) {
+        if (strpbrk(catlit, "\010\013")) {                      // 8 = flood, 11 = spotlight
             lights05.Append(_T(";SY(LIGHTS82)"));
             goto l05_end;
         }
 
         if (strpbrk(catlit, "\011")) {
-            lights05.Append(_T(";SY(LIGHTS81)"));
+            lights05.Append(_T(";SY(LIGHTS81)"));               // 9 = striplight
             goto l05_end;
         }
 
@@ -1291,7 +1291,7 @@ static void *LIGHTS05 (void *param)
 
 
         //  Is the light a directional or moire?
-        if (strpbrk(catlit, "\001\016"))
+        if (strpbrk(catlit, "\001\020"))                        // 1 = directional, 16 = moire
         {
             if (orientstr.Len())
             {
