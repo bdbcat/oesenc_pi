@@ -937,32 +937,38 @@ bool oesenc_pi::ScrubChartinfoList( void )
         wxLogMessage(_T("strk: ") + strk);
         wxLogMessage(_T("strt: ") + strt);
         
-        wxFileName candidate(strt);
-        
         bool bfound = false;
         for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
             wxString ts = chartArray.Item(i);
             wxFileName target(ts);
+            wxString tara = target.GetPath();
+            wxLogMessage(_T("ChartDir entry considered: ") + tara);
             
             bool done = false;
-            wxString tara;
             wxString cana;
+            wxFileName candidate = wxFileName(strt);
+            
             while(!done){
-                tara = target.GetPath();
                 cana = candidate.GetPath();
+                wxLogMessage(_T("  Chartinfo candidate tested: ") + cana);
                 
                 if(target.GetPath() == candidate.GetPath()){
+                    wxLogMessage(_T("done1"));
                     done = true;
                 }
                 
                 if(candidate.GetFullPath() == target.GetFullPath()){
+                    wxLogMessage(_T("done2"));
+                    
                     done = true;
                     bfound = true;
                     break;
                 }
                 candidate.RemoveLastDir();
-                if(!candidate.GetDirCount())
+                if(!candidate.GetDirCount()){
+                    wxLogMessage(_T("done3"));
                     done = true;
+                }
             }
             if(bfound)
                 break;
