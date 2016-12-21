@@ -7445,11 +7445,13 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
         ViewPort *vp, bool b_revrgb, bool b_pot )
 {
     wxImage Image;
-
+     
     Rule *prule = rules->razRule;
 
     bool bstagger_pattern = ( prule->fillType.PATP == 'S' );
 
+    wxColour local_unused_wxColor = m_unused_wxColor;
+    
     //      Create a wxImage of the pattern drawn on an "unused_color" field
     if( prule->definition.SYDF == 'R' ) {
         Image = useLegacyRaster ?
@@ -7486,13 +7488,29 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
 
         //      Instantiate the vector pattern to a wxBitmap
         wxMemoryDC mdc;
+
+        //  TODO
+        // This ought to work for wxOSX, but DOES NOT.
+        // We we do not want anti-aliased lines drawn in the pattern spec, since we used the solid primary color
+        // as a mask for manual blitting from the dc to memory buffer.
+        
+        // Best we can do is set the background color very dark, and hope for the best
+#ifdef __WXOSX__        
+#if wxUSE_GRAPHICS_CONTEXT
+        wxGraphicsContext* pgc = mdc.GetGraphicsContext();
+        if(pgc)
+            pgc->SetAntialiasMode(wxANTIALIAS_NONE); 
+#endif
+        local_unused_wxColor.Set(2,2,2);    
+#endif            
+        
         wxBitmap *pbm = NULL;
 
         if( ( 0 != width ) && ( 0 != height ) ) {
             pbm = new wxBitmap( width, height );
 
             mdc.SelectObject( *pbm );
-            mdc.SetBackground( wxBrush( m_unused_wxColor ) );
+            mdc.SetBackground( wxBrush( local_unused_wxColor ) );
             mdc.Clear();
 
             int pivot_x = prule->pos.patt.pivot_x.PACL;
@@ -7500,6 +7518,7 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
 
             char *str = prule->vector.LVCT;
             char *col = prule->colRef.LCRF;
+            
             wxPoint pivot( pivot_x, pivot_y );
             wxPoint r0( (int) ( ( pivot_x - box.GetMinX() ) / fsf ) + 1,
                         (int) ( ( pivot_y - box.GetMinY() ) / fsf ) + 1 );
@@ -7509,7 +7528,7 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
         } else {
             pbm = new wxBitmap( 2, 2 );       // substitute small, blank pattern
             mdc.SelectObject( *pbm );
-            mdc.SetBackground( wxBrush( m_unused_wxColor ) );
+            mdc.SetBackground( wxBrush( local_unused_wxColor ) );
             mdc.Clear();
         }
 
@@ -7584,12 +7603,33 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
     }
 #endif
 
+    S52color *primary_color = 0;
+    unsigned char primary_r, primary_g, primary_b;
+    double reference_value = 0.5;
+
+    bool b_filter = false;
+#if defined(__WXMAC__)
+    if( prule->definition.SYDF == 'V' ){
+        b_filter = true;
+        char *col = prule->colRef.LCRF;
+        primary_color = getColor( col+1);
+        if(primary_color){
+            primary_r = primary_color->R;
+            primary_g = primary_color->G;
+            primary_b = primary_color->B;
+            wxImage::RGBValue rgb(primary_r,primary_g,primary_b);
+            wxImage::HSVValue hsv = wxImage::RGBtoHSV( rgb );
+            reference_value = hsv.value;
+        }
+    }
+#endif    
+        
     unsigned char *ps;
 
     {
-        unsigned char mr = m_unused_wxColor.Red();
-        unsigned char mg = m_unused_wxColor.Green();
-        unsigned char mb = m_unused_wxColor.Blue();
+        unsigned char mr = local_unused_wxColor.Red();
+        unsigned char mg = local_unused_wxColor.Green();
+        unsigned char mb = local_unused_wxColor.Blue();
 
         if( pd0 && ps0 ){
             for( int iy = 0; iy < sizey; iy++ ) {
@@ -7600,26 +7640,47 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
                         unsigned char r = *ps++;
                         unsigned char g = *ps++;
                         unsigned char b = *ps++;
-    #ifdef ocpnUSE_ocpnBitmap
-                        if( b_revrgb ) {
-                            *pd++ = b;
-                            *pd++ = g;
-                            *pd++ = r;
-                        } else {
-                            *pd++ = r;
-                            *pd++ = g;
-                            *pd++ = b;
+                        
+                        if(b_filter){
+                            wxImage::RGBValue rgb(r,g,b);
+                            wxImage::HSVValue hsv = wxImage::RGBtoHSV( rgb );
+                            double ratio = hsv.value/reference_value;
+                            
+                            if(ratio > 0.5){
+                                *pd++ = primary_r;
+                                *pd++ = primary_g;
+                                *pd++ = primary_b;
+                                *pd++ = 255;
+                            }
+                            else{
+                                *pd++ = 0;
+                                *pd++ = 0;
+                                *pd++ = 0;
+                                *pd++ = 0;
+                            }
                         }
+                        else{
+        #ifdef ocpnUSE_ocpnBitmap
+                            if( b_revrgb ) {
+                                *pd++ = b;
+                                *pd++ = g;
+                                *pd++ = r;
+                            } else {
+                                *pd++ = r;
+                                *pd++ = g;
+                                *pd++ = b;
+                            }
 
-    #else
-                        *pd++ = r;
-                        *pd++ = g;
-                        *pd++ = b;
-    #endif
-                        if( b_use_alpha && imgAlpha ) {
-                            *pd++ = *imgAlpha++;
-                        } else {
-                            *pd++ = ( ( r == mr ) && ( g == mg ) && ( b == mb ) ? 0 : 255 );
+        #else
+                            *pd++ = r;
+                            *pd++ = g;
+                            *pd++ = b;
+        #endif
+                            if( b_use_alpha && imgAlpha ) {
+                                *pd++ = *imgAlpha++;
+                            } else {
+                                *pd++ = ( ( r == mr ) && ( g == mg ) && ( b == mb ) ? 0 : 255 );
+                            }
                         }
                     }
                 }
@@ -8231,7 +8292,7 @@ bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
     po->m_DisplayCat = PI_DISPLAYBASE;
     po->Scamin = 200000000;
 
-    char *pAVS = (char *) malloc( 2 );
+    char *pAVS = (char *) calloc( 4, 1 );
     strcpy( pAVS, "9" );
     
     po->attVal = new wxArrayOfS57attVal;
@@ -8240,30 +8301,42 @@ bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
     pattValTmp->value = pAVS;
     po->attVal->Add( pattValTmp );
     
-    po->att_array = (char *)malloc(6);
+    po->att_array = (char *)calloc(7, 1);
     strncpy(po->att_array, "CATLIT", 6);
     po->n_attr = 1;
+    po->S52_Context = NULL;
     
+    bool lights_on = false;
     
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
+
+    if(ctx){
+        ctx->bCS_Added = false;
     
-    ctx->bCS_Added = false;
-    
-    wxScreenDC dc;
-    PlugIn_ViewPort pivp = VPoint;
+        wxScreenDC dc;
+        PlugIn_ViewPort pivp = VPoint;
     
     // We hack the LUP to make the CS procedure not actually render anything
-    ctx->LUP->ruleList->razRule = (Rule *)dummy;
-    ctx->LUP->DISC = DISPLAYBASE;
+        LUPrec *lup = new LUPrec;
+        lup->ruleList = (Rules*)calloc(1, sizeof(Rules)); 
+        lup->ruleList->razRule = (Rule *)dummy;
+        lup->ruleList->ruleType = RUL_CND_SY;
+        strncpy(lup->OBCL, "LIGHTS", 6);  lup->OBCL[6] = 0;
+        
+        lup->DISC = DISPLAYBASE;
+        ctx->LUP = lup;
+        
+     
+        PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
-    PI_PLIBRenderObjectToDC( &dc, po, &pivp );
+        lights_on = ( ctx->bCS_Added == 1);
     
-    bool lights_on = ( ctx->bCS_Added == 1);
+        PI_PLIBFreeContext(po->S52_Context);
+    }
     
-    PI_PLIBFreeContext(po->S52_Context);
     delete po;
-    
+   
     return lights_on;
 }
 
@@ -8319,7 +8392,6 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
 {
     m_benableGLLS = true;               // default is to always use RenderToGLLS (VBO support)
     
- 
     // Has the core S52PLIB configuration changed?
     //  If it has, reload from global preferences file.
     
@@ -8330,7 +8402,6 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
         m_bShowS57Text = IsTextEnabled(VPoint);
 
-        
         // Detect and manage "LIGHTS" toggle
         OBJLElement *pOLE = NULL;
         for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
@@ -8382,7 +8453,6 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
                 if( cnt == num ) break;
             }
         }
-                
         
         m_myConfig = PI_GetPLIBStateHash();
     }
