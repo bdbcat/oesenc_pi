@@ -5018,11 +5018,9 @@ int s52plib::RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, Vi
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
-    //if(rzRules->obj->Index == 187)
-    //    int yyp = 0;
+//    if(rzRules->obj->Index == 2572)
+//        int yyp = 3; //return 1;
 
-    if(strncmp(rzRules->obj->FeatureName, "RECTRC", 6))
-        int yyp = 0;
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
@@ -5030,8 +5028,8 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
     if( IsObjNoshow( rzRules->LUP->OBCL) )
         return 0;
 
-    if(!strncmp(rzRules->obj->FeatureName, "LIGHTS", 6))
-        int yyp = 0;
+//    if(!strncmp(rzRules->obj->FeatureName, "SLCONS", 6))
+//        int yyp = 0;
     
     if( !ObjectRenderCheckCat( rzRules, vp ) ) {
 
@@ -7604,7 +7602,9 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
 #endif
 
     S52color *primary_color = 0;
-    unsigned char primary_r, primary_g, primary_b;
+    unsigned char primary_r = 0;
+    unsigned char primary_g = 0;
+    unsigned char primary_b = 0;
     double reference_value = 0.5;
 
     bool b_filter = false;
@@ -8131,6 +8131,21 @@ public:
     mps_container           *MPSRulesList;
 };
 
+void *dummy (void *param)
+{
+    return NULL;
+}
+
+
+void *dummys (void *param)
+{
+//     ObjRazRules *rzRules = (ObjRazRules *)param;
+//     rzRules->obj->bCS_Added = true;
+    
+    return NULL;
+}
+
+
 /*      TODO
  *      This is a bit of a hack
  *      The state of the S57 Text tool is not stored in the config file until the app exits.
@@ -8239,20 +8254,35 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
     
     PI_PLIBSetContext(po);
     S52PLIB_Context *ctx = (S52PLIB_Context *)po->S52_Context;
- 
-    ctx->bCS_Added = false;
+
+    bool sounding_on = true;
     
-    wxScreenDC dc;
-    PlugIn_ViewPort pivp = VPoint;
-    PI_PLIBSetRenderCaps( PLIB_CAPS_OBJCATMUTATE );
+    if(ctx){
+        ctx->bCS_Added = false;
+        
+    // We hack the LUP to make the CS procedure not actually render anything
+        LUPrec *lup = new LUPrec;
+        lup->ruleList = (Rules*)calloc(1, sizeof(Rules)); 
+        lup->ruleList->razRule = (Rule *)dummys;
+        lup->ruleList->ruleType = RUL_CND_SY;
+        strncpy(lup->OBCL, "SOUNDG", 6);  lup->OBCL[6] = 0;
+        strncpy(po->FeatureName, "SXXXXX", 6);          // to force bCS_Added
+        
+        lup->DISC = DISPLAYBASE;
+        ctx->LUP = lup;
     
-    PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
-    bool sounding_on;
+        wxScreenDC dc;
+        PlugIn_ViewPort pivp = VPoint;
+        PI_PLIBSetRenderCaps( PLIB_CAPS_OBJCATMUTATE );
     
-    sounding_on = ( ctx->bCS_Added == 1);
+        PI_PLIBRenderObjectToDC( &dc, po, &pivp );
     
-    PI_PLIBFreeContext(po->S52_Context);
+        sounding_on = ( ctx->bCS_Added == 1);
+    
+        PI_PLIBFreeContext(po->S52_Context);
+    }
+    
     delete po;
 
     return sounding_on;
@@ -8269,11 +8299,6 @@ bool s52plib::IsSoundingEnabled(const PlugIn_ViewPort& VPoint, bool current_val)
  * 
  *      This is pretty ugly, and can go away, and be done better, when the PlugIn API is updated post-O44.
  */
-
-void *dummy (void *param)
-{
-    return NULL;
-}
 
 bool s52plib::IsLightsEnabled(const PlugIn_ViewPort& VPoint)
 {
@@ -8402,6 +8427,7 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
         m_bShowS57Text = IsTextEnabled(VPoint);
 
+#if 1
         // Detect and manage "LIGHTS" toggle
         OBJLElement *pOLE = NULL;
         for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
@@ -8421,9 +8447,9 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
                 pOLE->nViz = 1;
             RemoveObjNoshow("LIGHTS");
         }
-
+#endif
         
-        
+#if 1      
         // Handle Anchor area toggle
         bool bAnchor = isAnchorEnabled(VPoint);
 
@@ -8455,8 +8481,9 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         }
         
         m_myConfig = PI_GetPLIBStateHash();
+#endif
     }
-    
+
     // Reset the LIGHTS declutter machine
     lastLightLat = 0;
     lastLightLon = 0;
