@@ -1172,6 +1172,7 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
         m_SE = m_edtn000;
         m_datum_str = _T("WGS84");
         m_SoundingsDatum = senc.getSoundingsDatumString();
+        m_DepthUnits = _T("Meters"); //senc.getSoundingsDatumString();
         
         // TODO ?? int senc_file_version = senc.getSencReadVersion();
         
@@ -3544,7 +3545,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         m_SoundingsDatum = sencfile->getSoundingsDatumString();
         m_ID = sencfile->getReadID();
         m_Name = sencfile->getReadName();
-
+        m_DepthUnits = _T("Meters"); //senc.getSoundingsDatumString();
+        
         //  Get the hashmap containing any TXTDSC info file records
         m_TXTDSC_map = sencfile->GetTXTDSC_Map();
         
