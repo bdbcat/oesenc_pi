@@ -66,6 +66,7 @@
 #include <Shlobj.h>
 #endif
 
+
 //      Some PlugIn global variables
 wxString                        g_sencutil_bin;
 S63ScreenLogContainer           *g_pScreenLog;
@@ -171,6 +172,287 @@ static int ExtensionCompare( const wxString& first, const wxString& second )
 }
 */
 
+#if 1
+class  OESENC_HTMLMessageDialog: public wxDialog
+{
+    
+public:
+    OESENC_HTMLMessageDialog(wxWindow *parent, const wxString& message,
+                             const wxString& caption = wxMessageBoxCaptionStr,
+                             long style = wxOK|wxCENTRE,  
+                             bool bFixedFont = false,
+                             const wxPoint& pos = wxDefaultPosition);
+    
+    void OnYes(wxCommandEvent& event);
+    void OnNo(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnClose( wxCloseEvent& event );
+    void OnTimer(wxTimerEvent &evt);
+    
+    
+private:
+    int m_style;
+    wxTimer m_timer;
+    
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(OESENC_HTMLMessageDialog, wxDialog)
+EVT_BUTTON(wxID_YES, OESENC_HTMLMessageDialog::OnYes)
+EVT_BUTTON(wxID_NO, OESENC_HTMLMessageDialog::OnNo)
+EVT_BUTTON(wxID_CANCEL, OESENC_HTMLMessageDialog::OnCancel)
+EVT_CLOSE(OESENC_HTMLMessageDialog::OnClose)
+EVT_TIMER(-1, OESENC_HTMLMessageDialog::OnTimer)
+
+END_EVENT_TABLE()
+
+
+OESENC_HTMLMessageDialog::OESENC_HTMLMessageDialog( wxWindow *parent,
+                                                    const wxString& message,
+                                                    const wxString& caption,
+                                                    long style,
+                                                    bool bFixedFont,
+                                                    const wxPoint& pos)
+: wxDialog( parent, wxID_ANY, caption, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP )
+{
+    m_style = style;
+    if(bFixedFont){
+        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+        double font_size = dFont->GetPointSize();
+        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size,wxFONTFAMILY_TELETYPE, dFont->GetStyle(), dFont->GetWeight());
+        SetFont( *qFont );
+    }
+    
+    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+    
+    wxHtmlWindow *msgWindow = new wxHtmlWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                                wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION );
+    msgWindow->SetBorders( 1 );
+    
+    topsizer->Add( msgWindow, 1, wxALIGN_CENTER_HORIZONTAL | wxEXPAND, 5 );
+    
+    wxString html;
+    html << message;
+    
+    wxCharBuffer buf = html.ToUTF8();
+    if( buf.data() )                            // string OK?
+       msgWindow->SetPage( html );
+    
+    // 3) buttons
+       int AllButtonSizerFlags = wxOK|wxCANCEL|wxYES|wxNO|wxHELP|wxNO_DEFAULT;
+       int center_flag = wxEXPAND;
+       if (style & wxYES_NO)
+           center_flag = wxALIGN_CENTRE;
+       wxSizer *sizerBtn = CreateSeparatedButtonSizer(style & AllButtonSizerFlags);
+       if ( sizerBtn )
+           topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
+       
+       SetSizer( topsizer );
+       
+       topsizer->Fit( this );
+       
+       wxSize szyv = msgWindow->GetVirtualSize();
+       
+       SetClientSize(szyv.x + 20, szyv.y + 20); 
+       
+       //Centre( /*wxBOTH | wxCENTER_FRAME*/);
+       CentreOnParent();
+       m_timer.SetOwner( this, -1 );
+       
+       int timeout_sec = 60;
+       if(timeout_sec > 0)
+           m_timer.Start( timeout_sec * 1000, wxTIMER_ONE_SHOT );
+       
+}
+
+void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
+{
+    SetReturnCode(wxID_YES);
+    if(IsModal())
+        EndModal( wxID_YES );
+    else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
+{
+    SetReturnCode(wxID_NO);
+    if(IsModal())
+        EndModal( wxID_NO );
+    else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    // Allow cancellation via ESC/Close button except if
+    // only YES and NO are specified.
+    if ( (m_style & wxYES_NO) != wxYES_NO || (m_style & wxCANCEL) )
+    {
+        SetReturnCode(wxID_CANCEL);
+        EndModal( wxID_CANCEL );
+    }
+}
+
+void OESENC_HTMLMessageDialog::OnClose( wxCloseEvent& event )
+{
+    SetReturnCode(wxID_CANCEL);
+    if(IsModal())
+        EndModal( wxID_CANCEL );
+    else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnTimer(wxTimerEvent &evt)
+{
+    if(IsModal())
+        EndModal( wxID_YES );
+    else
+        Hide();
+}
+#endif
+
+#if 0
+class  OESENC_HTMLMessageDialog: public wxWindow
+{
+    
+public:
+    OESENC_HTMLMessageDialog(wxWindow *parent, const wxString& message,
+                             const wxString& caption = wxMessageBoxCaptionStr,
+                             long style = wxOK|wxCENTRE,  
+                             bool bFixedFont = false,
+                             const wxPoint& pos = wxDefaultPosition);
+    
+    void OnYes(wxCommandEvent& event);
+    void OnNo(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnClose( wxCloseEvent& event );
+    void OnTimer(wxTimerEvent &evt);
+    
+    
+private:
+    int m_style;
+    wxTimer m_timer;
+    
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(OESENC_HTMLMessageDialog, wxWindow)
+//EVT_BUTTON(wxID_YES, OESENC_HTMLMessageDialog::OnYes)
+//EVT_BUTTON(wxID_NO, OESENC_HTMLMessageDialog::OnNo)
+//EVT_BUTTON(wxID_CANCEL, OESENC_HTMLMessageDialog::OnCancel)
+EVT_CLOSE(OESENC_HTMLMessageDialog::OnClose)
+EVT_TIMER(-1, OESENC_HTMLMessageDialog::OnTimer)
+
+END_EVENT_TABLE()
+
+
+OESENC_HTMLMessageDialog::OESENC_HTMLMessageDialog( wxWindow *parent,
+                                                    const wxString& message,
+                                                    const wxString& caption,
+                                                    long style,
+                                                    bool bFixedFont,
+                                                    const wxPoint& pos)
+: wxWindow( parent, wxID_ANY,  pos, wxDefaultSize, wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxRESIZE_BORDER)
+{
+    m_style = style;
+    if(bFixedFont){
+        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+        double font_size = dFont->GetPointSize();
+        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size,wxFONTFAMILY_TELETYPE, dFont->GetStyle(), dFont->GetWeight());
+        SetFont( *qFont );
+    }
+    
+    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+    
+    wxHtmlWindow *msgWindow = new wxHtmlWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                                wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION );
+    msgWindow->SetBorders( 1 );
+    
+    topsizer->Add( msgWindow, 1, wxALIGN_CENTER_HORIZONTAL | wxEXPAND, 5 );
+    
+    wxString html;
+    html << message;
+    
+    wxCharBuffer buf = html.ToUTF8();
+    if( buf.data() )                            // string OK?
+       msgWindow->SetPage( html );
+ /*   
+    // 3) buttons
+       int AllButtonSizerFlags = wxOK|wxCANCEL|wxYES|wxNO|wxHELP|wxNO_DEFAULT;
+       int center_flag = wxEXPAND;
+       if (style & wxYES_NO)
+           center_flag = wxALIGN_CENTRE;
+       wxSizer *sizerBtn = CreateSeparatedButtonSizer(style & AllButtonSizerFlags);
+       if ( sizerBtn )
+           topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
+       */
+
+       SetSizer( topsizer );
+       
+       topsizer->Fit( this );
+       
+       wxSize szyv = msgWindow->GetVirtualSize();
+       
+       SetClientSize(szyv.x + 20, szyv.y + 20); 
+       SetClientSize(600, szyv.y + 20); 
+       
+       //Centre( /*wxBOTH | wxCENTER_FRAME*/);
+       CentreOnParent();
+       m_timer.SetOwner( this, -1 );
+       
+       int timeout_sec = 10;
+       if(timeout_sec > 0)
+           m_timer.Start( timeout_sec * 1000, wxTIMER_ONE_SHOT );
+       Hide();
+       
+}
+
+void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
+{
+//     SetReturnCode(wxID_YES);
+//     if(IsModal())
+//         EndModal( wxID_YES );
+//     else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
+{
+//     SetReturnCode(wxID_NO);
+//     if(IsModal())
+//         EndModal( wxID_NO );
+//     else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+//     // Allow cancellation via ESC/Close button except if
+//     // only YES and NO are specified.
+//     if ( (m_style & wxYES_NO) != wxYES_NO || (m_style & wxCANCEL) )
+//     {
+//         SetReturnCode(wxID_CANCEL);
+//         EndModal( wxID_CANCEL );
+//     }
+}
+
+void OESENC_HTMLMessageDialog::OnClose( wxCloseEvent& event )
+{
+//     SetReturnCode(wxID_CANCEL);
+//     if(IsModal())
+//         EndModal( wxID_CANCEL );
+//     else
+        Hide();
+}
+
+void OESENC_HTMLMessageDialog::OnTimer(wxTimerEvent &evt)
+{
+       Hide();
+}
+#endif
+
+OESENC_HTMLMessageDialog *pinfoDlg;
 
 //---------------------------------------------------------------------------------------------------------
 //
@@ -330,6 +612,8 @@ bool oesenc_pi::DeInit(void)
 //        g_pScreenLog->Destroy();
 //        g_pScreenLog = NULL;
     }
+    
+    delete pinfoDlg;
     
     shutdown_SENC_server();
     
@@ -3627,116 +3911,6 @@ void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
 
 
 
-class  OESENC_HTMLMessageDialog: public wxDialog
-{
-    
-public:
-    OESENC_HTMLMessageDialog(wxWindow *parent, const wxString& message,
-                      const wxString& caption = wxMessageBoxCaptionStr,
-                      long style = wxOK|wxCENTRE,  
-                      bool bFixedFont = false,
-                      const wxPoint& pos = wxDefaultPosition);
-    
-    void OnYes(wxCommandEvent& event);
-    void OnNo(wxCommandEvent& event);
-    void OnCancel(wxCommandEvent& event);
-    void OnClose( wxCloseEvent& event );
-    
-private:
-    int m_style;
-    DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(OESENC_HTMLMessageDialog, wxDialog)
-EVT_BUTTON(wxID_YES, OESENC_HTMLMessageDialog::OnYes)
-EVT_BUTTON(wxID_NO, OESENC_HTMLMessageDialog::OnNo)
-EVT_BUTTON(wxID_CANCEL, OESENC_HTMLMessageDialog::OnCancel)
-EVT_CLOSE(OESENC_HTMLMessageDialog::OnClose)
-END_EVENT_TABLE()
-
-
-OESENC_HTMLMessageDialog::OESENC_HTMLMessageDialog( wxWindow *parent,
-                                      const wxString& message,
-                                      const wxString& caption,
-                                      long style,
-                                      bool bFixedFont,
-                                      const wxPoint& pos)
-: wxDialog( parent, wxID_ANY, caption, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP )
-{
-    m_style = style;
-    if(bFixedFont){
-        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
-        double font_size = dFont->GetPointSize();
-        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size,wxFONTFAMILY_TELETYPE, dFont->GetStyle(), dFont->GetWeight());
-        SetFont( *qFont );
-    }
-    
-    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-    
-    wxHtmlWindow *msgWindow = new wxHtmlWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                        wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION );
-    msgWindow->SetBorders( 1 );
-    
-    topsizer->Add( msgWindow, 1, wxALIGN_CENTER_HORIZONTAL | wxEXPAND, 5 );
-    
-    wxString html;
-    html << message;
-    
-    wxCharBuffer buf = html.ToUTF8();
-    if( buf.data() )                            // string OK?
-       msgWindow->SetPage( html );
-    
-    // 3) buttons
-    int AllButtonSizerFlags = wxOK|wxCANCEL|wxYES|wxNO|wxHELP|wxNO_DEFAULT;
-    int center_flag = wxEXPAND;
-    if (style & wxYES_NO)
-        center_flag = wxALIGN_CENTRE;
-    wxSizer *sizerBtn = CreateSeparatedButtonSizer(style & AllButtonSizerFlags);
-    if ( sizerBtn )
-        topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
-    
-    SetSizer( topsizer );
-    
-    topsizer->Fit( this );
-    
-    wxSize szyv = msgWindow->GetVirtualSize();
-   
-    SetClientSize(szyv.x + 20, szyv.y + 20); 
-    
-    Centre( wxBOTH | wxCENTER_FRAME);
-}
-
-void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
-{
-    SetReturnCode(wxID_YES);
-    EndModal( wxID_YES );
-}
-
-void OESENC_HTMLMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
-{
-    SetReturnCode(wxID_NO);
-    EndModal( wxID_NO );
-}
-
-void OESENC_HTMLMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
-{
-    // Allow cancellation via ESC/Close button except if
-    // only YES and NO are specified.
-    if ( (m_style & wxYES_NO) != wxYES_NO || (m_style & wxCANCEL) )
-    {
-        SetReturnCode(wxID_CANCEL);
-        EndModal( wxID_CANCEL );
-    }
-}
-
-void OESENC_HTMLMessageDialog::OnClose( wxCloseEvent& event )
-{
-    SetReturnCode(wxID_CANCEL);
-    EndModal( wxID_CANCEL );
-}
-
-
-
 void showChartinfoDialog( void )
 {
     if(g_binfoShown)
@@ -3751,7 +3925,7 @@ void showChartinfoDialog( void )
     
     hdr += _T("<hr />");
     
-    hdr += _T("<table border=0 bordercolor=#000000 style=background-color:#fbfbf9 width=600 cellpadding=3 cellspacing=3>");
+    hdr += _T("<center><table border=0 bordercolor=#000000 style=background-color:#fbfbf9 width=600 cellpadding=3 cellspacing=3>");
     
     hdr += _T("<tr>");
     
@@ -3769,6 +3943,7 @@ void showChartinfoDialog( void )
     
     hdr += _T("</tr>");
    
+    int len_max = 0;
     std::map<std::string, ChartInfoItem *>::iterator iter;
     for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
     {
@@ -3778,7 +3953,8 @@ void showChartinfoDialog( void )
         std::string key = iter->first;
         wxString strk = wxString(key.c_str(), wxConvUTF8);
         wxString info = pci->config_string;
- 
+        len_max = wxMax(info.Len(), len_max);
+        
         hdr += _T("<tr>");
         
         // Get the line fields
@@ -3797,13 +3973,25 @@ void showChartinfoDialog( void )
         hdr += _T("</tr>");
     }
  
-    hdr += _T("</table>");
+    hdr += _T("</table></center>");
     hdr += _T("</body></html>");
      
-    OESENC_HTMLMessageDialog dlg( NULL,hdr, _("oeSENC_PI Message"), wxOK, true);
-    dlg.Centre();
-    dlg.ShowModal();
-    g_binfoShown = true;
+    if(GetOCPNCanvasWindow()){
+        wxFont *pFont = OCPNGetFont(_T("Dialog"), 12);
+        wxScreenDC dc;
+        int sx, sy;
+        dc.GetTextExtent(_T("W"), &sx, &sy, NULL, NULL, pFont);
+        
+        int parent_font_width = sx;
+        wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
+    
+        pinfoDlg = new OESENC_HTMLMessageDialog( GetOCPNCanvasWindow(), hdr, _("oeSENC_PI Message"), wxOK);
+//        pinfoDlg->SetClientSize(sz);
+        pinfoDlg->Centre();
+        pinfoDlg->Show();
+        g_binfoShown = true;
+    }
+    
 }
 
 int processChartinfo(const wxString &oesenc_file)
