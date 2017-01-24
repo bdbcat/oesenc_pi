@@ -7630,7 +7630,6 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
     }
 #endif
 
-    S52color *primary_color = 0;
     unsigned char primary_r = 0;
     unsigned char primary_g = 0;
     unsigned char primary_b = 0;
@@ -7638,6 +7637,7 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
 
     bool b_filter = false;
 #if defined(__WXMAC__)
+    S52color *primary_color = 0;
     if( prule->definition.SYDF == 'V' ){
         b_filter = true;
         char *col = prule->colRef.LCRF;
@@ -7798,8 +7798,8 @@ int s52plib::RenderToBufferAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp,
 
 int s52plib::RenderAreaToDC( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp, render_canvas_parms *pb_spec )
 {
-    if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
-        int yyp = 0;
+//     if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
+//         int yyp = 0;
     
 
     if( !ObjectRenderCheckPos( rzRules, vp ) )
