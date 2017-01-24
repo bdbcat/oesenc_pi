@@ -3064,29 +3064,33 @@ void initLibraries(void)
 
 bool validate_SENC_server(void)
 {
-// #ifdef __WXMSW    
-//     return true;        // started as service earlier
-// #endif    
 
     if(g_debugLevel)printf("\n-------validate_SENC_server\n");
     wxLogMessage(_T("validate_SENC_server"));
-    
-    // Check to see if the server is already running, and available
-    Osenc_instream testAvail;
-    if(testAvail.isAvailable()){
-        wxLogMessage(_T("Available TRUE"));
-        return true;
-    }
 
-    if(g_debugLevel)printf("      validate_SENC_server, retry\n");
-    wxLogMessage(_T("Available FALSE, retry..."));
-    wxMilliSleep(500);
-    Osenc_instream testAvailRetry;
-    if(testAvailRetry.isAvailable()){
-        wxLogMessage(_T("Available TRUE"));
-        return true;
+    if(g_serverProc){
+    // Check to see if the server is already running, and available
+        Osenc_instream testAvail;
+        if(testAvail.isAvailable()){
+            wxLogMessage(_T("Available TRUE"));
+            return true;
+        }
+
+        wxString tmsg;
+        int nLoop = 1;
+        while(nLoop < 10){
+            tmsg.Printf(_T(" nLoop: %d"), nLoop);
+            if(g_debugLevel)printf("      validate_SENC_server, retry: %d \n", nLoop);
+            wxLogMessage(_T("Available FALSE, retry...") + tmsg);
+            wxMilliSleep(500);
+            Osenc_instream testAvailRetry;
+            if(testAvailRetry.isAvailable()){
+                wxLogMessage(_T("Available TRUE"));
+                return true;
+            }
+            nLoop++;
+        }
     }
-    
     
     // Not running, so start it up...
     
@@ -3193,6 +3197,7 @@ bool validate_SENC_server(void)
     if(g_serverDebug)
         cmds += _T(" -d");
     
+    wxLogMessage(_T("oesenc_pi: starting oeserverd utility"));
     g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
     wxMilliSleep(1000);
     
@@ -3218,7 +3223,7 @@ bool validate_SENC_server(void)
             msg += bin_test;
             msg += _T("}\n");
             msg += _(" reports Unavailable.\n\n");
-            OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+//            OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
             wxLogMessage(_T("oesenc_pi: ") + msg);
             
             g_sencutil_bin.Clear();
@@ -4023,8 +4028,8 @@ void showChartinfoDialog( void )
         int sx, sy;
         dc.GetTextExtent(_T("W"), &sx, &sy, NULL, NULL, pFont);
         
-        int parent_font_width = sx;
-        wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
+//        int parent_font_width = sx;
+//         wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
     
         pinfoDlg = new OESENC_HTMLMessageDialog( GetOCPNCanvasWindow(), hdr, _("oeSENC_PI Message"), wxOK);
 //        pinfoDlg->SetClientSize(sz);
