@@ -194,6 +194,12 @@ public:
     bool GetShowS57ImportantTextOnly() { return m_bShowS57ImportantTextOnly; }
     void SetShowS57ImportantTextOnly( bool f ) { m_bShowS57ImportantTextOnly = f; GenerateStateHash(); }
 
+    void SetLightsOff(bool val){ m_lightsOff = val; }
+    bool GetLightsOff(){ return m_lightsOff; }
+    
+    void SetAnchorOn(bool val){ m_anchorOn = val; }
+    bool GetAnchorOn(){ return m_anchorOn; }
+    
     int GetMajorVersion( void ) { return m_VersionMajor; }
     int GetMinorVersion( void ) { return m_VersionMinor; }
 
@@ -386,7 +392,10 @@ private:
     TextObjList m_textObjList;
 
     wxString m_ColorScheme;
-
+    
+    bool m_lightsOff;
+    bool m_anchorOn;
+    
     long m_state_hash;
 
     bool m_txf_ready;
@@ -417,11 +426,11 @@ public:
 #if wxUSE_GRAPHICS_CONTEXT
     void SetTargetGCDC( wxGCDC* gdc );
 #endif
-    bool Render(char *str, char *col, wxPoint &r, wxPoint &pivot, float scale, double rot_angle);
+    bool Render(char *str, char *col, wxPoint &r, wxPoint &pivot, wxPoint origin, float scale, double rot_angle);
     
 private:
     const char* findColorNameInRef( char colorCode, char* col );
-    void RotatePoint( wxPoint& point, double angle );
+    void RotatePoint( wxPoint& point, wxPoint origin, double angle );
     wxPoint ParsePoint( wxString& argument );
     void SetPen();
     void Line( wxPoint from, wxPoint to );

@@ -75,6 +75,10 @@ extern bool    g_oz_vector_scale;
 extern bool g_bresponsive;
 extern float g_ChartScaleFactorExp;
 
+extern int g_coreVersionMajor;
+extern int g_coreVersionMinor;
+extern int g_coreVersionPatch;
+
 extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
 extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
 extern PFNGLBUFFERDATAPROC                 s_glBufferData;
@@ -285,6 +289,9 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_bShowLdisText = true;
     m_bExtendLightSectors = true;
 
+    m_lightsOff = false;
+    m_anchorOn = false;
+    
     GenerateStateHash();
 
     HPGL = new RenderFromHPGL( this );
@@ -2247,6 +2254,20 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         fsf *= xscale;
     }
     
+    //  Special case for GEO_AREA objects with centred symbols
+    if( rzRules->obj->Primitive_type == GEO_AREA ) {
+        wxPoint r;
+        GetPointPixSingle( rzRules, rzRules->obj->y, rzRules->obj->x, &r, vp );
+        
+        double latdraw, londraw;                // position of the drawn symbol with pivot applied
+        GetPixPointSingleNoRotate( r.x + (prule->pos.symb.pivot_x.SYCL / fsf),
+                                   r.y + (prule->pos.symb.pivot_y.SYRW / fsf), &latdraw, &londraw, vp );
+        
+        if( !rzRules->obj->BBObj.Contains( latdraw, londraw ) ) // Symbol reference point is outside base area object
+             return 1;
+    }
+    
+    
     int width = prule->pos.symb.bnbox_x.SBXC + prule->pos.symb.bnbox_w.SYHL;
     width *= 4; // Grow the drawing bitmap to allow for rotation of symbols with highly offset pivot points
     width = (int) ( width / fsf );
@@ -2255,17 +2276,21 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
     height *= 4;
     height = (int) ( height / fsf );
 
+    int origin_x = prule->pos.symb.bnbox_x.SBXC;
+    int origin_y = prule->pos.symb.bnbox_y.SBXR;
+    wxPoint origin(origin_x, origin_y);
+    
     int pivot_x = prule->pos.symb.pivot_x.SYCL;
     int pivot_y = prule->pos.symb.pivot_y.SYRW;
+    wxPoint pivot( pivot_x, pivot_y );
 
     char *str = prule->vector.LVCT;
     char *col = prule->colRef.LCRF;
-    wxPoint pivot( pivot_x, pivot_y );
     wxPoint r0( (int) ( pivot_x / fsf ), (int) ( pivot_y / fsf ) );
 
     if( !m_pdc ) { // OpenGL Mode, do a direct render
         HPGL->SetTargetOpenGl();
-        HPGL->Render( str, col, r, pivot, xscale, (double) rot_angle );
+        HPGL->Render( str, col, r, pivot, origin, xscale, (double) rot_angle );
 
     } else {
 
@@ -2292,7 +2317,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         wxMemoryDC &gdc( mdc );
         HPGL->SetTargetDC( &gdc );
 #endif
-        HPGL->Render( str, col, r0, pivot, xscale, (double) rot_angle );
+        HPGL->Render( str, col, r0, pivot, origin, xscale, (double) rot_angle );
 
         int bm_width = ( gdc.MaxX() - gdc.MinX() ) + 4;
         int bm_height = ( gdc.MaxY() - gdc.MinY() ) + 4;
@@ -2320,7 +2345,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         wxGCDC targetGcdc( targetDc );
         r0 -= wxPoint( bm_orgx, bm_orgy );
         HPGL->SetTargetGCDC( &targetGcdc );
-        HPGL->Render( str, col, r0, pivot, xscale, (double) rot_angle );
+        HPGL->Render( str, col, r0, pivot,origin, xscale, (double) rot_angle );
 #else
         //  We can use the bitmap already rendered
         //  Get smallest containing bitmap
@@ -3793,7 +3818,7 @@ void s52plib::draw_lc_poly( wxDC *pdc, wxColor &color, int width, wxPoint *ptp, 
 
                         HPGL->SetTargetDC( pdc );
                         theta = atan2f( dy, dx );
-                        HPGL->Render( str, col, r, pivot, 1.0, theta * 180. / PI );
+                        HPGL->Render( str, col, r, pivot, pivot, 1.0, theta * 180. / PI );
 
                         xs += sym_len * dx / seg_len * sym_factor;
                         ys += sym_len * dy / seg_len * sym_factor;
@@ -3896,7 +3921,7 @@ next_seg_dc:
 
                         HPGL->SetTargetOpenGl();
                         theta = atan2f( dy, dx );
-                        HPGL->Render( str, col, r, pivot, 1.0, theta * 180. / PI );
+                        HPGL->Render( str, col, r, pivot, pivot, 1.0, theta * 180. / PI );
 
                         xs += sym_len * dx / seg_len * sym_factor;
                         ys += sym_len * dy / seg_len * sym_factor;
@@ -7516,13 +7541,17 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
 
             char *str = prule->vector.LVCT;
             char *col = prule->colRef.LCRF;
-            
             wxPoint pivot( pivot_x, pivot_y );
+            
+            int origin_x = prule->pos.patt.bnbox_x.PBXC;
+            int origin_y = prule->pos.patt.bnbox_y.PBXR;
+            wxPoint origin(origin_x, origin_y);
+            
             wxPoint r0( (int) ( ( pivot_x - box.GetMinX() ) / fsf ) + 1,
                         (int) ( ( pivot_y - box.GetMinY() ) / fsf ) + 1 );
 
             HPGL->SetTargetDC( &mdc );
-            HPGL->Render( str, col, r0, pivot, 1.0, 0 );
+            HPGL->Render( str, col, r0, pivot, origin, 1.0, 0 );
         } else {
             pbm = new wxBitmap( 2, 2 );       // substitute small, blank pattern
             mdc.SelectObject( *pbm );
@@ -7989,12 +8018,21 @@ bool s52plib::ObjectRenderCheckCat( ObjRazRules *rzRules, ViewPort *vp )
     if( rzRules->obj == NULL ) return false;
 
     bool b_catfilter = true;
-
-    //  Meta object override
-    if( !strncmp( rzRules->LUP->OBCL, "M_", 2 ) ) if( !m_bShowMeta ) return false;
+    bool b_visible = false;
 
     //      Do Object Type Filtering
     DisCat obj_cat = rzRules->obj->m_DisplayCat;
+    
+    //  Meta object filter. 
+    // Applied when showing display category OTHER, and
+    // only for objects whose decoded S52 display category (by LUP) is also OTHER
+    if( m_nDisplayCategory == OTHER ){
+        if(OTHER == obj_cat){
+            if( !strncmp( rzRules->LUP->OBCL, "M_", 2 ) )
+                if( !m_bShowMeta ) return false;
+        }
+    }
+
 
     if( m_nDisplayCategory == MARINERS_STANDARD ) {
         if( -1 == rzRules->obj->iOBJL ) UpdateOBJLArray( rzRules->obj );
@@ -8026,7 +8064,6 @@ bool s52plib::ObjectRenderCheckCat( ObjRazRules *rzRules, ViewPort *vp )
     if( !strncmp( rzRules->LUP->OBCL, "SOUNDG", 6 ) )
         b_catfilter = m_bShowSoundg;
     
-    bool b_visible = false;
     if( b_catfilter ) {
         b_visible = true;
 
@@ -8418,77 +8455,121 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
     m_benableGLLS = true;               // default is to always use RenderToGLLS (VBO support)
     
     // Has the core S52PLIB configuration changed?
-    //  If it has, reload from global preferences file.
+    //  If it has, reload from global preferences file, and other dynamic status information.
     
     int core_config = PI_GetPLIBStateHash();
     if(core_config != m_myConfig){
-        bool current_bsoundings = m_bShowSoundg;
-        LoadS57Config();
-        m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
-        m_bShowS57Text = IsTextEnabled(VPoint);
+        
+        //  If a modern (> OCPN 4.4) version of the core is active,
+        //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.
+        if( (g_coreVersionMajor >= 4) && (g_coreVersionMinor >= 5) ){
 
-#if 1
-        // Detect and manage "LIGHTS" toggle
-        OBJLElement *pOLE = NULL;
-        for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
-            pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
-            if( !strncmp( pOLE->OBJLName, "LIGHTS", 6 ) ) {
-                break;
-            }
-            pOLE = NULL;
-        }
+            OBJLElement *pOLE = NULL;
             
-        bool bshow_lights = IsLightsEnabled(VPoint);
-        
-        if(!bshow_lights)                     // On, going off
-            AddObjNoshow("LIGHTS");
-        else{                                   // Off, going on
-            if(pOLE)
-                pOLE->nViz = 1;
-            RemoveObjNoshow("LIGHTS");
-        }
-#endif
-        
-#if 1      
-        // Handle Anchor area toggle
-        bool bAnchor = isAnchorEnabled(VPoint);
+            // Detect and manage "LIGHTS" toggle
+            bool bshow_lights = !m_lightsOff;
+            if(!bshow_lights)                     // On, going off
+                AddObjNoshow("LIGHTS");
+            else{                                   // Off, going on
+                if(pOLE)
+                    pOLE->nViz = 1;
+                RemoveObjNoshow("LIGHTS");
+            }
 
-        const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
-        unsigned int num = sizeof(categories) / sizeof(categories[0]);
-        
-        if(!bAnchor){                            
-            for( unsigned int c = 0; c < num; c++ ) {
-                ps52plib->AddObjNoshow(categories[c]);
-            }
-        }
-        else{                                   
-            for( unsigned int c = 0; c < num; c++ ) {
-                ps52plib->RemoveObjNoshow(categories[c]);
-            }
+            // Handle Anchor area toggle
+            bool bAnchor = m_anchorOn;
             
-            unsigned int cnt = 0;
-            for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
-                OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+            const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
+            unsigned int num = sizeof(categories) / sizeof(categories[0]);
+            
+            if(!bAnchor){                            
                 for( unsigned int c = 0; c < num; c++ ) {
-                    if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
-                        pOLE->nViz = 1;         // force on
-                        cnt++;
-                        break;
-                    }
+                    ps52plib->AddObjNoshow(categories[c]);
                 }
-                if( cnt == num ) break;
+            }
+            else{                                   
+                for( unsigned int c = 0; c < num; c++ ) {
+                    ps52plib->RemoveObjNoshow(categories[c]);
+                }
+                
+                unsigned int cnt = 0;
+                for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
+                    OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+                    for( unsigned int c = 0; c < num; c++ ) {
+                        if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
+                            pOLE->nViz = 1;         // force on
+                            cnt++;
+                            break;
+                        }
+                    }
+                    if( cnt == num ) break;
+                }
+            }
+        }
+        
+        // If OCPN Core is older (<OCPN 4.4), we must do this the hard way
+        else{
+            bool current_bsoundings = m_bShowSoundg;
+            LoadS57Config();
+            m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
+            m_bShowS57Text = IsTextEnabled(VPoint);
+
+            // Detect and manage "LIGHTS" toggle
+            OBJLElement *pOLE = NULL;
+            for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+                pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+                if( !strncmp( pOLE->OBJLName, "LIGHTS", 6 ) ) {
+                    break;
+                }
+                pOLE = NULL;
+            }
+                
+            bool bshow_lights = IsLightsEnabled(VPoint);
+            
+            if(!bshow_lights)                     // On, going off
+                AddObjNoshow("LIGHTS");
+            else{                                   // Off, going on
+                if(pOLE)
+                    pOLE->nViz = 1;
+                RemoveObjNoshow("LIGHTS");
+            }
+            // Handle Anchor area toggle
+            bool bAnchor = isAnchorEnabled(VPoint);
+
+            const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
+            unsigned int num = sizeof(categories) / sizeof(categories[0]);
+            
+            if(!bAnchor){                            
+                for( unsigned int c = 0; c < num; c++ ) {
+                    ps52plib->AddObjNoshow(categories[c]);
+                }
+            }
+            else{                                   
+                for( unsigned int c = 0; c < num; c++ ) {
+                    ps52plib->RemoveObjNoshow(categories[c]);
+                }
+                
+                unsigned int cnt = 0;
+                for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
+                    OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+                    for( unsigned int c = 0; c < num; c++ ) {
+                        if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
+                            pOLE->nViz = 1;         // force on
+                            cnt++;
+                            break;
+                        }
+                    }
+                    if( cnt == num ) break;
+                }
             }
         }
         
         m_myConfig = PI_GetPLIBStateHash();
-#endif
     }
 
     // Reset the LIGHTS declutter machine
     lastLightLat = 0;
     lastLightLon = 0;
-    
-   
 }
 
 void s52plib::ClearTextList( void )
@@ -8673,8 +8754,8 @@ void RenderFromHPGL::SetTargetGCDC( wxGCDC* gdc )
 const char* RenderFromHPGL::findColorNameInRef( char colorCode, char* col )
 {
     int noColors = strlen( col ) / 6;
-    for( int i = 0; i < noColors; i++ ) {
-        if( *col + i == colorCode ) return col + i + 1;
+    for( int i = 0, j=0; i < noColors; i++, j += 6 ) {
+        if( *(col + j) == colorCode ) return col + j + 1;
     }
     return col + 1; // Default to first color if not found.
 }
@@ -8795,20 +8876,20 @@ void RenderFromHPGL::Polygon()
 #endif
 }
 
-void RenderFromHPGL::RotatePoint( wxPoint& point, double angle )
+void RenderFromHPGL::RotatePoint( wxPoint& point, wxPoint origin, double angle )
 {
     if( angle == 0. ) return;
     double sin_rot = sin( angle * PI / 180. );
     double cos_rot = cos( angle * PI / 180. );
 
-    double xp = ( point.x * cos_rot ) - ( point.y * sin_rot );
-    double yp = ( point.x * sin_rot ) + ( point.y * cos_rot );
+    double xp = ( (point.x - origin.x) * cos_rot ) - ( (point.y - origin.y) * sin_rot );
+    double yp = ( (point.x - origin.x) * sin_rot ) + ( (point.y - origin.y) * cos_rot );
 
-    point.x = (int) xp;
-    point.y = (int) yp;
+    point.x = (int) xp + origin.x;
+    point.y = (int) yp + origin.y;
 }
 
-bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, float scale, double rot_angle )
+bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, wxPoint origin, float scale, double rot_angle )
 {
 //      int width = 1;
 //      double radius = 0.0;
@@ -8844,8 +8925,9 @@ bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, f
         if( command == _T("PU") ) {
             SetPen();
             lineStart = ParsePoint( arguments );
+            RotatePoint( lineStart, origin, rot_angle );
             lineStart -= pivot;
-            RotatePoint( lineStart, rot_angle );
+            
             lineStart.x /= scaleFactor;
             lineStart.y /= scaleFactor;
             lineStart += r;
@@ -8857,8 +8939,8 @@ bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, f
                 lineEnd.x++;
             } else {
                 lineEnd = ParsePoint( arguments );
+                RotatePoint( lineEnd, origin, rot_angle );
                 lineEnd -= pivot;
-                RotatePoint( lineEnd, rot_angle );
                 lineEnd.x /= scaleFactor;
                 lineEnd.y /= scaleFactor;
                 lineEnd += r;
@@ -8901,7 +8983,7 @@ bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, f
                             points.GetNextToken().ToLong( &y );
                             lineEnd = wxPoint( x, y );
                             lineEnd -= pivot;
-                            RotatePoint( lineEnd, rot_angle );
+                            RotatePoint( lineEnd, origin, rot_angle );
                             lineEnd.x /= scaleFactor;
                             lineEnd.y /= scaleFactor;
                             lineEnd += r;
