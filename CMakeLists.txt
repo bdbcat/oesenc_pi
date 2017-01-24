@@ -23,7 +23,7 @@ MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 SET(VERSION_MAJOR "0")
 SET(VERSION_MINOR "4")
-SET(VERSION_PATCH "1221")
+SET(VERSION_PATCH "1323")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
 #SET(CMAKE_BUILD_TYPE Release)
@@ -91,6 +91,7 @@ ENDIF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm*")
 MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/wxJSON)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/cpl)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/dsa)
@@ -238,9 +239,18 @@ SET(SRC_S57ENC
                 src/mygdal/s57classregistrar.cpp
 )
 
+SET(SRC_JSON
+            src/wxJSON/json_defs.h
+            src/wxJSON/jsonreader.h
+            src/wxJSON/jsonval.h
+            src/wxJSON/jsonwriter.h
+            src/wxJSON/jsonreader.cpp
+            src/wxJSON/jsonval.cpp
+            src/wxJSON/jsonwriter.cpp
+        )
 
 
-ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_OESENC} ${SRC_CPL} ${SRC_ISO8211} ${SRC_DSA} ${SRC_S57ENC})
+ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_OESENC} ${SRC_CPL} ${SRC_ISO8211} ${SRC_DSA} ${SRC_S57ENC} ${SRC_JSON})
 
 IF(WIN32)
 #  SET(OPENCPN_IMPORT_LIB "opencpn.lib")

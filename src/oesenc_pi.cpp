@@ -52,6 +52,9 @@
 #include "s52utils.h"
 #include "Osenc.h"
 #include "chartsymbols.h"
+#include "json_defs.h"
+#include "jsonwriter.h"
+#include "jsonreader.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -115,6 +118,10 @@ int                             g_debugLevel;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
+
+int                             g_coreVersionMajor;
+int                             g_coreVersionMinor;
+int                             g_coreVersionPatch;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
@@ -672,6 +679,37 @@ wxArrayString oesenc_pi::GetDynamicChartClassNameArray()
 
 void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
+    if(message_id == _T("OpenCPN Config"))
+    {
+
+        // construct the JSON root object
+        wxJSONValue  root;
+        // construct a JSON parser
+        wxJSONReader reader;
+
+        // now read the JSON text and store it in the 'root' structure
+        // check for errors before retreiving values...
+        int numErrors = reader.Parse( message_body, &root );
+        if ( numErrors > 0 )  {
+            //              const wxArrayString& errors = reader.GetErrors();
+            return;
+        }
+
+        // Capture the OpenCPN base version information
+        g_coreVersionMajor = root[_T("OpenCPN Version Major")].AsInt();
+        g_coreVersionMinor = root[_T("OpenCPN Version Minor")].AsInt();
+        g_coreVersionPatch = root[_T("OpenCPN Version Patch")].AsInt();
+        
+        
+        // Capture the S52PLIB configuration
+        if(ps52plib){
+            ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
+            ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
+            ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
+            ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            
+        }
+    }
 }
 
 void oesenc_pi::SetColorScheme(PI_ColorScheme cs)
@@ -3156,7 +3194,7 @@ bool validate_SENC_server(void)
         cmds += _T(" -d");
     
     g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
-    wxMilliSleep(100);
+    wxMilliSleep(1000);
     
     // Check to see if the server function is available
     if(g_serverProc){
@@ -3188,7 +3226,10 @@ bool validate_SENC_server(void)
             
         }
         else{
-            wxLogMessage(_T("oesenc_pi: oeserverd Check OK...") + ver_line);
+            wxString nc;
+            nc.Printf(_T("LoopCount: %d"), nLoop);
+            
+            wxLogMessage(_T("oesenc_pi: oeserverd Check OK...") + nc);
         }
     }
     else{
