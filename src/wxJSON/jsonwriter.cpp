@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-    #pragma implementation "jsonwriter.cpp"
+//    #pragma implementation "jsonwriter.cpp"
 #endif
 
 
@@ -338,6 +338,8 @@ wxJSONWriter::SetDoubleFmtString( const char* fmt )
 int
 wxJSONWriter::DoWrite( wxOutputStream& os, const wxJSONValue& value, const wxString* key, bool comma )
 {
+    return 0;
+#if 0    
     // note that this function is recursive
 
     // some variables that cannot be allocated in the switch statement
@@ -548,6 +550,8 @@ wxJSONWriter::DoWrite( wxOutputStream& os, const wxJSONValue& value, const wxStr
         lastChar = WriteSeparator( os );
     }
     return lastChar;
+#endif
+    
 }
 
 

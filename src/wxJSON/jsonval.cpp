@@ -24,7 +24,8 @@
 #include <wx/debug.h>
 #include <wx/arrimpl.cpp>
 
-#include <jsonval.h>
+#include "jsonval.h"
+
 
 
 WX_DEFINE_OBJARRAY( wxJSONInternalArray );
@@ -1451,12 +1452,12 @@ wxJSONValue::HasMember( const wxString& key ) const
     wxJSONRefData* data = GetRefData();
     wxJSON_ASSERT( data );
 
-    if ( data && data->m_type == wxJSONTYPE_OBJECT )  {
-        wxJSONInternalMap::iterator it = data->m_valMap.find( key );
-        if ( it != data->m_valMap.end() )  {
-            r = true;
-        }
-    }
+//     if ( data && data->m_type == wxJSONTYPE_OBJECT )  {
+//         wxJSONInternalMap::iterator it = data->m_valMap.find( key );
+//         if ( it != data->m_valMap.end() )  {
+//             r = true;
+//         }
+//     }
     return r;
 }
 
@@ -1502,12 +1503,12 @@ wxJSONValue::GetMemberNames() const
     wxJSON_ASSERT( data->m_type == wxJSONTYPE_OBJECT );
 
     wxArrayString arr;
-    if ( data->m_type == wxJSONTYPE_OBJECT )   {
-        wxJSONInternalMap::iterator it;
-        for ( it = data->m_valMap.begin(); it != data->m_valMap.end(); it++ )  {
-            arr.Add( it->first );
-        }
-    }
+//     if ( data->m_type == wxJSONTYPE_OBJECT )   {
+//         wxJSONInternalMap::iterator it;
+//         for ( it = data->m_valMap.begin(); it != data->m_valMap.end(); it++ )  {
+//             arr.Add( it->first );
+//         }
+//     }
     return arr;
 }
 
@@ -1750,12 +1751,12 @@ wxJSONValue::Remove( const wxString& key )
     wxJSON_ASSERT( data );
 
     bool r = false;
-    if ( data->m_type == wxJSONTYPE_OBJECT )  {
-        wxJSONInternalMap::size_type count = data->m_valMap.erase( key );
-        if ( count > 0 )  {
-            r = true;
-        }
-    }
+//     if ( data->m_type == wxJSONTYPE_OBJECT )  {
+//         wxJSONInternalMap::size_type count = data->m_valMap.erase( key );
+//         if ( count > 0 )  {
+//             r = true;
+//         }
+//     }
     return r;
 }
 
@@ -1879,12 +1880,12 @@ wxJSONValue::ItemAt( const wxString& key ) const
     wxJSON_ASSERT( data );
 
     wxJSONValue v( wxJSONTYPE_INVALID );
-    if ( data->m_type == wxJSONTYPE_OBJECT )  {
-        wxJSONInternalMap::const_iterator it = data->m_valMap.find( key );
-        if ( it != data->m_valMap.end() )  {
-            v = it->second;
-        }
-    }
+//     if ( data->m_type == wxJSONTYPE_OBJECT )  {
+//         wxJSONInternalMap::const_iterator it = data->m_valMap.find( key );
+//         if ( it != data->m_valMap.end() )  {
+//             v = it->second;
+//         }
+//     }
     return v;
 }
 
@@ -2118,12 +2119,12 @@ wxJSONValue::Get( const wxString& key, const wxJSONValue& defaultValue ) const
 
     wxJSONRefData* data = GetRefData();
     wxJSON_ASSERT( data );
-    if ( data->m_type == wxJSONTYPE_OBJECT )  {
-        wxJSONInternalMap::iterator it = data->m_valMap.find( key );
-        if ( it != data->m_valMap.end() )  {
-            v = it->second;
-        }
-    }
+//     if ( data->m_type == wxJSONTYPE_OBJECT )  {
+//         wxJSONInternalMap::iterator it = data->m_valMap.find( key );
+//         if ( it != data->m_valMap.end() )  {
+//             v = it->second;
+//         }
+//     }
     return v;
 }
 
@@ -2169,12 +2170,12 @@ wxJSONValue::Find( const wxString& key ) const
 
     wxJSONValue* vp = 0;
 
-    if ( data->m_type == wxJSONTYPE_OBJECT )  {
-        wxJSONInternalMap::iterator it = data->m_valMap.find( key );
-        if ( it != data->m_valMap.end() )  {
-            vp = &(it->second);
-        }
-    }
+//     if ( data->m_type == wxJSONTYPE_OBJECT )  {
+//         wxJSONInternalMap::iterator it = data->m_valMap.find( key );
+//         if ( it != data->m_valMap.end() )  {
+//             vp = &(it->second);
+//         }
+//     }
     return vp;
 }
 
@@ -2245,6 +2246,7 @@ time the Dump() function is called recursively.
 wxString
 wxJSONValue::Dump( bool deep, int indent ) const
 {
+#if 0    
     wxJSONRefData* data = GetRefData();
     wxJSON_ASSERT( data );
 
@@ -2312,6 +2314,8 @@ wxJSONValue::Dump( bool deep, int indent ) const
         }
     }
     return s;
+#endif
+    return _T("");
 }
 
 //! Returns informations about the object
