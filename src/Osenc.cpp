@@ -47,8 +47,8 @@
 //#include <../opencpn/plugins/chartdldr_pi/src/unrar/rartypes.hpp>
 //#include "georef.h"
 
-//extern wxString                 g_csv_locn;
 extern int g_debugLevel;
+extern wxString g_pipeParm;
 
 using namespace std;
 
@@ -393,12 +393,16 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
     fifo_msg msg;
     
     LPTSTR lpvMessage=TEXT("Default message from client."); 
-//    TCHAR  chBuf[BUFSIZE]; 
     BOOL   fSuccess = FALSE; 
-//    DWORD  cbRead, cbToWrite, cbWritten, dwMode; 
     DWORD  cbToWrite, cbWritten; 
-    LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe"); 
+   
+    wxString pipeName;
+    if(g_pipeParm.Length())
+        pipeName = _T("\\\\.\\pipe\\") + g_pipeParm;
+    else
+        pipeName = _T("\\\\.\\pipe\\mynamedpipe");
     
+    LPCWSTR lpszPipename = pipeName.wc_str();
     
     // Try to open a named pipe; wait for it, if necessary. 
         

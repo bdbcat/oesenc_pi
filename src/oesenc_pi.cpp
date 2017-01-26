@@ -123,6 +123,8 @@ int                             g_coreVersionMajor;
 int                             g_coreVersionMinor;
 int                             g_coreVersionPatch;
 
+wxString                        g_pipeParm;
+
 std::map<std::string, ChartInfoItem *> info_hash;
 
 double g_overzoom_emphasis_base;
@@ -3185,19 +3187,24 @@ bool validate_SENC_server(void)
     // now start the server...
     wxString cmds = g_sencutil_bin;
 
-#ifndef __WXMSW__    
-//    cmds += _T(" --daemon");
-#endif
 
+    wxString pipeParm;
+    
     int flags = wxEXEC_ASYNC;
 #ifdef __WXMSW__    
-	flags |= wxEXEC_HIDE_CONSOLE;
+    flags |= wxEXEC_HIDE_CONSOLE;
+    long pid = ::wxGetProcessId();
+    pipeParm.Printf(_T("OCPN%04d"), pid % 10000);
+    g_pipeParm = pipeParm;
 #endif
 
+    if(g_pipeParm.Length())
+        cmds += _T(" -p ") + g_pipeParm;
+    
     if(g_serverDebug)
         cmds += _T(" -d");
     
-    wxLogMessage(_T("oesenc_pi: starting oeserverd utility"));
+    wxLogMessage(_T("oesenc_pi: starting oeserverd utility: ") + cmds);
     g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
     wxMilliSleep(1000);
     
