@@ -1,0 +1,24 @@
+<chartsymbols>
+                <lookup id="84" RCID="32120" name="LNDARE">
+                        <type>Area</type>
+                        <disp-prio>Group 1</disp-prio>
+                        <radar-prio>Supressed</radar-prio>
+                        <table-name>Plain</table-name>
+                        <instruction>AC(LANDA);TX(OBJNAM,1,2,3,'15118',-1,-1,CHBLK,26)</instruction>
+                        <display-cat>Displaybase</display-cat>
+                        <comment>12010</comment>
+                </lookup>
+
+                <lookup id="424" RCID="32459" name="LNDARE">
+                        <type>Area</type>
+                        <disp-prio>Group 1</disp-prio>
+                        <radar-prio>Supressed</radar-prio>
+                        <table-name>Symbolized</table-name>
+                        <instruction>AC(LANDA);TX(OBJNAM,1,2,3,'15118',-1,-1,CHBLK,26)</instruction>
+                        <display-cat>Displaybase</display-cat>
+                        <comment>12010</comment>
+                </lookup>
+
+
+</chartsymbols>
+
