@@ -7372,7 +7372,7 @@ int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, View
 {
     if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
         int yyp = 0;
-    
+
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
 
@@ -8460,6 +8460,8 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
     int core_config = PI_GetPLIBStateHash();
     if(core_config != m_myConfig){
         
+        LoadS57Config();
+        
         //  If a modern (> OCPN 4.4) version of the core is active,
         //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.
         if( (g_coreVersionMajor >= 4) && (g_coreVersionMinor >= 5) ){
@@ -8510,7 +8512,6 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
         // If OCPN Core is older (<OCPN 4.4), we must do this the hard way
         else{
             bool current_bsoundings = m_bShowSoundg;
-            LoadS57Config();
             m_bShowSoundg = IsSoundingEnabled(VPoint, current_bsoundings);
             m_bShowS57Text = IsTextEnabled(VPoint);
 
