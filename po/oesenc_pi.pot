@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: oesenc_pi 0.4.1326\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-03 19:59+0100\n"
+"POT-Creation-Date: 2017-02-04 17:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,8 +108,8 @@ msgstr ""
 msgid "Userpermit OK"
 msgstr ""
 
-#: src\oesenc_pi.cpp:2568 src\oesenc_pi.h:449
-msgid "OpenCPN SENC UserKey Required"
+#: src\oesenc_pi.cpp:2568
+msgid "OpenCPN oeSENC UserKey Required"
 msgstr ""
 
 #: src\oesenc_pi.cpp:2588
@@ -118,31 +118,31 @@ msgstr ""
 
 #: src\oesenc_pi.cpp:2607
 msgid ""
-"A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
+"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
 "FF\n"
 "\n"
-"Your OESENC UserKey may be obtained from your chart provider."
+"Your oeSENC UserKey may be obtained from your chart provider."
 msgstr ""
 
 #: src\oesenc_pi.cpp:2613
 msgid ""
-"ERROR: The UserKey entered is not valid for this OESENC chart set.\n"
+"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n"
 "\n"
-"A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
+"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
 "FF\n"
-"Your OESENC UserKey may be obtained from your chart provider.\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n"
 "\n"
 msgstr ""
 
 #: src\oesenc_pi.cpp:2621
 msgid ""
-"ERROR: The UserKey entered is not valid for this OESENC chart set.\n"
+"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "\n"
-"OESENC charts will be disabled for this session.\n"
+"oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n"
 "\n"
-"Your OESENC UserKey may be obtained from your chart provider.\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n"
 "\n"
 msgstr ""
 
@@ -163,7 +163,7 @@ msgstr ""
 #: src\oesenc_pi.cpp:3117 src\oesenc_pi.cpp:3138 src\oesenc_pi.cpp:3178
 #: src\oesenc_pi.cpp:3253 src\oesenc_pi.cpp:3533 src\oesenc_pi.cpp:3563
 #: src\oesenc_pi.cpp:3576
-msgid "oesenc_pi Message"
+msgid "oeSENC_pi Message"
 msgstr ""
 
 #: src\oesenc_pi.cpp:3134
@@ -266,6 +266,10 @@ msgstr ""
 
 #: src\oesenc_pi.cpp:3994
 msgid "Valid until"
+msgstr ""
+
+#: src\oesenc_pi.h:449
+msgid "OpenCPN SENC UserKey Required"
 msgstr ""
 
 #: src\oesenc_pi.h:577

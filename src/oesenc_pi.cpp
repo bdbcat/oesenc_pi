@@ -2565,7 +2565,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
 
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
 
-     SetTitle( _("OpenCPN SENC UserKey Required"));
+     SetTitle( _("OpenCPN oeSENC UserKey Required"));
 
      CreateControls( legendID );
      GetSizer()->SetSizeHints( this );
@@ -2604,24 +2604,24 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
              
          case LEGEND_FIRST:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n\
-Your OESENC UserKey may be obtained from your chart provider."),
+_("A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n\
+Your oeSENC UserKey may be obtained from your chart provider."),
                                                       wxDefaultPosition, wxDefaultSize, 0);
              break;
          case LEGEND_SECOND:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\
+_("ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\
 Please verify your UserKey and try again.\n\n\
-A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\
-Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\
+Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
                                                       wxDefaultPosition, wxDefaultSize, 0);
              break;
          case LEGEND_THIRD:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\n\
-OESENC charts will be disabled for this session.\n\
+_("ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n\
+oeSENC charts will be disabled for this session.\n\
 Please verify your UserKey and restart OpenCPN.\n\n\
-Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
                                                     wxDefaultPosition, wxDefaultSize, 0);
              
              m_UserKeyCtl->Disable();
@@ -3114,7 +3114,7 @@ bool validate_SENC_server(void)
         msg += _T("{");
         msg += bin_test;
         msg += _T("}");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3135,7 +3135,7 @@ bool validate_SENC_server(void)
         msg += _T("{");
         msg += bin_test;
         msg += _T("}");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3175,7 +3175,7 @@ bool validate_SENC_server(void)
         wxString msg1;
         msg1.Printf(_("This version of oesenc_PI requires oeserverd of version 1.00 or later."));
         msg += msg1;
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3250,7 +3250,7 @@ bool validate_SENC_server(void)
         msg += bin_test;
         msg += _T("}\n");
         msg += _(" could not be started.\n\n");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3530,7 +3530,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                             if (dwError == ERROR_CANCELLED)
                             {
                                 // The user refused to allow privileges elevation.
-                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to create fpr.\n  Please try again...."), _("oesenc_pi Message"), wxOK);
+                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to create fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
                                 berror = true;
                             }
                         }
@@ -3560,12 +3560,12 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     if(bcopy)
                         msg1 += _("\n\n Fingerprint file is also copied to desktop.");
                     
-                    OCPNMessageBox_PlugIn(NULL, msg1, _("oesenc_pi Message"), wxOK);
+                    OCPNMessageBox_PlugIn(NULL, msg1, _("oeSENC_pi Message"), wxOK);
                 }
                 
-                wxLogMessage(_T("oesenc fpr file created as: ") + fpr_file);
+                wxLogMessage(_T("oeSENC fpr file created as: ") + fpr_file);
                 if(bcopy)
-                    wxLogMessage(_T("oesenc fpr file created in desktop folder: ") + sdesktop_path);
+                    wxLogMessage(_T("oeSENC fpr file created in desktop folder: ") + sdesktop_path);
             }
             else{
                 wxLogMessage(_T("oesenc_pi: oeserverd results:"));
@@ -3573,7 +3573,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     wxString line = ret_array[i];
                     wxLogMessage( line );
                 }
-                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oesenc_pi Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
                 
                 berror = true;
             }
