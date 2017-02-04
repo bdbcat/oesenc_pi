@@ -1942,7 +1942,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
             }
 
             if( bdraw ) {
-                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_("ChartTexts")); //FontMgr::Get().GetFontColor(_("ChartTexts"));
+                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_T("ChartTexts")); //FontMgr::Get().GetFontColor(_T("ChartTexts"));
                 if( wcolor == *wxBLACK )
                     wcolor = wxColour( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
                 pdc->SetTextForeground( wcolor );

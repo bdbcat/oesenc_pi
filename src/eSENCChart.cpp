@@ -6159,8 +6159,10 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                 lightsHtml << _T("<b>Light</b> <font size=-2>(LIGHTS)</font><br>");
                 lightsHtml << _T("<font size=-2>") << thisLight.position << _T("</font><br>\n");
                 
-                if( curLight->hasSectors ) lightsHtml
-                    <<_("<font size=-2>(Sector angles are True Bearings from Seaward)</font><br>");
+                if( curLight->hasSectors ) lightsHtml 
+                    <<_T("<font size=-2>") 
+                    << _("Sector angles are True Bearings from Seaward") 
+                    << _T("</font><br>");
                 
                 lightsHtml << _T("<table>");
             }
