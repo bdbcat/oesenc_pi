@@ -1676,8 +1676,8 @@ int Osenc::ValidateAndCountUpdates( const wxFileName file000, const wxString Cop
                             
 //                             if( !chain_broken_mssage_shown ){
 //                                 OCPNMessageBox(NULL, 
-//                                                _("S57 Cell Update chain incomplete.\nENC features may be incomplete or inaccurate.\nCheck the logfile for details."),
-//                                                _("OpenCPN Create SENC Warning"), wxOK | wxICON_EXCLAMATION, 30 );
+//                                                _T("S57 Cell Update chain incomplete.\nENC features may be incomplete or inaccurate.\nCheck the logfile for details."),
+//                                                _T("OpenCPN Create SENC Warning"), wxOK | wxICON_EXCLAMATION, 30 );
 //                                                chain_broken_mssage_shown = true;
 //                             }
                             
@@ -1982,7 +1982,7 @@ int Osenc::createSenc200(const wxString& FullPath000, const wxString& SENCFileNa
     wxString Message = SENCfile.GetFullPath();
     Message.Append( _T("...Ingesting") );
     
-    wxString Title( _("OpenCPN S57 SENC File Create...") );
+    wxString Title( _T("OpenCPN S57 SENC File Create...") );
     Title.append( SENCfile.GetFullPath() );
     
     wxStopWatch progsw;

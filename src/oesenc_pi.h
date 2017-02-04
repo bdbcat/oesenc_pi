@@ -318,7 +318,7 @@ public:
 ////@begin control identifiers
 #define ID_GETUP 8100
 #define SYMBOL_GETUP_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
-#define SYMBOL_GETUP_TITLE _("S63_pi Userpermit Required")
+#define SYMBOL_GETUP_TITLE _T("S63_pi Userpermit Required")
 #define SYMBOL_GETUP_IDNAME ID_GETUP
 #define SYMBOL_GETUP_SIZE wxSize(500, 200)
 #define SYMBOL_GETUP_POSITION wxDefaultPosition
@@ -382,7 +382,7 @@ public:
 ////@begin control identifiers
 #define ID_GETIP 8200
 #define SYMBOL_GETIP_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
-#define SYMBOL_GETIP_TITLE _("S63_pi Install Permit Required")
+#define SYMBOL_GETIP_TITLE _T("S63_pi Install Permit Required")
 #define SYMBOL_GETIP_IDNAME ID_GETIP
 #define SYMBOL_GETIP_SIZE wxSize(500, 200)
 #define SYMBOL_GETIP_POSITION wxDefaultPosition

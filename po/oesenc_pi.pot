@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: oesenc_pi 0.1.1106\n"
+"Project-Id-Version: oesenc_pi 0.4.1326\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-06 23:53-0500\n"
+"POT-Creation-Date: 2017-02-04 17:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,322 +17,265 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/oesenc_pi.cpp:343
+#: src\eSENCChart.cpp:2963 src\eSENCChart.cpp:2967
+msgid "Building eSENC"
+msgstr ""
+
+#: src\eSENCChart.cpp:6160
+msgid "Sector angles are True Bearings from Seaward"
+msgstr ""
+
+#: src\oesenc_pi.cpp:229 src\oesenc_pi.cpp:369 src\oesenc_pi.cpp:3647
+#: src\oesenc_pi.cpp:3699 src\oesenc_pi.cpp:3847
+msgid "Dialog"
+msgstr ""
+
+#: src\oesenc_pi.cpp:659
 msgid "oeSENC"
 msgstr ""
 
-#: src/oesenc_pi.cpp:349
+#: src\oesenc_pi.cpp:665
 msgid "PlugIn for OpenCPN oeSENC charts"
 msgstr ""
 
-#: src/oesenc_pi.cpp:355
+#: src\oesenc_pi.cpp:671
 msgid ""
 "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:373 src/oesenc_pi.cpp:402
+#: src\oesenc_pi.cpp:1035 src\oesenc_pi.cpp:3397
 msgid ""
-"SSE 25..The ENC permit for this cell has expired.\n"
-" This cell may be out of date and MUST NOT be used for NAVIGATION."
+"To obtain a User Key, you must generate a unique System Identifier File.\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:445
-msgid "S63 Charts"
-msgstr ""
-
-#: src/oesenc_pi.cpp:457
-msgid "Chart Cells"
-msgstr ""
-
-#: src/oesenc_pi.cpp:468
-msgid "Installed S63 Cell Permits"
-msgstr ""
-
-#: src/oesenc_pi.cpp:477
-msgid "Cell Name"
-msgstr ""
-
-#: src/oesenc_pi.cpp:482 src/oesenc_pi.cpp:557
-msgid "Data Server ID"
-msgstr ""
-
-#: src/oesenc_pi.cpp:487 src/oesenc_pi.cpp:562
-msgid "Expiration Date"
-msgstr ""
-
-#: src/oesenc_pi.cpp:498
-msgid "Import Cell Permits..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:501
-msgid "Remove Permits"
-msgstr ""
-
-#: src/oesenc_pi.cpp:505
-msgid "Import Charts/Updates..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:522
-msgid "S63_pi Log"
-msgstr ""
-
-#: src/oesenc_pi.cpp:537
-msgid "Keys/Permits"
-msgstr ""
-
-#: src/oesenc_pi.cpp:543
-msgid "Installed S63 Certificates/Keys"
-msgstr ""
-
-#: src/oesenc_pi.cpp:551
-msgid "Certificate Name"
-msgstr ""
-
-#: src/oesenc_pi.cpp:574
-msgid "Import Certificate..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:584
-msgid "UserPermit"
-msgstr ""
-
-#: src/oesenc_pi.cpp:591
-msgid "New Userpermit..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:598
-msgid "InstallPermit"
-msgstr ""
-
-#: src/oesenc_pi.cpp:605
-msgid "New Installpermit..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:612 src/oesenc_pi.cpp:2773
-msgid "System Identification"
-msgstr ""
-
-#: src/oesenc_pi.cpp:618 src/oesenc_pi.cpp:2779
-msgid "Create System Identifier file..."
-msgstr ""
-
-#: src/oesenc_pi.cpp:671 src/oesenc_pi.cpp:2955
-msgid ""
-"To obtain an Install Permit, you must generate a unique System Identifier "
-"File.\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:672 src/oesenc_pi.cpp:2956
+#: src\oesenc_pi.cpp:1036 src\oesenc_pi.cpp:3398
 msgid "This file is also known as a\"fingerprint\" file.\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:673 src/oesenc_pi.cpp:2957
+#: src\oesenc_pi.cpp:1037 src\oesenc_pi.cpp:3399
 msgid ""
 "The fingerprint file contains information to uniquely identifiy this "
 "computer.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:674 src/oesenc_pi.cpp:2958
+#: src\oesenc_pi.cpp:1038 src\oesenc_pi.cpp:3400
 msgid ""
-"After creating this file, you will need it to generate your InstallPermit at "
-"the o-charts.org shop.\n"
+"After creating this file, you will need it to obtain your User Key at the o-"
+"charts.org shop.\n"
+"\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:675 src/oesenc_pi.cpp:2959
+#: src\oesenc_pi.cpp:1039 src\oesenc_pi.cpp:3401
 msgid "Proceed to create Fingerprint file?"
 msgstr ""
 
-#: src/oesenc_pi.cpp:677
+#: src\oesenc_pi.cpp:1041 src\oesenc_pi.cpp:3403 src\oesenc_pi.cpp:4041
 msgid "oeSENC_PI Message"
 msgstr ""
 
-#: src/oesenc_pi.cpp:719 src/oesenc_pi.cpp:3003
-msgid "Fingerprint file created.\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:722 src/oesenc_pi.cpp:730 src/oesenc_pi.cpp:2961
-#: src/oesenc_pi.cpp:3006 src/oesenc_pi.cpp:3014
-msgid "S63_PI Message"
-msgstr ""
-
-#: src/oesenc_pi.cpp:894
+#: src\oesenc_pi.cpp:1403 src\oesenc_pi.h:221
 msgid "oeSENC_PI Preferences"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1408
-msgid "S63_pi backchannel could not listen at the specified port !\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:1412
-msgid ""
-"S63_pi backchannel server listening.\n"
-"\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:1501 src/oesenc_pi.cpp:1547
-msgid "Unexpected event !\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:1520
-msgid ""
-"Error: couldn't accept a new connection\n"
-"\n"
-msgstr ""
-
-#: src/oesenc_pi.cpp:1850
-msgid "S63_pi Userpermit Required"
-msgstr ""
-
-#: src/oesenc_pi.cpp:1897
+#: src\oesenc_pi.cpp:2369
 msgid "Enter Userpermit"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1916
+#: src\oesenc_pi.cpp:2388
 msgid "Test Userpermit"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1921 src/oesenc_pi.cpp:2182
+#: src\oesenc_pi.cpp:2393
 msgid "Test Results"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1936 src/oesenc_pi.cpp:2196
+#: src\oesenc_pi.cpp:2408 src\oesenc_pi.cpp:2669
 msgid "Cancel"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1941 src/oesenc_pi.cpp:2201
+#: src\oesenc_pi.cpp:2413 src\oesenc_pi.cpp:2676
 msgid "OK"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1975
+#: src\oesenc_pi.cpp:2447
 msgid "Userpermit invalid"
 msgstr ""
 
-#: src/oesenc_pi.cpp:1983
+#: src\oesenc_pi.cpp:2455
 msgid "Userpermit OK"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2096
-msgid "OpenCPN SENC UserKey Required"
+#: src\oesenc_pi.cpp:2568
+msgid "OpenCPN oeSENC UserKey Required"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2116
+#: src\oesenc_pi.cpp:2588
 msgid "Enter UserKey"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2135
+#: src\oesenc_pi.cpp:2607
 msgid ""
-"A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
+"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
 "FF\n"
 "\n"
-"Your OESENC UserKey may be obtained from your chart provider."
+"Your oeSENC UserKey may be obtained from your chart provider."
 msgstr ""
 
-#: src/oesenc_pi.cpp:2141
+#: src\oesenc_pi.cpp:2613
 msgid ""
-"ERROR: The UserKey entered is not valid for this OESENC chart set.\n"
+"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n"
 "\n"
-"A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
+"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
 "FF\n"
-"Your OESENC UserKey may be obtained from your chart provider.\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2149
+#: src\oesenc_pi.cpp:2621
 msgid ""
-"ERROR: The UserKey entered is not valid for this OESENC chart set.\n"
+"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "\n"
-"OESENC charts will be disabled for this session.\n"
+"oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n"
 "\n"
-"Your OESENC UserKey may be obtained from your chart provider.\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2160
+#: src\oesenc_pi.cpp:2632
 msgid ""
 "UserKey accepted.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2177
-msgid "Test Installpermit"
-msgstr ""
-
-#: src/oesenc_pi.cpp:2592
+#: src\oesenc_pi.cpp:3105
 msgid "Checking oeserverd utility at "
 msgstr ""
 
-#: src/oesenc_pi.cpp:2600
+#: src\oesenc_pi.cpp:3113
 msgid "Cannot find the oserverd utility at \n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2604 src/oesenc_pi.cpp:2625 src/oesenc_pi.cpp:2665
-#: src/oesenc_pi.cpp:2711 src/oesenc_pi.cpp:2728
-msgid "oesenc_pi Message"
+#: src\oesenc_pi.cpp:3117 src\oesenc_pi.cpp:3138 src\oesenc_pi.cpp:3178
+#: src\oesenc_pi.cpp:3253 src\oesenc_pi.cpp:3533 src\oesenc_pi.cpp:3563
+#: src\oesenc_pi.cpp:3576
+msgid "oeSENC_pi Message"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2621
+#: src\oesenc_pi.cpp:3134
 msgid "Cannot execute oeserverd utility at \n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2655 src/oesenc_pi.cpp:2706 src/oesenc_pi.cpp:2723
+#: src\oesenc_pi.cpp:3168 src\oesenc_pi.cpp:3228 src\oesenc_pi.cpp:3248
 msgid "oeserverd utility at \n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2659
+#: src\oesenc_pi.cpp:3172
 msgid ""
 " is incorrect version, reports as:\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2663
+#: src\oesenc_pi.cpp:3176
 msgid "This version of oesenc_PI requires oeserverd of version 1.00 or later."
 msgstr ""
 
-#: src/oesenc_pi.cpp:2710
+#: src\oesenc_pi.cpp:3232
 msgid ""
 " reports Unavailable.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2727
+#: src\oesenc_pi.cpp:3252
 msgid ""
 " could not be started.\n"
 "\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2789
-msgid "Tender GPS Serial Port"
+#: src\oesenc_pi.cpp:3298
+msgid "System Identification"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2808
-msgid "Tracked Waypoint (by Name)"
+#: src\oesenc_pi.cpp:3308
+msgid "Create System Identifier file..."
 msgstr ""
 
-#: src/oesenc_pi.cpp:2826
-msgid "Tender Icon"
+#: src\oesenc_pi.cpp:3316
+msgid "Show In Finder"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2840
-msgid "Tender Dimensions"
+#: src\oesenc_pi.cpp:3318
+msgid "Show on disk"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2848
-msgid "Length Over All (m)"
+#: src\oesenc_pi.cpp:3533
+msgid ""
+"Administrator priveleges are required to create fpr.\n"
+"  Please try again...."
 msgstr ""
 
-#: src/oesenc_pi.cpp:2852
-msgid "Width Over All (m)"
+#: src\oesenc_pi.cpp:3552
+msgid ""
+"\n"
+"\n"
+" OSX "
 msgstr ""
 
-#: src/oesenc_pi.cpp:2856
-msgid "GPS Offset from Bow (m)"
+#: src\oesenc_pi.cpp:3557
+msgid "Fingerprint file created.\n"
 msgstr ""
 
-#: src/oesenc_pi.cpp:2860
-msgid "GPS Offset from Midship (m)"
+#: src\oesenc_pi.cpp:3561
+msgid ""
+"\n"
+"\n"
+" Fingerprint file is also copied to desktop."
+msgstr ""
+
+#: src\oesenc_pi.cpp:3844
+msgid "oeSENC PlugIn for OpenCPN"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3907
+msgid "License"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3932
+msgid "Accept"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3937
+msgid "Reject"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3976
+msgid "The following Chart sets are available:"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3986
+msgid "Chart set"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3990
+msgid "Version"
+msgstr ""
+
+#: src\oesenc_pi.cpp:3994
+msgid "Valid until"
+msgstr ""
+
+#: src\oesenc_pi.h:449
+msgid "OpenCPN SENC UserKey Required"
+msgstr ""
+
+#: src\oesenc_pi.h:577
+msgid "oeSENC_PI Information"
+msgstr ""
+
+#: src\s52plib.cpp:2104
+msgid "ChartTexts"
 msgstr ""
