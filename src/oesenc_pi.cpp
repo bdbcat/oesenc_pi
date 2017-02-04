@@ -725,7 +725,7 @@ void oesenc_pi::SetColorScheme(PI_ColorScheme cs)
 bool oesenc_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
     if(g_brendered_expired && !g_bnoShow_sse25){
-        wxString msg = _("SSE 25..The ENC permit for this cell has expired.\n This cell may be out of date and MUST NOT be used for NAVIGATION.");
+        wxString msg = _T("SSE 25..The ENC permit for this cell has expired.\n This cell may be out of date and MUST NOT be used for NAVIGATION.");
 
 
         wxFont *pfont = wxTheFontList->FindOrCreateFont(10, wxFONTFAMILY_DEFAULT,
@@ -754,7 +754,7 @@ bool oesenc_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 bool oesenc_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
     if(g_brendered_expired && !g_bnoShow_sse25){
-        wxString msg = _("SSE 25..The ENC permit for this cell has expired.\n This cell may be out of date and MUST NOT be used for NAVIGATION.");
+        wxString msg = _T("SSE 25..The ENC permit for this cell has expired.\n This cell may be out of date and MUST NOT be used for NAVIGATION.");
 
 
         wxFont *pfont = wxTheFontList->FindOrCreateFont(10, wxFONTFAMILY_DEFAULT,
@@ -797,7 +797,7 @@ void oesenc_pi::OnSetupOptions(){
 #if 0
     //  Create the S63 Options panel, and load it
 
-    m_s63chartPanelWinTop = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("S63 Charts") );
+    m_s63chartPanelWinTop = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _T("S63 Charts") );
 
     wxBoxSizer *chartPanelTopSizer = new wxBoxSizer( wxHORIZONTAL );
     m_s63chartPanelWinTop->SetSizer( chartPanelTopSizer );
@@ -809,7 +809,7 @@ void oesenc_pi::OnSetupOptions(){
     chartPanelTopSizerV->Add( m_s63NB, 0, wxEXPAND, 0 );
 
     m_s63chartPanelWin = new wxPanel(m_s63NB, wxID_ANY);
-    m_s63NB->AddPage(m_s63chartPanelWin, _("Chart Cells"), true );
+    m_s63NB->AddPage(m_s63chartPanelWin, _T("Chart Cells"), true );
 
     wxBoxSizer *chartPanelSizer = new wxBoxSizer( wxVERTICAL );
     m_s63chartPanelWin->SetSizer( chartPanelSizer );
@@ -820,7 +820,7 @@ void oesenc_pi::OnSetupOptions(){
     chartPanelSizer->Add( cmdButtonSizer, 0, wxALL, border_size );
 
     //  Chart cell permit listbox, etc
-    wxStaticBoxSizer* sbSizerLB= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _("Installed S63 Cell Permits") ), wxVERTICAL );
+    wxStaticBoxSizer* sbSizerLB= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _T("Installed S63 Cell Permits") ), wxVERTICAL );
 
     wxBoxSizer* bSizer17;
     bSizer17 = new wxBoxSizer( wxHORIZONTAL );
@@ -829,17 +829,17 @@ void oesenc_pi::OnSetupOptions(){
 
     wxListItem col0;
     col0.SetId(0);
-    col0.SetText( _("Cell Name") );
+    col0.SetText( _T("Cell Name") );
     m_permit_list->InsertColumn(0, col0);
 
     wxListItem col1;
     col1.SetId(1);
-    col1.SetText( _("Data Server ID") );
+    col1.SetText( _T("Data Server ID") );
     m_permit_list->InsertColumn(1, col1);
 
     wxListItem col2;
     col2.SetId(2);
-    col2.SetText( _("Expiration Date") );
+    col2.SetText( _T("Expiration Date") );
     m_permit_list->InsertColumn(2, col2);
 
     wxString permit_dir = GetPermitDir();
@@ -850,14 +850,14 @@ void oesenc_pi::OnSetupOptions(){
     wxBoxSizer* bSizer18;
     bSizer18 = new wxBoxSizer( wxVERTICAL );
 
-    m_buttonImportPermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _("Import Cell Permits..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonImportPermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Import Cell Permits..."), wxDefaultPosition, wxDefaultSize, 0 );
     bSizer18->Add( m_buttonImportPermit, 0, wxALL, 5 );
 
-    m_buttonRemovePermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _("Remove Permits"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonRemovePermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Remove Permits"), wxDefaultPosition, wxDefaultSize, 0 );
     m_buttonRemovePermit->Enable( false );
     bSizer18->Add( m_buttonRemovePermit, 0, wxALL, 5 );
 
-    m_buttonImportCells = new wxButton( m_s63chartPanelWin, wxID_ANY, _("Import Charts/Updates..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonImportCells = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Import Charts/Updates..."), wxDefaultPosition, wxDefaultSize, 0 );
     bSizer18->Add( m_buttonImportCells, 0, wxALL, 5 );
 
     bSizer17->Add( bSizer18, 0, wxEXPAND, 5 );
@@ -874,7 +874,7 @@ void oesenc_pi::OnSetupOptions(){
     }
     g_backchannel_port++;
 
-    wxStaticBoxSizer* sbSizerSL= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _("S63_pi Log") ), wxVERTICAL );
+    wxStaticBoxSizer* sbSizerSL= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _T("S63_pi Log") ), wxVERTICAL );
 
     g_pPanelScreenLog = new S63ScreenLog( m_s63chartPanelWin );
     sbSizerSL->Add( g_pPanelScreenLog, 1, wxEXPAND, 5 );
@@ -889,13 +889,13 @@ void oesenc_pi::OnSetupOptions(){
     //  Build the "Keys/Permits" tab
 
     m_s63chartPanelKeys = new wxPanel(m_s63NB, wxID_ANY);
-    m_s63NB->AddPage(m_s63chartPanelKeys, _("Keys/Permits"), false );
+    m_s63NB->AddPage(m_s63chartPanelKeys, _T("Keys/Permits"), false );
 
     wxBoxSizer *chartPanelSizerKeys = new wxBoxSizer( wxVERTICAL );
     m_s63chartPanelKeys->SetSizer( chartPanelSizerKeys );
 
     //  Certificate listbox, etc
-    wxStaticBoxSizer* sbSizerLBCert= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _("Installed S63 Certificates/Keys") ), wxVERTICAL );
+    wxStaticBoxSizer* sbSizerLBCert= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("Installed S63 Certificates/Keys") ), wxVERTICAL );
 
     wxBoxSizer* bSizer17C = new wxBoxSizer( wxHORIZONTAL );
 
@@ -903,18 +903,18 @@ void oesenc_pi::OnSetupOptions(){
 
     wxListItem col0c;
     col0c.SetId(0);
-    col0c.SetText( _("Certificate Name") );
+    col0c.SetText( _T("Certificate Name") );
     m_cert_list->InsertColumn(0, col0c);
 
     #if 0
     wxListItem col1;
     col1.SetId(1);
-    col1.SetText( _("Data Server ID") );
+    col1.SetText( _T("Data Server ID") );
     m_permit_list->InsertColumn(1, col1);
 
     wxListItem col2;
     col2.SetId(2);
-    col2.SetText( _("Expiration Date") );
+    col2.SetText( _T("Expiration Date") );
     m_permit_list->InsertColumn(2, col2);
 
     #endif
@@ -926,7 +926,7 @@ void oesenc_pi::OnSetupOptions(){
 
     wxBoxSizer* bSizer18C = new wxBoxSizer( wxVERTICAL );
 
-    m_buttonImportCert = new wxButton( m_s63chartPanelKeys, wxID_ANY, _("Import Certificate..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonImportCert = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("Import Certificate..."), wxDefaultPosition, wxDefaultSize, 0 );
     bSizer18C->Add( m_buttonImportCert, 0, wxALL, 5 );
 
     bSizer17C->Add( bSizer18C, 0, wxEXPAND, 5 );
@@ -936,41 +936,41 @@ void oesenc_pi::OnSetupOptions(){
     chartPanelSizerKeys->AddSpacer( 5 );
 
     //  User Permit
-    wxStaticBoxSizer* sbSizerUP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _("UserPermit") ), wxHORIZONTAL );
+    wxStaticBoxSizer* sbSizerUP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("UserPermit") ), wxHORIZONTAL );
     m_up_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(""));
 
     if(g_userpermit.Len())
         m_up_text->SetLabel( GetUserpermit() );
     sbSizerUP->Add(m_up_text, wxEXPAND);
 
-    m_buttonNewUP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _("New Userpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonNewUP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("New Userpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
     sbSizerUP->Add( m_buttonNewUP, 0, wxALL | wxALIGN_RIGHT, 5 );
 
     chartPanelSizerKeys->AddSpacer( 5 );
     chartPanelSizerKeys->Add( sbSizerUP, 0, wxEXPAND, 5 );
 
     //  Install Permit
-    wxStaticBoxSizer* sbSizerIP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _("InstallPermit") ), wxHORIZONTAL );
+    wxStaticBoxSizer* sbSizerIP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("InstallPermit") ), wxHORIZONTAL );
     m_ip_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(""));
 
     //if(g_installpermit.Len())
     //    m_ip_text->SetLabel( GetInstallpermit() );
     sbSizerIP->Add(m_ip_text, wxEXPAND);
 
-    m_buttonNewIP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _("New Installpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonNewIP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("New Installpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
     sbSizerIP->Add( m_buttonNewIP, 0, wxALL | wxALIGN_RIGHT, 5 );
 
     chartPanelSizerKeys->AddSpacer( 5 );
     chartPanelSizerKeys->Add( sbSizerIP, 0, wxEXPAND, 5 );
 
     //  FPR File Permit
-    wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
+    wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("System Identification") ), wxHORIZONTAL );
     m_fpr_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(" "));
     if(g_fpr_file.Len())
         m_fpr_text->SetLabel( g_fpr_file );
     sbSizerFPR->Add(m_fpr_text, wxEXPAND);
 
-    m_buttonNewFPR = new wxButton( m_s63chartPanelKeys, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
+    m_buttonNewFPR = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
     sbSizerFPR->Add( m_buttonNewFPR, 0, wxALL | wxALIGN_RIGHT, 5 );
 
     chartPanelSizerKeys->AddSpacer( 5 );
@@ -1080,10 +1080,10 @@ void oesenc_pi::OnNewFPRClick( wxCommandEvent &event )
             
             
             if(!berr && fpr_file.Length()){
-                wxString msg1 = _("Fingerprint file created.\n");
+                wxString msg1 = _T("Fingerprint file created.\n");
                 msg1 += fpr_file;
                 
-                OCPNMessageBox_PlugIn(NULL, msg1, _("S63_PI Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, msg1, _T("S63_PI Message"), wxOK);
             }
             else{
                 wxLogMessage(_T("S63_pi: OCPNsenc results:"));
@@ -1091,7 +1091,7 @@ void oesenc_pi::OnNewFPRClick( wxCommandEvent &event )
                     wxString line = valup_result[i];
                     wxLogMessage( line );
                 }
-                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("S63_PI Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _T("S63_PI Message"), wxOK);
             }
             
             g_fpr_file = fpr_file;
@@ -1877,11 +1877,11 @@ S63ScreenLog::S63ScreenLog(wxWindow *parent):
     // We use Ok() here to see if the server is really listening
     if (! m_server->Ok())
     {
-        m_plogtc->AppendText(_("S63_pi backchannel could not listen at the specified port !\n"));
+        m_plogtc->AppendText(_T("S63_pi backchannel could not listen at the specified port !\n"));
     }
     else
     {
-        m_plogtc->AppendText(_("S63_pi backchannel server listening.\n\n"));
+        m_plogtc->AppendText(_T("S63_pi backchannel server listening.\n\n"));
     }
 
     // Setup the event handler and subscribe to connection events
@@ -1961,16 +1961,16 @@ void S63ScreenLog::ClearLog(void)
 
 void S63ScreenLog::OnServerEvent(wxSocketEvent& event)
 {
-    wxString s; // = _("OnServerEvent: ");
+    wxString s; // = _T("OnServerEvent: ");
     wxSocketBase *sock;
 
     switch(event.GetSocketEvent())
     {
         case wxSOCKET_CONNECTION :
-//            s.Append(_("wxSOCKET_CONNECTION\n"));
+//            s.Append(_T("wxSOCKET_CONNECTION\n"));
             break;
         default                  :
-            s.Append(_("Unexpected event !\n"));
+            s.Append(_T("Unexpected event !\n"));
             break;
     }
 
@@ -1985,11 +1985,11 @@ void S63ScreenLog::OnServerEvent(wxSocketEvent& event)
 
     if (sock)
     {
-//       m_plogtc->AppendText(_("New client connection accepted\n\n"));
+//       m_plogtc->AppendText(_T("New client connection accepted\n\n"));
     }
     else
     {
-        m_plogtc->AppendText(_("Error: couldn't accept a new connection\n\n"));
+        m_plogtc->AppendText(_T("Error: couldn't accept a new connection\n\n"));
         return;
     }
 
@@ -2003,20 +2003,20 @@ void S63ScreenLog::OnServerEvent(wxSocketEvent& event)
 
 void S63ScreenLog::OnSocketEvent(wxSocketEvent& event)
 {
-    wxString s; // = _("OnSocketEvent: ");
+    wxString s; // = _T("OnSocketEvent: ");
     wxSocketBase *sock = event.GetSocket();
 
     // First, print a message
     switch(event.GetSocketEvent())
     {
         case wxSOCKET_INPUT :
-//            s.Append(_("wxSOCKET_INPUT\n"));
+//            s.Append(_T("wxSOCKET_INPUT\n"));
             break;
         case wxSOCKET_LOST  :
-//            s.Append(_("wxSOCKET_LOST\n"));
+//            s.Append(_T("wxSOCKET_LOST\n"));
             break;
         default             :
-            s.Append(_("Unexpected event !\n"));
+            s.Append(_T("Unexpected event !\n"));
             break;
     }
 
@@ -2062,7 +2062,7 @@ void S63ScreenLog::OnSocketEvent(wxSocketEvent& event)
                     // middle of a test or something. Destroy() takes care of all
                     // this for us.
 
-//                    m_plogtc->AppendText(_("Deleting socket.\n\n"));
+//                    m_plogtc->AppendText(_T("Deleting socket.\n\n"));
 
                     sock->Destroy();
                     break;
@@ -2319,7 +2319,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserpermitDialog, wxDialog )
      long wstyle = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER;
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
 
-     SetTitle( _("S63_pi Userpermit Required"));
+     SetTitle( _T("S63_pi Userpermit Required"));
 
      CreateControls();
      GetSizer()->SetSizeHints( this );
@@ -2565,7 +2565,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
 
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
 
-     SetTitle( _("OpenCPN SENC UserKey Required"));
+     SetTitle( _("OpenCPN oeSENC UserKey Required"));
 
      CreateControls( legendID );
      GetSizer()->SetSizeHints( this );
@@ -2604,24 +2604,24 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
              
          case LEGEND_FIRST:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n\
-Your OESENC UserKey may be obtained from your chart provider."),
+_("A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n\
+Your oeSENC UserKey may be obtained from your chart provider."),
                                                       wxDefaultPosition, wxDefaultSize, 0);
              break;
          case LEGEND_SECOND:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\
+_("ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\
 Please verify your UserKey and try again.\n\n\
-A valid OESENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\
-Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\
+Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
                                                       wxDefaultPosition, wxDefaultSize, 0);
              break;
          case LEGEND_THIRD:
              itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,
-_("ERROR: The UserKey entered is not valid for this OESENC chart set.\n\n\
-OESENC charts will be disabled for this session.\n\
+_("ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n\
+oeSENC charts will be disabled for this session.\n\
 Please verify your UserKey and restart OpenCPN.\n\n\
-Your OESENC UserKey may be obtained from your chart provider.\n\n"),
+Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
                                                     wxDefaultPosition, wxDefaultSize, 0);
              
              m_UserKeyCtl->Disable();
@@ -2646,12 +2646,12 @@ Your OESENC UserKey may be obtained from your chart provider.\n\n"),
      wxBoxSizer* itemBoxSizerTest = new wxBoxSizer( wxVERTICAL );
      itemBoxSizer2->Add( itemBoxSizerTest, 0, wxALIGN_LEFT | wxALL | wxEXPAND, 5 );
 
-     m_testBtn = new wxButton(itemDialog1, ID_GETIP_TEST, _("Test Installpermit"));
+     m_testBtn = new wxButton(itemDialog1, ID_GETIP_TEST, _T("Test Installpermit"));
      m_testBtn->Disable();
      itemBoxSizerTest->Add( m_testBtn, 0, wxALIGN_LEFT | wxALL, 5 );
 
      wxStaticBox* itemStaticBoxTestResults = new wxStaticBox( itemDialog1, wxID_ANY,
-                                                                  _("Test Results"), wxDefaultPosition, wxSize(-1, 40) );
+                                                                  _T("Test Results"), wxDefaultPosition, wxSize(-1, 40) );
 
      wxStaticBoxSizer* itemStaticBoxSizerTest = new wxStaticBoxSizer( itemStaticBoxTestResults,  wxHORIZONTAL );
      itemBoxSizerTest->Add( itemStaticBoxSizerTest, 0,  wxALIGN_RIGHT |wxALL | wxEXPAND, 5 );
@@ -3114,7 +3114,7 @@ bool validate_SENC_server(void)
         msg += _T("{");
         msg += bin_test;
         msg += _T("}");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3135,7 +3135,7 @@ bool validate_SENC_server(void)
         msg += _T("{");
         msg += bin_test;
         msg += _T("}");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3175,7 +3175,7 @@ bool validate_SENC_server(void)
         wxString msg1;
         msg1.Printf(_("This version of oesenc_PI requires oeserverd of version 1.00 or later."));
         msg += msg1;
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3250,7 +3250,7 @@ bool validate_SENC_server(void)
         msg += bin_test;
         msg += _T("}\n");
         msg += _(" could not be started.\n\n");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
         wxLogMessage(_T("oesenc_pi: ") + msg);
         
         g_sencutil_bin.Clear();
@@ -3530,7 +3530,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                             if (dwError == ERROR_CANCELLED)
                             {
                                 // The user refused to allow privileges elevation.
-                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to create fpr.\n  Please try again...."), _("oesenc_pi Message"), wxOK);
+                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to create fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
                                 berror = true;
                             }
                         }
@@ -3560,12 +3560,12 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     if(bcopy)
                         msg1 += _("\n\n Fingerprint file is also copied to desktop.");
                     
-                    OCPNMessageBox_PlugIn(NULL, msg1, _("oesenc_pi Message"), wxOK);
+                    OCPNMessageBox_PlugIn(NULL, msg1, _("oeSENC_pi Message"), wxOK);
                 }
                 
-                wxLogMessage(_T("oesenc fpr file created as: ") + fpr_file);
+                wxLogMessage(_T("oeSENC fpr file created as: ") + fpr_file);
                 if(bcopy)
-                    wxLogMessage(_T("oesenc fpr file created in desktop folder: ") + sdesktop_path);
+                    wxLogMessage(_T("oeSENC fpr file created in desktop folder: ") + sdesktop_path);
             }
             else{
                 wxLogMessage(_T("oesenc_pi: oeserverd results:"));
@@ -3573,7 +3573,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     wxString line = ret_array[i];
                     wxLogMessage( line );
                 }
-                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oesenc_pi Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
                 
                 berror = true;
             }
@@ -3859,8 +3859,8 @@ void oesenc_pi_about::CreateControls( void )
 //             g_StyleManager->GetCurrentStyle()->GetIcon( _T("donate") ),
 //             wxDefaultPosition, wxDefaultSize, 0 );
 // 
-//     buttonSizer->Add( new wxButton( this, ID_COPYLOG, _("Copy Log File to Clipboard") ), 1, wxALL | wxEXPAND, 3 );
-//     buttonSizer->Add( new wxButton( this, ID_COPYINI, _("Copy Settings File to Clipboard") ), 1, wxALL | wxEXPAND, 3 );
+//     buttonSizer->Add( new wxButton( this, ID_COPYLOG, _T("Copy Log File to Clipboard") ), 1, wxALL | wxEXPAND, 3 );
+//     buttonSizer->Add( new wxButton( this, ID_COPYINI, _T("Copy Settings File to Clipboard") ), 1, wxALL | wxEXPAND, 3 );
 //     buttonSizer->Add( donateButton, 1, wxALL | wxEXPAND | wxALIGN_RIGHT, 3 );
 #endif
     
@@ -3875,7 +3875,7 @@ void oesenc_pi_about::CreateControls( void )
     itemPanelAbout = new wxPanel( pNotebook, -1, wxDefaultPosition, wxDefaultSize,
             wxSUNKEN_BORDER | wxTAB_TRAVERSAL );
     itemPanelAbout->InheritAttributes();
-    pNotebook->AddPage( itemPanelAbout, _("About"), TRUE /* Default page */ );
+    pNotebook->AddPage( itemPanelAbout, _T("About"), TRUE /* Default page */ );
 
     pAboutHTMLCtl = new wxHtmlWindow( itemPanelAbout, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                 wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION);
@@ -3889,7 +3889,7 @@ void oesenc_pi_about::CreateControls( void )
     itemPanelAuthors = new wxPanel( pNotebook, -1, wxDefaultPosition, wxDefaultSize,
                                 wxSUNKEN_BORDER | wxTAB_TRAVERSAL );
     itemPanelAuthors->InheritAttributes();
-    pNotebook->AddPage( itemPanelAuthors, _("Authors") );
+    pNotebook->AddPage( itemPanelAuthors, _T("Authors") );
 
     pAuthorHTMLCtl = new wxHtmlWindow( itemPanelAuthors, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                     wxHW_SCROLLBAR_AUTO | wxHW_NO_SELECTION);
@@ -3918,7 +3918,7 @@ void oesenc_pi_about::CreateControls( void )
     itemPanelTips = new wxPanel( pNotebook, -1, wxDefaultPosition, wxDefaultSize,
             wxSUNKEN_BORDER | wxTAB_TRAVERSAL );
     itemPanelTips->InheritAttributes();
-    pNotebook->AddPage( itemPanelTips, _("Help") );
+    pNotebook->AddPage( itemPanelTips, _T("Help") );
 
     wxBoxSizer* helpSizer = new wxBoxSizer( wxVERTICAL );
     itemPanelTips->SetSizer( helpSizer );
