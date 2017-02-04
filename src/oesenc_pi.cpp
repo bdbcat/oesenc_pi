@@ -470,7 +470,7 @@ OESENC_HTMLMessageDialog *pinfoDlg;
 //---------------------------------------------------------------------------------------------------------
 
 #include "default_pi.xpm"
-#include <../pavuk-0.9.35/src/tr.h>
+//#include <../pavuk-0.9.35/src/tr.h>
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -681,6 +681,7 @@ wxArrayString oesenc_pi::GetDynamicChartClassNameArray()
 
 void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
+    
     if(message_id == _T("OpenCPN Config"))
     {
 
