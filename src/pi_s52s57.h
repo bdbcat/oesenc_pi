@@ -272,6 +272,8 @@ public:
     wxRect      rText;          // rectangle of the text as currently rendered, used for declutter
     bool        bnat;           // frmtd is National text, UTF-8 encoded
     bool        bspecial_char;  // frmtd has special ASCII characters, i.e. > 127
+    int         avgCharWidth;
+    
 };
 
 
@@ -499,7 +501,8 @@ typedef enum
     TYPE_CE = 0,
     TYPE_CC,
     TYPE_EC,
-    TYPE_EE
+    TYPE_EE,
+    TYPE_EE_REV
 } SegmentType;
 
 

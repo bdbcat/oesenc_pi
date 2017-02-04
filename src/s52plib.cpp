@@ -1760,7 +1760,8 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 
                 //  Add in the offsets, specified in units of nominal font height
                 yp += ptext->yoffs * ( ptext->rendered_char_height );
-                xp += ptext->xoffs * ( ptext->rendered_char_height );
+                //  X offset specified in units of average char width
+                xp += ptext->xoffs * ptext->avgCharWidth;
                 
                 pRectDrawn->SetX( xp );
                 pRectDrawn->SetY( yp );
@@ -1858,8 +1859,9 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 
             //  Add in the offsets, specified in units of nominal font height
             yp += ptext->yoffs * ( ptext->rendered_char_height );
-            xp += ptext->xoffs * ( ptext->rendered_char_height );
-
+            //  X offset specified in units of average char width
+            xp += ptext->xoffs * ptext->avgCharWidth;
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );
@@ -1926,8 +1928,9 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 
             //  Add in the offsets, specified in units of nominal font height
             yp += ptext->yoffs * ( h - descent );
-            xp += ptext->xoffs * ( h - descent );
-
+            //  X offset specified in units of average char width
+            xp += ptext->xoffs * ptext->avgCharWidth;
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );
@@ -2067,21 +2070,33 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
 
         //    Establish a font
         if( !text->pFont ) {
-
-            //    If we have loaded a legacy S52 compliant PLIB,
-            //    then we should use the formal font selection as required by
-            //    S52 specifications.
-            if( useLegacyRaster ) {
-                int spec_weight = text->weight - 0x30;
-                wxFontWeight fontweight;
-                if( spec_weight < 5 ) fontweight = wxFONTWEIGHT_LIGHT;
+            // Process the font specifications from the LUP symbolizatio rule
+            int spec_weight = text->weight - 0x30;
+            wxFontWeight fontweight;
+            if( spec_weight < 5 )
+                fontweight = wxFONTWEIGHT_LIGHT;
+            else{
+                if( spec_weight == 5 )
+                    fontweight = wxFONTWEIGHT_NORMAL;
                 else
-                    if( spec_weight == 5 ) fontweight = wxFONTWEIGHT_NORMAL;
-                    else
-                        fontweight = wxFONTWEIGHT_BOLD;
-
-                text->pFont = wxTheFontList->FindOrCreateFont( text->bsize, wxFONTFAMILY_SWISS,
-                        wxFONTSTYLE_NORMAL, fontweight );
+                    fontweight = wxFONTWEIGHT_BOLD;
+            }
+            
+            wxFont *specFont =  wxTheFontList->FindOrCreateFont( text->bsize, wxFONTFAMILY_SWISS,
+                                                                wxFONTSTYLE_NORMAL, fontweight );
+            
+            //Get the width of a single average character in the spec font
+            wxScreenDC dc;
+            dc.SetFont(*specFont);
+            wxSize tsz = dc.GetTextExtent(_T("X"));
+            text->avgCharWidth = tsz.x;
+            
+            //    If we have loaded a legacy S52 compliant PLIB,
+            //    then we should use the formal font selection as required by S52 specifications.
+            //    Otherwise, we have our own plan...
+            
+            if( useLegacyRaster ) {
+                text->pFont = specFont;
             } else {
                 int spec_weight = text->weight - 0x30;
                 wxFontWeight fontweight;
@@ -2233,8 +2248,12 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
 
     float xscale = 1.0;
-    
-    if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6)) || (!strncmp(rzRules->obj->FeatureName, "DWRTPT", 6)) ){
+
+    if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6))
+        || (!strncmp(rzRules->obj->FeatureName, "DWRTPT", 6))
+        || (!strncmp(rzRules->obj->FeatureName, "TWRTPT", 6))
+        || (!strncmp(rzRules->obj->FeatureName, "RCTLPT", 6))
+    ){
         // assume the symbol length 
         float sym_length = 30;
         float scaled_length = sym_length / vp->view_scale_ppm;
@@ -2260,8 +2279,9 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         GetPointPixSingle( rzRules, rzRules->obj->y, rzRules->obj->x, &r, vp );
         
         double latdraw, londraw;                // position of the drawn symbol with pivot applied
-        GetPixPointSingleNoRotate( r.x + (prule->pos.symb.pivot_x.SYCL / fsf),
-                                   r.y + (prule->pos.symb.pivot_y.SYRW / fsf), &latdraw, &londraw, vp );
+        GetPixPointSingleNoRotate( r.x + ((prule->pos.symb.pivot_x.SYCL - prule->pos.symb.bnbox_x.SBXC) / fsf),
+                                   r.y + ((prule->pos.symb.pivot_y.SYRW - prule->pos.symb.bnbox_y.SBXR) / fsf),
+                                   &latdraw, &londraw, vp );
         
         if( !rzRules->obj->BBObj.Contains( latdraw, londraw ) ) // Symbol reference point is outside base area object
              return 1;
@@ -3051,7 +3071,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
             
             //  Check visibility of the segment
             bool b_drawit = false;
-            if(ls_list->ls_type == TYPE_EE){
+            if( (ls_list->ls_type == TYPE_EE) || (ls_list->ls_type == TYPE_EE_REV) ){
                 if((BBView.GetMinLat() < ls_list->pedge->edgeBBox.GetMaxY() && BBView.GetMaxLat() > ls_list->pedge->edgeBBox.GetMinY()) &&
                     ((BBView.GetMinLon() <= ls_list->pedge->edgeBBox.GetMaxX() && BBView.GetMaxLon() >= ls_list->pedge->edgeBBox.GetMinX()) ||
                     (BBView.GetMaxLon() >=  180 && BBView.GetMaxLon() - 360 > ls_list->pedge->edgeBBox.GetMinX()) ||
@@ -5360,6 +5380,7 @@ int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
         while( ls ){
             switch (ls->ls_type){
                 case TYPE_EE:
+                case TYPE_EE_REV:
                     
                     pedge = ls->pedge; //(VE_Element *)ls->private0;
                     if(pedge)
@@ -8739,6 +8760,15 @@ RenderFromHPGL::RenderFromHPGL( s52plib* plibarg )
     transparency = 255;
 }
 
+RenderFromHPGL::~RenderFromHPGL( )
+{
+    #ifdef ocpnUSE_GL
+    if( renderToOpenGl ) {
+        glDisable (GL_BLEND );
+    }
+    #endif    
+}
+
 void RenderFromHPGL::SetTargetDC( wxDC* pdc )
 {
     targetDC = pdc;
@@ -8909,11 +8939,14 @@ void RenderFromHPGL::RotatePoint( wxPoint& point, wxPoint origin, double angle )
 
 bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, wxPoint origin, float scale, double rot_angle )
 {
-//      int width = 1;
-//      double radius = 0.0;
     wxPoint lineStart;
     wxPoint lineEnd;
-
+    
+#ifdef ocpnUSE_GL
+    if( renderToOpenGl )
+        glGetFloatv(GL_CURRENT_COLOR,m_currentColor);
+#endif        
+        
     scaleFactor = 100.0 / plib->GetPPMM();
     scaleFactor /= scale;
     
@@ -9027,9 +9060,15 @@ bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, w
         msg += wxString( command );
         wxLogWarning( msg );
     }
+    transparency = 255;
+    
 #ifdef ocpnUSE_GL
-    glDisable( GL_BLEND );
+    if( renderToOpenGl ) {
+        glDisable (GL_BLEND );
+        glColor4fv( m_currentColor );
+    }
 #endif    
+    
     return true;
 }
 

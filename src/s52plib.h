@@ -420,7 +420,8 @@ private:
 class RenderFromHPGL {
 public:
     RenderFromHPGL( s52plib* plibarg );
-
+    ~RenderFromHPGL( );
+    
     void SetTargetDC( wxDC* pdc );
     void SetTargetOpenGl();
 #if wxUSE_GRAPHICS_CONTEXT
@@ -458,6 +459,8 @@ private:
     bool renderToDC;
     bool renderToOpenGl;
     bool renderToGCDC;
+    
+    float m_currentColor[4];
     
 };
 
