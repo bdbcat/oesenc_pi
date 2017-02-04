@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-04 17:19+0100\n"
-"PO-Revision-Date: 2017-02-04 13:23-0500\n"
+"PO-Revision-Date: 2017-02-04 14:59-0500\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -22,7 +22,7 @@ msgstr "Construction de oeSENC"
 
 #: src\eSENCChart.cpp:6160
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Les secteurs sont des relèvements vrais à partir de la mer"
 
 #: src\oesenc_pi.cpp:229 src\oesenc_pi.cpp:369 src\oesenc_pi.cpp:3647
 #: src\oesenc_pi.cpp:3699 src\oesenc_pi.cpp:3847
@@ -100,7 +100,7 @@ msgstr "Userpermit OK"
 
 #: src\oesenc_pi.cpp:2568
 msgid "OpenCPN oeSENC UserKey Required"
-msgstr ""
+msgstr "Clé requise pour oeSENC"
 
 #: src\oesenc_pi.cpp:2588
 msgid "Enter UserKey"
@@ -109,21 +109,23 @@ msgstr "Entrez la clé"
 #: src\oesenc_pi.cpp:2607
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
-msgstr ""
+msgstr "Un clé valide pour OESENC a le format alphanumérique : AAAA-BBBB-CCCC-DDDD-EEEE-FF Votre clé pour OESENC peut être obtenue auprès de votre fournisseur de cartes marines."
 
 #: src\oesenc_pi.cpp:2613
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "Erreur : La clé entrée n'est pas valide pour ce pack de cartes marines. S'il vous plait, vérifiez votre clé et essayez à nouveau.\n\n"
+"Un clé valide pour OESENC a le format alphanumérique : AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Une clé valide peut être obtenue auprès de votre fournisseur de cartes marines.\n\n"
 
 #: src\oesenc_pi.cpp:2621
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "ERREUR : La clé entrée n’est pas valide pour cet ensemble de cartes marines pour  OESENC. Ces cartes marines OESENC seront désactivées pour cette session. S’il vous plaît vérifier votre clé et redémarrez OpenCPN. Votre clé pour OESENC peut être fournie par votre fournisseur de cartes marines.  \n\n"
 
 #: src\oesenc_pi.cpp:2632
 msgid "UserKey accepted.\n\n"
@@ -141,7 +143,7 @@ msgstr "Impossible de trouver l'utilitaire oeSENC à\n"
 #: src\oesenc_pi.cpp:3253 src\oesenc_pi.cpp:3533 src\oesenc_pi.cpp:3563
 #: src\oesenc_pi.cpp:3576
 msgid "oeSENC_pi Message"
-msgstr ""
+msgstr "Message du complément oeSENC_pi"
 
 #: src\oesenc_pi.cpp:3134
 msgid "Cannot execute oeserverd utility at \n"
