@@ -1456,7 +1456,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
             //SetClipRegionGL( glc, temp_vp, rect, true /*!b_overlay*/, b_use_stencil );
             ps52plib->m_last_clip_rect = rect;
-            wxRect clip_rect = rect;
+            //wxRect clip_rect = rect;
             //printf("last clip rect pi:  %d %d %d %d\n", clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
             
             
@@ -1471,7 +1471,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         //  Especially, we want the BBox to be accurate in order to
         //  render only those objects actually visible in this region
 
-        PlugIn_ViewPort temp_vp = VPoint;
+//        PlugIn_ViewPort temp_vp = VPoint;
         double temp_lon_left, temp_lat_bot, temp_lon_right, temp_lat_top;
 
         wxPoint p;
@@ -1488,10 +1488,10 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         
  //       double   lat_min, lat_max, lon_min, lon_max;
         
-        temp_vp.lat_min = temp_lat_bot;
-        temp_vp.lat_max = temp_lat_top;
-        temp_vp.lon_min = temp_lon_left;
-        temp_vp.lon_max = temp_lon_right;
+//         temp_vp.lat_min = temp_lat_bot;
+//         temp_vp.lat_max = temp_lat_top;
+//         temp_vp.lon_min = temp_lon_left;
+//         temp_vp.lon_max = temp_lon_right;
         
         //      Allow some slop in the viewport
         //            double margin = wxMin(temp_vp.GetBBox().GetWidth(), temp_vp.GetBBox().GetHeight()) * 0.05;
@@ -5012,7 +5012,7 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
     ObjRazRules *top;
     ObjRazRules *crnt;
     
-    PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
+    //PlugIn_ViewPort tvp = vp;                    // undo const  TODO fix this in PLIB
     
     ViewPort cvp = CreateCompatibleViewport( vp );
     cvp.GetBBox().Set(vp.lat_min, vp.lon_min, vp.lat_max, vp.lon_max);
