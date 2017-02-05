@@ -553,17 +553,10 @@ oesenc_pi::oesenc_pi(void *ppimgr)
 oesenc_pi::~oesenc_pi()
 {
       delete m_pplugin_icon;
-      if(g_pScreenLog) {
-          g_pScreenLog->Close();
-          g_pScreenLog->Destroy();
-          g_pScreenLog = NULL;
-      }
 }
 
 int oesenc_pi::Init(void)
 {
-//    ScreenLogMessage( _T("s63_pi Init()\n") );
-
     //  Get the path of the PlugIn itself
     g_pi_filename = GetPlugInPath(this);
 
@@ -572,39 +565,9 @@ int oesenc_pi::Init(void)
       //    Build an arraystring of dynamically loadable chart class names
     m_class_name_array.Add(_T("eSENCChart"));
 
-#if 0
-    //  Make sure the Certificate directory exists, and is populated with the most current IHO.PUB key file
-    wxString dir = GetCertificateDir();
-
-    if( !wxFileName::DirExists( dir ) ){
-        wxFileName::Mkdir(dir, 0777, wxPATH_MKDIR_FULL);
-    }
-
-    wxString iho_pub = dir + wxFileName::GetPathSeparator() + _T("IHO.PUB");
-    if(!::wxFileExists( iho_pub )){
-        wxTextFile file(iho_pub);
-        file.Create();
-        file.AddLine(i0, wxTextFileType_Dos);
-        file.AddLine(i1, wxTextFileType_Dos);
-        file.AddLine(i2, wxTextFileType_Dos);
-        file.AddLine(i3, wxTextFileType_Dos);
-        file.AddLine(i4, wxTextFileType_Dos);
-        file.AddLine(i5, wxTextFileType_Dos);
-        file.AddLine(i6, wxTextFileType_Dos);
-        file.AddLine(i7, wxTextFileType_Dos);
-
-        file.Write();
-        file.Close();
-    }
-#endif
-
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
     g_benable_screenlog = g_buser_enable_screenlog;
-    
-// #ifdef __WXMSW__
-//     wxExecute(_T("net start oeserverd"));              // exec asynchronously
-// #endif    
     
 
     return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
@@ -615,14 +578,11 @@ int oesenc_pi::Init(void)
 bool oesenc_pi::DeInit(void)
 {
     SaveConfig();
-    if(g_pScreenLog) {
-        g_pScreenLog->Close();
- //       delete g_pScreenLog;
-//        g_pScreenLog->Destroy();
-//        g_pScreenLog = NULL;
-    }
     
     delete pinfoDlg;
+    pinfoDlg = NULL;
+    
+    m_class_name_array.Clear();
     
     shutdown_SENC_server();
     
@@ -1515,7 +1475,7 @@ void s63_pi_event_handler::OnImportCertClick( wxCommandEvent &event )
 }
 #endif
 
-
+#if 0
 //      Private logging functions
 void ScreenLogMessage(wxString s)
 {
@@ -1567,7 +1527,7 @@ void ClearScreenLogSeq(void)
     }
 
 }
-
+#endif
 
 BEGIN_EVENT_TABLE(InfoWinDialog, wxDialog)
 EVT_PAINT ( InfoWinDialog::OnPaint )

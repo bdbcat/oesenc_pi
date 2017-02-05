@@ -266,11 +266,11 @@ void UtilProcess::OnTerminate(int pid, int status)
     term_happened = true;
     
     wxPrintf(_T("%s"), m_outstring.c_str());
-    if( s_plogtc )
-        ScreenLogMessage(m_outstring);
+//     if( s_plogtc )
+//         ScreenLogMessage(m_outstring);
 }
 
-
+#if 0
 unsigned char *eSENCChart::GetSENCCryptKeyBuffer( const wxString& FullPath, size_t* bufsize )
 {
     
@@ -340,7 +340,7 @@ unsigned char *eSENCChart::GetSENCCryptKeyBuffer( const wxString& FullPath, size
     
 }
 
-
+#endif
 
 
 
@@ -728,7 +728,7 @@ wxString eSENCChart::Get_eHDR_Name( const wxString& name000 )
     return efn;
 }
 
-
+#if 0
 wxString eSENCChart::Build_eHDR( const wxString& name000 )
 {
     wxString ehdr_file_name = Get_eHDR_Name( name000 );
@@ -835,6 +835,7 @@ wxString eSENCChart::Build_eHDR( const wxString& name000 )
         return ehdr_file_name;
     
 }
+#endif
 
 int nInit;
 
@@ -2659,7 +2660,7 @@ bool eSENCChart::InitFrom_ehdr( wxString &efn )
     return true;
 }
 
-
+#if 0
 //-----------------------------------------------------------------------------------------------
 //    Find or Create a relevent SENC file from a given .000 ENC file
 //    Returns with error code, and associated SENC file name in m_S57FileName
@@ -2769,7 +2770,7 @@ PI_InitReturn eSENCChart::FindOrCreateSenc( const wxString& name )
             }
 
             else {
-                ScreenLogMessage( _T("   Info: Existing eSENC file failed decrypt.\n "));
+//                ScreenLogMessage( _T("   Info: Existing eSENC file failed decrypt.\n "));
                 bbuild_new_senc = true;
             }
             
@@ -2956,8 +2957,9 @@ PI_InitReturn eSENCChart::FindOrCreateSenc( const wxString& name )
     m_SENCFileName = SENCFileName;
     return PI_INIT_OK;
 }
+#endif
 
-
+#if 0
 int eSENCChart::BuildSENCFile( const wxString& FullPath_os63, const wxString& SENCFileName )
 {
     int retval = BUILD_SENC_OK;
@@ -3093,6 +3095,7 @@ int eSENCChart::BuildSENCFile( const wxString& FullPath_os63, const wxString& SE
     
     return retval;
 }
+#endif
 
 #if 0
 int eSENCChart::_insertRules( S57Obj *obj )
@@ -7116,7 +7119,7 @@ void ServerProcess::OnTerminate(int pid, int status)
 
 
 
-
+#if 0
 //------------------------------------------------------------------------------
 //    SENCclient Implementation
 //------------------------------------------------------------------------------
@@ -7129,7 +7132,6 @@ SENCclient::SENCclient(void)
     m_server_pid = 0;
     m_sproc = NULL;
 }
-
 
 void SENCclient::Attach(const wxString &senc_file_name)
 {
@@ -7341,6 +7343,7 @@ int SENCclient::NetRead(void *destination, size_t length, size_t *read_actual)
     
     return retval;
 }
+#endif
 
 #if 0
 int SENCclient::UnRead(char *destination, int length)
@@ -7420,7 +7423,8 @@ int SENCclient::UnRead(char *destination, int length)
         return ret_val;
     }
     #endif
-    
+
+#if 0
     size_t SENCclient::OnSysRead(void *buffer, size_t size)
     {
         size_t read_actual;
@@ -7440,7 +7444,7 @@ int SENCclient::UnRead(char *destination, int length)
         
         return read_actual;
     }
-    
+#endif    
     
 bool SENCclient::Eof() const
 {
