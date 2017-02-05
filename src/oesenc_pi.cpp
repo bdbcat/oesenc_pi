@@ -3111,7 +3111,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                 
                 bcopy =  ::wxCopyFile(fpr_file.Trim(false), desktop_fpr_path);
                 sdesktop_path = desktop_fpr_path;
-                msg1 += _("\n\n OSX ");
+                msg1 += _T("\n\n OSX ");
 #endif
 
                 
