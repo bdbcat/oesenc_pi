@@ -6161,7 +6161,7 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                 
                 if( curLight->hasSectors ) lightsHtml 
                     <<_T("<font size=-2>") 
-                    << _("Sector angles are True Bearings from Seaward") 
+                    << _T("Sector angles are True Bearings from Seaward") 
                     << _T("</font><br>");
                 
                 lightsHtml << _T("<table>");

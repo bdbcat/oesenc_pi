@@ -2367,7 +2367,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserpermitDialog, wxDialog )
      itemDialog1->SetSizer( itemBoxSizer2 );
 
      wxStaticBox* itemStaticBoxSizer4Static = new wxStaticBox( itemDialog1, wxID_ANY,
-                                                               _("Enter Userpermit") );
+                                                               _T("Enter Userpermit") );
 
      wxStaticBoxSizer* itemStaticBoxSizer4 = new wxStaticBoxSizer( itemStaticBoxSizer4Static,
                                                                    wxVERTICAL );
@@ -2386,12 +2386,12 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserpermitDialog, wxDialog )
      wxBoxSizer* itemBoxSizerTest = new wxBoxSizer( wxVERTICAL );
      itemBoxSizer2->Add( itemBoxSizerTest, 0, wxALIGN_LEFT | wxALL | wxEXPAND, 5 );
 
-     m_testBtn = new wxButton(itemDialog1, ID_GETUP_TEST, _("Test Userpermit"));
+     m_testBtn = new wxButton(itemDialog1, ID_GETUP_TEST, _T("Test Userpermit"));
      m_testBtn->Disable();
      itemBoxSizerTest->Add( m_testBtn, 0, wxALIGN_LEFT | wxALL, 5 );
 
      wxStaticBox* itemStaticBoxTestResults = new wxStaticBox( itemDialog1, wxID_ANY,
-                                                                  _("Test Results"), wxDefaultPosition, wxSize(-1, 40) );
+                                                                  _T("Test Results"), wxDefaultPosition, wxSize(-1, 40) );
 
      wxStaticBoxSizer* itemStaticBoxSizerTest = new wxStaticBoxSizer( itemStaticBoxTestResults,  wxHORIZONTAL );
      itemBoxSizerTest->Add( itemStaticBoxSizerTest, 0,  wxALIGN_RIGHT | wxALL | wxEXPAND, 5 );
@@ -2445,7 +2445,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserpermitDialog, wxDialog )
                  m_TestResult->SetLabel(line.Trim());
              }
              else {
-                m_TestResult->SetLabel(_("Userpermit invalid"));
+                m_TestResult->SetLabel(_T("Userpermit invalid"));
              }
              berr = true;
              m_OKButton->Disable();
@@ -2453,7 +2453,7 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserpermitDialog, wxDialog )
          }
      }
      if(!berr){
-         m_TestResult->SetLabel(_("Userpermit OK"));
+         m_TestResult->SetLabel(_T("Userpermit OK"));
          m_OKButton->Enable();
      }
  }
