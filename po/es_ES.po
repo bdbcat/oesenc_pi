@@ -44,19 +44,19 @@ msgstr "PlugIn para OpenCPN - Facilita el uso de cartas oeSENC.\n\n"
 
 #: src\oesenc_pi.cpp:996 src\oesenc_pi.cpp:2959
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr "Para obtener un UserKey debe generar un único Archivo Identificador del Sistema. \\n\n"
+msgstr "Para obtener un UserKey debe generar un único Archivo Identificador del Sistema. \n\n"
 
 #: src\oesenc_pi.cpp:997 src\oesenc_pi.cpp:2960
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr "Este archivo también es conocido como un archivo de \"huella digital\". \\n\n"
+msgstr "Este archivo también es conocido como un archivo de \"huella digital\". \n\n"
 
 #: src\oesenc_pi.cpp:998 src\oesenc_pi.cpp:2961
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
-msgstr "El archivo huella digital contiene información para identificar a este ordenador individual.\\n\\n"
+msgstr "El archivo huella digital contiene información para identificar a este ordenador individual.\n\n"
 
 #: src\oesenc_pi.cpp:999 src\oesenc_pi.cpp:2962
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr "El fichero fingerprint utilizamos luego en el o-charts.org shop para generar el UserKey.\\n\n\n"
+msgstr "El fichero fingerprint utilizamos luego en el o-charts.org shop para generar el UserKey.\n\n\n"
 
 #: src\oesenc_pi.cpp:1000 src\oesenc_pi.cpp:2963
 msgid "Proceed to create Fingerprint file?"
@@ -170,7 +170,7 @@ msgstr "Privilegios de administrador son necesarios para crear el fpr.   Por fav
 
 #: src\oesenc_pi.cpp:3119
 msgid "Fingerprint file created.\n"
-msgstr "Archivo de huella digital creado.\\n\n"
+msgstr "Archivo de huella digital creado.\n\n"
 
 #: src\oesenc_pi.cpp:3123
 msgid "\n\n"
