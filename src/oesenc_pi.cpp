@@ -2919,10 +2919,42 @@ void initLibraries(void)
     else
         pi_bopengl = true;
     
+ 
+    char *str = (char *) glGetString( GL_RENDERER );
+    if (str == NULL)
+        wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
+
+    char render_string[80];
+    wxString renderer;
+    if(str){
+        strncpy( render_string, str, 79 );
+        renderer = wxString( render_string, wxConvUTF8 );
+    }
+    
     
     g_b_EnableVBO = false;
     g_GLMinCartographicLineWidth = 1.0;
     g_GLMinSymbolLineWidth = 1.0;
+    
+    //  Set the minimum line width
+    GLint parms[2];
+    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
+    g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
+    g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
+    
+    //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
+    //    This is most evident on rendered symbols which have horizontal or vertical line segments
+    //    Detect this case, and adjust the render parameters.
+    
+    if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
+        GLfloat parf;
+        glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
+        
+        g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
+    }
+    
+    
+    
     
     if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
         g_texture_rectangle_format = GL_TEXTURE_2D;
