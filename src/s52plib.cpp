@@ -7277,9 +7277,9 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
          }
          else {
              // restore clipping region
-//             glPopMatrix();
-//             SetGLClipRect( *vp, m_last_clip_rect);
-//             glPushMatrix();
+             glPopMatrix();
+             SetGLClipRect( *vp, m_last_clip_rect);
+             glPushMatrix();
              RotateToViewPort(*vp);
              
              glDisable( GL_DEPTH_TEST );
@@ -8490,11 +8490,13 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
 
             // First, we capture some temporary values that were set by messaging, but would be overwritten by config read
             bool bTextOn = m_bShowS57Text;
+            bool bSoundingsOn = m_bShowSoundg;
             
             LoadS57Config();
             
             //  And then reset the temp values that were overwritten by config load
             m_bShowS57Text = bTextOn;
+            m_bShowSoundg = bSoundingsOn;
             
             OBJLElement *pOLE = NULL;
             
