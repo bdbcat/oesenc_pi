@@ -40,7 +40,7 @@ msgstr "PlugIn voor OpenCPN oeSENC-kaarten"
 #: src\oesenc_pi.cpp:671
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr "PlugIn voor OpenCPN. Biedt ondersteuning voor oeSENC-kaarten.  "
+msgstr "PlugIn voor OpenCPN.\n Biedt ondersteuning voor oeSENC-kaarten.\n\n"
 
 #: src\oesenc_pi.cpp:1035 src\oesenc_pi.cpp:3397
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
@@ -134,7 +134,7 @@ msgstr "FOUT: De ingevoerde 'UserKey' is niet geldig voor dit oeSENC kaartenfoli
 
 #: src\oesenc_pi.cpp:2632
 msgid "UserKey accepted.\n\n"
-msgstr "'UserKey' geaccepteerd.  "
+msgstr "'UserKey' geaccepteerd.\n\n"
 
 #: src\oesenc_pi.cpp:3105
 msgid "Checking oeserverd utility at "
@@ -172,7 +172,7 @@ msgstr " rapporten niet beschikbaar.  \n\n"
 
 #: src\oesenc_pi.cpp:3252
 msgid " could not be started.\n\n"
-msgstr " kon niet worden gestart.  "
+msgstr " kon niet worden gestart.\n\n"
 
 #: src\oesenc_pi.cpp:3298
 msgid "System Identification"
