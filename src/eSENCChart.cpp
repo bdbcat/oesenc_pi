@@ -1380,7 +1380,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     SetLinePriorities();
 
     //        Clear the text declutter list
-///    ps52plib->ClearTextList();
+    ps52plib->ClearTextList();
     
     //    How many rectangles in the Region?
     int n_rect = 0;
@@ -1454,7 +1454,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
 
             //SetClipRegionGL( glc, temp_vp, rect, true /*!b_overlay*/, b_use_stencil );
-//            ps52plib->m_last_clip_rect = rect;
+            ps52plib->m_last_clip_rect = rect;
             wxRect clip_rect = rect;
             //printf("last clip rect pi:  %d %d %d %d\n", clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
             
@@ -4983,7 +4983,7 @@ bool eSENCChart::DoRenderViewOnDC( wxMemoryDC& dc, const PlugIn_ViewPort& VPoint
                                                 dc.SelectObject( *pDIB );
                                                 
                                                 //        Clear the text declutter list
- ///                                                       ps52plib->ClearTextList();
+                                                ps52plib->ClearTextList();
                                                 
                                                 DCRenderRect( dc, VPoint, &full_rect );
                                                 
