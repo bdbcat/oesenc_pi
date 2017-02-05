@@ -1,0 +1,71 @@
+<chartsymbols>
+
+   <symbols>
+
+   <symbol RCID="1586">
+      <name>SOUNDSA1</name>
+      <definition>V</definition>
+      <vector width="205" height="1">
+         <distance min="0" max="0" />
+         <pivot x="750" y="750" />
+         <origin x="730" y="750" />
+         <HPGL>SPZ;SW1;PU525,970;PD730,970;</HPGL>
+      </vector>
+      <description>symbol for drying height, used for shallow soundings, less than or equal to safety depth</description>
+      <color-ref>ZSNDG2</color-ref>
+   </symbol>
+
+    <symbol RCID="1524">
+      <name>SOUNDGB1</name>
+      <definition>V</definition>
+      <vector width="631" height="131">
+         <distance min="0" max="0" />
+         <pivot x="750" y="750" />
+         <origin x="750" y="750" />
+         <HPGL>SPY;SW1;PU340,928;PD340,1059;PD971,1059;PD971,928;</HPGL>
+      </vector>
+      <description>symbol for swept sounding, used for deep soundings greater than safety depth</description>
+      <color-ref>YSNDG1</color-ref>
+   </symbol>
+
+   <symbol RCID="3422">
+      <name>SOUNDGC2</name>
+      <definition>V</definition>
+      <vector width="854" height="854">
+         <distance min="0" max="0" />
+         <pivot x="7350" y="1546" />
+         <origin x="7350" y="1546" />
+         <HPGL>SPA;SW1;PU7350,1546;CI427;</HPGL>
+      </vector>
+      <description>sounding of low accuracy</description>
+      <color-ref>ASNDG1</color-ref>
+   </symbol>
+
+   <symbol RCID="1587">
+      <name>SOUNDSB1</name>
+      <definition>V</definition>
+      <vector width="631" height="131">
+         <distance min="0" max="0" />
+         <pivot x="750" y="750" />
+         <origin x="750" y="750" />
+         <HPGL>SPZ;SW1;PU340,928;PD340,1059;PD971,1059;PD971,928;</HPGL>
+      </vector>
+      <description>symbol for swept sounding, used for shallow soundings, less than or equal to safety depth</description>
+      <color-ref>ZSNDG2</color-ref>
+   </symbol>
+
+   <symbol RCID="3423">
+      <name>SOUNDSC2</name>
+      <definition>V</definition>
+      <vector width="854" height="854">
+         <distance min="0" max="0" />
+         <pivot x="7350" y="1546" />
+         <origin x="7350" y="1546" />
+         <HPGL>SPA;SW1;PU7350,1546;CI427;</HPGL>
+      </vector>
+      <description>sounding of low accuracy</description>
+      <color-ref>ASNDG1</color-ref>
+   </symbol>
+
+   </symbols>
+</chartsymbols>
