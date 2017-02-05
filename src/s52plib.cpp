@@ -1875,7 +1875,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
             }
 
             if( bdraw ) {
-                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_("ChartTexts")); //FontMgr::Get().GetFontColor(_("ChartTexts"));
+                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_T("ChartTexts")); //FontMgr::Get().GetFontColor(_T("ChartTexts"));
                 if( wcolor == *wxBLACK )
                     glColor3ub( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
                 else
@@ -2115,8 +2115,8 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
                 default_size += 2;     // default to 2pt larger than system UI font
 #endif
                 
-                //wxFont* templateFont = FontMgr::Get().GetFont( _("ChartTexts"), default_size );
-                wxFont *templateFont = GetOCPNScaledFont_PlugIn(_("ChartTexts"), default_size );
+                //wxFont* templateFont = FontMgr::Get().GetFont( _T("ChartTexts"), default_size );
+                wxFont *templateFont = GetOCPNScaledFont_PlugIn(_T("ChartTexts"), default_size );
 
                 // NOAA ENC fles requests font size up to 20 points, which looks very
                 // disproportioned. Let's scale those sizes down to more reasonable values.
