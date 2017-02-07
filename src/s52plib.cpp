@@ -8487,6 +8487,8 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
     
     int core_config = PI_GetPLIBStateHash();
     if(core_config != m_myConfig){
+
+        g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
         
         //  If a modern (> OCPN 4.4) version of the core is active,
         //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.

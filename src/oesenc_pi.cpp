@@ -2478,7 +2478,7 @@ void initLibraries(void)
     // General variables
     g_overzoom_emphasis_base = 0;
     g_oz_vector_scale = false;
-    g_ChartScaleFactorExp = 1;
+    g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
     
     // OpenGL variables
     
