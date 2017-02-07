@@ -1365,6 +1365,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
         UpdateLUPs( this );                             // and update the LUPs
+        ClearRenderedTextCache();                       // and reset the text renderer,
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
         ps52plib->FlushSymbolCaches();
