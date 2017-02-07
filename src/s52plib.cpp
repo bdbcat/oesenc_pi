@@ -1875,11 +1875,8 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
             }
 
             if( bdraw ) {
-                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_("ChartTexts")); //FontMgr::Get().GetFontColor(_("ChartTexts"));
-                if( wcolor == *wxBLACK )
-                    glColor3ub( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
-                else
-                    glColor3ub( wcolor.Red(), wcolor.Green(), wcolor.Blue() );
+                wxColour wcolor = GetFontColour_PlugIn(_("ChartTexts"));
+                glColor3ub( wcolor.Red(), wcolor.Green(), wcolor.Blue() );
 
                 glEnable( GL_BLEND );
                 glEnable( GL_TEXTURE_2D );
@@ -1941,11 +1938,8 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     bdraw = false;
             }
 
-            if( bdraw ) {
-                wxColour wcolor = *wxBLACK; //GetFontColour_PlugIn(_T("ChartTexts")); //FontMgr::Get().GetFontColor(_T("ChartTexts"));
-                if( wcolor == *wxBLACK )
-                    wcolor = wxColour( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
-                pdc->SetTextForeground( wcolor );
+            if( bdraw ) {                
+                pdc->SetTextForeground( GetFontColour_PlugIn( _( "ChartTexts" ) ) );
 
                 pdc->DrawText( ptext->frmtd, xp, yp );
             }
