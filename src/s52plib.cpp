@@ -1876,8 +1876,13 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 
             if( bdraw ) {
                 wxColour wcolor = GetFontColour_PlugIn(_("ChartTexts"));
-                glColor3ub( wcolor.Red(), wcolor.Green(), wcolor.Blue() );
-
+                
+                // If the user has not changed the color from BLACK, then use the color specified in the S52 LUP
+                if( wcolor == *wxBLACK )
+                    glColor3ub( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
+                else
+                    glColor3ub( wcolor.Red(), wcolor.Green(), wcolor.Blue() );
+                
                 glEnable( GL_BLEND );
                 glEnable( GL_TEXTURE_2D );
                 glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -1938,8 +1943,13 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     bdraw = false;
             }
 
-            if( bdraw ) {                
-                pdc->SetTextForeground( GetFontColour_PlugIn( _( "ChartTexts" ) ) );
+            if( bdraw ) {
+                wxColour wcolor = GetFontColour_PlugIn(_("ChartTexts"));
+                
+                // If the user has not changed the color from BLACK, then use the color specified in the S52 LUP
+                if( wcolor == *wxBLACK )
+                    wcolor = wxColour( ptext->pcol->R, ptext->pcol->G, ptext->pcol->B );
+                pdc->SetTextForeground( wcolor );
 
                 pdc->DrawText( ptext->frmtd, xp, yp );
             }
