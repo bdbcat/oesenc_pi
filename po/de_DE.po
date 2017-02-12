@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-05 19:11+0100\n"
-"PO-Revision-Date: 2017-02-05 13:14-0500\n"
+"PO-Revision-Date: 2017-02-12 03:40-0500\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -22,7 +22,7 @@ msgstr "eSENC wird erstellt"
 
 #: src\eSENCChart.cpp:6167
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Winkel der Sektoren sind Wahre Peilungen von See"
 
 #: src\oesenc_pi.cpp:229 src\oesenc_pi.cpp:369 src\oesenc_pi.cpp:3209
 #: src\oesenc_pi.cpp:3261 src\oesenc_pi.cpp:3409
@@ -227,5 +227,5 @@ msgstr "Informationen zum oeSENC_PI"
 
 #: src\s52plib.cpp:2119
 msgid "ChartTexts"
-msgstr ""
+msgstr "Kartentexte"
 

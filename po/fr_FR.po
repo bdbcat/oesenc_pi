@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-05 19:11+0100\n"
-"PO-Revision-Date: 2017-02-05 13:14-0500\n"
+"PO-Revision-Date: 2017-02-12 03:40-0500\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -18,11 +18,11 @@ msgstr ""
 
 #: src\eSENCChart.cpp:2969 src\eSENCChart.cpp:2973
 msgid "Building eSENC"
-msgstr "Construction de oeSENC"
+msgstr "Construction de eSENC"
 
 #: src\eSENCChart.cpp:6167
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Les secteurs sont des relèvements vrais à partir de la mer"
 
 #: src\oesenc_pi.cpp:229 src\oesenc_pi.cpp:369 src\oesenc_pi.cpp:3209
 #: src\oesenc_pi.cpp:3261 src\oesenc_pi.cpp:3409
@@ -35,7 +35,7 @@ msgstr "oeSENC"
 
 #: src\oesenc_pi.cpp:625
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr "Complément pour les cartes oeSNC d'OpenCPN"
+msgstr "Complément pour les cartes oeSENC d'OpenCPN"
 
 #: src\oesenc_pi.cpp:631
 msgid "PlugIn for OpenCPN\n"
@@ -89,7 +89,7 @@ msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
 msgstr "Erreur : La clé entrée n'est pas valide pour ce pack de cartes marines. S'il vous plait, vérifiez votre clé et essayez à nouveau.\n\n"
-"Un clé valide pour OESENC a le format alphanumérique : AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Un clé valide pour oeSENC a le format alphanumérique : AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Une clé valide peut être obtenue auprès de votre fournisseur de cartes marines.\n\n"
 
 #: src\oesenc_pi.cpp:2151
@@ -131,7 +131,7 @@ msgstr "Impossible d'éxecuter l'utilitaire oeSENC à \n"
 
 #: src\oesenc_pi.cpp:2730 src\oesenc_pi.cpp:2790 src\oesenc_pi.cpp:2810
 msgid "oeserverd utility at \n"
-msgstr "Utilitaire oeSENC à \n"
+msgstr "utilitaire oeserved à \n"
 
 #: src\oesenc_pi.cpp:2734
 msgid " is incorrect version, reports as:\n\n"
@@ -198,7 +198,7 @@ msgstr "Rejeter"
 
 #: src\oesenc_pi.cpp:3538
 msgid "The following Chart sets are available:"
-msgstr "Le pack de cartes marines est disponible :"
+msgstr "Pack disponible(s) de cartes marines :"
 
 #: src\oesenc_pi.cpp:3548
 msgid "Chart set"
@@ -210,11 +210,11 @@ msgstr "Version"
 
 #: src\oesenc_pi.cpp:3556
 msgid "Valid until"
-msgstr "Valable jusqu\\'au"
+msgstr "Valable jusqu'au"
 
 #: src\oesenc_pi.h:297
 msgid "OpenCPN SENC UserKey Required"
-msgstr "Clé requise pour oeSENC"
+msgstr "Clé requise pour OpenCPN SENC"
 
 #: src\oesenc_pi.h:425
 msgid "oeSENC_PI Information"
@@ -222,5 +222,5 @@ msgstr "Information de oeSENC_pi"
 
 #: src\s52plib.cpp:2119
 msgid "ChartTexts"
-msgstr ""
+msgstr "ChartTexts"
 
