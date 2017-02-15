@@ -849,7 +849,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     if( !wxFileName::FileExists( name ) )
         return PI_INIT_FAIL_REMOVE;
 
-    if(!CheckEULA()){
+    if(!processChartinfo( name )){
         return PI_INIT_FAIL_REMOVE;
     }
     
@@ -872,7 +872,6 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     m_ChartFamily = PI_CHART_FAMILY_VECTOR;
     m_projection = PI_PROJECTION_MERCATOR;
 
-    processChartinfo(name);
     
     if(!g_bUserKeyHintTaken)
         processUserKeyHint(name);
@@ -1197,6 +1196,37 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
 }
 
 
+wxBitmap &eSENCChart::RenderRegionViewOnDCNoText(const PlugIn_ViewPort& VPoint, const wxRegion &Region)
+{
+    bool b_text = ps52plib->GetShowS57Text();
+    ps52plib->SetShowS57Text( false );
+    
+    wxBitmap & ret_val = RenderRegionView(VPoint, Region);
+    ps52plib->SetShowS57Text( b_text );
+    
+    return ret_val;
+}
+
+bool eSENCChart::RenderRegionViewOnDCTextOnly(wxMemoryDC& dc, const PlugIn_ViewPort& VPoint, const wxRegion &Region)
+{
+    if(!dc.IsOk())
+        return false;
+    
+    SetVPParms( VPoint );
+    
+    DCRenderText( dc, VPoint );
+
+    return true;
+}
+
+
+void eSENCChart::ClearPLIBTextList()
+{
+    //        Clear the text declutter list
+    if(ps52plib)
+        ps52plib->ClearTextList();
+    
+}
 
 wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRegion &Region)
 {
@@ -1342,6 +1372,21 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
     return *m_pCloneBM;
 #endif    
 }
+
+int eSENCChart::RenderRegionViewOnGLNoText( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
+                                      const wxRegion &Region, bool b_use_stencil )
+{
+    bool b_text = ps52plib->GetShowS57Text();
+    ps52plib->SetShowS57Text( false );
+    
+    int ret_val = RenderRegionViewOnGL(glc, VPoint, Region, b_use_stencil);
+
+    ps52plib->SetShowS57Text( b_text );
+    
+    return ret_val;
+}
+
+
 
 int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
                           const wxRegion &Region, bool b_use_stencil )
@@ -1508,6 +1553,77 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
     glPopMatrix();
 
+#endif
+    return true;
+}
+
+int eSENCChart::RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
+                                      const wxRegion &Region, bool b_use_stencil )
+{
+    
+#ifdef ocpnUSE_GL
+    
+    m_cvp = CreateCompatibleViewport( VPoint );
+    
+    SetVPParms( VPoint );
+    
+    ps52plib->PrepareForRender(VPoint);
+    
+    //    Adjust for rotation
+    glPushMatrix();
+    
+    if( fabs( VPoint.rotation ) > 0.01 ) {
+        
+        double w = VPoint.pix_width;
+        double h = VPoint.pix_height;
+        
+        //    Rotations occur around 0,0, so calculate a post-rotate translation factor
+        double angle = VPoint.rotation;
+        angle -= VPoint.skew;
+        
+        double ddx = ( w * cos( -angle ) - h * sin( -angle ) - w ) / 2;
+        double ddy = ( h * cos( -angle ) + w * sin( -angle ) - h ) / 2;
+        
+        glRotatef( angle * 180. / PI, 0, 0, 1 );
+        
+        glTranslatef( ddx, ddy, 0 );                 // post rotate translation
+    }
+    
+    {
+        wxRegionIterator upd( Region ); // get the Region rect list
+        while( upd.HaveRects() ) {
+            wxRect rect = upd.GetRect();
+            
+            //  Build synthetic ViewPort on this rectangle
+            //  Especially, we want the BBox to be accurate in order to
+            //  render only those objects actually visible in this region
+            
+            ViewPort temp_vp = m_cvp;
+            double temp_lon_left, temp_lat_bot, temp_lon_right, temp_lat_top;
+            
+            wxPoint p;
+            p.x = rect.x;
+            p.y = rect.y;
+            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
+            
+            p.x += rect.width;
+            p.y += rect.height;
+            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
+            
+            if( temp_lon_right < temp_lon_left )        // presumably crossing Greenwich
+                temp_lon_right += 360.;
+            
+                
+                temp_vp.GetBBox().Set(temp_lat_bot, temp_lon_left, temp_lat_top, temp_lon_right);
+                
+                DoRenderRectOnGLTextOnly( glc, temp_vp, rect, b_use_stencil);
+                
+                upd++;
+        }
+    }
+    
+    glPopMatrix();
+    
 #endif
     return true;
 }
@@ -1778,6 +1894,82 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     return true;
 }
 
+bool eSENCChart::DoRenderRectOnGLTextOnly( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil )
+{
+    
+    int i;
+    ObjRazRules *top;
+    ObjRazRules *crnt;
+
+    ViewPort tvp = VPoint;                    // undo const  TODO fix this in PLIB
+
+    //    If the ViewPort is unrotated, we can use a simple (fast) scissor test instead
+    //    of a stencil or depth buffer clipping algorithm.....
+    /*
+     if(fabs(VPoint.rotation) < 0.01)
+     {
+
+     glScissor(rect.x, VPoint.pix_height-rect.height-rect.y, rect.width, rect.height);
+     glEnable(GL_SCISSOR_TEST);
+     glDisable (GL_STENCIL_TEST);
+     glDisable (GL_DEPTH_TEST);
+
+     }
+     */
+    if( b_useStencil )
+        glEnable( GL_STENCIL_TEST );
+    else
+        glEnable( GL_DEPTH_TEST );
+
+    glDisable( GL_DEPTH_TEST );
+
+
+    // TODO WHY is this necessary? 
+    glDisable( GL_DEPTH_TEST );
+    
+    //    Render the lines and points
+    for( i = 0; i < PRIO_NUM; ++i ) {
+        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
+            top = razRules[i][4]; // Area Symbolized Boundaries
+        else
+            top = razRules[i][3];           // Area Plain Boundaries
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;               // next object
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToGLText( glc, crnt, &tvp );
+        }
+
+        top = razRules[i][2];           //LINES
+        while( top != NULL ) {
+            ObjRazRules *crnt = top;
+            top = top->next;
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToGLText( glc, crnt, &tvp );
+        }
+
+        if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
+            top = razRules[i][0];       //SIMPLIFIED Points
+        else
+            top = razRules[i][1];           //Paper Chart Points Points
+
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToGLText( glc, crnt, &tvp );
+        }
+
+    }
+
+    glDisable( GL_STENCIL_TEST );
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_SCISSOR_TEST );
+    
+   
+    return true;
+}
+
 void eSENCChart::ClearRenderedTextCache()
 {
     ObjRazRules *top;
@@ -1808,6 +2000,50 @@ void eSENCChart::ClearRenderedTextCache()
         }
     }
 }
+
+bool eSENCChart::DCRenderText( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp )
+{
+    int i;
+    ObjRazRules *top;
+    ObjRazRules *crnt;
+    
+    ViewPort tvp = CreateCompatibleViewport( vp );
+    
+    for( i = 0; i < PRIO_NUM; ++i ) {
+        
+        if( ps52plib->m_nBoundaryStyle == SYMBOLIZED_BOUNDARIES ) top = razRules[i][4]; // Area Symbolized Boundaries
+        else
+            top = razRules[i][3];           // Area Plain Boundaries
+            while( top != NULL ) {
+                crnt = top;
+                top = top->next;               // next object
+                crnt->sm_transform_parms = &vp_transform;
+                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+            }
+            
+            top = razRules[i][2];           //LINES
+            while( top != NULL ) {
+                ObjRazRules *crnt = top;
+                top = top->next;
+                crnt->sm_transform_parms = &vp_transform;
+                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+            }
+            
+            if( ps52plib->m_nSymbolStyle == SIMPLIFIED ) top = razRules[i][0];       //SIMPLIFIED Points
+        else
+            top = razRules[i][1];           //Paper Chart Points Points
+            
+            while( top != NULL ) {
+                crnt = top;
+                top = top->next;
+                crnt->sm_transform_parms = &vp_transform;
+                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+            }
+    }
+    
+    return true;
+}
+
 
 
 
@@ -6394,7 +6630,8 @@ wxString eSENCChart::GetObjectAttributeValueAsString( PI_S57Obj *obj, int iatt, 
                 else if( curAttrName == _T("SIGPER") ) val_suffix = _T("s");
                 else if( curAttrName == _T("VALACM") ) val_suffix = _T(" Minutes/year");
                 else if( curAttrName == _T("VALMAG") ) val_suffix = _T("&deg;");
-               
+                else if( curAttrName == _T("CURVEL") ) val_suffix = _T(" kt");
+                
                if( dval - floor( dval ) < 0.01 ) value.Printf( _T("%2.0f"), dval );
                else
                    value.Printf( _T("%4.1f"), dval );

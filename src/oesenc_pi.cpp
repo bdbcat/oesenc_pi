@@ -69,6 +69,8 @@
 #include <Shlobj.h>
 #endif
 
+#include <wx/arrimpl.cpp> 
+WX_DEFINE_OBJARRAY(EULAArray);
 
 //      Some PlugIn global variables
 wxString                        g_sencutil_bin;
@@ -124,6 +126,9 @@ int                             g_coreVersionMinor;
 int                             g_coreVersionPatch;
 
 wxString                        g_pipeParm;
+
+wxArrayString                   g_ChartInfoArray;
+EULAArray                       g_EULAArray;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
@@ -470,7 +475,6 @@ OESENC_HTMLMessageDialog *pinfoDlg;
 //---------------------------------------------------------------------------------------------------------
 
 #include "default_pi.xpm"
-//#include <../pavuk-0.9.35/src/tr.h>
 
 
 //---------------------------------------------------------------------------------------------------------
@@ -569,7 +573,8 @@ int oesenc_pi::Init(void)
 
     g_benable_screenlog = g_buser_enable_screenlog;
     
-
+    g_ChartInfoArray.Clear();
+    
     return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
     | WANTS_OVERLAY_CALLBACK | WANTS_OPENGL_OVERLAY_CALLBACK | WANTS_PREFERENCES );
 
@@ -1223,41 +1228,50 @@ bool oesenc_pi::ScrubChartinfoList( void )
         wxLogMessage(_T("strt: ") + strt);
         
         bool bfound = false;
-        for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
-            wxString ts = chartArray.Item(i);
-            wxFileName target(ts);
-            wxString tara = target.GetPath();
-            wxLogMessage(_T("ChartDir entry considered: ") + tara);
+        
+        //  Of course, the candidate directory must exist...
+        if(::wxDirExists(strt)){
             
-            bool done = false;
-            wxString cana;
-            wxFileName candidate = wxFileName(strt);
-            
-            while(!done){
-                cana = candidate.GetPath();
-                wxLogMessage(_T("  Chartinfo candidate tested: ") + cana);
+            for(unsigned int i=0 ; i < chartArray.GetCount() ; i++){
+                wxString ts = chartArray.Item(i);
+                wxFileName target(ts);
+                wxString tara = target.GetPath();
+                wxLogMessage(_T("ChartDir entry considered: ") + tara);
                 
-                if(target.GetPath() == candidate.GetPath()){
-                    wxLogMessage(_T("done1"));
-                    done = true;
-                }
+                bool done = false;
+                wxString cana;
+                wxFileName candidate = wxFileName(strt);
                 
-                if(candidate.GetFullPath() == target.GetFullPath()){
-                    wxLogMessage(_T("done2"));
+                while(!done){
+                    cana = candidate.GetPath();
+                    wxLogMessage(_T("  Chartinfo candidate tested: ") + cana);
                     
-                    done = true;
-                    bfound = true;
+                    if(target.GetPath() == candidate.GetPath()){
+                        wxLogMessage(_T("done1"));
+                        done = true;
+                    }
+                    
+                    if(candidate.GetFullPath() == target.GetFullPath()){
+                        wxLogMessage(_T("done2"));
+                        
+                        done = true;
+                        bfound = true;
+                        break;
+                    }
+                    candidate.RemoveLastDir();
+                    if(!candidate.GetDirCount()){
+                        wxLogMessage(_T("done3"));
+                        done = true;
+                    }
+                }
+                if(bfound)
                     break;
-                }
-                candidate.RemoveLastDir();
-                if(!candidate.GetDirCount()){
-                    wxLogMessage(_T("done3"));
-                    done = true;
-                }
             }
-            if(bfound)
-                break;
         }
+        else{
+            wxLogMessage(_T("  Candidate does not exist: ") + strt);
+        }
+            
         
         //  Did not find the directory, so remove corresponding entry from the hashmap.
         //  This means that the entry will not be written to config file on app exit, so it is gone.
@@ -1325,6 +1339,39 @@ bool oesenc_pi::LoadConfig( void )
                 
             bContk = pConf->GetNextEntry( strk, dummyval );
         }
+
+        //  Load the persistent EULA information
+        pConf->SetPath ( _T ( "/PlugIns/oesenc/EULA" ) );
+        
+        bContk = pConf->GetFirstEntry( strk, dummyval );
+        while( bContk ) {
+            pConf->Read( strk, &kval );
+            
+            ChartSetEULA *cse = new ChartSetEULA;
+            wxStringTokenizer tkz( kval, _T(":") );
+            wxString EULAShow = tkz.GetNextToken();        // oesencEULAShow, text
+            wxString EULAShown = tkz.GetNextToken();        // Has it been shown at least once?  1/0
+            wxString EULAFile = tkz.GetNextToken();
+            
+            cse->fileName = EULAFile;
+            
+            if(EULAShow.Upper().Find(_T("ONCE")) != wxNOT_FOUND)
+                cse->npolicyShow = 1;
+            else if(EULAShow.Upper().Find(_T("ALWAYS")) != wxNOT_FOUND)
+                cse->npolicyShow = 2;
+            else 
+                cse->npolicyShow = 0;
+            
+            if(EULAShown ==_T("1"))
+                cse->b_onceShown = true;
+            
+            g_EULAArray.Add(cse);
+            
+            
+            bContk = pConf->GetNextEntry( strk, dummyval );
+        }
+        
+        
     }
 
     return true;
@@ -1352,6 +1399,34 @@ bool oesenc_pi::SaveConfig( void )
             wxString strk = wxString(key.c_str(), wxConvUTF8);
             pConf->Write( strk, pci->config_string );
             
+        }
+
+        //  Save the persistent EULA
+        pConf->DeleteGroup(_T ( "/PlugIns/oesenc/EULA"));
+        pConf->SetPath ( _T ( "/PlugIns/oesenc/EULA" ) );
+        
+        for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
+            ChartSetEULA *cse = g_EULAArray.Item(i);
+            
+            wxString config_val;
+            wxString EULAShow = _T("never");
+            if(cse->npolicyShow == 1)
+                EULAShow = _T("once");
+            if(cse->npolicyShow == 2)
+                EULAShow = _T("always");
+            
+            config_val += EULAShow + _T(":");
+            if(cse->b_onceShown)
+                config_val += _T("1:");
+            else
+                config_val += _T("0:");
+            
+            config_val += cse->fileName;
+            
+            wxString key;
+            key.Printf(_T("EULA_%02d"), i);
+
+            pConf->Write( key, config_val );
         }
         
     }
@@ -3163,8 +3238,8 @@ bool CheckEULA( void )
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow() );
     g_bEULA_OK = (pab->ShowModal() == 0);
 
-    if(!g_bEULA_OK)
-        g_bEULA_Rejected = true;
+//     if(!g_bEULA_OK)
+//         g_bEULA_Rejected = true;
 
     if(g_bEULA_OK && (0 == g_UserKey.Length()) )
         g_UserKey = _T("Pending");
@@ -3173,6 +3248,22 @@ bool CheckEULA( void )
     
     return g_bEULA_OK;
 }
+
+bool ShowEULA( wxString fileName )
+{
+    oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), fileName );
+    bool bEULA_OK = (pab->ShowModal() == 0);
+    
+    if(bEULA_OK && (0 == g_UserKey.Length()) )
+        g_UserKey = _T("Pending");
+    
+    pab->Destroy();
+    
+    return bEULA_OK;
+}
+
+
+
 
 IMPLEMENT_DYNAMIC_CLASS( oesenc_pi_about, wxDialog )
 
@@ -3187,7 +3278,7 @@ oesenc_pi_about::oesenc_pi_about( void ) :
     m_parent( NULL ),
     m_btips_loaded ( FALSE ) { }
 
-    oesenc_pi_about::oesenc_pi_about( wxWindow* parent, wxWindowID id, const wxString& caption,
+oesenc_pi_about::oesenc_pi_about( wxWindow* parent, wxWindowID id, const wxString& caption,
                   const wxPoint& pos, const wxSize& size, long style) :
     m_parent( parent ),
     m_btips_loaded ( FALSE )
@@ -3195,7 +3286,16 @@ oesenc_pi_about::oesenc_pi_about( void ) :
   Create(parent, id, caption, pos, size, style);
 }
 
-
+oesenc_pi_about::oesenc_pi_about( wxWindow* parent, wxString fileName, wxWindowID id, const wxString& caption,
+                                  const wxPoint& pos, const wxSize& size, long style) :
+                                  m_parent( parent ),
+                                  m_btips_loaded ( FALSE )
+{
+    m_fileName = fileName;
+    Create(parent, id, caption, pos, size, style);
+}
+                                  
+                                  
 bool oesenc_pi_about::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos,
         const wxSize& size, long style )
 {
@@ -3336,14 +3436,21 @@ void oesenc_pi_about::Populate( void )
     _T("plugins") + wxFileName::GetPathSeparator() +
     _T("oesenc_pi") + wxFileName::GetPathSeparator();
     
-    //wxTextFile license_filea( shareLocn + _T("rrc_eula_ChartSetsForOpenCPN.txt") );
-    wxTextFile license_filea( shareLocn + _T("rrc_eula_ChartSetsForOpenCPN-v16-12.txt") );
+    wxFileName fn(m_fileName);
+    bool bhtml = fn.GetExt().Upper() == _T("HTML");
+    
+    wxTextFile license_filea( m_fileName );
     if ( license_filea.Open() ) {
-        for ( wxString str = license_filea.GetFirstLine(); !license_filea.Eof() ; str = license_filea.GetNextLine() )
-            licenseText.Append( str + _T("<br>") );
+        for ( wxString str = license_filea.GetFirstLine(); !license_filea.Eof() ; str = license_filea.GetNextLine() ){
+            licenseText.Append( str );
+            if(!bhtml)
+                licenseText += _T("<br>");
+        }
         license_filea.Close();
     } else {
-        wxLogMessage( _T("Could not open oesenc_pi License file: ") + shareLocn );
+        licenseText.Append(_("Could not open oesenc_pi EULA: ") + m_fileName + _T("<br>"));
+        wxLogMessage( _T("Could not open oesenc_pi EULA: ") + m_fileName );
+        closeButton->Disable();
     }
     
         
@@ -3491,7 +3598,7 @@ void oesenc_pi_about::CreateControls( void )
     mainSizer->Add( buttonBottomSizer, 0, wxALL, 5 );
     
     
-    wxButton* closeButton = new wxButton( this, xID_OK, _("Accept"), wxDefaultPosition, wxDefaultSize, 0 );
+    closeButton = new wxButton( this, xID_OK, _("Accept"), wxDefaultPosition, wxDefaultSize, 0 );
     closeButton->SetDefault();
     closeButton->InheritAttributes();
     buttonBottomSizer->Add( closeButton, 0, wxEXPAND | wxALL, 5 );
@@ -3611,11 +3718,140 @@ void showChartinfoDialog( void )
 
 int processChartinfo(const wxString &oesenc_file)
 {
+    // Do not process anything if a EULA has been rejected
+    if(g_bEULA_Rejected)
+        return false;
+    
     // get the Chartinfo as a wxTextFile
     wxFileName fn(oesenc_file);
-    wxString chartInfo = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
-    chartInfo += _T("Chartinfo.txt");
+    wxString chartInfoDir = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
+    wxString chartInfo = chartInfoDir + _T("Chartinfo.txt");
 
+    if(wxFileExists(chartInfo)){
+        
+    // Have we processed this exact ChartInfo file in this session?
+    // If so, all is well
+        if( wxNOT_FOUND != g_ChartInfoArray.Index( chartInfo))
+            return true;
+    
+        g_ChartInfoArray.Add(chartInfo);
+    
+    }
+    else
+        return true;                    // no ChartInfo file at all
+        
+        
+    // First, consider the EULA
+    wxTextFile info_file( chartInfo );
+    if( info_file.Open() ){
+        wxString line = info_file.GetFirstLine();
+        
+        wxString fileEULA, sshowEULA, fullEULAFileName;
+        wxArrayString EULAFileArray;
+        while( !info_file.Eof() ){
+            if(line.StartsWith( _T("oesencEULAFile:" ) ) ) {
+                wxString tentativeFileEULA = line.AfterFirst(':').Trim(false);
+                EULAFileArray.Add(tentativeFileEULA);
+            }
+ 
+            else if(line.StartsWith( _T("oesencEULAShow:" ) ) ) {
+                sshowEULA = line.AfterFirst(':').Trim(false).Trim(); 
+                
+            }
+     
+            if( (EULAFileArray.GetCount()) && (sshowEULA.Length())){
+                ChartSetEULA *CSE;
+                
+                if(EULAFileArray.GetCount()){               // might be localized EULA files
+                    wxString loc = GetLocaleCanonicalName();
+                    wxString loc2 = loc.Mid(0,2).Upper();
+                    for(unsigned int iloc = 0 ;  iloc < EULAFileArray.GetCount() ; iloc++){
+                        wxString tEULA = EULAFileArray.Item(iloc).Mid(0,3).Upper();
+                        if((tEULA[2] == '_') || (tEULA[2] == '-') ){
+                            if(tEULA.Mid(0,2) == loc2){         // a match
+                                // Does it exist?
+                                if(wxFileExists(chartInfoDir + EULAFileArray.Item(iloc))){
+                                    fileEULA = EULAFileArray.Item(iloc);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //  Some trouble with localized EULA? If so, find the first really available file in the array
+                if(!fileEULA.Length()){
+                    for(unsigned int iloc = 0 ;  iloc < EULAFileArray.GetCount() ; iloc++){
+                        if(wxFileExists(chartInfoDir + EULAFileArray.Item(iloc))){
+                            fileEULA = EULAFileArray.Item(iloc);
+                            break;
+                        }
+                    }
+                }
+                
+                fullEULAFileName = chartInfoDir + fileEULA;
+                    
+                //  Search the EULA array loaded from config file for a match
+                bool b_found = false;
+                for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
+                    if(fullEULAFileName == g_EULAArray.Item(i)->fileName){
+                        b_found = true;
+                        CSE = g_EULAArray.Item(i);
+                        break;
+                    }
+                }
+                
+                //  If not found, this is a EULA definition coming for the first time
+                //  So add it to the global array to be persisted later.
+                if(!b_found){
+                    ChartSetEULA *cse = new ChartSetEULA;
+                    cse->fileName = fullEULAFileName;
+                    if(sshowEULA.Upper().Find(_T("ONCE")) != wxNOT_FOUND)
+                        cse->npolicyShow = 1;
+                    else if(sshowEULA.Upper().Find(_T("ALWAYS")) != wxNOT_FOUND)
+                        cse->npolicyShow = 2;
+                    else 
+                        cse->npolicyShow = 0;
+                    
+                    g_EULAArray.Add(cse);
+                    CSE = cse;
+                }
+                
+                //  If the EULA is required to be shown, either once or always, do it here
+                bool b_show = false;
+                if( (CSE->npolicyShow == 1) && (!CSE->b_onceShown))       // once per lifetime
+                    b_show = true;
+                if( (CSE->npolicyShow == 2) && (!CSE->b_sessionShown))    // once per session
+                    b_show = true;
+                
+                bool b_showResult = false;
+                if(b_show){
+                    wxString file = CSE->fileName;
+                    b_showResult = ShowEULA(file);
+                    
+                    if(!b_showResult){
+                        g_bEULA_Rejected = true;
+                        return false;                   // User did not accept EULA, or file missing
+                    }
+                    else{
+                        CSE->b_sessionShown = true;
+                        CSE->b_onceShown = true;
+                    }
+                }
+                
+                //  Done with this EULA
+                fullEULAFileName.Clear();
+                sshowEULA.Clear();
+                EULAFileArray.Clear();
+            }
+            
+            line = info_file.GetNextLine();
+        }
+    }
+    
+    
+            
+    
     std::string key = std::string(fn.GetPath(wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR).c_str());
     
     if(wxFileExists(chartInfo)){

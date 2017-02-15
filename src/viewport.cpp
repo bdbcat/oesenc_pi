@@ -38,8 +38,7 @@
 #include "viewport.h"
 #include "LLRegion.h"
 #include "OCPNRegion.h"
-#include "ocpn_plugin.h"
-
+#include "oesenc_pi.h"
 //#include "dychart.h"
 
 #include <wx/listimpl.cpp>

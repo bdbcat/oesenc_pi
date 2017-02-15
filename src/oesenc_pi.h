@@ -80,17 +80,7 @@ class   OCPNCertificateList;
 class oesenc_pi_event_handler;
 
 
-class Catalog_Entry31
-{
-public:
-    Catalog_Entry31(){};
-    ~Catalog_Entry31(){};
 
-    wxString m_filename;
-    wxString m_comt;
-};
-
-WX_DECLARE_OBJARRAY(Catalog_Entry31,      Catalog31);
 
 class ChartInfoItem {
 public:
@@ -102,6 +92,18 @@ public:
     bool bShown;
     bool bAccessed;
 };
+
+class ChartSetEULA{
+public:
+    ChartSetEULA() {b_sessionShown = false; b_onceShown = false;}
+    ~ChartSetEULA() {};
+
+    wxString fileName;
+    int npolicyShow;
+    bool b_sessionShown;
+    bool b_onceShown;
+};
+WX_DECLARE_OBJARRAY(ChartSetEULA *, EULAArray);
 
 
 //----------------------------------------------------------------------------------------------------------
@@ -191,7 +193,6 @@ private:
 
     wxString            m_userpermit;
 
-    Catalog31           *m_catalog;
     wxString            m_last_enc_root_dir;
 
     OCPNCertificateList *m_cert_list;
@@ -443,6 +444,15 @@ public:
                     const wxPoint& pos = wxDefaultPosition,
                     const wxSize& size = wxSize(500, 500),
                     long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
+
+    explicit oesenc_pi_about( wxWindow* parent, 
+                              wxString fileName,
+                              wxWindowID id = ID_DIALOG,
+                              const wxString& caption = SYMBOL_ABOUT_TITLE,
+                              const wxPoint& pos = wxDefaultPosition,
+                              const wxSize& size = wxSize(500, 500),
+                              long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
+    
     bool Create( wxWindow* parent,
                  wxWindowID id = ID_DIALOG,
                  const wxString& caption = SYMBOL_ABOUT_TITLE,
@@ -474,6 +484,9 @@ private:
     wxHtmlWindow *pAboutHTMLCtl;
     wxHtmlWindow *pLicenseHTMLCtl;
     wxHtmlWindow *pAuthorHTMLCtl;
+    
+    wxString m_fileName;
+    wxButton* closeButton;
     
     //wxSize m_displaySize;
     

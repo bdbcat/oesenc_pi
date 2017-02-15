@@ -30,7 +30,8 @@
 
 #include "pi_s52s57.h"                 //types
 
-#include "ocpn_plugin.h"
+//#include "ocpn_plugin.h"
+#include "oesenc_pi.h"
 
 class wxGLContext;
 
@@ -183,7 +184,8 @@ public:
     //    For DC's
     int RenderObjectToDC( wxDC *pdc, ObjRazRules *rzRules, ViewPort *vp );
     int RenderAreaToDC( wxDC *pdc, ObjRazRules *rzRules, ViewPort *vp, render_canvas_parms *pb_spec );
-
+    int RenderObjectToDCText( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp );
+    
     // Accessors
     bool GetShowSoundings() { return m_bShowSoundg; }
     void SetShowSoundings( bool f ) { m_bShowSoundg = f; GenerateStateHash(); }
@@ -221,6 +223,7 @@ public:
     
     //    For OpenGL
     int RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp );
+    int RenderObjectToGLText( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp );
     int RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp );
    
     void RenderPolytessGL( ObjRazRules *rzRules, ViewPort *vp,double z_clip_geom, wxPoint *ptp );
@@ -288,7 +291,8 @@ private:
     bool PreloadOBJLFromCSV(const wxString &csv_file);
 
     int DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp );
-
+    int DoRenderObjectTextOnly( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp );
+    
     //    Area Renderers
     int RenderToBufferAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp,
         render_canvas_parms *pb_spec );

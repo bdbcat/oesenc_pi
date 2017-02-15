@@ -2155,7 +2155,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
         
         //            if ( rzRules->obj->Primitive_type == GEO_POINT )
         {
-            double latmin, lonmin, latmax, lonmax, extent = 0;
+            double latmin, lonmin, latmax, lonmax = 0;
             
             GetPixPointSingleNoRotate( rect.GetX(), rect.GetY() + rect.GetHeight(), &latmin, &lonmin, vp );
             GetPixPointSingleNoRotate( rect.GetX() + rect.GetWidth(), rect.GetY(), &latmax, &lonmax, vp );
@@ -2262,7 +2262,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
         float sym_length = 30;
         float scaled_length = sym_length / vp->view_scale_ppm;
         
-        double fac1 = scaled_length / fsf;
+        //double fac1 = scaled_length / fsf;
         
         
         float target_length = 1852;
@@ -2954,7 +2954,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     //  Try to determine if the feature needs to be drawn in the most efficient way
     //  We need to look at priority and visibility of each segment
-    int bdraw = 0;
+    //int bdraw = 0;
     
     //  Get the current display priority
     //  Default comes from the LUP, unless overridden
@@ -3406,7 +3406,7 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         float *ppt;
         
         int direction =1;
-        int ndraw = 0;
+//        int ndraw = 0;
         while(ls){
             if( ls->priority == priority_current  ) {  
 
@@ -3462,8 +3462,8 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                             direction = 1;
                         else if( (pfirst == pfirst_next) || (pfirst == plast_next) )
                             direction = -1;
-                        else
-                            int yyp = 4;
+//                         else
+//                             int yyp = 4;
                     }
                 }
                     
@@ -4205,7 +4205,7 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     if(1/*rzRules->obj->Scamin > 10000000*/){                        // huge (unset) SCAMIN)
         float radius_meters_target = 200;
     
-        float fsf = 100 / canvas_pix_per_mm;
+        //float fsf = 100 / canvas_pix_per_mm;
 
         float radius_meters = ( radius * canvas_pix_per_mm ) / vp->view_scale_ppm;
    
@@ -5064,6 +5064,18 @@ int s52plib::RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, Vi
 }
 
 
+int s52plib::RenderObjectToDCText( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
+{
+    return DoRenderObjectTextOnly( pdcin, rzRules, vp );
+}
+
+int s52plib::RenderObjectToGLText( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp )
+{
+    m_glcc = (wxGLContext *) &glcc;
+    return DoRenderObjectTextOnly( NULL, rzRules, vp );
+}
+
+
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
@@ -5203,6 +5215,104 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 
     return 1;
 }
+
+int s52plib::DoRenderObjectTextOnly( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
+{
+    //    if(strncmp(rzRules->obj->FeatureName, "RDOCAL", 6))
+    //        return 0;
+    
+    if( !ObjectRenderCheckPos( rzRules, vp ) )
+        return 0;
+    
+    if( IsObjNoshow( rzRules->LUP->OBCL) )
+        return 0;
+    
+    if( !ObjectRenderCheckCat( rzRules, vp ) ) {
+        
+        //  If this object cannot be moved to a higher category by CS procedures,
+        //  then we are done here
+        if(!rzRules->obj->m_bcategory_mutable)
+            return 0;
+        
+        // already added, nothing below can change its display category        
+            if(rzRules->obj->bCS_Added ) 
+                return 0;
+            
+            //  Otherwise, make sure the CS, if present, has been evaluated,
+                //  and then check the category again    
+                //  no rules 
+                if( !ObjectRenderCheckCS( rzRules, vp ) )
+                    return 0;
+                
+                
+                rzRules->obj->CSrules = NULL;
+                Rules *rules = rzRules->LUP->ruleList;
+                while( rules != NULL ) {
+                    if( RUL_CND_SY ==  rules->ruleType ){
+                        GetAndAddCSRules( rzRules, rules );
+                        rzRules->obj->bCS_Added = 1; // mark the object
+                        break;
+                    }
+                    rules = rules->next;
+                }
+                
+                // still not displayable    
+                if( !ObjectRenderCheckCat( rzRules, vp ) ) 
+                    return 0;
+    }
+    
+    m_pdc = pdcin; // use this DC
+    Rules *rules = rzRules->LUP->ruleList;
+    
+    while( rules != NULL ) {
+        switch( rules->ruleType ){
+            case RUL_TXT_TX:
+                RenderTX( rzRules, rules, vp );
+                break; // TX
+            case RUL_TXT_TE:
+                RenderTE( rzRules, rules, vp );
+                break; // TE
+            case RUL_CND_SY: {
+                if( !rzRules->obj->bCS_Added ) {
+                    rzRules->obj->CSrules = NULL;
+                    GetAndAddCSRules( rzRules, rules );
+                    if(strncmp(rzRules->obj->FeatureName, "SOUNDG", 6))
+                        rzRules->obj->bCS_Added = 1; // mark the object
+                }
+                
+                Rules *rules_last = rules;
+                rules = rzRules->obj->CSrules;
+                
+                while( NULL != rules ) {
+                    switch( rules->ruleType ){
+                        case RUL_TXT_TX:
+                            RenderTX( rzRules, rules, vp );
+                            break;
+                        case RUL_TXT_TE:
+                            RenderTE( rzRules, rules, vp );
+                            break;
+                        default:
+                            break; // no rule type (init)
+                    }
+                    rules_last = rules;
+                    rules = rules->next;
+                }
+                
+                rules = rules_last;
+                break;
+            }
+            
+                        case RUL_NONE:
+                        default:
+                            break; // no rule type (init)
+        } // switch
+        
+        rules = rules->next;
+    }
+    
+    return 1;
+}
+
 
 bool s52plib::PreloadOBJLFromCSV(const wxString &csv_file)
 {
@@ -5419,7 +5529,7 @@ int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
         if(index_run){
             for( int iseg = 0; iseg < rzRules->obj->m_n_lsindex; iseg++ ) {
                 //  Get first connected node
-                int inode = *index_run++;
+//                int inode = *index_run++;
 
                 VE_Element *pedge = 0;
                 //  Get the edge
@@ -5433,7 +5543,7 @@ int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
                 }
 
                 //  Get last connected node
-                inode = *index_run++;
+//                inode = *index_run++;
 
             }
         }
@@ -7398,8 +7508,8 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 
 int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp )
 {
-    if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
-        int yyp = 0;
+//     if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
+//         int yyp = 0;
 
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;

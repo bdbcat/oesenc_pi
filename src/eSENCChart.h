@@ -118,7 +118,7 @@ public:
 // eSENCChart Definition
 // ----------------------------------------------------------------------------
 
-class  eSENCChart : public PlugInChartBaseGL
+class  eSENCChart : public PlugInChartBaseExtended
 {
       DECLARE_DYNAMIC_CLASS(ChartS63)
 
@@ -148,12 +148,20 @@ class  eSENCChart : public PlugInChartBaseGL
       virtual void chartpix_to_latlong(double pixx, double pixy, double *plat, double *plon);
       
       wxBitmap &RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRegion &Region);
+      wxBitmap &RenderRegionViewOnDCNoText(const PlugIn_ViewPort& VPoint, const wxRegion &Region);
+      bool RenderRegionViewOnDCTextOnly(wxMemoryDC& dc, const PlugIn_ViewPort& VPoint, const wxRegion &Region);
+      
       bool RenderViewOnDC(wxMemoryDC& dc, const PlugIn_ViewPort& VPoint);
  
       int RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
                                 const wxRegion &Region, bool b_use_stencil );
+      int RenderRegionViewOnGLNoText( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
+                                      const wxRegion &Region, bool b_use_stencil );
+      int RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
+                                        const wxRegion &Region, bool b_use_stencil );
       
-
+      void ClearPLIBTextList();
+      
       virtual bool AdjustVP(PlugIn_ViewPort &vp_last, PlugIn_ViewPort &vp_proposed);
       virtual double GetNearestPreferredScalePPM(double target_scale_ppm);
 
@@ -244,6 +252,8 @@ protected:
       bool DoRenderRegionViewOnDC(wxMemoryDC& dc, const PlugIn_ViewPort& VPoint, const wxRegion &Region, bool b_overlay);
       int DCRenderRect(wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wxRect *rect);
       bool DCRenderLPB(wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wxRect* rect);
+      bool DCRenderText( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp );
+      
       wxBitmap *GetCloneBitmap();
       bool IsCacheValid(){ return (pDIB != NULL); }
       void InvalidateCache();
@@ -253,6 +263,7 @@ protected:
       void SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint, const wxRect &Rect,
                             bool b_render_nodta, bool b_useStencil );
       bool DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil );
+      bool DoRenderRectOnGLTextOnly( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil );
       
       void UpdateLUPsOnStateChange( void );
       void ClearRenderedTextCache();
