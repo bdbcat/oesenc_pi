@@ -1429,125 +1429,63 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     //        Clear the text declutter list
     ps52plib->ClearTextList();
     
-    //    How many rectangles in the Region?
-    int n_rect = 0;
-    wxRegionIterator clipit( Region );
-    while( clipit.HaveRects() ) {
-        clipit++;
-        n_rect++;
-    }
-
-    //    Adjust for rotation
     glPushMatrix();
 
-    if( fabs( VPoint.rotation ) > 0.01 ) {
-
-        double w = VPoint.pix_width;
-        double h = VPoint.pix_height;
-
-        //    Rotations occur around 0,0, so calculate a post-rotate translation factor
-        double angle = VPoint.rotation;
-        angle -= VPoint.skew;
-
-        double ddx = ( w * cos( -angle ) - h * sin( -angle ) - w ) / 2;
-        double ddy = ( h * cos( -angle ) + w * sin( -angle ) - h ) / 2;
-
-        glRotatef( angle * 180. / PI, 0, 0, 1 );
-
-        glTranslatef( ddx, ddy, 0 );                 // post rotate translation
-    }
-
-    //    Arbitrary optimization....
-    //    It is cheaper to draw the entire screen if the rectangle count is large,
-    //    as is the case for CM93 charts with non-rectilinear borders
-    //    However, most (all?) pan operations on "normal" charts will be small rect count
-    if( n_rect < 4 ) {
-        wxRegionIterator upd( Region ); // get the Region rect list
+    wxRegionIterator upd( Region ); // get the Region rect list
         while( upd.HaveRects() ) {
             wxRect rect = upd.GetRect();
 
-            //printf("Rect: %d %d %d %d\n", rect.x, rect.y, rect.width, rect.height);
             //  Build synthetic ViewPort on this rectangle
             //  Especially, we want the BBox to be accurate in order to
             //  render only those objects actually visible in this region
 
             ViewPort temp_vp = m_cvp;
             double temp_lon_left, temp_lat_bot, temp_lon_right, temp_lat_top;
-
-            wxPoint p;
-            p.x = rect.x;
-            p.y = rect.y;
-            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
             
-            p.x += rect.width;
-            p.y += rect.height;
-            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
+            //TODO
+            //  This is much slower on rotated cases.  We can do better
+            //  It is slow because the inclusion test on geo location is very broad, covers the whole rotated screen
+            if(fabs(VPoint.rotation) > 0.01){
+                wxPoint p;
+                p.x = VPoint.rv_rect.x;
+                p.y = VPoint.rv_rect.y;
+            
+                PlugIn_ViewPort vpbox = VPoint;
+                vpbox.rotation = 0;
+                GetCanvasLLPix( &vpbox, p, &temp_lat_top, &temp_lon_left);
+            
+                p.x += VPoint.rv_rect.width;
+                p.y += VPoint.rv_rect.height;
+                GetCanvasLLPix( &vpbox, p, &temp_lat_bot, &temp_lon_right);
+            }
+            else{
+                wxPoint p;
+                p.x = rect.x;
+                p.y = rect.y;
+                
+                GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
+                
+                p.x += rect.width;
+                p.y += rect.height;
+                GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
+            }
             
             if( temp_lon_right < temp_lon_left )        // presumably crossing Greenwich
                 temp_lon_right += 360.;
 
-//            double   lat_min, lat_max, lon_min, lon_max;
-            
-//             temp_vp.lat_min = temp_lat_bot;
-//             temp_vp.lat_max = temp_lat_top;
-//             temp_vp.lon_min = temp_lon_left;
-//             temp_vp.lon_max = temp_lon_right;
 
             temp_vp.GetBBox().Set(temp_lat_bot, temp_lon_left, temp_lat_top, temp_lon_right);
             
-            //      Allow some slop in the viewport
-            //            double margin = wxMin(temp_vp.GetBBox().GetWidth(), temp_vp.GetBBox().GetHeight()) * 0.05;
-            //            temp_vp.GetBBox().EnLarge(margin);
-
-
             //SetClipRegionGL( glc, temp_vp, rect, true /*!b_overlay*/, b_use_stencil );
             ps52plib->m_last_clip_rect = rect;
             //wxRect clip_rect = rect;
-            //printf("last clip rect pi:  %d %d %d %d\n", clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
-            
             
             DoRenderRectOnGL( glc, temp_vp, rect, b_use_stencil);
 
             upd++;
-        }
-    } else {
-        wxRect rect = Region.GetBox();
+        }  //while
 
-        //  Build synthetic ViewPort on this rectangle
-        //  Especially, we want the BBox to be accurate in order to
-        //  render only those objects actually visible in this region
-
-//        PlugIn_ViewPort temp_vp = VPoint;
-        double temp_lon_left, temp_lat_bot, temp_lon_right, temp_lat_top;
-
-        wxPoint p;
-        p.x = rect.x;
-        p.y = rect.y;
-        GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
-        
-        p.x += rect.width;
-        p.y += rect.height;
-        GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
-        
-        if( temp_lon_right < temp_lon_left )        // presumably crossing Greenwich
-                temp_lon_right += 360.;
-        
- //       double   lat_min, lat_max, lon_min, lon_max;
-        
-//         temp_vp.lat_min = temp_lat_bot;
-//         temp_vp.lat_max = temp_lat_top;
-//         temp_vp.lon_min = temp_lon_left;
-//         temp_vp.lon_max = temp_lon_right;
-        
-        //      Allow some slop in the viewport
-        //            double margin = wxMin(temp_vp.GetBBox().GetWidth(), temp_vp.GetBBox().GetHeight()) * 0.05;
-        //            temp_vp.GetBBox().EnLarge(margin);
-
-        //SetClipRegionGL( glc, VPoint, Region, true /*!b_overlay*/, b_use_stencil );
-        //DoRenderRectOnGL( glc, temp_vp, rect, b_use_stencil );
-
-    }
-//      Update last_vp to reflect current state
+        //      Update last_vp to reflect current state
     m_last_vp = VPoint;
     m_last_Region = Region;
 
@@ -1572,22 +1510,6 @@ int eSENCChart::RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const Plug
     //    Adjust for rotation
     glPushMatrix();
     
-    if( fabs( VPoint.rotation ) > 0.01 ) {
-        
-        double w = VPoint.pix_width;
-        double h = VPoint.pix_height;
-        
-        //    Rotations occur around 0,0, so calculate a post-rotate translation factor
-        double angle = VPoint.rotation;
-        angle -= VPoint.skew;
-        
-        double ddx = ( w * cos( -angle ) - h * sin( -angle ) - w ) / 2;
-        double ddy = ( h * cos( -angle ) + w * sin( -angle ) - h ) / 2;
-        
-        glRotatef( angle * 180. / PI, 0, 0, 1 );
-        
-        glTranslatef( ddx, ddy, 0 );                 // post rotate translation
-    }
     
     {
         wxRegionIterator upd( Region ); // get the Region rect list
@@ -1600,25 +1522,43 @@ int eSENCChart::RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const Plug
             
             ViewPort temp_vp = m_cvp;
             double temp_lon_left, temp_lat_bot, temp_lon_right, temp_lat_top;
-            
-            wxPoint p;
-            p.x = rect.x;
-            p.y = rect.y;
-            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
-            
-            p.x += rect.width;
-            p.y += rect.height;
-            GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
+
+            //TODO
+            //  This is much slower on rotated cases.  We can do better
+            //  It is slow because the inclusion test on geo location is very broad, covers the whole rotated screen
+            if(fabs(VPoint.rotation) > 0.01){
+                wxPoint p;
+                p.x = VPoint.rv_rect.x;
+                p.y = VPoint.rv_rect.y;
+                
+                PlugIn_ViewPort vpbox = VPoint;
+                vpbox.rotation = 0;
+                GetCanvasLLPix( &vpbox, p, &temp_lat_top, &temp_lon_left);
+                
+                p.x += VPoint.rv_rect.width;
+                p.y += VPoint.rv_rect.height;
+                GetCanvasLLPix( &vpbox, p, &temp_lat_bot, &temp_lon_right);
+            }
+            else{
+                wxPoint p;
+                p.x = rect.x;
+                p.y = rect.y;
+                
+                GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_top, &temp_lon_left);
+                
+                p.x += rect.width;
+                p.y += rect.height;
+                GetCanvasLLPix( (PlugIn_ViewPort *)&VPoint, p, &temp_lat_bot, &temp_lon_right);
+            }
             
             if( temp_lon_right < temp_lon_left )        // presumably crossing Greenwich
                 temp_lon_right += 360.;
             
+            temp_vp.GetBBox().Set(temp_lat_bot, temp_lon_left, temp_lat_top, temp_lon_right);
                 
-                temp_vp.GetBBox().Set(temp_lat_bot, temp_lon_left, temp_lat_top, temp_lon_right);
+            DoRenderRectOnGLTextOnly( glc, temp_vp, rect, b_use_stencil);
                 
-                DoRenderRectOnGLTextOnly( glc, temp_vp, rect, b_use_stencil);
-                
-                upd++;
+            upd++;
         }
     }
     
