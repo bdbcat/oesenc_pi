@@ -3225,6 +3225,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 
 bool CheckEULA( void )
 {
+    wxLogMessage(_T("CheckEULA"));
     if(g_bEULA_Rejected)
         return false;
     
@@ -3251,6 +3252,7 @@ bool CheckEULA( void )
 
 bool ShowEULA( wxString fileName )
 {
+    wxLogMessage(_T("ShowEULA"));
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), fileName );
     bool bEULA_OK = (pab->ShowModal() == 0);
     
@@ -3718,6 +3720,8 @@ void showChartinfoDialog( void )
 
 int processChartinfo(const wxString &oesenc_file)
 {
+    wxLogMessage(_T("processChartInfo ") + oesenc_file);
+    
     // Do not process anything if a EULA has been rejected
     if(g_bEULA_Rejected)
         return false;
