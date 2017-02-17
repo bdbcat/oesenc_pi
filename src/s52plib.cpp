@@ -2140,7 +2140,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
                         templateFont->GetStyle(), fontweight, false, templateFont->GetFaceName() );
             }
         }
-
+/*
         //  Render text at declared x/y of object
         wxPoint r;
         GetPointPixSingle( rzRules, rzRules->obj->y, rzRules->obj->x, &r, vp );
@@ -2194,6 +2194,75 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
         }
         
      }
+*/
+
+        //  Render text at declared x/y of object
+        wxPoint r;
+        GetPointPixSingle( rzRules, rzRules->obj->y, rzRules->obj->x, &r, vp );
+
+        wxRect rect;
+        bool bwas_drawn = RenderText( m_pdc, text, r.x, r.y, &rect, rzRules->obj, m_bDeClutterText, vp );
+
+        //  If this is an un-cached text render, it probably means that a single object has two or more
+        //  text renders in its rule set.  RDOCAL is one example.  There are others
+        //  We need to cache only the first text structure, but should update the render rectangle
+        //  to reflect all texts rendered for this object,  in order to process the declutter logic.
+        bool b_dupok = false;
+        if( b_free_text ) {
+            delete text;
+        
+            if(!bwas_drawn){
+                return 1;
+            }
+            else{                               // object was drawn
+                text = rzRules->obj->FText;
+                
+                wxRect r0 = text->rText;
+                r0 = r0.Union(rect);
+                text->rText = r0;
+            
+                b_dupok = true;                 // OK to add a duplicate text structure to the declutter list, just for this case.
+            }
+        }
+        else
+            text->rText = rect;
+        
+        
+        //      If this text was actually drawn, add a pointer to its rect to the de-clutter list if it doesn't already exist
+        if( m_bDeClutterText ) {
+            if( bwas_drawn ) {
+                bool b_found = false;
+                for( TextObjList::Node *node = m_textObjList.GetFirst(); node; node =  node->GetNext() ) {
+                    S52_TextC *oc = node->GetData();
+
+                    if( oc == text ) {
+                        if(!b_dupok)
+                            b_found = true;
+                        break;
+                    }
+                }
+                if( !b_found )
+                    m_textObjList.Append( text );
+            }
+        }
+
+        //  Update the object Bounding box
+        //  so that subsequent drawing operations will redraw the item fully
+        //  and so that cursor hit testing includes both the text and the object
+
+//            if ( rzRules->obj->Primitive_type == GEO_POINT )
+        {
+            double latmin, lonmin, latmax, lonmax, extent = 0;
+
+            GetPixPointSingleNoRotate( rect.GetX(), rect.GetY() + rect.GetHeight(), &latmin, &lonmin, vp );
+            GetPixPointSingleNoRotate( rect.GetX() + rect.GetWidth(), rect.GetY(), &latmax, &lonmax, vp );
+            LLBBox bbtext;
+            bbtext.Set( latmin, lonmin, latmax, lonmax );
+
+            rzRules->obj->BBObj.Expand( bbtext );
+        }
+    }
+
 
     return 1;
 }
@@ -5079,8 +5148,8 @@ int s52plib::RenderObjectToGLText( const wxGLContext &glcc, ObjRazRules *rzRules
 int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 {
     //TODO  Debugging
-//    if(rzRules->obj->Index == 2572)
-//        int yyp = 3; //return 1;
+//    if(rzRules->obj->Index != 1060)
+//        return 1;
 
     
     if( !ObjectRenderCheckPos( rzRules, vp ) )
@@ -7508,9 +7577,13 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 
 int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp )
 {
-//     if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
-//         int yyp = 0;
+     //if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
+       //  int yyp = 0;
 
+     //TODO  Debugging
+//     if(rzRules->obj->Index != 1060)
+//             return 1;
+         
     if( !ObjectRenderCheckPos( rzRules, vp ) )
         return 0;
 
