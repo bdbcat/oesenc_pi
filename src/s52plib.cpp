@@ -7463,7 +7463,6 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
              glPopMatrix();
              SetGLClipRect( *vp, m_last_clip_rect);
              glPushMatrix();
-             RotateToViewPort(*vp);
              
              glDisable( GL_DEPTH_TEST );
              
