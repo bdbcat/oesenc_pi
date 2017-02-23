@@ -55,6 +55,8 @@
 #include "json_defs.h"
 #include "jsonwriter.h"
 #include "jsonreader.h"
+#include "dsa_utils.h"
+#include "sha1.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -129,6 +131,7 @@ wxString                        g_pipeParm;
 
 wxArrayString                   g_ChartInfoArray;
 EULAArray                       g_EULAArray;
+wxArrayString                   g_EULAShaArray;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
@@ -159,6 +162,7 @@ wxString                        g_csv_locn;
 long                            g_serverProc;
 
 bool shutdown_SENC_server( void );
+bool ShowAlwaysEULAs();
 
 
 // the class factories, used to create and destroy instances of the PlugIn
@@ -530,6 +534,8 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       m_up_text = NULL;
       LoadConfig();
       ScrubChartinfoList(  );
+      g_bEULA_Rejected = false;
+      g_bEULA_Rejected = !ShowAlwaysEULAs();
       
 
       //        Set up a common data location,
@@ -3250,11 +3256,68 @@ bool CheckEULA( void )
     return g_bEULA_OK;
 }
 
+wxString getEULASha1( wxString fileName)
+{
+    wxString result;
+    
+    if(!::wxFileExists(fileName))
+        return _T("");
+   
+    wxTextFile eula_file( fileName );
+    if( eula_file.Open() ){
+            
+        wxArrayString sig_array;
+        wxString line = eula_file.GetFirstLine();
+            
+        while( !eula_file.Eof() ){
+            sig_array.Add(line);
+            line = eula_file.GetNextLine();
+        }
+                
+    //  Make one long string of the  file, to treat as a blob
+        wxString eula_blob;
+        for(unsigned int i=0 ; i < sig_array.Count() ; i++){
+            wxString line = sig_array[i];
+            eula_blob += line;
+        }                
+
+        // calculate SHA1 of the blob
+        wxCharBuffer blob_buf = eula_blob.ToUTF8();
+        
+        SHA1Context sha1;
+        uint8_t sha1sum[SHA1HashSize];
+        SHA1Reset(&sha1);
+        
+        SHA1Input(&sha1, (uint8_t *)blob_buf.data(), strlen( blob_buf.data()) );
+        SHA1Result(&sha1, sha1sum);
+    
+        for(int i=0 ; i < 20 ; i ++){
+            wxString val;
+            val.Printf(_T("%02X"), sha1sum[i]);
+            result += val;
+        }
+    }    
+    
+    return result;
+}
+    
 bool ShowEULA( wxString fileName )
 {
     wxLogMessage(_T("ShowEULA"));
+    
+    wxString sha = getEULASha1(fileName);
+    
+    //  look in the session persistent array for a match
+    for(unsigned int i=0 ; i < g_EULAShaArray.GetCount() ; i++){
+        if(g_EULAShaArray[i] == sha)
+            return true;
+    }
+        
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), fileName );
     bool bEULA_OK = (pab->ShowModal() == 0);
+    
+    if(bEULA_OK)
+        g_EULAShaArray.Add(sha);
     
     if(bEULA_OK && (0 == g_UserKey.Length()) )
         g_UserKey = _T("Pending");
@@ -3264,7 +3327,8 @@ bool ShowEULA( wxString fileName )
     return bEULA_OK;
 }
 
-
+    
+            
 
 
 IMPLEMENT_DYNAMIC_CLASS( oesenc_pi_about, wxDialog )
@@ -3939,4 +4003,21 @@ void processUserKeyHint(const wxString &oesenc_file)
     }
 }
 
-
+bool ShowAlwaysEULAs()
+{
+    bool b_showResult = true;
+    
+    ChartSetEULA *CSE;
+    
+    for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
+        CSE = g_EULAArray.Item(i);
+        if(CSE->npolicyShow == 2){
+            wxString file = CSE->fileName;
+            b_showResult = ShowEULA(file);
+            if(!b_showResult)
+                return false;
+        }
+    }
+    
+    return true;
+}

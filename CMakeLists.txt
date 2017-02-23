@@ -230,9 +230,9 @@ SET(SRC_ISO8211
         )
 
 SET(SRC_DSA
-#                src/dsa/dsa_utils.cpp
-#                src/dsa/mp_math.c
-#                src/dsa/sha1.c
+                src/dsa/dsa_utils.cpp
+                src/dsa/mp_math.c
+                src/dsa/sha1.c
     )
     
 SET(SRC_S57ENC
