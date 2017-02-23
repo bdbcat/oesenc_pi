@@ -3980,7 +3980,7 @@ void processUserKeyHint(const wxString &oesenc_file)
     // get the Chartinfo as a wxTextFile
     wxFileName fn(oesenc_file);
     wxString userkey = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
-    userkey += _T("Userkey.txt");
+    userkey += _T("Chartinfo.txt");
     
     if(!wxFileExists(userkey))
         return;
