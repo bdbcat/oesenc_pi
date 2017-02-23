@@ -3508,7 +3508,7 @@ void oesenc_pi_about::Populate( void )
     wxTextFile license_filea( m_fileName );
     if ( license_filea.Open() ) {
         for ( wxString str = license_filea.GetFirstLine(); !license_filea.Eof() ; str = license_filea.GetNextLine() ){
-            licenseText.Append( str );
+            licenseText.Append( str +_T(" ") );
             if(!bhtml)
                 licenseText += _T("<br>");
         }
