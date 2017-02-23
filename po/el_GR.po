@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-05 19:11+0100\n"
-"PO-Revision-Date: 2017-02-05 13:14-0500\n"
+"PO-Revision-Date: 2017-02-23 09:22-0500\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -18,45 +18,45 @@ msgstr ""
 
 #: src\eSENCChart.cpp:2969 src\eSENCChart.cpp:2973
 msgid "Building eSENC"
-msgstr ""
+msgstr "Δημιουργία eSENC"
 
 #: src\eSENCChart.cpp:6167
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Οι γωνίες των τομέων είναι αληθείς διοπτεύσεις από τη θάλασσα"
 
 #: src\oesenc_pi.cpp:229 src\oesenc_pi.cpp:369 src\oesenc_pi.cpp:3209
 #: src\oesenc_pi.cpp:3261 src\oesenc_pi.cpp:3409
 msgid "Dialog"
-msgstr ""
+msgstr "Διάλογος"
 
 #: src\oesenc_pi.cpp:619
 msgid "oeSENC"
-msgstr ""
+msgstr "oeSENC"
 
 #: src\oesenc_pi.cpp:625
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr ""
+msgstr "Πρόσθετο για χάρτες OpenCPN oeSENC"
 
 #: src\oesenc_pi.cpp:631
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr ""
+msgstr "Πρόσθετο για το OpenCPN. Παρέχει υποστήριξη χαρτών oeSENC.\n\n"
 
 #: src\oesenc_pi.cpp:996 src\oesenc_pi.cpp:2959
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr ""
+msgstr "Για να αποκτήσετε ένα User Key, πρέπει να δημιουργήσετε ένα μοναδικό αρχείο System Identifier.\n"
 
 #: src\oesenc_pi.cpp:997 src\oesenc_pi.cpp:2960
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr ""
+msgstr "Αυτό το αρχείο είναι επίσης γνωστό ως ένα αρχείο «ταυτοποίησης».\n"
 
 #: src\oesenc_pi.cpp:998 src\oesenc_pi.cpp:2961
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
-msgstr ""
+msgstr "Το αρχείο ταυτοποίησης περιλαμβάνει πληροφορίες για την αναγνώριση του υπολογιστή.\n\n"
 
 #: src\oesenc_pi.cpp:999 src\oesenc_pi.cpp:2962
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr ""
+msgstr "Μετά τη δημιουργία αυτού του αρχείου, θα πρέπει να αποκτήσετε το User Key σας στο κατάστημα o-charts.org.\n\n"
 
 #: src\oesenc_pi.cpp:1000 src\oesenc_pi.cpp:2963
 msgid "Proceed to create Fingerprint file?"
