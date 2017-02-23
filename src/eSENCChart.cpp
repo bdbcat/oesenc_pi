@@ -6003,50 +6003,97 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
         }
         
         case GEO_LINE: {
-            if( 1 ) {
-                //  Coarse test first
-                if( !obj->BBObj.ContainsMarge( lat, lon, select_radius ) )
-                    return false;
+            //  Coarse test first
+            if( !obj->BBObj.ContainsMarge( lat, lon, select_radius ) )
+                return false;
+            
+            float sel_rad_meters = select_radius * 1852 * 60;       // approximately
+            double easting, northing;
+            toSM_Plugin( lat, lon, m_ref_lat, m_ref_lon, &easting, &northing );
+            
+            if( obj->geoPt ) {
                 
-                //  Line geometry is carried in SM coordinates, so...
+                //  Line geometry is carried in SM or CM93 coordinates, so...
+                //  make the hit test using SM coordinates, converting from object points to SM using per-object conversion factors.
                 
-                float sel_rad_meters = select_radius * 1852 * 60;       // approximately
+                pt *ppt = obj->geoPt;
+                int npt = obj->npt;
                 
-                double easting, northing;
-                toSM_Plugin( lat, lon, m_ref_lat, m_ref_lon, &easting, &northing );
+                double xr = obj->x_rate;
+                double xo = obj->x_origin;
+                double yr = obj->y_rate;
+                double yo = obj->y_origin;
                 
-                float *ptest = 0;
-                int ntp = GetLineFeaturePointArray(obj, (void **) &ptest);
-                float *pfree = ptest;
+                double north0 = ( ppt->y * yr ) + yo;
+                double east0 = ( ppt->x * xr ) + xo;
+                ppt++;
                 
-                if(!ntp)
-                    return false;
-                float a0 = *ptest++;
-                float b0 = *ptest++;
-                
-                
-                for( int ip = 1; ip < ntp; ip++ ) {
+                for( int ip = 1; ip < npt; ip++ ) {
                     
-                    float a = *ptest++;
-                    float b = *ptest++;
-
+                    double north = ( ppt->y * yr ) + yo;
+                    double east = ( ppt->x * xr ) + xo;
+                    
                     //    A slightly less coarse segment bounding box check
-                     if( northing >= ( fmin(b0, b) - sel_rad_meters ) )
-                         if( northing <= ( fmax(b0, b) + sel_rad_meters ) )
-                             if( easting >= ( fmin(a0, a) - sel_rad_meters ) )
-                                 if( easting <= ( fmax(a0, a) + sel_rad_meters ) ) {
-                                free (pfree);
-                                return true;
-                         }
-                   
-                   a0 = a;
-                   b0 = b;
+                    if( northing >= ( fmin(north, north0) - sel_rad_meters ) ) if( northing
+                        <= ( fmax(north, north0) + sel_rad_meters ) ) if( easting
+                        >= ( fmin(east, east0) - sel_rad_meters ) ) if( easting
+                        <= ( fmax(east, east0) + sel_rad_meters ) ) {
+                            return true;
+                        }
+                        
+                        north0 = north;
+                    east0 = east;
+                    ppt++;
                 }
-                free (pfree);
+            }
+            else{                       // in oSENC V2, Array of points is stored in prearranged VBO array.
+                if( obj->m_ls_list ){
+                    
+                    float *ppt;
+                    unsigned char *vbo_point = (unsigned char *)obj->m_chart_context->chart->GetLineVertexBuffer();
+                    line_segment_element *ls = obj->m_ls_list;
+                    
+                    while(ls && vbo_point){
+                        int nPoints;
+                        if( (ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV) ){
+                            ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
+                            nPoints = ls->pedge->nCount;
+                        }
+                        else{
+                            ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                            nPoints = 2;
+                        }
+                        
+                        float north0 = ppt[1];
+                        float east0 = ppt[0];
+                        
+                        ppt += 2;
+                        
+                        for(int ip=0 ; ip < nPoints - 1 ; ip++){
+                            
+                            float north = ppt[1];
+                            float east = ppt[0];
+                            
+                            if( northing >= ( fmin(north, north0) - sel_rad_meters ) )
+                                if( northing <= ( fmax(north, north0) + sel_rad_meters ) )
+                                    if( easting >= ( fmin(east, east0) - sel_rad_meters ) )
+                                        if( easting <= ( fmax(east, east0) + sel_rad_meters ) ) {
+                                            return true;
+                                        }
+                                        
+                                        north0 = north;
+                                    east0 = east;
+                                
+                                ppt += 2;
+                        }            
+                        
+                        ls = ls->next;
+                    }
+                }
             }
             
             break;
-        }
+         }
         
         case GEO_META:
         case GEO_PRIM:
@@ -6114,6 +6161,29 @@ int CompareLights( PI_S57Light** l1ptr, PI_S57Light** l2ptr )
     if( angle1 == angle2 ) return 0;
     if( angle1 > angle2 ) return 1;
     return -1;
+}
+
+static const char *type2str( int type)
+{
+    const char *r = "Unknown";
+    switch(type) {
+        case GEO_POINT:
+            return "Point";
+            break;
+        case GEO_LINE:
+            return "Line";
+            break;
+        case GEO_AREA:
+            return "Area";
+            break;
+        case GEO_META:
+            return "Meta";
+            break;
+        case GEO_PRIM:
+            return "Prim";
+            break;
+    }
+    return r;
 }
 
 
@@ -6253,7 +6323,12 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                                 attribStr << _T("</font></td></tr>\n");
                                 inDepthRange = false;
                             }
-                            attribStr << _T("<tr><td valign=top><font size=-2>") << curAttrName;
+                            attribStr << _T("<tr><td valign=top><font size=-2>");
+                            if(curAttrName == _T("catgeo"))
+                                attribStr << _T("CATGEO");
+                            else
+                                attribStr << curAttrName;
+                            
                             attribStr << _T("</font></td><td>&nbsp;&nbsp;</td><td valign=top><font size=-1>");
                         }
                     }
@@ -6272,6 +6347,9 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                         if( curAttrName == _T("INFORM") || curAttrName == _T("NINFOM") )
                             value.Replace( _T("|"), _T("<br>") );
                         attribStr << value;
+                        
+                        if(curAttrName == _T("catgeo"))
+                            attribStr << type2str(current->Primitive_type);
                         
                         if( !( curAttrName == _T("DRVAL1") ) ) {
                             attribStr << _T("</font></td></tr>\n");
