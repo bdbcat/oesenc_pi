@@ -767,7 +767,8 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
     if(verify_val != SENC_NO_ERROR)
         return verify_val;
     
-
+    if(g_debugLevel) wxLogMessage(_T("ingestHeader SENC verified OK"));
+    
     S57Obj *obj = 0;
     
     //  Read the rest of the records in the header
@@ -1024,6 +1025,8 @@ int Osenc::ingest200(const wxString &senc_file_name,
     if(verify_val != SENC_NO_ERROR)
         return verify_val;
 
+    if(g_debugLevel) wxLogMessage(_T("ingest200 SENC verified OK"));
+                                     
     S57Obj *obj = 0;
     int featureID;
     uint32_t primitiveType;
@@ -1537,7 +1540,8 @@ int Osenc::ingest200(const wxString &senc_file_name,
             
     }
     
-    
+    if(g_debugLevel) wxLogMessage(_T("ingest200 SENC Ingested OK"));
+                                     
     return ret_val;
     
 }

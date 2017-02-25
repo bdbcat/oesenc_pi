@@ -89,6 +89,7 @@ extern wxString         g_UserKey;
 extern bool             g_PIbDebugS57;
 extern bool             g_bEULA_OK;
 extern int              global_color_scheme;
+extern int              g_debugLevel;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
 
@@ -3486,13 +3487,19 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     int srv = sencfile->ingest200(FullPath, &Objects, &VEs, &VCs);
     
     if(srv != SENC_NO_ERROR){
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile ingest Error"));
+                                         
         if(( ERROR_SIGNATURE_FAILURE == srv )  || ( ERROR_SENC_CORRUPT == srv ) ){
-            
+
+            if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Getting new UserKey"));
+                                             
             // Give user one chance to fix the key, then bail out..
             if(!validateUserKey( FullPath )){
+                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Bad UserKey, return ERROR_SIGNATURE_FAILURE"));
                 return ERROR_SIGNATURE_FAILURE;
             }
             else{
+                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Retry ingest200"));
                 delete sencfile;
                 Objects.clear();
                 VEs.clear();
@@ -3503,6 +3510,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                 
                 int srvb = sencfile->ingest200(FullPath, &Objects, &VEs, &VCs);
                 if(srvb != SENC_NO_ERROR){
+                    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile ingest Error, second try"));
                     wxLogMessage( sencfile->getLastError() );
                     delete sencfile;
                     return srvb;
@@ -3510,7 +3518,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             }
         }
     }
-    
+
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile SENC Loaded OK"));
+                                     
     //  Get the cell Ref point
     Extent ext = sencfile->getReadExtent();
     
@@ -3819,6 +3829,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
 
         AssembleLineGeometry();
         
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Return OK"));
+                                         
         return ret_val;
 }
 
