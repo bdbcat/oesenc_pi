@@ -138,6 +138,7 @@ std::map<std::string, ChartInfoItem *> info_hash;
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
 float g_ChartScaleFactorExp;
+int g_chart_zoom_modifier_vector;
 
 float g_GLMinCartographicLineWidth;
 bool  g_b_EnableVBO;
@@ -683,6 +684,13 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
             
         }
+        
+        if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
+            g_chart_zoom_modifier_vector = root[_T("OpenCPN Zoom Mod Vector")].AsInt();
+        
+        if(ps52plib)
+            ps52plib->GenerateStateHash();
+            
     }
 }
 
@@ -1301,6 +1309,13 @@ bool oesenc_pi::LoadConfig( void )
     wxFileConfig *pConf = (wxFileConfig *) g_pconfig;
 
     if( pConf ) {
+        pConf->SetPath( _T ( "/Settings" ) );    
+        
+        pConf->Read( _T ( "ZoomDetailFactorVector" ), &g_chart_zoom_modifier_vector, 0 );
+        g_chart_zoom_modifier_vector = wxMin(g_chart_zoom_modifier_vector,5);
+        g_chart_zoom_modifier_vector = wxMax(g_chart_zoom_modifier_vector,-5);
+        
+
         pConf->SetPath( _T("/PlugIns/oesenc") );
 
         //      Defaults
@@ -1444,7 +1459,7 @@ void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
     g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, _("oeSENC_PI Preferences"), wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
     g_prefs_dialog->Fit();
-    g_prefs_dialog->SetSize(wxSize(300, -1));
+//    g_prefs_dialog->SetSize(wxSize(300, -1));
     wxColour cl;
     GetGlobalColor(_T("DILG1"), &cl);
     g_prefs_dialog->SetBackgroundColour(cl);
