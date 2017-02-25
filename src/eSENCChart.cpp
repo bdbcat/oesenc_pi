@@ -47,6 +47,7 @@
 #include "Osenc.h"
 #include "s52plib.h"
 #include "viewport.h"
+#include "s52utils.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -64,6 +65,8 @@
 #define snprintf mysnprintf
 
 #endif
+
+extern bool GetDoubleAttr( S57Obj *obj, const char *AttrName, double &val );
 
 
 extern wxString         g_sencutil_bin;
@@ -4400,7 +4403,7 @@ void eSENCChart::BuildDepthContourArray( void )
             while( top != NULL ) {
                 if( !strncmp( top->obj->FeatureName, "DEPCNT", 6 ) ) {
                     double valdco = 0.0;
-                    if( 0/*GetDoubleAttr( top->obj, "VALDCO", valdco )*/ ) {  //TODO implement this...
+                    if( GetDoubleAttr( top->obj, "VALDCO", valdco ) ) {  
                         if (valdco != prev_valdco) {
                             prev_valdco = valdco;
                             m_nvaldco++;
@@ -4491,7 +4494,7 @@ void eSENCChart::SetSafetyContour(void)
     //    This method computes the smallest chart DEPCNT:VALDCO value which
     //    is greater than or equal to the current PLIB mariner parameter S52_MAR_SAFETY_CONTOUR
     
-    double mar_safety_contour = 6;//S52_getMarinerParam(S52_MAR_SAFETY_CONTOUR);
+    double mar_safety_contour = S52_getMarinerParam(S52_MAR_SAFETY_CONTOUR);
     
     int i = 0;
     if( NULL != m_pvaldco_array ) {
