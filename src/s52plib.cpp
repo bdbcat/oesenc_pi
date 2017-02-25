@@ -8735,13 +8735,15 @@ void s52plib::PrepareForRender(const PlugIn_ViewPort& VPoint)
             // First, we capture some temporary values that were set by messaging, but would be overwritten by config read
             bool bTextOn = m_bShowS57Text;
             bool bSoundingsOn = m_bShowSoundg;
-
+            enum _DisCat old = m_nDisplayCategory;
+            
             LoadS57Config();
 
             //  And then reset the temp values that were overwritten by config load
             m_bShowS57Text = bTextOn;
             m_bShowSoundg = bSoundingsOn;
-
+            m_nDisplayCategory = old;
+            
             OBJLElement *pOLE = NULL;
 
             // Detect and manage "LIGHTS" toggle

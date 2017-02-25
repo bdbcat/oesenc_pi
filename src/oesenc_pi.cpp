@@ -683,6 +683,11 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
             ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
             
+            int icat;
+            if( root[_T("OpenCPN S52PLIB DisplayCategory")].AsInt(icat) ){
+                _DisCat dcat = (_DisCat)icat;
+                ps52plib->SetDisplayCategory( dcat );
+            }
         }
         
         if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
