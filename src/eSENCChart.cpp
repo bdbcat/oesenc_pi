@@ -1400,13 +1400,6 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         
     SetVPParms( VPoint );
 
-//    bool force_new_view = false;
-
-//    if( Region != m_last_Region ) force_new_view = true;
-
-    //PI_PLIBSetRenderCaps( PLIB_CAPS_LINE_BUFFER | PLIB_CAPS_SINGLEGEO_BUFFER | PLIB_CAPS_OBJSEGLIST | PLIB_CAPS_OBJCATMUTATE);
-    //PI_PLIBPrepareForNewRender();
-    
     ps52plib->PrepareForRender(VPoint);
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
@@ -1436,6 +1429,8 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     wxRegionIterator upd( Region ); // get the Region rect list
         while( upd.HaveRects() ) {
             wxRect rect = upd.GetRect();
+//            printf("  wSENCChart::RRVGL:  rect: %d %d %d %d \n", rect.x, rect.y, rect.width, rect.height);
+            
 
             //  Build synthetic ViewPort on this rectangle
             //  Especially, we want the BBox to be accurate in order to
@@ -4522,33 +4517,14 @@ void eSENCChart::SetSafetyContour(void)
     } else {
         m_next_safe_cnt = (double) 1e6;
     }
+    
+    // A safety contour greater than "Deep Depth" makes no sense...
+    // So, declare "no suitable safety depth contour"
+    if(m_next_safe_cnt > S52_getMarinerParam(S52_MAR_DEEP_CONTOUR))
+        m_next_safe_cnt = (double) 1e6;
+    
 }
 
-#if 0
-void eSENCChart::SetSafetyContour(void)
-{
-         // Iterate through the array of contours in this cell, choosing the best one to
-         // render as a bold "safety contour" in the PLIB.
-         
-         //    This method computes the smallest chart DEPCNT:VALDCO value which
-         //    is greater than or equal to the current PLIB mariner parameter S52_MAR_SAFETY_CONTOUR
-         
-     double mar_safety_contour = PI_GetPLIBMarinerSafetyContour();
-     
-     m_next_safe_contour = mar_safety_contour;      // default in the case mar_safety_contour
-                                                    // is deeper than any cell contour present
-     for(unsigned int i = 0 ; i < m_pcontour_array->GetCount() ; i++) {
-         double h = m_pcontour_array->Item(i);
-         if( h >= mar_safety_contour ){
-             m_next_safe_contour = h;
-             break;
-         }
-     }
-     
-     m_this_chart_context->safety_contour = m_next_safe_contour;                // Save in context
-}    
-     
-#endif
 //      Rendering Support Methods
 
 //-----------------------------------------------------------------------
