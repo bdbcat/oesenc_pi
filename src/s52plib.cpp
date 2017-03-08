@@ -2255,7 +2255,7 @@ int s52plib::RenderT_All( ObjRazRules *rzRules, Rules *rules, ViewPort *vp, bool
 
 //            if ( rzRules->obj->Primitive_type == GEO_POINT )
         {
-            double latmin, lonmin, latmax, lonmax, extent = 0;
+            double latmin, lonmin, latmax, lonmax;
 
             GetPixPointSingleNoRotate( rect.GetX(), rect.GetY() + rect.GetHeight(), &latmin, &lonmin, vp );
             GetPixPointSingleNoRotate( rect.GetX() + rect.GetWidth(), rect.GetY(), &latmax, &lonmax, vp );
@@ -2348,7 +2348,9 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
         fsf *= xscale;
     }
-
+    
+    xscale *= g_ChartScaleFactorExp;
+    
     //  Special case for GEO_AREA objects with centred symbols
     if( rzRules->obj->Primitive_type == GEO_AREA ) {
         wxPoint r;
@@ -2363,7 +2365,13 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
              return 1;
     }
 
-
+    double render_angle = rot_angle;
+    
+    //  Very special case for ATON flare lights at 135 degrees, the standard render angle.
+    //  We don't want them to rotate with the viewport.
+    if(rzRules->obj->bIsAton && (!strncmp(rzRules->obj->FeatureName, "LIGHTS", 6))  && (fabs(rot_angle - 135.0) < 1.) )
+        render_angle -= vp->rotation * 180./PI;
+    
     int width = prule->pos.symb.bnbox_x.SBXC + prule->pos.symb.bnbox_w.SYHL;
     width *= 4; // Grow the drawing bitmap to allow for rotation of symbols with highly offset pivot points
     width = (int) ( width / fsf );
@@ -2386,7 +2394,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
     if( !m_pdc ) { // OpenGL Mode, do a direct render
         HPGL->SetTargetOpenGl();
-        HPGL->Render( str, col, r, pivot, origin, xscale, (double) rot_angle );
+        HPGL->Render( str, col, r, pivot, origin, xscale, render_angle );
 
     } else {
 
@@ -3115,6 +3123,11 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glDisable( GL_LINE_STIPPLE );
 #endif
 
+    if(w >= 2){
+         glEnable( GL_LINE_SMOOTH );
+         glEnable( GL_BLEND );
+    }
+            
     glPushMatrix();
 
     // Set up the OpenGL transform matrix for this object
@@ -3213,6 +3226,9 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     glPopMatrix();
 
     glDisable( GL_LINE_STIPPLE );
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_BLEND );
+    
 #endif                  // OpenGL
 
     return 1;
@@ -3316,6 +3332,11 @@ int s52plib::RenderLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     }
 #endif
+    if(w >= 2){    
+        glEnable( GL_LINE_SMOOTH );
+        glEnable( GL_BLEND );
+    }
+    
 #endif
 
     //    Get a true pixel clipping/bounding box from the vp
@@ -3412,8 +3433,12 @@ int s52plib::RenderLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     }
 #ifdef ocpnUSE_GL
-    if( !m_pdc )
+    if( !m_pdc ){
         glDisable( GL_LINE_STIPPLE );
+        glDisable( GL_LINE_SMOOTH );
+        glDisable( GL_BLEND );
+    }
+        
 #endif
     return 1;
 }
@@ -9070,13 +9095,19 @@ void RenderFromHPGL::SetPen()
     }
 #ifdef ocpnUSE_GL
     if( renderToOpenGl ) {
+    //    glEnable( GL_LINE_SMOOTH );
+        glEnable( GL_POLYGON_SMOOTH );
+        
         glColor4ub( penColor.Red(), penColor.Green(), penColor.Blue(), transparency );
-        glLineWidth( wxMax(g_GLMinSymbolLineWidth, (float) penWidth * 0.7) );
+        int line_width = wxMax(g_GLMinSymbolLineWidth, (float) penWidth * 0.7);
+        glLineWidth( line_width );
 #ifndef __OCPN__ANDROID__
-        glLineWidth( wxMax(g_GLMinSymbolLineWidth, (float) penWidth) );
+        if(line_width >= 2)
+            glEnable( GL_LINE_SMOOTH );
+        else
+            glDisable( GL_LINE_SMOOTH );
         glEnable( GL_BLEND );
-        glEnable( GL_LINE_SMOOTH );
-#endif
+#endif        
     }
 #endif
 #if wxUSE_GRAPHICS_CONTEXT
