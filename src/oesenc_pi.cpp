@@ -1341,7 +1341,6 @@ bool oesenc_pi::LoadConfig( void )
             g_fpr_file = wxEmptyString;
         
         pConf->Read( _T("UserKey"), &g_UserKey );
-        pConf->Read( _T("EULA_Accepted"), &g_bEULA_OK, false );
         
         //  Load the persistent Chartinfo strings
         pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
@@ -1374,7 +1373,7 @@ bool oesenc_pi::LoadConfig( void )
             pConf->Read( strk, &kval );
             
             ChartSetEULA *cse = new ChartSetEULA;
-            wxStringTokenizer tkz( kval, _T(":") );
+            wxStringTokenizer tkz( kval, _T(";") );
             wxString EULAShow = tkz.GetNextToken();        // oesencEULAShow, text
             wxString EULAShown = tkz.GetNextToken();        // Has it been shown at least once?  1/0
             wxString EULAFile = tkz.GetNextToken();
@@ -1411,7 +1410,6 @@ bool oesenc_pi::SaveConfig( void )
         pConf->SetPath( _T("/PlugIns/oesenc") );
 
         pConf->Write( _T("UserKey"), g_UserKey );
-        pConf->Write( _T("EULA_Accepted"), g_bEULA_OK );
         pConf->Write( _T("LastFPRFile"), g_fpr_file);
         
         //  Save the persistent Chartinfo strings
@@ -1441,11 +1439,11 @@ bool oesenc_pi::SaveConfig( void )
             if(cse->npolicyShow == 2)
                 EULAShow = _T("always");
             
-            config_val += EULAShow + _T(":");
+            config_val += EULAShow + _T(";");
             if(cse->b_onceShown)
-                config_val += _T("1:");
+                config_val += _T("1;");
             else
-                config_val += _T("0:");
+                config_val += _T("0;");
             
             config_val += cse->fileName;
             
@@ -3878,11 +3876,16 @@ int processChartinfo(const wxString &oesenc_file)
                 }
                 
                 fullEULAFileName = chartInfoDir + fileEULA;
-                    
+
+                wxString subEULAFileName = fullEULAFileName;
+                subEULAFileName.Replace(wxFileName::GetPathSeparator(), '!');
+                
                 //  Search the EULA array loaded from config file for a match
                 bool b_found = false;
                 for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
-                    if(fullEULAFileName == g_EULAArray.Item(i)->fileName){
+                    wxLogMessage( _T("Garray item: ") + g_EULAArray.Item(i)->fileName);
+                    wxLogMessage( _T("Comparing to: ") + subEULAFileName);
+                    if(subEULAFileName == g_EULAArray.Item(i)->fileName){
                         b_found = true;
                         CSE = g_EULAArray.Item(i);
                         break;
@@ -3892,8 +3895,10 @@ int processChartinfo(const wxString &oesenc_file)
                 //  If not found, this is a EULA definition coming for the first time
                 //  So add it to the global array to be persisted later.
                 if(!b_found){
+                    wxLogMessage(_T("not found, so adding...") + subEULAFileName);
+                    
                     ChartSetEULA *cse = new ChartSetEULA;
-                    cse->fileName = fullEULAFileName;
+                    cse->fileName = subEULAFileName;
                     if(sshowEULA.Upper().Find(_T("ONCE")) != wxNOT_FOUND)
                         cse->npolicyShow = 1;
                     else if(sshowEULA.Upper().Find(_T("ALWAYS")) != wxNOT_FOUND)
@@ -3915,6 +3920,8 @@ int processChartinfo(const wxString &oesenc_file)
                 bool b_showResult = false;
                 if(b_show){
                     wxString file = CSE->fileName;
+                    file.Replace('!', wxFileName::GetPathSeparator());
+                    
                     b_showResult = ShowEULA(file);
                     
                     if(!b_showResult){
