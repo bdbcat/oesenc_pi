@@ -3543,13 +3543,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     int n_ve_elements = VEs.size();
     
     for( int i = 0; i < n_ve_elements; i++ ) {
-        VE_Element *pve_from_array = VEs.at( i );
+        VE_Element *vep = VEs.at( i );
         
         //       VE_Element ve_from_array = VEs.at( i );
-        VE_Element *vep = new VE_Element;
-        vep->index = pve_from_array->index;
-        vep->nCount = pve_from_array->nCount;
-        vep->pPoints = pve_from_array->pPoints;
         vep->max_priority = 0;            // Default
         
         if(vep->nCount){
@@ -3594,14 +3590,14 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     int n_vc_elements = VCs.size();
     
     for( int i = 0; i < n_vc_elements; i++ ) {
-        VC_Element *vc_from_array = VCs.at( i );
-        VC_Element *vcp = new VC_Element;
-        vcp->index = vc_from_array->index;
-        vcp->pPoint = vc_from_array->pPoint;
+        VC_Element *vcp = VCs.at( i );
         
         m_vc_hash[vcp->index] = vcp;
     }
-    
+
+    VEs.clear();        // destroy contents, no longer needed
+    VCs.clear();
+            
     //Walk the vector of S57Objs, associating LUPS, instructions, etc...
     
     for(unsigned int i=0 ; i < Objects.size() ; i++){
