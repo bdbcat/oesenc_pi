@@ -12,6 +12,11 @@
 //    #pragma implementation "jsonval.cpp"
 //#endif
 
+#ifdef NDEBUG
+// make wxLogTrace a noop if no debug set, it's really slow
+// must be defined before including debug.h
+#define wxDEBUG_LEVEL 0
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -38,10 +43,11 @@ WX_DEFINE_OBJARRAY( wxJSONInternalArray );
 
 // the trace mask used in wxLogTrace() function
 // static const wxChar* traceMask = _T("jsonval");
+#if wxDEBUG_LEVEL > 0
 static const wxChar* traceMask = _T("jsonval");
 static const wxChar* compareTraceMask = _T("sameas");
 static const wxChar* cowTraceMask = _T("traceCOW" );
-
+#endif
 
 
 /*******************************************************************
