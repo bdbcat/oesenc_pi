@@ -3638,6 +3638,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
 //             }
             delete obj;
             Objects[i] = NULL;
+            // nothing to do with this unknown object
+            continue;
         } else {
             //              Convert LUP to rules set
             ps52plib->_LUP2rules( LUP, obj );
