@@ -609,6 +609,7 @@ Osenc::Osenc()
 
 Osenc::~Osenc()
 {
+    free(pBuffer);
 }
 
 void Osenc::init( void )

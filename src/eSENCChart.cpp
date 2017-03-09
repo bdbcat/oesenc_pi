@@ -3475,7 +3475,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     
     int ret_val = 0;                    // default is OK
     
-    Osenc *sencfile = new Osenc();;
+    Osenc *sencfile = new Osenc();
     
     // Set up the containers for ingestion results.
     // These will be populated by Osenc, and owned by the caller (this).
@@ -3836,7 +3836,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         AssembleLineGeometry();
         
         if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Return OK"));
-                                         
+
+        delete sencfile;                                         
         return ret_val;
 }
 
