@@ -634,6 +634,7 @@ eSENCChart::~eSENCChart()
       
       //m_pcontour_array->Clear();
       //delete m_pcontour_array;
+      free(m_pvaldco_array);
       
       free(m_line_vertex_buffer);
 }
