@@ -4215,14 +4215,6 @@ int s52plib::RenderMPS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
 int s52plib::RenderCARC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 {
-
-    //TODO  Empirically, I find that MSW is always faster using display list instead of VBO.
-    //  I doubt this is generally true, though.  We need some smarter logic here,
-    //  perhaps a runtime measurement approach to detect and use the faster method.
-//#ifdef __WXMSW__
-//    return RenderCARC_DisplayList(rzRules, rules, vp);
-//#endif
-
     return RenderCARC_VBO(rzRules, rules, vp);
 }
 
@@ -4332,185 +4324,178 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     xs.Printf( _T("%5g"), xscale );
     carc_hash += xs;
 
-    bool bnoCache = xscale < 1.0;
-
-    if(bnoCache){
-        if(prule->pixelPtr){
-            switch( prule->parm0 ){
-                case ID_wxBitmap: {
-                    wxBitmap *pbm = (wxBitmap *) ( prule->pixelPtr );
-                    delete pbm;
-                    break;
+    if(m_pdc){          // DC rendering
+        if(fabs(prule->parm7 - xscale) > .00001){
+            if(prule->pixelPtr){
+                switch( prule->parm0 ){
+                    case ID_wxBitmap: {
+                        wxBitmap *pbm = (wxBitmap *) ( prule->pixelPtr );
+                        delete pbm;
+                        break;
+                    }
+                    case ID_RGBA: {
+                        unsigned char *p = (unsigned char *) ( prule->pixelPtr );
+                        free( p );
+                        break;
+                    }
+                    case ID_EMPTY:
+                    default:
+                        break;
                 }
-                case ID_RGBA: {
-                    unsigned char *p = (unsigned char *) ( prule->pixelPtr );
-                    free( p );
-                    break;
-                }
-                case ID_EMPTY:
-                default:
-                    break;
+
+                prule->parm0 = ID_EMPTY;
+                prule->pixelPtr = NULL;
             }
-
-            prule->parm0 = ID_EMPTY;
-            prule->pixelPtr = NULL;
         }
-    }
 
-    //Instantiate the symbol if necessary
-    if( ( rules->razRule->pixelPtr == NULL ) || ( rules->razRule->parm1 != m_colortable_index ) ) {
-        //  Render the sector light to a bitmap
+        //Instantiate the symbol if necessary
+        if( ( rules->razRule->pixelPtr == NULL ) || ( rules->razRule->parm1 != m_colortable_index ) ) {
+            //  Render the sector light to a bitmap
 
-        rad = (int) ( radius * canvas_pix_per_mm );
+            rad = (int) ( radius * canvas_pix_per_mm );
 
-        width = ( rad * 2 ) + 28;
-        height = ( rad * 2 ) + 28;
-        wxBitmap bm( width, height, -1 );
-        wxMemoryDC mdc;
-        mdc.SelectObject( bm );
-        mdc.SetBackground( wxBrush( m_unused_wxColor ) );
-        mdc.Clear();
-
-        //    Adjust sector math for wxWidgets API
-        float sb;
-        float se;
-
-        //      For some reason, the __WXMSW__ build flips the sense of
-        //      start and end angles on DrawEllipticArc()
-#ifndef __WXMSW__
-        if ( sectr2 > sectr1 )
-        {
-            sb = 90 - sectr1;
-            se = 90 - sectr2;
-        }
-        else
-        {
-            sb = 360 + ( 90 - sectr1 );
-            se = 90 - sectr2;
-        }
-#else
-        if( sectr2 > sectr1 ) {
-            se = 90 - sectr1;
-            sb = 90 - sectr2;
-        } else {
-            se = 360 + ( 90 - sectr1 );
-            sb = 90 - sectr2;
-        }
-#endif
-
-        //      Here is a goofy way of computing the dc drawing extents exactly
-        //      Draw a series of fat line segments approximating the arc using dc.DrawLine()
-        //      This will properly establish the drawing box in the dc
-
-        int border_fluff = 4; // by how much should the blit bitmap be "fluffed"
-
-        //  wxDC min/max calculations are currently broken in wxQT, so we use the entire circle instead of arcs...
-#ifndef __WXQT__
-        if( fabs( sectr2 - sectr1 ) != 360 ) // not necessary for all-round lights
-                {
-            mdc.ResetBoundingBox();
-
-            wxPen *pblockpen = wxThePenList->FindOrCreatePen( *wxBLACK, 10, wxPENSTYLE_SOLID );
-            mdc.SetPen( *pblockpen );
-
-            float start_angle, end_angle;
-            if( se < sb ) {
-                start_angle = se;
-                end_angle = sb;
-            } else {
-                start_angle = sb;
-                end_angle = se;
-            }
-
-            int x0 = ( width / 2 ) + (int) ( rad * cos( start_angle * PI / 180. ) );
-            int y0 = ( height / 2 ) - (int) ( rad * sin( start_angle * PI / 180. ) );
-            for( float a = start_angle + .1; a <= end_angle; a += 2.0 ) {
-                int x = ( width / 2 ) + (int) ( rad * cosf( a * PI / 180. ) );
-                int y = ( height / 2 ) - (int) ( rad * sinf( a * PI / 180. ) );
-                mdc.DrawLine( x0, y0, x, y );
-                x0 = x;
-                y0 = y;
-            }
-
-            bm_width = ( mdc.MaxX() - mdc.MinX() ) + ( border_fluff * 2 );
-            bm_height = ( mdc.MaxY() - mdc.MinY() ) + ( border_fluff * 2 );
-            bm_orgx = mdc.MinX()-border_fluff - width/2; //wxMax ( 0, mdc.MinX()-border_fluff );
-            bm_orgy = mdc.MinY()-border_fluff - height/2; //wxMax ( 0, mdc.MinY()-border_fluff );
-
+            width = ( rad * 2 ) + 28;
+            height = ( rad * 2 ) + 28;
+            wxBitmap bm( width, height, -1 );
+            wxMemoryDC mdc;
+            mdc.SelectObject( bm );
+            mdc.SetBackground( wxBrush( m_unused_wxColor ) );
             mdc.Clear();
-        }
 
-        else {
+            //    Adjust sector math for wxWidgets API
+            float sb;
+            float se;
+
+            //      For some reason, the __WXMSW__ build flips the sense of
+            //      start and end angles on DrawEllipticArc()
+    #ifndef __WXMSW__
+            if ( sectr2 > sectr1 )
+            {
+                sb = 90 - sectr1;
+                se = 90 - sectr2;
+            }
+            else
+            {
+                sb = 360 + ( 90 - sectr1 );
+                se = 90 - sectr2;
+            }
+    #else
+            if( sectr2 > sectr1 ) {
+                se = 90 - sectr1;
+                sb = 90 - sectr2;
+            } else {
+                se = 360 + ( 90 - sectr1 );
+                sb = 90 - sectr2;
+            }
+    #endif
+
+            //      Here is a goofy way of computing the dc drawing extents exactly
+            //      Draw a series of fat line segments approximating the arc using dc.DrawLine()
+            //      This will properly establish the drawing box in the dc
+
+            int border_fluff = 4; // by how much should the blit bitmap be "fluffed"
+
+            //  wxDC min/max calculations are currently broken in wxQT, so we use the entire circle instead of arcs...
+    #ifndef __WXQT__
+            if( fabs( sectr2 - sectr1 ) != 360 ) // not necessary for all-round lights
+                    {
+                mdc.ResetBoundingBox();
+
+                wxPen *pblockpen = wxThePenList->FindOrCreatePen( *wxBLACK, 10, wxPENSTYLE_SOLID );
+                mdc.SetPen( *pblockpen );
+
+                float start_angle, end_angle;
+                if( se < sb ) {
+                    start_angle = se;
+                    end_angle = sb;
+                } else {
+                    start_angle = sb;
+                    end_angle = se;
+                }
+
+                int x0 = ( width / 2 ) + (int) ( rad * cos( start_angle * PI / 180. ) );
+                int y0 = ( height / 2 ) - (int) ( rad * sin( start_angle * PI / 180. ) );
+                for( float a = start_angle + .1; a <= end_angle; a += 2.0 ) {
+                    int x = ( width / 2 ) + (int) ( rad * cosf( a * PI / 180. ) );
+                    int y = ( height / 2 ) - (int) ( rad * sinf( a * PI / 180. ) );
+                    mdc.DrawLine( x0, y0, x, y );
+                    x0 = x;
+                    y0 = y;
+                }
+
+                bm_width = ( mdc.MaxX() - mdc.MinX() ) + ( border_fluff * 2 );
+                bm_height = ( mdc.MaxY() - mdc.MinY() ) + ( border_fluff * 2 );
+                bm_orgx = mdc.MinX()-border_fluff - width/2; //wxMax ( 0, mdc.MinX()-border_fluff );
+                bm_orgy = mdc.MinY()-border_fluff - height/2; //wxMax ( 0, mdc.MinY()-border_fluff );
+
+                mdc.Clear();
+            }
+
+            else {
+                bm_width = rad * 2 + ( border_fluff * 2 );
+                bm_height = rad * 2 + ( border_fluff * 2 );
+                bm_orgx = -bm_width / 2;
+                bm_orgy = -bm_height / 2;
+
+            }
+
+    #else
             bm_width = rad * 2 + ( border_fluff * 2 );
             bm_height = rad * 2 + ( border_fluff * 2 );
             bm_orgx = -bm_width / 2;
             bm_orgy = -bm_height / 2;
+    #endif
 
-        }
+            wxBitmap *sbm = NULL;
 
-#else
-        bm_width = rad * 2 + ( border_fluff * 2 );
-        bm_height = rad * 2 + ( border_fluff * 2 );
-        bm_orgx = -bm_width / 2;
-        bm_orgy = -bm_height / 2;
-#endif
+                //    Draw the outer border
+                wxColour color = getwxColour( outline_color );
 
-        wxBitmap *sbm = NULL;
-
-        //    Do not need to actually render the symbol for OpenGL mode
-        //    We just need the extents calculated above...
-        if( m_pdc ) {
-            //    Draw the outer border
-            wxColour color = getwxColour( outline_color );
-
-            wxPen *pthispen = wxThePenList->FindOrCreatePen( color, outline_width, wxPENSTYLE_SOLID );
-            mdc.SetPen( *pthispen );
-            wxBrush *pthisbrush = wxTheBrushList->FindOrCreateBrush( color, wxBRUSHSTYLE_TRANSPARENT );
-            mdc.SetBrush( *pthisbrush );
-
-            mdc.DrawEllipticArc( width / 2 - rad, height / 2 - rad, rad * 2, rad * 2, sb, se );
-
-            if( arc_width ) {
-                wxColour colorb = getwxColour( arc_color );
-
-                if( !colorb.IsOk() ) colorb = getwxColour( _T("CHMGD") );
-
-                pthispen = wxThePenList->FindOrCreatePen( colorb, arc_width, wxPENSTYLE_SOLID );
+                wxPen *pthispen = wxThePenList->FindOrCreatePen( color, outline_width, wxPENSTYLE_SOLID );
                 mdc.SetPen( *pthispen );
+                wxBrush *pthisbrush = wxTheBrushList->FindOrCreateBrush( color, wxBRUSHSTYLE_TRANSPARENT );
+                mdc.SetBrush( *pthisbrush );
 
                 mdc.DrawEllipticArc( width / 2 - rad, height / 2 - rad, rad * 2, rad * 2, sb, se );
 
-            }
+                if( arc_width ) {
+                    wxColour colorb = getwxColour( arc_color );
 
-            mdc.SelectObject( wxNullBitmap );
+                    if( !colorb.IsOk() ) colorb = getwxColour( _T("CHMGD") );
 
-            //          Get smallest containing bitmap
-            sbm = new wxBitmap(
-                bm.GetSubBitmap( wxRect( width/2 + bm_orgx, height/2 + bm_orgy, bm_width, bm_height ) ) );
+                    pthispen = wxThePenList->FindOrCreatePen( colorb, arc_width, wxPENSTYLE_SOLID );
+                    mdc.SetPen( *pthispen );
 
-//                  delete pbm;
+                    mdc.DrawEllipticArc( width / 2 - rad, height / 2 - rad, rad * 2, rad * 2, sb, se );
 
-            //      Make the mask
-            wxMask *pmask = new wxMask( *sbm, m_unused_wxColor );
+                }
 
-            //      Associate the mask with the bitmap
-            sbm->SetMask( pmask );
+                mdc.SelectObject( wxNullBitmap );
 
-            // delete any old private data
-            ClearRulesCache( rules->razRule );
+                //          Get smallest containing bitmap
+                sbm = new wxBitmap(
+                    bm.GetSubBitmap( wxRect( width/2 + bm_orgx, height/2 + bm_orgy, bm_width, bm_height ) ) );
 
+                //      Make the mask
+                wxMask *pmask = new wxMask( *sbm, m_unused_wxColor );
 
-        }
+                //      Associate the mask with the bitmap
+                sbm->SetMask( pmask );
 
-        //      Save the bitmap ptr and aux parms in the rule
-        prule->pixelPtr = sbm;
-        prule->parm0 = ID_wxBitmap;
-        prule->parm1 = m_colortable_index;
-        prule->parm2 = bm_orgx;
-        prule->parm3 = bm_orgy;
-        prule->parm5 = bm_width;
-        prule->parm6 = bm_height;
-    } // instantiation
+                // delete any old private data
+                ClearRulesCache( rules->razRule );
+
+            //      Save the bitmap ptr and aux parms in the rule
+            prule->pixelPtr = sbm;
+            prule->parm0 = ID_wxBitmap;
+            prule->parm1 = m_colortable_index;
+            prule->parm2 = bm_orgx;
+            prule->parm3 = bm_orgy;
+            prule->parm5 = bm_width;
+            prule->parm6 = bm_height;
+            prule->parm7 = xscale;
+        } // instantiation
+    }
 
 #ifdef ocpnUSE_GL
     CARC_Buffer buffer;
@@ -4591,17 +4576,11 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
             m_CARC_hashmap[carc_hash] = buffer;
 
-        //      Save the vbo and OpenGL specific parameters in the rule
-//            prule->pixelPtr = (void *) 1;
-//            prule->parm0 = ID_GLIST;
-//            prule->parm7 = m_CARC_hashmap[carc_hash];
         } else
             buffer = m_CARC_hashmap[carc_hash];
     } // instantiation
 #endif
 
-    int b_width = prule->parm5;
-    int b_height = prule->parm6;
 
     //  Render arcs at object's x/y
     wxPoint r;
@@ -4672,6 +4651,9 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glPopMatrix();
 #endif
     } else {
+        int b_width = prule->parm5;
+        int b_height = prule->parm6;
+        
         //      Get the bitmap into a memory dc
         wxMemoryDC mdc;
         mdc.SelectObject( (wxBitmap &) ( *( (wxBitmap *) ( rules->razRule->pixelPtr ) ) ) );
@@ -4727,8 +4709,8 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     double latmin, lonmin, latmax, lonmax;
 
-    GetPixPointSingleNoRotate( r.x + rules->razRule->parm2, r.y + rules->razRule->parm3 + b_height, &latmin, &lonmin, vp );
-    GetPixPointSingleNoRotate( r.x + rules->razRule->parm2 + b_width, r.y + rules->razRule->parm3, &latmax, &lonmax, vp );
+    GetPixPointSingleNoRotate( r.x + prule->parm2,                r.y + prule->parm3 + prule->parm6, &latmin, &lonmin, vp );
+    GetPixPointSingleNoRotate( r.x + prule->parm2 + prule->parm5, r.y + prule->parm3,                &latmax, &lonmax, vp );
     LLBBox symbox;
     symbox.Set( latmin, lonmin, latmax, lonmax );
     rzRules->obj->BBObj.Expand( symbox );
@@ -4736,7 +4718,7 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     return 1;
 }
 
-
+#if 0
 int s52plib::RenderCARC_DisplayList( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 {
     char *str = (char*) rules->INSTstr;
@@ -5124,6 +5106,7 @@ int s52plib::RenderCARC_DisplayList( ObjRazRules *rzRules, Rules *rules, ViewPor
 
     return 1;
 }
+#endif
 
 // Conditional Symbology
 char *s52plib::RenderCS( ObjRazRules *rzRules, Rules *rules )
