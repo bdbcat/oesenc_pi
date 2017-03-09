@@ -531,6 +531,15 @@ eSENCChart::eSENCChart()
     m_nvaldco_alloc = 0;
     m_pvaldco_array = NULL;
     
+    // from viewport, should be in plugin_viewport CTOR
+    m_last_vp.bValid = false;
+    m_last_vp.skew = 0.;
+    m_last_vp.view_scale_ppm = 1;
+    m_last_vp.rotation = 0.;
+    m_last_vp.b_quilt = false;
+    m_last_vp.pix_height = m_last_vp.pix_width = 0;
+    m_last_vp.m_projection_type = PROJECTION_MERCATOR;
+
 #if 0
       m_depth_unit_id = PI_DEPTH_UNIT_UNKNOWN;
 
