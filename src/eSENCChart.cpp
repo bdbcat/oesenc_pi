@@ -7188,8 +7188,10 @@ void eSENCChart::AssembleLineGeometry( void )
     // are now in the VBO buffer
     for( VC_Hash::iterator itc = m_vc_hash.begin(); itc != m_vc_hash.end(); ++itc ) {
         VC_Element *pcs = itc->second;
-        if(pcs)
+        if(pcs) {
             free(pcs->pPoint);
+            delete pcs;
+        }
     }
     m_vc_hash.clear();
     
