@@ -5910,7 +5910,7 @@ ListOfPI_S57Obj *eSENCChart::GetObjRuleListAtLatLon(float lat, float lon, float 
         
         //  Make a minimally compatible PI_S57Obj
         PI_S57Obj *cobj = new PI_S57Obj;
-        
+        cobj->bIsClone = true;
         strncpy(cobj->FeatureName, pObj->FeatureName, 8);
         cobj->Primitive_type = (GeoPrim_t)pObj->Primitive_type;
         cobj->att_array = pObj->att_array;
@@ -5939,7 +5939,8 @@ ListOfPI_S57Obj *eSENCChart::GetObjRuleListAtLatLon(float lat, float lon, float 
     }
     
     delete ret_ptr;
-    
+    // caller must delete objects stored in obj_list or they will leak
+    obj_list->DeleteContents( true );    
     return obj_list;
 }
 
