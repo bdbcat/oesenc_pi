@@ -139,6 +139,7 @@ double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
 float g_ChartScaleFactorExp;
 int g_chart_zoom_modifier_vector;
+double g_display_size_mm;
 
 float g_GLMinCartographicLineWidth;
 bool  g_b_EnableVBO;
@@ -692,6 +693,23 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
             g_chart_zoom_modifier_vector = root[_T("OpenCPN Zoom Mod Vector")].AsInt();
+
+        if(root[_T("OpenCPN Display Width")].IsInt()){
+            g_display_size_mm = (double)root[_T("OpenCPN Display Width")].AsInt();
+            
+            wxWindow *cc1 = GetOCPNCanvasWindow();
+            if(cc1){
+                int display_size_mm = wxMax(g_display_size_mm, 200);
+                
+                int sx, sy;
+                wxDisplaySize( &sx, &sy );
+                double max_physical = wxMax(sx, sy);
+                
+                double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
+                if(ps52plib)
+                    ps52plib->SetPPMM( pix_per_mm );
+            }
+        }
         
         if(ps52plib)
             ps52plib->GenerateStateHash();
@@ -2707,7 +2725,11 @@ void initLibraries(void)
         
         wxWindow *cc1 = GetOCPNCanvasWindow();
         if(cc1){
-            int display_size_mm = wxGetDisplaySizeMM().GetWidth();
+            
+            if(!g_display_size_mm)
+                g_display_size_mm = wxGetDisplaySizeMM().GetWidth();
+            
+            int display_size_mm = wxMax(g_display_size_mm, 200);
             
             int sx, sy;
             wxDisplaySize( &sx, &sy );
