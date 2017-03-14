@@ -3,236 +3,225 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-03-09 10:42+0100\n"
-"PO-Revision-Date: 2017-03-14 08:56-0400\n"
+"PO-Revision-Date: 2017-03-14 08:53-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
-"Language-Team: Swedish\n"
-"Language: sv_SE\n"
+"Language-Team: Arabic\n"
+"Language: ar_SA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: opencpn\n"
-"X-Crowdin-Language: sv-SE\n"
+"X-Crowdin-Language: ar\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
 #: src\eSENCChart.cpp:3143 src\eSENCChart.cpp:3147
 msgid "Building eSENC"
-msgstr "Bygger eSENC-filer"
+msgstr ""
 
 #: src\eSENCChart.cpp:6411
 msgid "Sector angles are True Bearings from Seaward"
-msgstr "Sektorns vinklar är sann bäring från sjösidan"
+msgstr ""
 
 #: src\oesenc_pi.cpp:239 src\oesenc_pi.cpp:379 src\oesenc_pi.cpp:3393
 #: src\oesenc_pi.cpp:3445 src\oesenc_pi.cpp:3600
 msgid "Dialog"
-msgstr "Dialog"
+msgstr ""
 
 #: src\oesenc_pi.cpp:631
 msgid "oeSENC"
-msgstr "oeSENC"
+msgstr ""
 
 #: src\oesenc_pi.cpp:637
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr "PlugIn för oeSENC-sjökort till OpenCPN"
+msgstr ""
 
 #: src\oesenc_pi.cpp:643
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr "PlugIn för OpenCPN \n"
-"för att använda oeSENC sjökort.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1020 src\oesenc_pi.cpp:3058
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr "För att erhålla en användarnyckel, måste du generera en fil med ett unik System-ID.\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1021 src\oesenc_pi.cpp:3059
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr "Denna fil kallas också en fil med \"fingeravtryck\" (fingerprint).\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1022 src\oesenc_pi.cpp:3060
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
-msgstr "Fingeravtrycksfilen innehåller unik information för att identifiera datorn.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1023 src\oesenc_pi.cpp:3061
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr "När filen är skapad, kommer du att behöva den för få din användarlicens hos \n"
-"o-charts.org webshop.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1024 src\oesenc_pi.cpp:3062
 msgid "Proceed to create Fingerprint file?"
-msgstr "Fortsätta för att skapa filen med fingeravtryck?"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1026 src\oesenc_pi.cpp:3064 src\oesenc_pi.cpp:3794
 msgid "oeSENC_PI Message"
-msgstr "oeSENC_PI meddelande"
+msgstr ""
 
 #: src\oesenc_pi.cpp:1463 src\oesenc_pi.h:222
 msgid "oeSENC_PI Preferences"
-msgstr "Inställningar för oeSENC_PI"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2197
 msgid "OpenCPN oeSENC UserKey Required"
-msgstr "Det krävs en användarlicens för OpenCPN oeSENC"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2217
 msgid "Enter UserKey"
-msgstr "Skriv in användarlicensen"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2236
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
-msgstr "En giltig oeSENC licensnyckel har formatet: AAAA-BBBB-CCCC-DDDD-EEEE-FF \n\n"
-"En oeSENC licensnyckel kan erhållas från din leverantör av sjökorten."
+msgstr ""
 
 #: src\oesenc_pi.cpp:2242
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr "FEL: Den licensnyckel som angetts är inte giltigt för detta set av oeSENC kort. \n"
-"Vänligen kontrollera din licensnyckel och försök igen.\n\n"
-"En giltig OESENC-nyckel har formatet: AAAA-BBBB-CCCC-DDDD-EEEE-FF \n"
-"oeSENC licensnyckel erhålls från din leverantör av sjökorten.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2250
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr "FEL: Den licensnyckel som angetts är inte giltigt för detta set av oeSENC kort.\n\n"
-"Dessa oeSENC sjökort kommer att blockeras för denna session.\n"
-"Vänligen kontrollera din licensnyckel och starta om OpenCPN.\n\n"
-"oeSENC licensnyckel erhålls från din leverantör av sjökorten.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2261
 msgid "UserKey accepted.\n\n"
-msgstr "Användarlicensen är korrekt.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2298
 msgid "Cancel"
-msgstr "Avbryt"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2305
 msgid "OK"
-msgstr "OK"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2766
 msgid "Checking oeserverd utility at "
-msgstr "Kontrollerar nyckelserver \"oeserverd\" på "
+msgstr ""
 
 #: src\oesenc_pi.cpp:2774
 msgid "Cannot find the oserverd utility at \n"
-msgstr "Kan inte hitta nyckelserver \"oserverd\" på\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2778 src\oesenc_pi.cpp:2799 src\oesenc_pi.cpp:2839
 #: src\oesenc_pi.cpp:2914 src\oesenc_pi.cpp:3194 src\oesenc_pi.cpp:3224
 #: src\oesenc_pi.cpp:3237
 msgid "oeSENC_pi Message"
-msgstr "oeSENC_PI meddelande"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2795
 msgid "Cannot execute oeserverd utility at \n"
-msgstr "Det går inte att starta nyckelserver \"oeserverd\" på\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2829 src\oesenc_pi.cpp:2889 src\oesenc_pi.cpp:2909
 msgid "oeserverd utility at \n"
-msgstr "nyckelserver \"oeserverd\" på\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2833
 msgid " is incorrect version, reports as:\n\n"
-msgstr " är felaktig version, nämligen:\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2837
 msgid "This version of oesenc_PI requires oeserverd of version 1.00 or later."
-msgstr "Denna version av oesenc_PI kräver oeserverd av version 1.00 eller senare."
+msgstr ""
 
 #: src\oesenc_pi.cpp:2893
 msgid " reports Unavailable.\n\n"
-msgstr " är inte tillgänglig.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2913
 msgid " could not be started.\n\n"
-msgstr " kunde inte startas.\n\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2959
 msgid "System Identification"
-msgstr "Systemidentifiering"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2969
 msgid "Create System Identifier file..."
-msgstr "Skapa system-ID fil..."
+msgstr ""
 
 #: src\oesenc_pi.cpp:2977
 msgid "Show In Finder"
-msgstr "Visa i Finder"
+msgstr ""
 
 #: src\oesenc_pi.cpp:2979
 msgid "Show on disk"
-msgstr "Visa på disk"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3194
 msgid "Administrator priveleges are required to create fpr.\n"
 "  Please try again...."
-msgstr "Administratörsrättigheter krävs för att skapa \"fingeravtryck\" fpr.   \n"
-" Vänligen försök igen...."
+msgstr ""
 
 #: src\oesenc_pi.cpp:3218
 msgid "Fingerprint file created.\n"
-msgstr "Fingeravtrycksfilen har skapas.\n"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3222
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
-msgstr "\n\n"
-"Fingeravtrycksfil, ftr, kopieras också till skrivbordet."
+msgstr ""
 
 #: src\oesenc_pi.cpp:3535
 msgid "Could not open oesenc_pi EULA: "
-msgstr "Kunde inte öppna oesenc_pi EULA: "
+msgstr ""
 
 #: src\oesenc_pi.cpp:3597
 msgid "oeSENC PlugIn for OpenCPN"
-msgstr "Plugin oeSENC för OpenCPN"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3660
 msgid "License"
-msgstr "Licens"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3685
 msgid "Accept"
-msgstr "Godkänn"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3690
 msgid "Reject"
-msgstr "Avvisa"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3729
 msgid "The following Chart sets are available:"
-msgstr "Följande set av sjökort finns tillgängliga:"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3739
 msgid "Chart set"
-msgstr "Sjökortset"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3743
 msgid "Version"
-msgstr "Version"
+msgstr ""
 
 #: src\oesenc_pi.cpp:3747
 msgid "Valid until"
-msgstr "är giltiga till"
+msgstr ""
 
 #: src\oesenc_pi.h:298
 msgid "OpenCPN SENC UserKey Required"
-msgstr "Det krävs en användarlicens för OpenCPN SENC"
+msgstr ""
 
 #: src\oesenc_pi.h:426
 msgid "oeSENC_PI Information"
-msgstr "oeSENC_PI Information"
+msgstr ""
 
 #: src\s52plib.cpp:1881 src\s52plib.cpp:1950 src\s52plib.cpp:2126
 msgid "ChartTexts"
-msgstr "Text på vektorsjökort"
+msgstr ""
 
