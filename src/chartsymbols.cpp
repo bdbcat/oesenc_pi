@@ -302,8 +302,8 @@ void ChartSymbols::BuildLookup( Lookup &lookup )
     while( index < pLUPARRAYtyped->GetCount() ) {
         LUPrec *pLUPCandidate = pLUPARRAYtyped->Item( index );
         if( LUP->RCID == pLUPCandidate->RCID ) {
+            pLUPARRAYtyped->RemoveAt(index);
             plib->DestroyLUP( pLUPCandidate ); // empties the LUP
-            pLUPARRAYtyped->Remove( pLUPCandidate );
             break;
         }
         index++;

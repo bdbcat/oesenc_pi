@@ -609,6 +609,7 @@ Osenc::Osenc()
 
 Osenc::~Osenc()
 {
+    free(pBuffer);
 }
 
 void Osenc::init( void )
@@ -3563,6 +3564,7 @@ PolyTessGeo *Osenc::BuildPolyTessGeo(_OSENC_AreaGeometry_Record_Payload *record,
     unsigned char *p_run = vbuf;
     while( p_tp ) {
             memcpy(p_run, p_tp->p_vertex, p_tp->nVert * 2 * sizeof(float));
+            free( p_tp->p_vertex );
             p_tp->p_vertex = (double  *)p_run;
             p_run += p_tp->nVert * 2 * sizeof(float);
             p_tp = p_tp->p_next; // pick up the next in chain

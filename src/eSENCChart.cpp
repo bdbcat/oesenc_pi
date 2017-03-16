@@ -531,6 +531,15 @@ eSENCChart::eSENCChart()
     m_nvaldco_alloc = 0;
     m_pvaldco_array = NULL;
     
+    // from viewport, should be in plugin_viewport CTOR
+    m_last_vp.bValid = false;
+    m_last_vp.skew = 0.;
+    m_last_vp.view_scale_ppm = 1;
+    m_last_vp.rotation = 0.;
+    m_last_vp.b_quilt = false;
+    m_last_vp.pix_height = m_last_vp.pix_width = 0;
+    m_last_vp.m_projection_type = PROJECTION_MERCATOR;
+
 #if 0
       m_depth_unit_id = PI_DEPTH_UNIT_UNKNOWN;
 
@@ -625,6 +634,7 @@ eSENCChart::~eSENCChart()
       
       //m_pcontour_array->Clear();
       //delete m_pcontour_array;
+      free(m_pvaldco_array);
       
       free(m_line_vertex_buffer);
 }
@@ -3475,7 +3485,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     
     int ret_val = 0;                    // default is OK
     
-    Osenc *sencfile = new Osenc();;
+    Osenc *sencfile = new Osenc();
     
     // Set up the containers for ingestion results.
     // These will be populated by Osenc, and owned by the caller (this).
@@ -3543,13 +3553,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     int n_ve_elements = VEs.size();
     
     for( int i = 0; i < n_ve_elements; i++ ) {
-        VE_Element *pve_from_array = VEs.at( i );
+        VE_Element *vep = VEs.at( i );
         
         //       VE_Element ve_from_array = VEs.at( i );
-        VE_Element *vep = new VE_Element;
-        vep->index = pve_from_array->index;
-        vep->nCount = pve_from_array->nCount;
-        vep->pPoints = pve_from_array->pPoints;
         vep->max_priority = 0;            // Default
         
         if(vep->nCount){
@@ -3594,14 +3600,14 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     int n_vc_elements = VCs.size();
     
     for( int i = 0; i < n_vc_elements; i++ ) {
-        VC_Element *vc_from_array = VCs.at( i );
-        VC_Element *vcp = new VC_Element;
-        vcp->index = vc_from_array->index;
-        vcp->pPoint = vc_from_array->pPoint;
+        VC_Element *vcp = VCs.at( i );
         
         m_vc_hash[vcp->index] = vcp;
     }
-    
+
+    VEs.clear();        // destroy contents, no longer needed
+    VCs.clear();
+            
     //Walk the vector of S57Objs, associating LUPS, instructions, etc...
     
     for(unsigned int i=0 ; i < Objects.size() ; i++){
@@ -3647,6 +3653,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
 //             }
             delete obj;
             Objects[i] = NULL;
+            // nothing to do with this unknown object
+            continue;
         } else {
             //              Convert LUP to rules set
             ps52plib->_LUP2rules( LUP, obj );
@@ -3834,7 +3842,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         AssembleLineGeometry();
         
         if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Return OK"));
-                                         
+
+        delete sencfile;                                         
         return ret_val;
 }
 
@@ -5910,7 +5919,7 @@ ListOfPI_S57Obj *eSENCChart::GetObjRuleListAtLatLon(float lat, float lon, float 
         
         //  Make a minimally compatible PI_S57Obj
         PI_S57Obj *cobj = new PI_S57Obj;
-        
+        cobj->bIsClone = true;
         strncpy(cobj->FeatureName, pObj->FeatureName, 8);
         cobj->Primitive_type = (GeoPrim_t)pObj->Primitive_type;
         cobj->att_array = pObj->att_array;
@@ -5939,7 +5948,8 @@ ListOfPI_S57Obj *eSENCChart::GetObjRuleListAtLatLon(float lat, float lon, float 
     }
     
     delete ret_ptr;
-    
+    // caller must delete objects stored in obj_list or they will leak
+    obj_list->DeleteContents( true );    
     return obj_list;
 }
 
@@ -7187,8 +7197,10 @@ void eSENCChart::AssembleLineGeometry( void )
     // are now in the VBO buffer
     for( VC_Hash::iterator itc = m_vc_hash.begin(); itc != m_vc_hash.end(); ++itc ) {
         VC_Element *pcs = itc->second;
-        if(pcs)
+        if(pcs) {
             free(pcs->pPoint);
+            delete pcs;
+        }
     }
     m_vc_hash.clear();
     
