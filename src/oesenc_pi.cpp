@@ -2368,6 +2368,9 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
          dlg.SetSize(500,-1);
          dlg.Centre();
          
+         if(pinfoDlg)
+             pinfoDlg->Hide();
+         
          int ret = dlg.ShowModal();
          if(ret == 0)
              return g_UserKey;
@@ -2404,9 +2407,15 @@ bool validateUserKey( wxString sencFileName)
         
     
         if(( ERROR_SIGNATURE_FAILURE == retCode )  || ( ERROR_SENC_CORRUPT == retCode ) ){
-        
+            wxLogMessage(_T("validateUserKey E1.5"));
+            
+            // We try once, quietly
+            int retCode_retry0 = senc.ingestHeader( sencFileName );
+            if(retCode_retry0 == SENC_NO_ERROR)
+                return true;
+                
             wxLogMessage(_T("validateUserKey E2"));
-            //  On a signature error, we try once more, allowing user to enter a new key
+            //  On a hard signature error, we try once more, allowing user to enter a new key
             wxString key = GetUserKey( LEGEND_SECOND, true );
             
             if(key.Upper() == _T("INVALID")){
