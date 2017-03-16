@@ -122,6 +122,7 @@ int                             g_debugLevel;
 
 oesenc_pi_event_handler         *g_event_handler;
 int                             global_color_scheme;
+double                          g_pix_per_mm;
 
 int                             g_coreVersionMajor;
 int                             g_coreVersionMinor;
@@ -219,6 +220,7 @@ private:
 
 BEGIN_EVENT_TABLE(OESENC_HTMLMessageDialog, wxDialog)
 EVT_BUTTON(wxID_YES, OESENC_HTMLMessageDialog::OnYes)
+EVT_BUTTON(wxID_OK, OESENC_HTMLMessageDialog::OnYes)
 EVT_BUTTON(wxID_NO, OESENC_HTMLMessageDialog::OnNo)
 EVT_BUTTON(wxID_CANCEL, OESENC_HTMLMessageDialog::OnCancel)
 EVT_CLOSE(OESENC_HTMLMessageDialog::OnClose)
@@ -292,6 +294,7 @@ void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
         EndModal( wxID_YES );
     else
         Hide();
+    RequestRefresh(GetOCPNCanvasWindow());
 }
 
 void OESENC_HTMLMessageDialog::OnNo(wxCommandEvent& WXUNUSED(event))
@@ -321,6 +324,7 @@ void OESENC_HTMLMessageDialog::OnClose( wxCloseEvent& event )
         EndModal( wxID_CANCEL );
     else
         Hide();
+    RequestRefresh(GetOCPNCanvasWindow());
 }
 
 void OESENC_HTMLMessageDialog::OnTimer(wxTimerEvent &evt)
@@ -708,6 +712,8 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
                 if(ps52plib)
                     ps52plib->SetPPMM( pix_per_mm );
+                
+                g_pix_per_mm = pix_per_mm;
             }
         }
         
@@ -1224,7 +1230,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
     wxArrayString chartArray;
     wxFileConfig *pConf = (wxFileConfig *) g_pconfig;
     
-    wxLogMessage(_T("Scrub1: "));
+    if(g_debugLevel) wxLogMessage(_T("Scrub1: "));
     
     pConf->SetPath( _T ( "/ChartDirectories" ) );
     int iDirMax = pConf->GetNumberOfEntries();
@@ -1238,7 +1244,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
             // remove/fix the decorations
             wxString valAdd = val.BeforeFirst('^') + wxString(wxFileName::GetPathSeparator());
 
-            wxLogMessage(_T("  Dirlist  val: ") + val + _T("  valadd: ") + valAdd);
+            if(g_debugLevel) wxLogMessage(_T("  Dirlist  val: ") + val + _T("  valadd: ") + valAdd);
             
             chartArray.Add(valAdd);
             bCont = pConf->GetNextEntry( str, dummy );
@@ -1247,7 +1253,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
     
     // And walk the hashmap of ChartinfoItems, trying to find a match from the hashmap item to the directory list contents
 
-    wxLogMessage(_T("Scrub2: "));
+    if(g_debugLevel) wxLogMessage(_T("Scrub2: "));
     
     pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
     std::map<std::string, ChartInfoItem *>::iterator iter = info_hash.begin();
@@ -1261,8 +1267,8 @@ bool oesenc_pi::ScrubChartinfoList( void )
         wxString strt = strk.Mid(2);
         strt.Replace('!', wxFileName::GetPathSeparator());
         
-        wxLogMessage(_T("strk: ") + strk);
-        wxLogMessage(_T("strt: ") + strt);
+        if(g_debugLevel) wxLogMessage(_T("strk: ") + strk);
+        if(g_debugLevel) wxLogMessage(_T("strt: ") + strt);
         
         bool bfound = false;
         
@@ -1273,7 +1279,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
                 wxString ts = chartArray.Item(i);
                 wxFileName target(ts);
                 wxString tara = target.GetPath();
-                wxLogMessage(_T("ChartDir entry considered: ") + tara);
+                if(g_debugLevel) wxLogMessage(_T("ChartDir entry considered: ") + tara);
                 
                 bool done = false;
                 wxString cana;
@@ -1281,15 +1287,15 @@ bool oesenc_pi::ScrubChartinfoList( void )
                 
                 while(!done){
                     cana = candidate.GetPath();
-                    wxLogMessage(_T("  Chartinfo candidate tested: ") + cana);
+                    if(g_debugLevel) wxLogMessage(_T("  Chartinfo candidate tested: ") + cana);
                     
                     if(target.GetPath() == candidate.GetPath()){
-                        wxLogMessage(_T("done1"));
+                        if(g_debugLevel) wxLogMessage(_T("done1"));
                         done = true;
                     }
                     
                     if(candidate.GetFullPath() == target.GetFullPath()){
-                        wxLogMessage(_T("done2"));
+                        if(g_debugLevel) wxLogMessage(_T("done2"));
                         
                         done = true;
                         bfound = true;
@@ -1297,7 +1303,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
                     }
                     candidate.RemoveLastDir();
                     if(!candidate.GetDirCount()){
-                        wxLogMessage(_T("done3"));
+                        if(g_debugLevel) wxLogMessage(_T("done3"));
                         done = true;
                     }
                 }
@@ -1306,7 +1312,7 @@ bool oesenc_pi::ScrubChartinfoList( void )
             }
         }
         else{
-            wxLogMessage(_T("  Candidate does not exist: ") + strt);
+            if(g_debugLevel) wxLogMessage(_T("  Candidate does not exist: ") + strt);
         }
             
         
@@ -1315,11 +1321,11 @@ bool oesenc_pi::ScrubChartinfoList( void )
         if(!bfound){
             info_hash.erase(iter);
             iter = info_hash.begin();
-            wxLogMessage(_T("    dropping: ") + strk + _T("\n"));
+            if(g_debugLevel) wxLogMessage(_T("    dropping: ") + strk + _T("\n"));
         }
         else{
             ++iter;
-            wxLogMessage(_T("    keeping: ") + strk + _T("\n"));
+            if(g_debugLevel) wxLogMessage(_T("    keeping: ") + strk + _T("\n"));
         }
         
     }
@@ -1376,7 +1382,7 @@ bool oesenc_pi::LoadConfig( void )
                 ChartInfoItem *pitem = new ChartInfoItem;
                 pitem->config_string = kval;
                 info_hash[key] = pitem;
-                wxLogMessage(_T("Loadconfig adding: ") + strk);
+                if(g_debugLevel) wxLogMessage(_T("Loadconfig adding: ") + strk);
                 
             }
                 
@@ -3822,7 +3828,7 @@ void showChartinfoDialog( void )
     
 }
 
-int processChartinfo(const wxString &oesenc_file)
+bool processChartinfo(const wxString &oesenc_file)
 {
     wxLogMessage(_T("processChartInfo ") + oesenc_file);
     
@@ -3905,8 +3911,8 @@ int processChartinfo(const wxString &oesenc_file)
                 //  Search the EULA array loaded from config file for a match
                 bool b_found = false;
                 for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
-                    wxLogMessage( _T("Garray item: ") + g_EULAArray.Item(i)->fileName);
-                    wxLogMessage( _T("Comparing to: ") + subEULAFileName);
+                    if(g_debugLevel) wxLogMessage( _T("Garray item: ") + g_EULAArray.Item(i)->fileName);
+                    if(g_debugLevel) wxLogMessage( _T("Comparing to: ") + subEULAFileName);
                     if(subEULAFileName == g_EULAArray.Item(i)->fileName){
                         b_found = true;
                         CSE = g_EULAArray.Item(i);
@@ -3917,7 +3923,7 @@ int processChartinfo(const wxString &oesenc_file)
                 //  If not found, this is a EULA definition coming for the first time
                 //  So add it to the global array to be persisted later.
                 if(!b_found){
-                    wxLogMessage(_T("not found, so adding...") + subEULAFileName);
+                    if(g_debugLevel) wxLogMessage(_T("not found, so adding...") + subEULAFileName);
                     
                     ChartSetEULA *cse = new ChartSetEULA;
                     cse->fileName = subEULAFileName;
@@ -3987,7 +3993,7 @@ int processChartinfo(const wxString &oesenc_file)
                     wxString ncnt;
                     ncnt.Printf(_T("K%d"), nkey);
                     keyn.Prepend( ncnt );
-                    wxLogMessage(_T("processChartInfo considering: ") + keyn);
+                    if(g_debugLevel) wxLogMessage(_T("processChartInfo considering: ") + keyn);
                     
                     keyn.Replace(wxFileName::GetPathSeparator(), '!');
                     
@@ -3999,12 +4005,12 @@ int processChartinfo(const wxString &oesenc_file)
                         ChartInfoItem *pitem = new ChartInfoItem;
                         pitem->config_string = content;
                         info_hash[key] = pitem;
-                        wxLogMessage(_T("processChartInfo adding: ") + keyn);
+                        if(g_debugLevel) wxLogMessage(_T("processChartInfo adding: ") + keyn);
                         
                         g_binfoShown = false;                           // added a line, so force re-display
                     }
                     else{
-                        wxLogMessage(_T("processChartInfo found: ") + keyn);
+                        if(g_debugLevel) wxLogMessage(_T("processChartInfo found: ") + keyn);
                     }
                     
                     nkey++;
@@ -4016,10 +4022,10 @@ int processChartinfo(const wxString &oesenc_file)
         }
         
              
-        return 0;    
+        return true;    
     }
     else
-        return -1;
+        return false;
                 
 }
 

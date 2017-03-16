@@ -75,6 +75,7 @@ extern bool    g_oz_vector_scale;
 extern bool g_bresponsive;
 extern float g_ChartScaleFactorExp;
 extern int g_chart_zoom_modifier_vector;
+extern double  g_pix_per_mm;
 
 float g_scaminScale;
 
@@ -282,7 +283,9 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_VersionMinor = 2;
 
     canvas_pix_per_mm = 3.;
-
+    if(g_pix_per_mm)
+        canvas_pix_per_mm = g_pix_per_mm;
+    
     //        Set up some default flags
     m_bDeClutterText = false;
     m_bShowAtonText = true;
@@ -1766,6 +1769,31 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 //  X offset specified in units of average char width
                 xp += ptext->xoffs * ptext->avgCharWidth;
 
+                // adjust for text justification
+                int w = ptext->avgCharWidth * ptext->frmtd.Length();
+                switch ( ptext->hjust){
+                    case '1':               // centered
+                    xp -= w/2;
+                    break;
+                    case '2':               // right
+                     xp -= w;
+                     break;
+                    case '3':               // left (default)
+                    default:
+                        break;
+                }
+                
+                switch ( ptext->vjust){
+                    case '3':               // top
+                    yp += ptext->rendered_char_height;
+                    break;
+                    case '2':               // centered
+                     yp += ptext->rendered_char_height/2;
+                     break;
+                    case '1':               // bottom (default)
+                    default:
+                        break;
+                }
                 pRectDrawn->SetX( xp );
                 pRectDrawn->SetY( yp );
                 pRectDrawn->SetWidth( ptext->RGBA_width );
@@ -1865,6 +1893,31 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
             //  X offset specified in units of average char width
             xp += ptext->xoffs * ptext->avgCharWidth;
 
+            // adjust for text justification
+            switch ( ptext->hjust){
+                case '1':               // centered
+                    xp -= w/2;
+                    break;
+                case '2':               // right
+                     xp -= w;
+                     break;
+                case '3':               // left (default)
+                default:
+                    break;
+            }
+            
+            switch ( ptext->vjust){
+                case '3':               // top
+                    yp += ptext->rendered_char_height;
+                    break;
+                case '2':               // centered
+                     yp += ptext->rendered_char_height/2;
+                     break;
+                case '1':               // bottom (default)
+                default:
+                    break;
+            }
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );
@@ -1936,6 +1989,31 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
             //  X offset specified in units of average char width
             xp += ptext->xoffs * ptext->avgCharWidth;
 
+            // adjust for text justification
+            switch ( ptext->hjust){
+                case '1':               // centered
+                    xp -= w/2;
+                    break;
+                case '2':               // right
+                     xp -= w;
+                     break;
+                case '3':               // left (default)
+                default:
+                    break;
+            }
+            
+            switch ( ptext->vjust){
+                case '3':               // top
+                    yp += h;
+                    break;
+                case '2':               // centered
+                     yp += h/2;
+                     break;
+                case '1':               // bottom (default)
+                default:
+                    break;
+            }
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );

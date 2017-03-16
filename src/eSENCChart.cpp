@@ -141,7 +141,7 @@ extern bool validate_SENC_server( void );
 //extern wxString GetUserKey( int legendID, bool bforceNew);
 extern bool validateUserKey( wxString sencFileName);
 extern bool CheckEULA( void );
-extern int processChartinfo(const wxString &oesenc_file);
+extern bool processChartinfo(const wxString &oesenc_file);
 extern void showChartinfoDialog( void );
 extern void processUserKeyHint(const wxString &oesenc_file);
 
@@ -1215,9 +1215,18 @@ bool eSENCChart::RenderRegionViewOnDCTextOnly(wxMemoryDC& dc, const PlugIn_ViewP
         return false;
     
     SetVPParms( VPoint );
+   
     
-    DCRenderText( dc, VPoint );
-
+    wxRegionIterator upd( Region ); // get the Region rect list
+    while( upd.HaveRects() ) {
+        wxRect rect = upd.GetRect();
+        
+        wxDCClipper clip(dc, rect);
+        DCRenderText( dc, VPoint );
+        
+        upd++;
+    }  //while
+    
     return true;
 }
 
