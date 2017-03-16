@@ -1202,6 +1202,17 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
             SENCCreateDate.ResetTime();                   // to midnight
             
          wxString senc_base_edtn = senc.getSENCReadBaseEdition();
+        
+        wxDateTime updt;
+        updt.ParseFormat( senc.getUpdateDate(), _T("%Y%m%d") );
+        if( !updt.IsValid() )
+            updt.ParseFormat( _T("20000101"), _T("%Y%m%d") );
+
+//        if( !updt.IsValid() )
+//            int yyp = 4;
+        
+        m_EdDate = updt;
+        
     }
 
     return ret_val;

@@ -812,6 +812,8 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
                 if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
                     dun = 1; break;
                 }
+                m_sdate000 = wxString( buf, wxConvUTF8 );
+                
                 break;
             }
             
@@ -832,6 +834,8 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
                 if(!fpx.Read(buf, record.record_length - sizeof(OSENC_Record_Base)).IsOk()){
                     dun = 1; break;
                 }
+                m_LastUpdateDate = wxString( buf, wxConvUTF8 );
+                
                 break;
             }
             
