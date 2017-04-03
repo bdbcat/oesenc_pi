@@ -3120,8 +3120,27 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             
             wxString cmd = g_sencutil_bin;
             cmd += _T(" -f ");                  // Make fingerprint
-            
+
+#ifndef __WXMSW__
+            cmd += _T("\"");
             cmd += fpr_dir;
+            
+            //cmd += _T("my fpr/");             // testing
+            
+//            wxString tst_cedilla = wxString::Format(_T("my fpr copy %cCedilla/"), 0x00E7);       // testing French cedilla
+//            cmd += tst_cedilla;            // testing
+            
+            cmd += _T("\"");
+#else
+            cmd += wxString('\"'); 
+            cmd += fpr_dir;
+            
+//            cmd += _T("my fpr\\");            // testing spaces in path
+            
+//            wxString tst_cedilla = wxString::Format(_T("my%c\\"), 0x00E7);       // testing French cedilla
+//            cmd += tst_cedilla;            // testing
+#endif            
+            wxLogMessage(_T("Create FPR command: ") + cmd);
             
             ::wxBeginBusyCursor();
             
@@ -3190,14 +3209,13 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     wxFileName fn(fpr_file);
                     wxString desktop_fpr_file = desktop_fpr + fn.GetFullName();
                     
-                    wxString wcmd = g_sencutil_bin;
-                    wcmd += _T(" -f ");                  // Make fingerprint
-                    wcmd += desktop_fpr;
+//                     wxString exe = g_sencutil_bin;
+//                     wxString parms = _T(" -f ");
+//                     parms += desktop_fpr;
                     
- 
-                    wxString exe = g_sencutil_bin;
-                    wxString parms = _T(" -f ");
-                    parms += desktop_fpr;
+                    wxString exe = _T("xcopy");
+                    wxString parms = fpr_file.Trim() + _T(" ") + wxString('\"') + desktop_fpr + wxString('\"');
+                    wxLogMessage(_T("FPR copy command: ") + exe + _T(" ") + parms);
                     
                     const wchar_t *wexe = exe.wc_str(wxConvUTF8);
                     const wchar_t *wparms = parms.wc_str(wxConvUTF8);
@@ -3228,7 +3246,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                             if (dwError == ERROR_CANCELLED)
                             {
                                 // The user refused to allow privileges elevation.
-                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to create fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
+                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to copy fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
                                 berror = true;
                             }
                         }
