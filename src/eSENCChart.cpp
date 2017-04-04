@@ -3562,9 +3562,21 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
    
     //    Create a hash map of VE_Element pointers as a chart class member
     int n_ve_elements = VEs.size();
-    
+
+    wxString msgs;
+    msgs.Printf(_T("%d"), n_ve_elements);
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  VEs Size: ") + msgs);
+                                     
     for( int i = 0; i < n_ve_elements; i++ ) {
         VE_Element *vep = VEs.at( i );
+        
+        //  The hash key needs to be a reasonable 32 bit int...
+        if(vep->index > 0x7FFFFFFF){
+            wxString msg;
+            msg.Printf(_T("%d"), i);
+            if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Found bad VE_Element index at i:") + msg);
+//            continue;
+        }
         
         //       VE_Element ve_from_array = VEs.at( i );
         vep->max_priority = 0;            // Default
@@ -3603,10 +3615,17 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             fromSM_Plugin( east_max, north_max, m_ref_lat, m_ref_lon, &lat, &lon );
             vep->edgeBBox.SetMax( lon, lat);
         }
-        
+
         m_ve_hash[vep->index] = vep;
     }
+
     
+    wxString msgss;
+    msgss.Printf(_T("%d"), m_ve_hash.size());
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  VE_hash Size: ") + msgss);
+    
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Process Edge Vectors OK"));
+                                     
     //    Create a hash map VC_Element pointers as a chart class member
     int n_vc_elements = VCs.size();
     
@@ -3616,6 +3635,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         m_vc_hash[vcp->index] = vcp;
     }
 
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Process Connect Vectors OK"));
+                                     
     VEs.clear();        // destroy contents, no longer needed
     VCs.clear();
             
@@ -3718,7 +3739,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         }
         
     }   // Objects iterator
-    
+
+    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Object tree Walk OK"));
+                                     
     //   Decide on pub date to show
     
     wxDateTime d000;
@@ -3772,7 +3795,8 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         // Validate hash maps....
         //TODO  Do we really need to do this?
         // nedd to fix up the negatives?
-        
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start Validate Hashmaps..."));
+                                         
         ObjRazRules *top;
         ObjRazRules *nxx;
         
@@ -3791,10 +3815,11 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                         int inode = *index_run;
                         if( ( inode ) ) {
                             if( m_vc_hash.find( inode ) == m_vc_hash.end() ) {
+                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad inode 0"));
                                 //    Must be a bad index in the SENC file
                                 //    Stuff a recognizable flag to indicate invalidity
                                 *index_run = 0;
-                                m_vc_hash[0] = 0;
+//                                m_vc_hash[0] = 0;
                             }
                         }
                         index_run++;
@@ -3805,10 +3830,12 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                             enode = -enode;
                         if( ( enode ) ) {
                             if( m_ve_hash.find( enode ) == m_ve_hash.end() ) {
+                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad enode 1"));
+                                
                                 //    Must be a bad index in the SENC file
                                 //    Stuff a recognizable flag to indicate invalidity
                                 *index_run = 0;
-                                m_ve_hash[0] = 0;
+//                                m_ve_hash[0] = 0;
                             }
                         }
                         
@@ -3820,8 +3847,9 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                             if( m_vc_hash.find( jnode ) == m_vc_hash.end() ) {
                                 //    Must be a bad index in the SENC file
                                 //    Stuff a recognizable flag to indicate invalidity
+                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad jnode 2"));
                                 *index_run = 0;
-                                m_vc_hash[0] = 0;
+//                                m_vc_hash[0] = 0;
                             }
                         }
                         index_run++;
@@ -3833,6 +3861,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
                 }
             }
         }
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Validate Hashmaps OK"));
         
         //  Set up the chart context
         m_this_chart_context = (chart_context *)calloc( sizeof(chart_context), 1);
@@ -3850,8 +3879,12 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             }
         }
 
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start AssembleLineGeometry"));
+                                         
         AssembleLineGeometry();
-        
+ 
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  AssembleLineGeometry OK"));
+                                         
         if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile Return OK"));
 
         delete sencfile;                                         
@@ -6819,7 +6852,12 @@ typedef struct segment_pair{
 
 void eSENCChart::AssembleLineGeometry( void )
 {
-
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Start "));
+    
+    wxString msgss;
+    msgss.Printf(_T("%d"), m_ve_hash.size());
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  VE_hash Size: ") + msgss);
+    
 //    OCPNStopWatch sw;
     
     // Walk the hash tables to get the required buffer size
@@ -6835,7 +6873,9 @@ void eSENCChart::AssembleLineGeometry( void )
     }
 
 //    printf("time0 %f\n", sw.GetTime());
-    
+    wxString msgc;
+    msgc.Printf( _T("%d"), nPoints);
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Got Point count: ") + msgc);
     
     
     std::map<std::string, connector_segment *> ce_connector_hash;
@@ -6849,7 +6889,8 @@ void eSENCChart::AssembleLineGeometry( void )
     std::vector<segment_pair> connector_segment_vector;
     size_t seg_pair_index = 0;
     
-    
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Start Object Walk"));
+                                     
     
     //  Get the end node connected segments.  To do this, we
     //  walk the Feature array and process each feature that potentially has a LINE type element
@@ -7112,7 +7153,8 @@ void eSENCChart::AssembleLineGeometry( void )
         }
     }
 //    printf("time1 %f\n", sw.GetTime());
-    
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Finish Object Walk OK"));
+                                 
     //  We have the total VBO point count, and a nice hashmap of the connector segments
     nPoints += ndelta;          // allow for the connector segments
     
@@ -7140,7 +7182,9 @@ void eSENCChart::AssembleLineGeometry( void )
     //      Now iterate on the hashmaps, adding the connector segments in the temporary vector to the VBO buffer
     //      At the  same time, populate a vector, storing the pcs pointers to allow destruction at this class dtor.
     //      This will allow us to destroy (automatically) the pcs hashmaps, and save some storage
-    
+
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Begin Hash iteration"));
+                                     
     std::map<std::string, connector_segment *>::iterator iter;
     
     for( iter = ce_connector_hash.begin(); iter != ce_connector_hash.end(); ++iter )
@@ -7190,7 +7234,9 @@ void eSENCChart::AssembleLineGeometry( void )
     
     // And so we can empty the temp buffer
     connector_segment_vector.clear();
-    
+
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  End Hash iteration"));
+                                     
     // Wwe can convert the edge hashmap to a vector, to allow  us to destroy the hashmap
     // and at the same time free up the point storage in the VE_Elements, since all the points
     // are now in the VBO buffer
@@ -7202,7 +7248,9 @@ void eSENCChart::AssembleLineGeometry( void )
         }
     }
     m_ve_hash.clear();
-    
+
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  End Edge vector convert OK"));
+                                     
     // and we can empty the connector hashmap,
     // and at the same time free up the point storage in the VC_Elements, since all the points
     // are now in the VBO buffer
@@ -7215,6 +7263,7 @@ void eSENCChart::AssembleLineGeometry( void )
     }
     m_vc_hash.clear();
     
+    if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  End Connector vector convert OK"));
     
     
 //    printf("time3 %f\n", sw.GetTime());
