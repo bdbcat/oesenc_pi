@@ -3201,7 +3201,8 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     
                     char str[128];
                     wcstombs(str, desktop_path, 128);
-                    wxString desktop_fpr(str, wxConvUTF8);
+                    wxString desktop_fpr(str, wxConvAuto());
+                    
                     sdesktop_path = desktop_fpr;
                     if( desktop_fpr.Last() != wxFileName::GetPathSeparator() )
                          desktop_fpr += wxFileName::GetPathSeparator();
@@ -3209,9 +3210,6 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                     wxFileName fn(fpr_file);
                     wxString desktop_fpr_file = desktop_fpr + fn.GetFullName();
                     
-//                     wxString exe = g_sencutil_bin;
-//                     wxString parms = _T(" -f ");
-//                     parms += desktop_fpr;
                     
                     wxString exe = _T("xcopy");
                     wxString parms = fpr_file.Trim() + _T(" ") + wxString('\"') + desktop_fpr + wxString('\"');
