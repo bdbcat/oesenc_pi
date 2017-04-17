@@ -2771,7 +2771,7 @@ bool validate_SENC_server(void)
     if(g_serverProc){
     // Check to see if the server is already running, and available
         Osenc_instream testAvail;
-        if(testAvail.isAvailable()){
+        if(testAvail.isAvailable(g_UserKey)){
             wxLogMessage(_T("Available TRUE"));
             return true;
         }
@@ -2784,7 +2784,7 @@ bool validate_SENC_server(void)
             wxLogMessage(_T("Available FALSE, retry...") + tmsg);
             wxMilliSleep(500);
             Osenc_instream testAvailRetry;
-            if(testAvailRetry.isAvailable()){
+            if(testAvailRetry.isAvailable(g_UserKey)){
                 wxLogMessage(_T("Available TRUE"));
                 return true;
             }
@@ -2938,7 +2938,11 @@ bool validate_SENC_server(void)
         else{
             wxString nc;
             nc.Printf(_T("LoopCount: %d"), nLoop);
-            
+
+            //  Get the decrypt type into the logfile
+            Osenc_instream testAvail_type;
+            testAvail_type.isAvailable( g_UserKey );
+                
             wxLogMessage(_T("oesenc_pi: oeserverd Check OK...") + nc);
         }
     }
@@ -2961,22 +2965,16 @@ bool validate_SENC_server(void)
 
 bool shutdown_SENC_server( void )
 {
-// #ifdef __WXMSW__
-//     wxExecute(_T("net stop oeserverd"));              // exec asynchronously
-//     return true;
-// #else    
     
     // Check to see if the server is already running, and available
     Osenc_instream testAvail;
-    if(1/*testAvail.isAvailable()*/){
+    if(1){
         testAvail.Shutdown();
         return true;
     }
     else{
         return false;
     }
-// #endif    
-    
 }
 
 
@@ -3119,7 +3117,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                 fpr_dir += wxFileName::GetPathSeparator();
             
             wxString cmd = g_sencutil_bin;
-            cmd += _T(" -f ");                  // Make fingerprint
+            cmd += _T(" -g ");                  // Make fingerprint
 
 #ifndef __WXMSW__
             cmd += _T("\"");

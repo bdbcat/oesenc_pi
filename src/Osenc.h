@@ -548,7 +548,7 @@ public:
     
     Osenc_instream &Read(void *buffer, size_t size);
     bool IsOk();
-    bool isAvailable();
+    bool isAvailable(wxString user_key = _T(""));
     void Shutdown();
     
 private:

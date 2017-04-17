@@ -148,7 +148,7 @@ void Osenc_instream::Close()
 }
 
 
-bool Osenc_instream::isAvailable()
+bool Osenc_instream::isAvailable( wxString user_key )
 {
     if(g_debugLevel)printf("TestAvail\n");
 
@@ -156,7 +156,7 @@ bool Osenc_instream::isAvailable()
         return m_uncrypt_stream->IsOk();
     }
     else{
-        if( Open(CMD_TEST_AVAIL, _T(""), _T("?")) ){
+        if( Open(CMD_TEST_AVAIL, _T(""), user_key) ){
             if(g_debugLevel)printf("TestAvail Open OK\n");
             char response[8];
             memset( response, 0, 8);
@@ -355,15 +355,27 @@ void Osenc_instream::Close()
 }
 
 
-bool Osenc_instream::isAvailable()
+bool Osenc_instream::isAvailable( wxString user_key )
 {
-    if( Open(CMD_TEST_AVAIL, _T(""), _T("")) ){
+    if( Open(CMD_TEST_AVAIL, _T(""), user_key ) ){
         char response[8];
         memset( response, 0, 8);
         int nTry = 5;
         do{
-            if( Read(response, 2).IsOk() ){
-                return( !strncmp(response, "OK", 2) );
+            if( Read(response, 3).IsOk() ){
+                if(strncmp(response, "OK", 2))
+                    return false;
+                
+                if(response[2] == '1')
+                    wxLogMessage(_T("Osenc_instream decrypt T"));
+                else if(response[2] == '2')
+                    wxLogMessage(_T("Osenc_instream decrypt S"));
+                else if(response[2] == '3')
+                    wxLogMessage(_T("Osenc_instream decrypt L"));
+                else
+                    wxLogMessage(_T("Osenc_instream decrypt ?"));
+                    
+                return true;    
             }
             
             wxMilliSleep(100);
