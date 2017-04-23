@@ -227,6 +227,7 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         
         // Open the well known public FIFO for writing
         if( (publicfifo = open(PUBLIC, O_WRONLY | O_NDELAY) ) == -1) {
+            wxLogMessage(_T("oesenc_pi: Could not open PUBLIC pipe"));
             return false;
             //if( errno == ENXIO )
         }
@@ -246,9 +247,9 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         // Open the private FIFO for reading to get output of command
         // from the server.
         if((privatefifo = open(privatefifo_name, O_RDONLY) ) == -1) {
+            wxLogMessage(_T("oesenc_pi: Could not open private pipe"));
             return false;
         }
-        
         return true;
     }
     else{                        // not encrypted
