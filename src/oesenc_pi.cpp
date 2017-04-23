@@ -2913,7 +2913,7 @@ bool validate_SENC_server(void)
 
         while(nLoop){
             Osenc_instream testAvail_One;
-            if(!testAvail_One.isAvailable())
+            if(!testAvail_One.isAvailable(_T("?")))
                 wxSleep(1);
             else{
                 bAvail = true;
