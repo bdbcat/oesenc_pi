@@ -60,53 +60,262 @@ WX_DEFINE_OBJARRAY( SENCFloatPtrArray );
 void OpenCPN_OGRErrorHandler( CPLErr eErrClass, int nError,
                               const char * pszErrorMsg );               // installed GDAL OGR library error handler
 
-#if 0
-struct fifo_msg {
-    char cmd;
-    char fifo_name[256];
-    char senc_name[256];
-    char senc_key[256];
-};
 
-#define PUBLIC "/tmp/OCPN_PIPE"
-
-#define CMD_READ_ESENC          0
-#define CMD_TEST_AVAIL          1
-#define CMD_EXIT                2
-
+#ifdef __OCPN__ANDROID__
 //--------------------------------------------------------------------------
-//      Osenc_instream definition
+//      Osenc_instream implementation as Kernel Socket
 //--------------------------------------------------------------------------
-class Osenc_instream
+
+int makeAddr(const char* name, struct sockaddr_un* pAddr, socklen_t* pSockLen)
 {
-public:
-        Osenc_instream();
-        ~Osenc_instream();
-        
-        bool Open( unsigned char cmd, wxString senc_file_name, wxString crypto_key );
+    // consider this:
+    //http://stackoverflow.com/questions/11640826/can-not-connect-to-linux-abstract-unix-socket
+    
+    int nameLen = strlen(name);
+    if (nameLen >= (int) sizeof(pAddr->sun_path) -1)  /* too long? */
+        return -1;
+    pAddr->sun_path[0] = '\0';  /* abstract namespace */
+    strcpy(pAddr->sun_path+1, name);
+    pAddr->sun_family = AF_LOCAL;
+    *pSockLen = 1 + nameLen + offsetof(struct sockaddr_un, sun_path);
+    return 0;
+}
+
+Osenc_instream::Osenc_instream()
+{
+    Init();
+}
+
+Osenc_instream::~Osenc_instream()
+{
+    Close();
+}
+
+void Osenc_instream::Init()
+{
+    privatefifo = -1;
+    publicfifo = -1;
+    m_OK = true;
+    m_lastBytesRead = 0;
+    m_lastBytesReq = 0;
+    m_uncrypt_stream = 0;
+    publicSocket = -1;
+    
+    strcpy(publicsocket_name,"com.whoever.xfer");
+    
+    if (makeAddr(publicsocket_name, &sockAddr, &sockLen) < 0){
+        if(g_debugLevel)printf("   Cannot makeAddr...: %s \n", publicsocket_name);
+        wxLogMessage(_T("oesenc_pi: Could not makeAddr for PUBLIC socket"));
+    }
+    
+    publicSocket = socket(AF_LOCAL, SOCK_STREAM, PF_UNIX);
+    if (publicSocket < 0) {
+        if(g_debugLevel)printf("   Cannot make socket...: %s \n", publicsocket_name);
+        wxLogMessage(_T("oesenc_pi: Could not make PUBLIC socket"));
+    }
+    
+}
+
+void Osenc_instream::Close()
+{
+    if(-1 != privatefifo){
+        if(g_debugLevel)printf("   Close private fifo: %s \n", privatefifo_name);
+        close(privatefifo);
+        if(g_debugLevel)printf("   unlink private fifo: %s \n", privatefifo_name);
+        unlink(privatefifo_name);
+    }
+    
+    if(-1 != publicfifo)
+        close(publicfifo);
+    
+    if(m_uncrypt_stream){
+        delete m_uncrypt_stream;
+    }
+    
+    if(-1 != publicSocket){
+        if(g_debugLevel)printf("   Close publicSocket: %s \n", publicsocket_name);
+        close( publicSocket );
+    }
+    
+    Init();             // In case it want to be used again
+}
+
+
+bool Osenc_instream::isAvailable( wxString user_key )
+{
+    if(g_debugLevel)printf("TestAvail\n");
+    
+    if(m_uncrypt_stream){
+        return m_uncrypt_stream->IsOk();
+    }
+    else{
+        if( Open(CMD_TEST_AVAIL, _T(""), user_key) ){
+            if(g_debugLevel)printf("TestAvail Open OK\n");
+            char response[8];
+            memset( response, 0, 8);
+            int nTry = 5;
+            do{
+                if( Read(response, 2).IsOk() ){
+                    if(g_debugLevel)printf("TestAvail Response OK\n");
+                    return( !strncmp(response, "OK", 2) );
+                }
                 
-        Osenc_instream &Read(void *buffer, size_t size);
-        bool IsOk();
-        bool isAvailable();
+                if(g_debugLevel)printf("Sleep on TestAvail: %d\n", nTry);
+                wxMilliSleep(100);
+                nTry--;
+            }while(nTry);
+            
+            return false;
+        }
+        else{
+            if(g_debugLevel)printf("TestAvail Open Error\n");
+            return false;
+        }
+    }
+    
+}
+
+void Osenc_instream::Shutdown()
+{
+    //     if(!m_uncrypt_stream){
+        //         Open(CMD_EXIT,  _T(""), _T("")) ;
+        //         char response[8];
+        //         memset( response, 0, 8);
+        //         Read(response, 3);
+        //     }
         
-private:
-    int privatefifo; // file descriptor to read-end of PRIVATE
-    int publicfifo; // file descriptor to write-end of PUBLIC 
+        if(Open(CMD_EXIT,  _T(""), _T("?"))) {
+            char response[8];
+            memset( response, 0, 8);
+            Read(response, 3);
+        }
+}
+
+
+bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString crypto_key )
+{
+    if(crypto_key.Length()){
+        fifo_msg msg;
+        
+        
+        
+        if (connect(publicSocket, (const struct sockaddr*) &sockAddr, sockLen) < 0) {
+            wxLogMessage(_T("oesenc_pi: Could not connect to PUBLIC socket"));
+            return false;
+        }
+        
+        wxCharBuffer buf = senc_file_name.ToUTF8();
+        if(buf.data()) 
+            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
+        
+        buf = crypto_key.ToUTF8();
+        if(buf.data()) 
+            strncpy(msg.senc_key, buf.data(), sizeof(msg.senc_key));
+        
+        msg.cmd = cmd;
+        
+        write(publicSocket, (char*) &msg, sizeof(msg));
+        
+        return true;
+    }
+    else{                        // not encrypted
+        m_uncrypt_stream = new wxFileInputStream(senc_file_name);
+        return m_uncrypt_stream->IsOk();
+    }
+}
+
+Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
+{
+    #define READ_SIZE 64000;
+    #define MAX_TRIES 100;
+    if(!m_uncrypt_stream){
+        size_t max_read = READ_SIZE;
+        //    bool blk = fcntl(privatefifo, F_GETFL) & O_NONBLOCK;
+        
+        if( -1 != publicSocket){
+            
+            int remains = size;
+            char *bufRun = (char *)buffer;
+            int totalBytesRead = 0;
+            int nLoop = MAX_TRIES;
+            do{
+                int bytes_to_read = MIN(remains, max_read);
+                if(bytes_to_read > 10000)
+                    int yyp = 2;
+                
+                int bytesRead;
+                
+                #if 1
+                struct pollfd fd;
+                int ret;
+                
+                fd.fd = publicSocket; // your socket handler 
+                fd.events = POLLIN;
+                ret = poll(&fd, 1, 100); // 1 second for timeout
+                switch (ret) {
+                    case -1:
+                        // Error
+                        bytesRead = 0;
+                        break;
+                    case 0:
+                        // Timeout 
+                        bytesRead = -1;
+                        break;
+                    default:
+                        bytesRead = read(publicSocket, bufRun, bytes_to_read );
+                        break;
+                }
+                
+                #else                
+                bytesRead = read(publicSocket, bufRun, bytes_to_read );
+                #endif                
+                
+                // Server may not have opened the Write end of the FIFO yet
+                if(bytesRead == 0){
+                    //                    printf("miss %d %d %d\n", nLoop, bytes_to_read, size);
+                    nLoop --;
+                    wxMilliSleep(1);
+                }
+                else if(bytesRead == -1)
+                    nLoop = 0;
+                else
+                    nLoop = MAX_TRIES;
+                
+                remains -= bytesRead;
+                bufRun += bytesRead;
+                totalBytesRead += bytesRead;
+            } while( (remains > 0) && (nLoop) );
+            
+            m_OK = (totalBytesRead == size);
+            if(!m_OK)
+                int yyp = 4;
+            m_lastBytesRead = totalBytesRead;
+            m_lastBytesReq = size;
+        }
+        
+        return *this;
+    }
+    else{
+        if(m_uncrypt_stream->IsOk())
+            m_uncrypt_stream->Read(buffer, size);
+        m_OK = m_uncrypt_stream->IsOk();
+        return *this;
+    }
+}
+
+bool Osenc_instream::IsOk()
+{
+    if(!m_OK)
+        int yyp = 4;
     
-    char privatefifo_name[256];
-    bool m_OK;
-    int m_lastBytesRead, m_lastBytesReq;
-    
-#ifdef __WXMSW__    
-    HANDLE hPipe; 
-#endif    
-    
-};
+    return m_OK;
+}
+
 #endif
 
-#ifndef __WXMSW__
+#if defined(__LINUX__) && (!defined __OCPN__ANDROID__)
 //--------------------------------------------------------------------------
-//      Osenc_instream implementation
+//      Osenc_instream implementation as Named Pipe 
 //--------------------------------------------------------------------------
 Osenc_instream::Osenc_instream()
 {
@@ -319,7 +528,7 @@ bool Osenc_instream::IsOk()
     return m_OK;
 }
 
-#else  //MSW
+#elif defined(__WXMSW__)  //MSW
 
 #include <windows.h> 
 #include <stdio.h>

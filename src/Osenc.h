@@ -43,6 +43,14 @@
 #include <string.h>
 #include <stdint.h>
 
+#ifndef __WXMSW__
+#include <unistd.h>
+#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <poll.h>
+#endif
+
 typedef struct _Extent{
     double SLAT;
     double WLON;
@@ -562,6 +570,13 @@ private:
     #ifdef __WXMSW__    
     HANDLE hPipe; 
     #endif    
+    
+    #ifndef __WXMSW__    
+    char publicsocket_name[256];
+    struct sockaddr_un sockAddr;
+    socklen_t sockLen;
+    int publicSocket;
+    #endif
     
     wxFileInputStream *m_uncrypt_stream;
 };

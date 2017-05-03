@@ -62,13 +62,30 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+
+    #ifndef __OCPN__ANDROID__
+        #include <GL/gl.h>
+        #include <GL/glu.h>
+        #include <GL/glext.h>
+    #else
+        #include <qopengl.h>
+        #include <GL/gl_private.h>              // this is a cut-down version of gl.h
+    #endif
+
 #endif
 
 #ifdef __MSVC__
 #include <windows.h>
 #include <Shlobj.h>
+#endif
+
+#ifdef __OCPN__ANDROID__
+#include <QtAndroidExtras/QAndroidJniObject>
+#include "qdebug.h"
+wxString callActivityMethod_ss(const char *method, wxString parm);
+wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
+wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
+
 #endif
 
 #include <wx/arrimpl.cpp> 
@@ -167,6 +184,9 @@ long                            g_serverProc;
 bool shutdown_SENC_server( void );
 bool ShowAlwaysEULAs();
 
+#ifdef __OCPN__ANDROID__
+extern JavaVM *java_vm;         // found in androidUtil.cpp, accidentally exported....
+#endif
 
 // the class factories, used to create and destroy instances of the PlugIn
 
@@ -521,6 +541,14 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       _T("PlugIns/oesenc_pi/oeserverd\"");
 #endif
 
+#ifdef __OCPN__ANDROID__
+      wxString exeLocn = *GetpSharedDataLocation();
+      wxFileName fnl(exeLocn);
+      fnl.RemoveLastDir();                // remove "files/"
+      g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
+      g_serverProc = 0;
+#endif
+      
       g_bSENCutil_valid = false;                // not confirmed yet
 
 
@@ -2663,7 +2691,11 @@ void initLibraries(void)
         g_texture_rectangle_format = GL_TEXTURE_2D;
     else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
         g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
-    
+
+    #ifdef __OCPN__ANDROID__
+        g_texture_rectangle_format = GL_TEXTURE_2D;
+    #endif
+        
     //  Class Registrar Manager
     
     if( pi_poRegistrarMgr == NULL ) {
@@ -2793,9 +2825,11 @@ bool validate_SENC_server(void)
     }
     
     // Not running, so start it up...
-    
-    //Verify that oeserverd actually exists, and runs.
+
     wxString bin_test = g_sencutil_bin;
+    
+#ifndef __OCPN__ANDROID__    
+    //Verify that oeserverd actually exists, and runs.
     
     if(wxNOT_FOUND != g_sencutil_bin.Find('\"'))
         bin_test = g_sencutil_bin.Mid(1).RemoveLast();
@@ -2818,69 +2852,6 @@ bool validate_SENC_server(void)
         g_sencutil_bin.Clear();
         return false;
     }
-
-    wxString ver_line;
-#if 0    
-    //Will it run?
-    wxArrayString ret_array;
-    ret_array.Alloc(1000);
-    wxString cmd = g_sencutil_bin;
-    cmd += _T(" -a");                 // get version
-    long rv = wxExecute(cmd, ret_array, ret_array, wxEXEC_SYNC );
-    
-    if(0 != rv) {
-        wxString msg = _("Cannot execute oeserverd utility at \n");
-        msg += _T("{");
-        msg += bin_test;
-        msg += _T("}");
-        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
-        wxLogMessage(_T("oesenc_pi: ") + msg);
-        
-        g_sencutil_bin.Clear();
-        return false;
-    }
-    
-    // Check results
-    bool bad_ver = false;
-    for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
-        wxString line = ret_array[i];
-        if(ret_array[i].Upper().Find(_T("VERSION")) != wxNOT_FOUND){
-            ver_line = line;
-            wxStringTokenizer tkz(line, _T(" ")); 
-            while ( tkz.HasMoreTokens() ){
-                wxString token = tkz.GetNextToken();
-                double ver;
-                if(token.ToDouble(&ver)){
-                    if( ver < 1.00)
-                        bad_ver = true;
-                }
-            }
-        }
-    }
-    
-    if(!ver_line.Length())                    // really old version.
-          bad_ver = true;
-    
-    
-    if(bad_ver) {
-        wxString msg = _("oeserverd utility at \n");
-        msg += _T("{");
-        msg += bin_test;
-        msg += _T("}\n");
-        msg += _(" is incorrect version, reports as:\n\n");
-        msg += ver_line;
-        msg += _T("\n\n");
-        wxString msg1;
-        msg1.Printf(_("This version of oesenc_PI requires oeserverd of version 1.00 or later."));
-        msg += msg1;
-        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
-        wxLogMessage(_T("oesenc_pi: ") + msg);
-        
-        g_sencutil_bin.Clear();
-        return false;
-        
-    }
-#endif
 
     // now start the server...
     wxString cmds = g_sencutil_bin;
@@ -2905,12 +2876,44 @@ bool validate_SENC_server(void)
     wxLogMessage(_T("oesenc_pi: starting oeserverd utility: ") + cmds);
     g_serverProc = wxExecute(cmds, flags);              // exec asynchronously
     wxMilliSleep(1000);
+
+    
+#else           // Android
+    qDebug() << "Starting SENC server";
+    
+    //  The target binary executable
+    wxString cmd = g_sencutil_bin;
+    
+    //  Set up the parameter passed as the local app storage directory
+    wxString dataLoc = *GetpPrivateApplicationDataLocation();
+    wxFileName fn(dataLoc);
+    wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+    wxString libLocn = *GetpSharedDataLocation();
+    wxFileName fnl(libLocn);
+    fnl.RemoveLastDir();                // remove "files/"
+    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+        
+    wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
+    
+    wxString result = callActivityMethod_s4s("createProc", cmd, _T("-q"), dataDir, libDir);
+    
+    wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
+    
+    long pid;
+    if(result.ToLong(&pid))
+        g_serverProc = pid;
+    
+    wxMilliSleep(1000);
+    
+#endif    
     
     // Check to see if the server function is available
     if(g_serverProc){
         bool bAvail = false;
         int nLoop = 10;
-
+        
         while(nLoop){
             Osenc_instream testAvail_One;
             if(!testAvail_One.isAvailable(_T("?")))
@@ -2928,7 +2931,7 @@ bool validate_SENC_server(void)
             msg += bin_test;
             msg += _T("}\n");
             msg += _(" reports Unavailable.\n\n");
-//            OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
+            //            OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
             wxLogMessage(_T("oesenc_pi: ") + msg);
             
             g_sencutil_bin.Clear();
@@ -2938,11 +2941,11 @@ bool validate_SENC_server(void)
         else{
             wxString nc;
             nc.Printf(_T("LoopCount: %d"), nLoop);
-
+            
             //  Get the decrypt type into the logfile
             Osenc_instream testAvail_type;
             testAvail_type.isAvailable( g_UserKey );
-                
+            
             wxLogMessage(_T("oesenc_pi: oeserverd Check OK...") + nc);
         }
     }
@@ -2958,7 +2961,6 @@ bool validate_SENC_server(void)
         g_sencutil_bin.Clear();
         return false;
     }
-        
     
     return true;
 }
@@ -2976,6 +2978,178 @@ bool shutdown_SENC_server( void )
         return false;
     }
 }
+
+#ifdef __OCPN__ANDROID__
+bool CheckPendingJNIException()
+{
+    JNIEnv* jenv;
+    
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) 
+        return true;
+    
+    if( (jenv)->ExceptionCheck() == JNI_TRUE ) {
+        
+        // Handle exception here.
+        (jenv)->ExceptionDescribe(); // writes to logcat
+        (jenv)->ExceptionClear();
+        
+        return false;           // There was a pending exception, but cleared OK
+        // interesting discussion:  http://blog.httrack.com/blog/2013/08/23/catching-posix-signals-on-android/
+    }
+    
+    return false;
+    
+}
+
+wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        return return_string;
+    }
+    
+    //  Need a Java environment to decode the resulting string
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+        return _T("jenv Error");
+    }
+    
+    jstring p1 = (jenv)->NewStringUTF(parm1.c_str());
+    jstring p2 = (jenv)->NewStringUTF(parm2.c_str());
+    
+    
+    
+    QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", p1, p2);
+    
+    (jenv)->DeleteLocalRef(p1);
+    (jenv)->DeleteLocalRef(p2);
+    
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+        
+    jstring s = data.object<jstring>();
+        
+    if( (jenv)->GetStringLength( s )){
+            const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+            return_string = wxString(ret_string, wxConvUTF8);
+    }
+        
+    return return_string;
+        
+}
+
+wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        return return_string;
+    }
+    
+    //  Need a Java environment to decode the resulting string
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+        return _T("jenv Error");
+    }
+    
+    wxCharBuffer p1b = parm1.ToUTF8();
+    jstring p1 = (jenv)->NewStringUTF(p1b.data());
+    
+    wxCharBuffer p2b = parm2.ToUTF8();
+    jstring p2 = (jenv)->NewStringUTF(p2b.data());
+    
+    wxCharBuffer p3b = parm3.ToUTF8();
+    jstring p3 = (jenv)->NewStringUTF(p3b.data());
+    
+    wxCharBuffer p4b = parm4.ToUTF8();
+    jstring p4 = (jenv)->NewStringUTF(p4b.data());
+    
+    QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                                                       p1, p2, p3, p4);
+    (jenv)->DeleteLocalRef(p1);
+    (jenv)->DeleteLocalRef(p2);
+    (jenv)->DeleteLocalRef(p3);
+    (jenv)->DeleteLocalRef(p4);
+    
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    //qDebug() << "Back from method_s4s";
+        
+        jstring s = data.object<jstring>();
+        
+        if( (jenv)->GetStringLength( s )){
+            const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+            return_string = wxString(ret_string, wxConvUTF8);
+        }
+        
+    return return_string;
+        
+}
+
+
+wxString callActivityMethod_ss(const char *method, wxString parm)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        return return_string;
+    }
+    
+    //  Need a Java environment to decode the resulting string
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+        return _T("jenv Error");
+    }
+    
+    jstring p = (jenv)->NewStringUTF(parm.c_str());
+    
+    
+    QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;)Ljava/lang/String;", p);
+    
+    (jenv)->DeleteLocalRef(p);
+    
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+//    qDebug() << "OK return";
+    
+//    return _T("OK");
+    
+    jstring s = data.object<jstring>();
+        
+    if( (jenv)->GetStringLength( s )){
+        const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+        return_string = wxString(ret_string, wxConvUTF8);
+    }
+        
+    return return_string;
+}
+
+#endif
 
 
 BEGIN_EVENT_TABLE( oesencPrefsDialog, wxDialog )
@@ -3767,7 +3941,76 @@ void oesenc_pi_about::OnPageChange( wxNotebookEvent& event )
 }
 
 
+#ifdef __OCPN__ANDROID__
+void showChartinfoDialog( void )
+{
+    if(g_binfoShown)
+        return;
+    
+    if(info_hash.empty())
+        return;
+    
+    wxString hdr = _T("<html><body><center><font size=+1>");
+    hdr +=  _("Available Chart sets:");
+    hdr += _T("</font></center>");
+    
+    hdr += _T("<hr />");
+    
+    hdr += _T("<center><table border=0 bordercolor=#000000 style=background-color:#fbfbf9 width=800 cellpadding=1 cellspacing=1>");
+    
+    hdr += _T("<tr>");
+    hdr += _T("</tr>");
+   
+    int len_max = 0;
+    int ncs = 1;
+    std::map<std::string, ChartInfoItem *>::iterator iter;
+    for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
+    {
+        wxString csn;
+        csn.Printf(_T("Chart set %d"), ncs);
+        
+        hdr += _T("<td><font size=+2>");
+        hdr += csn;
+        hdr += _T("</font></td>");
+        
+        wxString formatted;
+        
+        ChartInfoItem *pci = iter->second;
+        std::string key = iter->first;
+        wxString strk = wxString(key.c_str(), wxConvUTF8);
+        wxString info = pci->config_string;
+        len_max = wxMax(info.Len(), len_max);
+        
+        
+        // Get the line fields
+         wxStringTokenizer tkx(info, _T(";"));
+         while ( tkx.HasMoreTokens() ){
+            wxString token = tkx.GetNextToken();        //description
+            hdr += _T("<tr><td>  ") + token + _T("</td></tr>");
+                    
+            token = tkx.GetNextToken();         // version
+            hdr += _T("<tr><td>Version:</td></tr>");
+            hdr += _T("<tr><td align=\"right\">") + token + _T("</td></tr>");
+            
+            token = tkx.GetNextToken();         // expiry date
+            hdr += _T("<tr><td>Valid Until:</td></tr>");
+            hdr += _T("<tr><td align=\"right\"> <font color=#ff0000>") + token + _T("</font><font color=#000000></font></td></tr>");
+         }
+        
+        ncs++;
+        hdr += _T("</tr>");
+        
+    }
+ 
+    hdr += _T("</table></center>");
+    hdr += _T("</body></html>");
 
+    callActivityMethod_s2s("displayHTMLAlertDialog", _("oeSENC_PI Message"), hdr);
+    g_binfoShown = true;
+}
+#endif
+
+#ifndef __OCPN__ANDROID__
 void showChartinfoDialog( void )
 {
     if(g_binfoShown)
@@ -3789,7 +4032,7 @@ void showChartinfoDialog( void )
     hdr += _T("<td><font size=+2>");
     hdr += _("Chart set");
     hdr += _T("</font></td>");
- 
+    
     hdr += _T("<td><font size=+2>");
     hdr += _("Version");
     hdr += _T("</font></td>");
@@ -3799,7 +4042,7 @@ void showChartinfoDialog( void )
     hdr += _T("</font></td>");
     
     hdr += _T("</tr>");
-   
+    
     int len_max = 0;
     std::map<std::string, ChartInfoItem *>::iterator iter;
     for( iter = info_hash.begin(); iter != info_hash.end(); ++iter )
@@ -3815,41 +4058,43 @@ void showChartinfoDialog( void )
         hdr += _T("<tr>");
         
         // Get the line fields
-         wxStringTokenizer tkx(info, _T(";"));
-         while ( tkx.HasMoreTokens() ){
+        wxStringTokenizer tkx(info, _T(";"));
+        while ( tkx.HasMoreTokens() ){
             wxString token = tkx.GetNextToken();        //description
             hdr += _T("<td>") + token + _T("</td>");
-                    
+            
             token = tkx.GetNextToken();         // version
             hdr += _T("<td>") + token + _T("</td>");
-                    
+            
             token = tkx.GetNextToken();         // expiry date
             hdr += _T("<td><font color=#ff0000>") + token + _T("</font></td>");
         }
         
         hdr += _T("</tr>");
     }
- 
+    
     hdr += _T("</table></center>");
     hdr += _T("</body></html>");
-     
+    
     if(GetOCPNCanvasWindow()){
         wxFont *pFont = OCPNGetFont(_T("Dialog"), 12);
         wxScreenDC dc;
         int sx, sy;
         dc.GetTextExtent(_T("W"), &sx, &sy, NULL, NULL, pFont);
         
-//        int parent_font_width = sx;
-//         wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
-    
+        //        int parent_font_width = sx;
+        //         wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
+        
         pinfoDlg = new OESENC_HTMLMessageDialog( GetOCPNCanvasWindow(), hdr, _("oeSENC_PI Message"), wxOK);
-//        pinfoDlg->SetClientSize(sz);
+        //        pinfoDlg->SetClientSize(sz);
         pinfoDlg->Centre();
         pinfoDlg->Show();
         g_binfoShown = true;
     }
     
 }
+#endif
+
 
 bool processChartinfo(const wxString &oesenc_file)
 {
