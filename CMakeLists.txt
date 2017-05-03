@@ -91,6 +91,36 @@ ENDIF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm*")
 MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 
 
+#  To build for android, use this cmake invocation..
+#$cmake -DUSE_GARMINHOST=OFF -D_wx_selected_config=androideabi-qt
+#-DCMAKE_TOOLCHAIN_FILE=../buildandroid/build_android.cmake
+#-DwxQt_Build=build_android_55_intl -DwxQt_Base=/home/dsr/Projects/wxqt/wxWidgets
+#-DQt_Base=/home/dsr/Projects/qt5bare -DQt_Build=build_release/qtbase ..
+
+IF(DEFINED _wx_selected_config)
+
+#  May be overridden
+IF(NOT DEFINED Qt_Build)
+  SET(Qt_Build "android_armv7")
+ENDIF(NOT DEFINED Qt_Build)
+
+MESSAGE (STATUS "selected config ${_wx_selected_config}")
+
+IF(_wx_selected_config MATCHES "androideabi-qt")
+  MESSAGE (STATUS "Building for wxQt-Android")
+  MESSAGE (STATUS "Qt_Base/Build: " ${Qt_Base} "/" ${Qt_Build})
+  MESSAGE (STATUS "wxQt_Base/Build: " ${wxQt_Base} "/" ${wxQt_Build})
+  SET(QT_ANDROID "ON")
+  SET(QT_LINUX "OFF")
+  SET(QT "ON")
+ENDIF(_wx_selected_config MATCHES "androideabi-qt")
+
+ENDIF(DEFINED _wx_selected_config)
+
+
+INCLUDE("cmake/PluginConfigure.cmake")
+
+
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/wxJSON)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/cpl)
@@ -114,9 +144,12 @@ ENDIF(UNIX)
 IF(NOT WIN32)
 # ADD_DEFINITIONS( "-Wall -g -fexceptions -fvisibility=hidden -O0" )
  ADD_DEFINITIONS( "-Wall -g -fexceptions -O2" )
- IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-    ADD_DEFINITIONS( " -O0")
- ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
+ ADD_DEFINITIONS( "-Wall -Wno-unused -fexceptions -rdynamic" )
+ ADD_DEFINITIONS( " -g -fno-strict-aliasing")
+
+# IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+#    ADD_DEFINITIONS( " -O0")
+# ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 
  IF(NOT APPLE)
   SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic -g")
@@ -136,31 +169,9 @@ ENDIF(WIN32)
 # Let cmake find additional modules private
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
-SET(wxWidgets_USE_LIBS html base core net )
-
-FIND_PACKAGE(OpenGL)
-IF(OPENGL_GLU_FOUND)
-
-    SET(wxWidgets_USE_LIBS ${wxWidgets_USE_LIBS} gl )
-    INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-
-    MESSAGE (STATUS "Found OpenGL..." )
-    MESSAGE (STATUS "    Lib: " ${OPENGL_LIBRARIES})
-    MESSAGE (STATUS "    Include: " ${OPENGL_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DocpnUSE_GL)
-
-ELSE(OPENGL_GLU_FOUND)
-    MESSAGE (STATUS "OpenGL not found..." )
-ENDIF(OPENGL_GLU_FOUND)
 
 ADD_DEFINITIONS(-DTIXML_USE_STL)
 
-SET(BUILD_SHARED_LIBS TRUE)
-#SET( wxWidgets_USE_DEBUG ON)
-
-FIND_PACKAGE(wxWidgets REQUIRED)
-
-INCLUDE(${wxWidgets_USE_FILE})
 
 FIND_PACKAGE(Gettext REQUIRED)
 
@@ -249,8 +260,13 @@ SET(SRC_JSON
             src/wxJSON/jsonwriter.cpp
         )
 
-
 ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_OESENC} ${SRC_CPL} ${SRC_ISO8211} ${SRC_DSA} ${SRC_S57ENC} ${SRC_JSON})
+
+IF (QT_ANDROID )
+    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OCPN_Core_LIBRARIES} )
+    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lgnustl_shared")
+    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lz" )
+ENDIF(QT_ANDROID)
 
 IF(WIN32)
 #  SET(OPENCPN_IMPORT_LIB "opencpn.lib")
