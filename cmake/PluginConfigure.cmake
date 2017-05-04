@@ -15,8 +15,17 @@ ENDIF (COMMAND cmake_policy)
 
 MESSAGE (STATUS "*** Staging to build ${PACKAGE_NAME} ***")
 
-configure_file(cmake/version.h.in ${PROJECT_SOURCE_DIR}/src/version.h)
-SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}" )
+include  ("VERSION.cmake")
+
+#  Do the version.h configuration into the build output directory,
+#  thereby allowing building from a read-only source tree.
+IF(NOT SKIP_VERSION_CONFIG)
+    configure_file(${PROJECT_SOURCE_DIR}/cmake/version.h.in ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/version.h)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include)
+ENDIF(NOT SKIP_VERSION_CONFIG)
+
+SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+
 
 SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
@@ -48,15 +57,10 @@ IF(MSVC)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_DEPRECATE)
 ENDIF(MSVC)
 
-IF(NOT QT_ANDROID)
 IF(NOT DEFINED wxWidgets_USE_FILE)
   SET(wxWidgets_USE_LIBS base core net xml html adv)
-  SET(BUILD_SHARED_LIBS TRUE)
-  FIND_PACKAGE(wxWidgets REQUIRED)
 ENDIF(NOT DEFINED wxWidgets_USE_FILE)
 
-  INCLUDE(${wxWidgets_USE_FILE})
-ENDIF(NOT QT_ANDROID)
 
 #  QT_ANDROID is a cross-build, so the native FIND_PACKAGE(wxWidgets...) and wxWidgets_USE_FILE is not useful.
 #  We add the dependencies manually.
@@ -125,24 +129,12 @@ IF(QT_ANDROID)
     SET(OPENGLES_FOUND "YES")
     SET(OPENGL_FOUND "YES")
 
-
-ELSE(QT_ANDROID)
-    FIND_PACKAGE(OpenGL)
-    IF(OPENGL_GLU_FOUND)
-
-        SET(wxWidgets_USE_LIBS ${wxWidgets_USE_LIBS} gl)
-        INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-
-        MESSAGE (STATUS "Found OpenGL..." )
-        MESSAGE (STATUS "    Lib: " ${OPENGL_LIBRARIES})
-        MESSAGE (STATUS "    Include: " ${OPENGL_INCLUDE_DIR})
-        ADD_DEFINITIONS(-DocpnUSE_GL)
-    ELSE(OPENGL_GLU_FOUND)
-        MESSAGE (STATUS "OpenGL not found..." )
-    ENDIF(OPENGL_GLU_FOUND)
-
 ENDIF(QT_ANDROID)
 
+IF (NOT QT_ANDROID )
+    FIND_PACKAGE(wxWidgets REQUIRED)
+    INCLUDE(${wxWidgets_USE_FILE})
+ENDIF (NOT QT_ANDROID )
 
 # On Android, PlugIns need a specific linkage set....
 IF (QT_ANDROID )

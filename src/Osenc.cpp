@@ -46,6 +46,7 @@
 #include "mygeom63.h"
 //#include <../opencpn/plugins/chartdldr_pi/src/unrar/rartypes.hpp>
 #include "georef.h"
+#include "ocpn_plugin.h"
 
 extern int g_debugLevel;
 extern wxString g_pipeParm;
@@ -4025,8 +4026,8 @@ PolyTessGeo *Osenc::BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *r
         double minxt, minyt, maxxt, maxyt;
         //double east_min, north_min, east_max, north_max;
         
-        fromSM( pbb[0] / scaler, pbb[2] / scaler, m_ref_lat, m_ref_lon, &minyt, &minxt );
-        fromSM( pbb[1] / scaler, pbb[3] / scaler, m_ref_lat, m_ref_lon, &maxyt, &maxxt );
+        fromSM_Plugin( pbb[0] / scaler, pbb[2] / scaler, m_ref_lat, m_ref_lon, &minyt, &minxt );
+        fromSM_Plugin( pbb[1] / scaler, pbb[3] / scaler, m_ref_lat, m_ref_lon, &maxyt, &maxxt );
         
         #if 0        
         #ifdef __ARM_ARCH

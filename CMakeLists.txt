@@ -173,15 +173,6 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 ADD_DEFINITIONS(-DTIXML_USE_STL)
 
 
-FIND_PACKAGE(Gettext REQUIRED)
-
-#  Do the version.h configuration into the build output directory,
-#  thereby allowing building from a read-only source tree.
-IF(NOT SKIP_VERSION_CONFIG)
-    configure_file(version.h.in ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/version.h)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include)
-ENDIF(NOT SKIP_VERSION_CONFIG)
-
 # For convenience we define the sources as a variable. You can add
 # header files and cpp/c files and CMake will sort them out
 
