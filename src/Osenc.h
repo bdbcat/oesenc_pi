@@ -95,6 +95,10 @@ WX_DECLARE_OBJARRAY(float *,   SENCFloatPtrArray);
 #define FEATURE_GEOMETRY_RECORD_LINE            81
 #define FEATURE_GEOMETRY_RECORD_AREA            82
 #define FEATURE_GEOMETRY_RECORD_MULTIPOINT      83
+#define FEATURE_GEOMETRY_RECORD_AREA_EXT        84
+
+#define VECTOR_EDGE_NODE_TABLE_EXT_RECORD        85
+#define VECTOR_CONNECTED_NODE_TABLE_EXT_RECORD   86
 
 #define VECTOR_EDGE_NODE_TABLE_RECORD             96
 #define VECTOR_CONNECTED_NODE_TABLE_RECORD        97
@@ -261,6 +265,32 @@ typedef struct _OSENC_AreaGeometry_Record_Payload{
     void *          payLoad;
 }OSENC_AreaGeometry_Record_Payload;
 
+typedef struct _OSENC_AreaGeometryExt_Record_Base{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    double          extent_s_lat;
+    double          extent_n_lat;
+    double          extent_w_lon;
+    double          extent_e_lon;
+    uint32_t        contour_count;
+    uint32_t        triprim_count;
+    uint32_t        edgeVector_count;
+    double          scaleFactor;
+}OSENC_AreaGeometryExt_Record_Base;
+
+typedef struct _OSENC_AreaGeometryExt_Record_Payload{
+    double          extent_s_lat;
+    double          extent_n_lat;
+    double          extent_w_lon;
+    double          extent_e_lon;
+    uint32_t        contour_count;
+    uint32_t        triprim_count;
+    uint32_t        edgeVector_count;
+    double          scaleFactor;
+    void *          payLoad;
+}OSENC_AreaGeometryExt_Record_Payload;
+
+
 typedef struct _OSENC_VET_Record{
     uint16_t        record_type;
     uint32_t        record_length;
@@ -272,6 +302,24 @@ typedef struct _OSENC_VET_Record_Base{
     uint32_t        record_length;
 }OSENC_VET_Record_Base;
 
+typedef struct _OSENC_VET_RecordExt{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    double          scaleFactor;
+    unsigned char   payload;
+}OSENC_VET_RecordExt;
+
+typedef struct _OSENC_VET_RecordExt_Base{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    double          scaleFactor;
+}OSENC_VET_RecordExt_Base;
+
+typedef struct _OSENC_VET_RecordExt_Payload{
+    double          scaleFactor;
+    void *          payLoad;
+}OSENC_VET_RecordExt_Payload;
+
 typedef struct _OSENC_VCT_Record{
     uint16_t        record_type;
     uint32_t        record_length;
@@ -282,6 +330,25 @@ typedef struct _OSENC_VCT_Record_Base{
     uint16_t        record_type;
     uint32_t        record_length;
 }OSENC_VCT_Record_Base;
+
+typedef struct _OSENC_VCT_RecordExt{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    double          scaleFactor;
+    unsigned char   payload;
+}OSENC_VCT_RecordExt;
+
+typedef struct _OSENC_VCT_RecordExt_Base{
+    uint16_t        record_type;
+    uint32_t        record_length;
+    double          scaleFactor;
+}OSENC_VCT_RecordExt_Base;
+
+typedef struct _OSENC_VCT_RecordExt_Payload{
+    double          scaleFactor;
+    void *          payLoad;
+}OSENC_VCT_RecordExt_Payload;
+
 
 typedef struct _OSENC_COVR_Record{
     uint16_t        record_type;
@@ -463,6 +530,7 @@ private:
     std::string GetAttributeAcronymFromTypecode( int typeCode );
     
     PolyTessGeo *BuildPolyTessGeo(_OSENC_AreaGeometry_Record_Payload *record, unsigned char **bytes_consumed );
+    PolyTessGeo *BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *record, unsigned char **next_byte );
     
     LineGeometryDescriptor *BuildLineGeometry( _OSENC_LineGeometry_Record_Payload *pPayload );
     
