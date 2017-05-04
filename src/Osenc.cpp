@@ -427,10 +427,12 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
             strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
         
             // Create the private FIFO
-        if(-1 == mkfifo(privatefifo_name, 0666))
+        if(-1 == mkfifo(privatefifo_name, 0666)){
             if(g_debugLevel)printf("   mkfifo private failed: %s\n", privatefifo_name);
-        else
+        }
+        else{
             if(g_debugLevel)printf("   mkfifo OK: %s\n", privatefifo_name);
+        }
         
         
         
@@ -478,16 +480,14 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
         if( -1 != privatefifo){
 //            printf("           Read private fifo: %s, %d bytes\n", privatefifo_name, size);
             
-            int remains = size;
+            size_t remains = size;
             char *bufRun = (char *)buffer;
-            int totalBytesRead = 0;
+            size_t totalBytesRead = 0;
             int nLoop = MAX_TRIES;
             do{
-                int bytes_to_read = MIN(remains, max_read);
-                if(bytes_to_read > 10000)
-                    int yyp = 2;
+                size_t bytes_to_read = MIN(remains, max_read);
                 
-                int bytesRead = read(privatefifo, bufRun, bytes_to_read );
+                size_t bytesRead = read(privatefifo, bufRun, bytes_to_read );
 
                 // Server may not have opened the Write end of the FIFO yet
                 if(bytesRead == 0){
