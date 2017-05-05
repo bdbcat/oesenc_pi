@@ -314,7 +314,7 @@ bool Osenc_instream::IsOk()
 
 #endif
 
-#if defined(__LINUX__) && (!defined __OCPN__ANDROID__)
+#if !defined(__WXMSW__) && !defined( __OCPN__ANDROID__)   // i.e. linux and Mac
 //--------------------------------------------------------------------------
 //      Osenc_instream implementation as Named Pipe 
 //--------------------------------------------------------------------------
