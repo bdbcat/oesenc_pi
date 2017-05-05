@@ -85,7 +85,8 @@
 wxString callActivityMethod_ss(const char *method, wxString parm);
 wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
-
+void androidShowBusyIcon();
+void androidHideBusyIcon();
 #endif
 
 #include <wx/arrimpl.cpp> 
@@ -1389,6 +1390,8 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("DEBUG_SERVER"), &g_serverDebug);
         pConf->Read( _T("DEBUG_LEVEL"), &g_debugLevel);
         
+        g_debugLevel = 1;
+        
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
         
@@ -2219,6 +2222,9 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
      long wstyle = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER;
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
 
+     wxFont *qFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+     SetFont( *qFont );
+     
      CreateControls(legendID);
      GetSizer()->SetSizeHints( this );
      Centre();
@@ -2243,15 +2249,15 @@ IMPLEMENT_DYNAMIC_CLASS( SENCGetUserKeyDialog, wxDialog )
 #ifdef __WXMAC__
      wstyle |= wxSTAY_ON_TOP;
 #endif
-
      wxDialog::Create( parent, id, caption, pos, size, wstyle );
-
+     
+     wxFont *qFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+     SetFont( *qFont );
+     
      SetTitle( _("OpenCPN oeSENC UserKey Required"));
 
      CreateControls( legendID );
-     GetSizer()->SetSizeHints( this );
      Centre();
-
      return TRUE;
  }
 
@@ -2359,6 +2365,7 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
      itemBoxSizer16->Add( m_OKButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
 
      m_UserKeyCtl->AppendText(g_old_UserKey);
+     
  }
 
 
@@ -2392,13 +2399,23 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
      else
      {
          g_old_UserKey = g_UserKey;
-         SENCGetUserKeyDialog dlg( legendID, NULL);
-         dlg.SetSize(500,-1);
+         SENCGetUserKeyDialog dlg( legendID, GetOCPNCanvasWindow());
+         
+         wxSize dialogSize(500, -1);
+         
+#ifdef __OCPN__ANDROID__
+         wxSize ss = ::wxGetDisplaySize();
+         dialogSize.x = ss.x * 8 / 10;
+#endif         
+         dlg.SetSize(dialogSize);
          dlg.Centre();
          
          if(pinfoDlg)
              pinfoDlg->Hide();
-         
+
+#ifdef __OCPN__ANDROID__
+         androidHideBusyIcon();
+#endif             
          int ret = dlg.ShowModal();
          if(ret == 0)
              return g_UserKey;
@@ -3486,11 +3503,16 @@ bool CheckEULA( void )
     _T("oesenc_pi") + wxFileName::GetPathSeparator();
     
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow() );
-    g_bEULA_OK = (pab->ShowModal() == 0);
+    pab->ShowModal();
+    g_bEULA_OK = (pab->GetReturnCode() == 0);
+    
 
-//     if(!g_bEULA_OK)
-//         g_bEULA_Rejected = true;
-
+    if(!g_bEULA_OK)
+        wxLogMessage(_T("EULA Rejected."));
+    else
+        wxLogMessage(_T("EULA Accepted."));
+    
+    
     if(g_bEULA_OK && (0 == g_UserKey.Length()) )
         g_UserKey = _T("Pending");
         
@@ -3555,9 +3577,19 @@ bool ShowEULA( wxString fileName )
         if(g_EULAShaArray[i] == sha)
             return true;
     }
-        
+    
+#ifdef __OCPN__ANDROID__
+    androidHideBusyIcon();
+#endif
+    
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), fileName );
-    bool bEULA_OK = (pab->ShowModal() == 0);
+    pab->ShowModal();
+    bool bEULA_OK = (pab->GetReturnCode() == 0);
+    
+    if(!bEULA_OK)
+        wxLogMessage(_T("EULA Rejected."));
+    else
+        wxLogMessage(_T("EULA Accepted."));
     
     if(bEULA_OK)
         g_EULAShaArray.Add(sha);
@@ -3767,7 +3799,18 @@ void oesenc_pi_about::Populate( void )
     licenseText.Append( _T("</font></body></html>") );
         
     pLicenseHTMLCtl->SetPage( licenseText );
-        
+    
+    pLicenseHTMLCtl->SetBackgroundColour( bg );
+    
+    #ifdef __WXQT__
+    // wxQT has some trouble clearing the background of HTML window...
+    wxBitmap tbm( GetSize().x, GetSize().y, -1 );
+    wxMemoryDC tdc( tbm );
+    tdc.SetBackground( bg );
+    tdc.Clear();
+    pLicenseHTMLCtl->SetBackgroundImage(tbm);
+    #endif
+    
         
 #if 0    
     wxTextFile license_file( m_DataLocn + _T("license.txt") );
@@ -3922,11 +3965,13 @@ void oesenc_pi_about::CreateControls( void )
 
 void oesenc_pi_about::OnXidOkClick( wxCommandEvent& event )
 {
+    SetReturnCode(0);
     EndModal(0);
 }
 
 void oesenc_pi_about::OnXidRejectClick( wxCommandEvent& event )
 {
+    SetReturnCode(1);
     EndModal(1);
 }
 
@@ -4240,9 +4285,6 @@ bool processChartinfo(const wxString &oesenc_file)
         }
     }
     
-    
-            
-    
     std::string key = std::string(fn.GetPath(wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR).c_str());
     
     if(wxFileExists(chartInfo)){
@@ -4336,6 +4378,8 @@ bool ShowAlwaysEULAs()
         CSE = g_EULAArray.Item(i);
         if(CSE->npolicyShow == 2){
             wxString file = CSE->fileName;
+            file.Replace('!', wxFileName::GetPathSeparator());
+            
             b_showResult = ShowEULA(file);
             if(!b_showResult)
                 return false;
@@ -4344,3 +4388,44 @@ bool ShowAlwaysEULAs()
     
     return true;
 }
+
+#ifdef __OCPN__ANDROID__
+void androidShowBusyIcon()
+{
+//    if(b_androidBusyShown)
+//        return;
+    
+    //  Get a reference to the running native activity
+     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+        "activity", "()Landroid/app/Activity;");
+
+     if ( !activity.isValid() )
+         return;
+        
+        //  Call the desired method
+     QAndroidJniObject data = activity.callObjectMethod("showBusyCircle", "()Ljava/lang/String;");
+        
+//     b_androidBusyShown = true;
+}
+
+void androidHideBusyIcon()
+{
+//    if(!b_androidBusyShown)
+//        return;
+    
+    //  Get a reference to the running native activity
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+        "activity", "()Landroid/app/Activity;");
+        
+    if ( !activity.isValid() )
+        return;
+        
+        //  Call the desired method
+    QAndroidJniObject data = activity.callObjectMethod("hideBusyCircle", "()Ljava/lang/String;");
+        
+//    b_androidBusyShown = false;
+}
+#endif
+
+
+
