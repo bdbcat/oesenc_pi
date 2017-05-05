@@ -128,37 +128,23 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/dsa)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 
-IF(WIN32)
-#      INCLUDE_DIRECTORIES("U:/Projects/opencpn_sf/opencpn/include")
-ENDIF(WIN32)
-
-IF(UNIX)
-#     INCLUDE_DIRECTORIES("/home/dsr/Projects/opencpn_sf/opencpn/include")
-ENDIF(UNIX)
-
-
-# require proper c++
-#ADD_DEFINITIONS( "-Wall -ansi -pedantic -Wno-variadic-macros" )
-#TODO: Should we use  -fno-stack-protector
-#  IF NOT DEBUGGING CFLAGS="-O2 -march=native"
 IF(NOT WIN32)
-# ADD_DEFINITIONS( "-Wall -g -fexceptions -fvisibility=hidden -O0" )
- ADD_DEFINITIONS( "-Wall -g -fexceptions -O2" )
- ADD_DEFINITIONS( "-Wall -Wno-unused -fexceptions -rdynamic" )
- ADD_DEFINITIONS( " -g -fno-strict-aliasing")
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -O2 -Wno-unused -fno-strict-aliasing")
 
-# IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-#    ADD_DEFINITIONS( " -O0")
-# ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 
  IF(NOT APPLE)
-  SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic -g")
+  SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-Bsymbolic")
+  ADD_DEFINITIONS( "-rdynamic" )
  ELSE(NOT APPLE)
   SET(CMAKE_SHARED_LINKER_FLAGS "-Wl -undefined dynamic_lookup")
   ADD_DEFINITIONS( "-Wno-overloaded-virtual" )
  ENDIF(NOT APPLE)
 
 ENDIF(NOT WIN32)
+
+# IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+#    ADD_DEFINITIONS( " -O0")
+# ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 
 # Add some definitions to satisfy MS
 IF(WIN32)
@@ -260,11 +246,8 @@ IF (QT_ANDROID )
 ENDIF(QT_ANDROID)
 
 IF(WIN32)
-#  SET(OPENCPN_IMPORT_LIB "opencpn.lib")
-#  SET(OPENCPN_IMPORT_LIB "E:/opencpn_cmake2010/${CMAKE_CFG_INTDIR}/opencpn.lib")
   SET(OPENCPN_IMPORT_LIB "C:/Projects/opencpn/build/${CMAKE_CFG_INTDIR}/opencpn.lib")
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OPENCPN_IMPORT_LIB} )
-#  ADD_DEPENDENCIES(${PACKAGE_NAME} ${PARENT})
 ENDIF(WIN32)
 
 IF(NOT APPLE)
@@ -274,7 +257,7 @@ ENDIF(NOT APPLE)
 
 
 # Install any special data files or binary helpers here....
-# The PlugIn library itself and any "data" directory (with contents) gets installed in PluginInstall.cmake later
+# The PlugIn library itself and any "data" directory (with contents) gets installed in generic PluginInstall.cmake later
 
 IF(UNIX AND NOT APPLE)
 SET(PARENT opencpn)
@@ -333,23 +316,16 @@ INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
       DESTINATION "oesenc_pi/oesenc_pi" )
 
-INSTALL(TARGETS ${PACKAGE_NAME} RUNTIME LIBRARY DESTINATION "oesenc_pi/oesenc_pi")
-ENDIF(APPLE)
+  # We also need to copy the helper utility to the binary build directory so that the PACKAGES scripts will find it.
+configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/oeserverd
+            ${CMAKE_CURRENT_BINARY_DIR}/oeserverd COPYONLY)
 
-IF(APPLE)
-    if (NOT EXISTS "${PROJECT_BINARY_DIR}/data/")
-        file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/data/")
-        message ("Generating data directory")
-        endif ()
-
-   FILE(GLOB PACKAGE_DATA_FILES ${CMAKE_SOURCE_DIR}/data/*)
-
-   FOREACH (_currentDataFile ${PACKAGE_DATA_FILES})
-        MESSAGE (STATUS "copying: ${_currentDataFile}" )
-        configure_file(${_currentDataFile} ${CMAKE_CURRENT_BINARY_DIR}/data COPYONLY)
-   ENDFOREACH (_currentDataFile )
+configure_file(${PROJECT_SOURCE_DIR}/src/rrc_eula_ChartSetsForOpenCPN.txt
+            ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+            
 
 ENDIF(APPLE)
+
 
 
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")

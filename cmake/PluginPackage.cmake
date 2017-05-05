@@ -150,25 +150,22 @@ INCLUDE(CPack)
 
 IF(APPLE)
 
- #  Copy a bunch of files so the Packages installer builder can find them
- #  relative to ${CMAKE_CURRENT_BINARY_DIR}
+ #  Copy a few generic files so the Packages installer builder can find them relative to ${CMAKE_CURRENT_BINARY_DIR}
  #  This avoids absolute paths in the chartdldr_pi.pkgproj file
 
-configure_file(${PROJECT_SOURCE_DIR}/cmake/gpl.txt
-            ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/cmake/gpl.txt ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
 
-configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/pkg_background.jpg
-            ${CMAKE_CURRENT_BINARY_DIR}/pkg_background.jpg COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/pkg_background.jpg ${CMAKE_CURRENT_BINARY_DIR}/pkg_background.jpg COPYONLY)
 
             
   # This is a bit of a hack...
   # We need to copy the helper utility to the binary build directory so that the PACKAGES scripts will find it.
   # Would be nicer if this could be specified from the top level cmake file, so that this file remains generic...
-configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/oeserverd
-            ${CMAKE_CURRENT_BINARY_DIR}/oeserverd COPYONLY)
+#configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/oeserverd
+#            ${CMAKE_CURRENT_BINARY_DIR}/oeserverd COPYONLY)
 
-configure_file(${PROJECT_SOURCE_DIR}/src/rrc_eula_ChartSetsForOpenCPN.txt
-            ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+#configure_file(${PROJECT_SOURCE_DIR}/src/rrc_eula_ChartSetsForOpenCPN.txt
+#            ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
             
             
  # Patch the pkgproj.in file to make the output package name conform to Xxx-Plugin_x.x.pkg format
