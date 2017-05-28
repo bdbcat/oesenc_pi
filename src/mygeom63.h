@@ -88,7 +88,7 @@ public:
 
       //    Conversion parameters
       //    for (assummed linear) convertions from vertex_array points to easting/northing, metres from 0,0
-      //    To convert to lat/lon, use simple merctor equations
+      //    To convert to lat/lon, use simple mercator equations
       double            x_rate;
       double            x_offset;
       double            y_rate;
@@ -112,7 +112,7 @@ public:
         double      *p_vertex;              //  Pointer to vertex array, x,y,x,y.....
 
         double      minxt, minyt, maxxt, maxyt;
-        LLBBox       box;
+        LLBBox      tri_box;
         
         TriPrim     *p_next;                // chain link
 };
@@ -205,9 +205,12 @@ class PolyTessGeo
         void Set_OK( bool bok ){ m_bOK = bok;}
         void SetPPGHead( PolyTriGroup *head){ m_ppg_head = head; }
         void SetnVertexMax( int max ){ m_nvertex_max = max; }
+
+        Extended_Geometry     *m_pxgeom;
+        double         m_ref_lat, m_ref_lon;
         
     private:
-        int BuildTessGL(void);
+        int BuildTessGLFromXG(void);
         int my_bufgets( char *buf, int buf_len_max );
 
 
@@ -216,7 +219,6 @@ class PolyTessGeo
 
         bool            m_bOK;
 
-        Extended_Geometry     *m_pxgeom;
 
         double         xmin, xmax, ymin, ymax;
         PolyTriGroup    *m_ppg_head;                  // head of a PolyTriGroup chain
@@ -231,7 +233,6 @@ class PolyTessGeo
         char           *m_buf_ptr;                   // used to read passed SENC record
         int            m_nrecl;
 
-        double         m_ref_lat, m_ref_lon;
 
 };
 

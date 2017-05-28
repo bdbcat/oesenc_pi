@@ -65,6 +65,10 @@
 #define new DEBUG_NEW
 #endif
 
+#ifdef __OCPN__ANDROID__
+#include "qdebug.h"
+#endif
+
 extern s52plib *ps52plib;
 extern wxString g_csv_locn;
 extern float g_GLMinCartographicLineWidth;
@@ -6778,8 +6782,11 @@ void s52plib::RenderToBufferFilledPolygon( ObjRazRules *rzRules, S57Obj *obj, S5
     }
 
     if( obj->pPolyTessGeo ) {
-        if( !rzRules->obj->pPolyTessGeo->IsOk() ) // perform deferred tesselation
-        rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        if( !rzRules->obj->pPolyTessGeo->IsOk() ){ // perform deferred tesselation
+            rzRules->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( rzRules->obj );
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+                rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        }
 
         wxPoint *pp3 = (wxPoint *) malloc( 3 * sizeof(wxPoint) );
         wxPoint *ptp = (wxPoint *) malloc(
@@ -6791,12 +6798,12 @@ void s52plib::RenderToBufferFilledPolygon( ObjRazRules *rzRules, S57Obj *obj, S5
         while( p_tp ) {
             LLBBox box;
             if(!rzRules->obj->m_chart_context->chart) {          // This is a PlugIn Chart
-                box = p_tp->box;
+                box = p_tp->tri_box;
                 //LegacyTriPrim *p_ltp = (LegacyTriPrim *)p_tp;
                 //box.Set(p_ltp->miny, p_ltp->minx, p_ltp->maxy, p_ltp->maxx);
             }
             else
-                box = p_tp->box;
+                box = p_tp->tri_box;
 
             if(!BBView.IntersectOut(box)) {
                 //      Get and convert the points
@@ -7015,8 +7022,11 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         }
 
         // perform deferred tesselation
-        if( !rzRules->obj->pPolyTessGeo->IsOk() )
-            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        if( !rzRules->obj->pPolyTessGeo->IsOk() ){
+            rzRules->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( rzRules->obj );
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+                rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        }
 
         //  Get the vertex data
         PolyTriGroup *ppg_vbo = rzRules->obj->pPolyTessGeo->Get_PolyTriGroup_head();
@@ -7130,10 +7140,10 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
             if(!rzRules->obj->m_chart_context->chart) {          // This is a PlugIn Chart
 //                LegacyTriPrim *p_ltp = (LegacyTriPrim *)p_tp;
 //                box.Set(p_ltp->miny, p_ltp->minx, p_ltp->maxy, p_ltp->maxx);
-                box = p_tp->box;
+                box = p_tp->tri_box;
             }
             else
-                box = p_tp->box;
+                box = p_tp->tri_box;
 
             if(!BBView.IntersectOut(box)) {
                 if(b_useVBO) {
@@ -7334,8 +7344,11 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     wxPoint *ptp;
     if( rzRules->obj->pPolyTessGeo ) {
-        if( !rzRules->obj->pPolyTessGeo->IsOk() ) // perform deferred tesselation
-            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        if( !rzRules->obj->pPolyTessGeo->IsOk() ){ // perform deferred tesselation
+            rzRules->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( rzRules->obj );
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+                rzRules->obj->pPolyTessGeo->BuildDeferredTess();
+        }
 
         ptp = (wxPoint *) malloc(
                 ( rzRules->obj->pPolyTessGeo->GetnVertexMax() + 1 ) * sizeof(wxPoint) );
@@ -7387,10 +7400,10 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
             if(!rzRules->obj->m_chart_context->chart) {          // This is a PlugIn Chart
 //                LegacyTriPrim *p_ltp = (LegacyTriPrim *)p_tp;
 //                box.Set(p_ltp->miny, p_ltp->minx, p_ltp->maxy, p_ltp->maxx);
-                box = p_tp->box;
+                box = p_tp->tri_box;
             }
             else
-                box = p_tp->box;
+                box = p_tp->tri_box;
 
             if(!BBView.IntersectOut(box)) {
                 //      Get and convert the points
@@ -7614,7 +7627,7 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 
     TriPrim *p_tp = ppg->tri_prim_head;
     while( p_tp ) {
-        if(!BBView.IntersectOut( p_tp->box)) {
+        if(!BBView.IntersectOut( p_tp->tri_box)) {
             //      Get and convert the points
 
             wxPoint *pr = ptp;
@@ -9073,6 +9086,240 @@ void s52plib::GetPixPointSingleNoRotate( int pixx, int pixy, double *plat, doubl
 }
 
 
+Extended_Geometry *s52plib::buildExtendedGeom( S57Obj *obj )
+{
+    Extended_Geometry *xG = new Extended_Geometry;
+    
+    //  Get the countours from the line segment arrays already present in the object
+    
+    // Calculate the size of the resulting contour points buffer
+    int max_points = 0;
+    if( obj->m_n_edge_max_points > 0 )
+        max_points = obj->m_n_edge_max_points;
+    else{
+        line_segment_element *lsa = obj->m_ls_list;
+        
+        while(lsa){
+            
+            if(lsa->ls_type == TYPE_EE)
+                max_points += lsa->pedge->nCount;
+            else
+                max_points += 2;
+            
+            lsa = lsa->next;
+        }
+    }
+        
+    //  Allocate some storage for ccontour points
+    double *ptpf = (double *) malloc( ( max_points *2 ) * sizeof(double) );
+    double *pfRun = ptpf;
+    
+    unsigned char *vbo_point = (unsigned char *)obj->m_chart_context->chart->GetLineVertexBuffer();;
+    line_segment_element *ls = obj->m_ls_list;
+    
+    unsigned int index = 0;
+    int nls = 0;
+    float lpx, lpy, fpx, fpy;
+    float *ppt;
+    
+    int direction = 1;
+    int ndraw = 0;
+    wxArrayInt contourCountArray;
+    
+    while(ls){
+            
+            //  We need to get the direction for the first segment
+            if(index == 0){
+                
+                // But we only care if there is another segment following
+                if(ls->next){
+                    
+                    int nPoints;
+                    // fetch the first point
+                    if(ls->ls_type == TYPE_EE){
+                        ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
+                        nPoints = ls->pedge->nCount;
+                    }
+                    else{
+                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                        nPoints = 2;
+                    }
+                    float pfirstx = ppt[1];
+                    float pfirsty = ppt[0];
+                    
+                    
+                    // fetch the last point
+                    int index_last = (nPoints-1) * 2;
+                    float plastx = ppt[index_last +1];
+                    float plasty = ppt[index_last];
+                    
+                    //  Now fetch the first and last point of the following segment
+                    
+                    int nPoints_next;
+                    line_segment_element *lsn = ls->next;
+                    
+                    // fetch the first point
+                    if(lsn->ls_type == TYPE_EE){
+                        ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
+                        nPoints_next = lsn->pedge->nCount;
+                    }
+                    else{
+                        ppt = (float *)(vbo_point + lsn->pcs->vbo_offset);
+                        nPoints_next = 2;
+                    }
+                    float pfirstx_next = ppt[1];
+                    float pfirsty_next = ppt[0];
+                    
+                
+                    // fetch the last point
+                    int index_last_next = (nPoints_next-1) * 2;
+                    float plastx_next = ppt[index_last_next +1];
+                    float plasty_next = ppt[index_last_next];
+                    
+                     
+                    // Now find the correct match
+                    // That is, what order(direction) of the first segmenta allows direct hookup to the next segment
+                    // we don't care about the direction of the next segment, only that it can be connected
+                    
+                    if( (fabs(plastx - pfirstx_next) < .05) && (fabs(plasty - pfirsty_next) < .05) ){
+                        fpx = pfirstx;
+                        fpy = pfirsty;
+                        direction = 1;
+                    }
+                    
+                    else if( (fabs(plastx - plastx_next) < .05) && (fabs(plasty - plasty_next) < .05) ){
+                        direction = 1;
+                        fpx = pfirstx;
+                        fpy = pfirsty;
+                    }
+                    else{
+                        direction = -1;
+                        fpx = plastx;
+                        fpy = plasty;
+                    }
+                }
+            }
+            
+          
+            //transcribe the segment in the proper order into the output buffer
+            int nPoints;
+            // fetch the first point
+            if(ls->ls_type == TYPE_EE){
+                ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
+                nPoints = ls->pedge->nCount;
+                
+            }
+            else{
+                ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                nPoints = 2;
+            }
+            
+            
+            if(direction == 1){
+                int vbo_index = 0;
+                for(int ip=0 ; ip < nPoints ; ip++){
+                    *pfRun++ = ppt[vbo_index];
+                    *pfRun++ = ppt[vbo_index + 1];
+                    nls++;
+                    index++;
+                    
+                    lpy = ppt[vbo_index];
+                    lpx = ppt[vbo_index + 1];
+                    vbo_index += 2;
+                }
+            }
+            else{
+                int vbo_index = (nPoints-1) * 2;
+                for(int ip=0 ; ip < nPoints ; ip++){
+                    *pfRun++ = ppt[vbo_index];
+                    *pfRun++ = ppt[vbo_index + 1];
+                    nls++;
+                    index++;
+                    
+                    lpy = ppt[vbo_index];
+                    lpx = ppt[vbo_index + 1];
+                    vbo_index -= 2;
+                }
+            }
+            
+           
+        
+        // inspect the next segment to see if it can be connected, or if the chain breaks
+        if(ls->next){
+            
+            int nPoints_next;
+            line_segment_element *lsn = ls->next;
+            // fetch the first point
+            if(lsn->ls_type == TYPE_EE){
+                ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
+                nPoints_next = lsn->pedge->nCount;
+            }
+            else{
+                ppt = (float *)(vbo_point + lsn->pcs->vbo_offset);
+                nPoints_next = 2;
+            }
+            
+            float pfirstx_next = ppt[1];
+            float pfirsty_next = ppt[0];
+            
+            // fetch the last point
+            int index_last_next = (nPoints_next-1) * 2;
+            float plastx_next = ppt[index_last_next +1];
+            float plasty_next = ppt[index_last_next];
+            
+            
+            // try to match a point in this segment with the last point in the previous segment, and set direction for the next loop
+            
+            if( (fabs(lpx - pfirstx_next) < 0.05) &&  (fabs(lpy - pfirsty_next) < 0.05) )
+                direction = 1;
+
+            else if( (fabs(lpx - plastx_next) < 0.05) &&  (fabs(lpy - plasty_next) < 0.05) )
+                direction = -1;
+            
+            else{
+                
+                // Is the contour closed?
+                if( (fabs(lpx - fpx) < 0.05) &&  (fabs(lpy - fpy) < 0.05) )
+                    int yyp = 4;
+                    
+                // Store the point count for this contour
+                contourCountArray.Add(nls);
+                
+                
+                nls = 0;
+                index = 0;
+            }
+        }
+        else{
+            // no more segments, so capture the point count for the last segment,
+            // and record this contour
+            
+            // Is the contour closed?
+            if( (fabs(lpx - fpx) < 0.05) &&  (fabs(lpy - fpy) < 0.05) )
+                int yyp = 4;
+            
+            contourCountArray.Add(nls);
+            
+            
+        }
+      
+        ls = ls->next;
+    }
+    
+    //  Fill in the Extended_Geometry parameters....
+
+    xG->n_contours = contourCountArray.GetCount();
+    xG->contour_array = (int *)malloc(xG->n_contours * sizeof(int));
+    for(int i=0 ; i < xG->n_contours ; i++){
+        xG->contour_array[i] = contourCountArray[i];
+    }
+    
+    xG->vertex_array = (wxPoint2DDouble *)ptpf;
+    
+    return xG;
+}
+
+
 void DrawAALine( wxDC *pDC, int x0, int y0, int x1, int y1, wxColour clrLine, int dash, int space )
 {
 
@@ -9184,6 +9431,15 @@ void RenderFromHPGL::SetPen()
         glColor4ub( penColor.Red(), penColor.Green(), penColor.Blue(), transparency );
         int line_width = wxMax(g_GLMinSymbolLineWidth, (float) penWidth * 0.7);
         glLineWidth( line_width );
+        
+#ifdef __OCPN__ANDROID__
+        //  Scale the pen width dependent on the platform display resolution
+        float nominal_line_width_pix = wxMax(1.0, floor(ps52plib->GetPPMM() / 5.0));             //0.2 mm nominal, but not less than 1 pixel
+        //qDebug() << nominal_line_width_pix;
+        line_width =  wxMax(g_GLMinSymbolLineWidth, (float) penWidth * nominal_line_width_pix);
+        glLineWidth( line_width );
+#endif
+        
 #ifndef __OCPN__ANDROID__
         if(line_width >= 2)
             glEnable( GL_LINE_SMOOTH );

@@ -82,8 +82,11 @@
 #ifdef __OCPN__ANDROID__
 #include <QtAndroidExtras/QAndroidJniObject>
 #include "qdebug.h"
+wxString callActivityMethod_vs(const char *method);
 wxString callActivityMethod_ss(const char *method, wxString parm);
 wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
+wxString callActivityMethod_s5s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5);
+wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5, wxString parm6);
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
 void androidShowBusyIcon();
 void androidHideBusyIcon();
@@ -615,10 +618,20 @@ int oesenc_pi::Init(void)
     g_benable_screenlog = g_buser_enable_screenlog;
     
     g_ChartInfoArray.Clear();
-    
-    return (INSTALLS_PLUGIN_CHART_GL | WANTS_PLUGIN_MESSAGING
-    | WANTS_OVERLAY_CALLBACK | WANTS_OPENGL_OVERLAY_CALLBACK | WANTS_PREFERENCES );
+   
+    int flags =  INSTALLS_PLUGIN_CHART_GL |
+                 WANTS_PLUGIN_MESSAGING   |
+                 WANTS_OVERLAY_CALLBACK   |
+                 WANTS_OPENGL_OVERLAY_CALLBACK;
 
+#ifdef __OCPN__ANDROID__
+    flags |= INSTALLS_TOOLBOX_PAGE;
+#else    
+    flags |= WANTS_PREFERENCES;
+#endif
+    
+    return flags;
+    
 }
 
 bool oesenc_pi::DeInit(void)
@@ -627,6 +640,12 @@ bool oesenc_pi::DeInit(void)
     
     delete pinfoDlg;
     pinfoDlg = NULL;
+    
+    if( m_pOptionsPage )
+    {
+        if( DeleteOptionsPage( m_pOptionsPage ) )
+            m_pOptionsPage = NULL;
+    }
     
     m_class_name_array.Clear();
     
@@ -831,236 +850,6 @@ bool oesenc_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 
 //      Options Dialog Page management
 
-void oesenc_pi::OnSetupOptions(){
-#if 0
-    //  Create the S63 Options panel, and load it
-
-    m_s63chartPanelWinTop = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _T("S63 Charts") );
-
-    wxBoxSizer *chartPanelTopSizer = new wxBoxSizer( wxHORIZONTAL );
-    m_s63chartPanelWinTop->SetSizer( chartPanelTopSizer );
-
-    wxBoxSizer* chartPanelTopSizerV = new wxBoxSizer( wxVERTICAL );
-    chartPanelTopSizer->Add(chartPanelTopSizerV, wxEXPAND);
-
-    m_s63NB = new wxNotebook( m_s63chartPanelWinTop, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_TOP );
-    chartPanelTopSizerV->Add( m_s63NB, 0, wxEXPAND, 0 );
-
-    m_s63chartPanelWin = new wxPanel(m_s63NB, wxID_ANY);
-    m_s63NB->AddPage(m_s63chartPanelWin, _T("Chart Cells"), true );
-
-    wxBoxSizer *chartPanelSizer = new wxBoxSizer( wxVERTICAL );
-    m_s63chartPanelWin->SetSizer( chartPanelSizer );
-
-    int border_size = 2;
-
-    wxBoxSizer* cmdButtonSizer = new wxBoxSizer( wxVERTICAL );
-    chartPanelSizer->Add( cmdButtonSizer, 0, wxALL, border_size );
-
-    //  Chart cell permit listbox, etc
-    wxStaticBoxSizer* sbSizerLB= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _T("Installed S63 Cell Permits") ), wxVERTICAL );
-
-    wxBoxSizer* bSizer17;
-    bSizer17 = new wxBoxSizer( wxHORIZONTAL );
-
-    m_permit_list = new OCPNPermitList( m_s63chartPanelWin );
-
-    wxListItem col0;
-    col0.SetId(0);
-    col0.SetText( _T("Cell Name") );
-    m_permit_list->InsertColumn(0, col0);
-
-    wxListItem col1;
-    col1.SetId(1);
-    col1.SetText( _T("Data Server ID") );
-    m_permit_list->InsertColumn(1, col1);
-
-    wxListItem col2;
-    col2.SetId(2);
-    col2.SetText( _T("Expiration Date") );
-    m_permit_list->InsertColumn(2, col2);
-
-    wxString permit_dir = GetPermitDir();
-    m_permit_list->BuildList( permit_dir );
-
-    bSizer17->Add( m_permit_list, 1, wxALL|wxEXPAND, 5 );
-
-    wxBoxSizer* bSizer18;
-    bSizer18 = new wxBoxSizer( wxVERTICAL );
-
-    m_buttonImportPermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Import Cell Permits..."), wxDefaultPosition, wxDefaultSize, 0 );
-    bSizer18->Add( m_buttonImportPermit, 0, wxALL, 5 );
-
-    m_buttonRemovePermit = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Remove Permits"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_buttonRemovePermit->Enable( false );
-    bSizer18->Add( m_buttonRemovePermit, 0, wxALL, 5 );
-
-    m_buttonImportCells = new wxButton( m_s63chartPanelWin, wxID_ANY, _T("Import Charts/Updates..."), wxDefaultPosition, wxDefaultSize, 0 );
-    bSizer18->Add( m_buttonImportCells, 0, wxALL, 5 );
-
-    bSizer17->Add( bSizer18, 0, wxEXPAND, 5 );
-    sbSizerLB->Add( bSizer17, 1, wxEXPAND, 5 );
-
-    chartPanelSizer->Add( sbSizerLB, 0, wxEXPAND, 5 );
-    chartPanelSizer->AddSpacer( 5 );
-
-
-    if(g_pScreenLog) {
-        g_pScreenLog->Close();
-        delete g_pScreenLog;
-        g_pScreenLog = NULL;
-    }
-    g_backchannel_port++;
-
-    wxStaticBoxSizer* sbSizerSL= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelWin, wxID_ANY, _T("S63_pi Log") ), wxVERTICAL );
-
-    g_pPanelScreenLog = new S63ScreenLog( m_s63chartPanelWin );
-    sbSizerSL->Add( g_pPanelScreenLog, 1, wxEXPAND, 5 );
-
-    chartPanelSizer->Add( sbSizerSL, 0, wxEXPAND, 5 );
-
-    g_pPanelScreenLog->SetMinSize(wxSize(-1, 200));
-
-    m_s63chartPanelWin->Layout();
-
-
-    //  Build the "Keys/Permits" tab
-
-    m_s63chartPanelKeys = new wxPanel(m_s63NB, wxID_ANY);
-    m_s63NB->AddPage(m_s63chartPanelKeys, _T("Keys/Permits"), false );
-
-    wxBoxSizer *chartPanelSizerKeys = new wxBoxSizer( wxVERTICAL );
-    m_s63chartPanelKeys->SetSizer( chartPanelSizerKeys );
-
-    //  Certificate listbox, etc
-    wxStaticBoxSizer* sbSizerLBCert= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("Installed S63 Certificates/Keys") ), wxVERTICAL );
-
-    wxBoxSizer* bSizer17C = new wxBoxSizer( wxHORIZONTAL );
-
-    m_cert_list = new OCPNCertificateList( m_s63chartPanelKeys );
-
-    wxListItem col0c;
-    col0c.SetId(0);
-    col0c.SetText( _T("Certificate Name") );
-    m_cert_list->InsertColumn(0, col0c);
-
-    #if 0
-    wxListItem col1;
-    col1.SetId(1);
-    col1.SetText( _T("Data Server ID") );
-    m_permit_list->InsertColumn(1, col1);
-
-    wxListItem col2;
-    col2.SetId(2);
-    col2.SetText( _T("Expiration Date") );
-    m_permit_list->InsertColumn(2, col2);
-
-    #endif
-
-    m_cert_list->BuildList( GetCertificateDir() );
-
-
-    bSizer17C->Add( m_cert_list, 1, wxALL|wxFIXED_MINSIZE, 5 );
-
-    wxBoxSizer* bSizer18C = new wxBoxSizer( wxVERTICAL );
-
-    m_buttonImportCert = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("Import Certificate..."), wxDefaultPosition, wxDefaultSize, 0 );
-    bSizer18C->Add( m_buttonImportCert, 0, wxALL, 5 );
-
-    bSizer17C->Add( bSizer18C, 0, wxEXPAND, 5 );
-    sbSizerLBCert->Add( bSizer17C, 1, wxEXPAND, 5 );
-
-    chartPanelSizerKeys->Add( sbSizerLBCert, 0, wxEXPAND, 5 );
-    chartPanelSizerKeys->AddSpacer( 5 );
-
-    //  User Permit
-    wxStaticBoxSizer* sbSizerUP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("UserPermit") ), wxHORIZONTAL );
-    m_up_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(""));
-
-    if(g_userpermit.Len())
-        m_up_text->SetLabel( GetUserpermit() );
-    sbSizerUP->Add(m_up_text, wxEXPAND);
-
-    m_buttonNewUP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("New Userpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
-    sbSizerUP->Add( m_buttonNewUP, 0, wxALL | wxALIGN_RIGHT, 5 );
-
-    chartPanelSizerKeys->AddSpacer( 5 );
-    chartPanelSizerKeys->Add( sbSizerUP, 0, wxEXPAND, 5 );
-
-    //  Install Permit
-    wxStaticBoxSizer* sbSizerIP= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("InstallPermit") ), wxHORIZONTAL );
-    m_ip_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(""));
-
-    //if(g_installpermit.Len())
-    //    m_ip_text->SetLabel( GetInstallpermit() );
-    sbSizerIP->Add(m_ip_text, wxEXPAND);
-
-    m_buttonNewIP = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("New Installpermit..."), wxDefaultPosition, wxDefaultSize, 0 );
-    sbSizerIP->Add( m_buttonNewIP, 0, wxALL | wxALIGN_RIGHT, 5 );
-
-    chartPanelSizerKeys->AddSpacer( 5 );
-    chartPanelSizerKeys->Add( sbSizerIP, 0, wxEXPAND, 5 );
-
-    //  FPR File Permit
-    wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( m_s63chartPanelKeys, wxID_ANY, _T("System Identification") ), wxHORIZONTAL );
-    m_fpr_text = new wxStaticText(m_s63chartPanelKeys, wxID_ANY, _T(" "));
-    if(g_fpr_file.Len())
-        m_fpr_text->SetLabel( g_fpr_file );
-    sbSizerFPR->Add(m_fpr_text, wxEXPAND);
-
-    m_buttonNewFPR = new wxButton( m_s63chartPanelKeys, wxID_ANY, _T("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
-    sbSizerFPR->Add( m_buttonNewFPR, 0, wxALL | wxALIGN_RIGHT, 5 );
-
-    chartPanelSizerKeys->AddSpacer( 5 );
-    chartPanelSizerKeys->Add( sbSizerFPR, 0, wxEXPAND, 5 );
-
-
-
-    chartPanelSizerKeys->AddSpacer( 15 );
-    wxStaticLine *psl = new wxStaticLine(m_s63chartPanelKeys, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
-    chartPanelSizerKeys->Add( psl, 0, wxEXPAND, 5 );
-    chartPanelSizerKeys->AddSpacer( 15 );
-
-    m_cert_list->SetMinSize(wxSize(-1, 80));
-    m_s63chartPanelKeys->Layout();
-
-
-
-    //  Connect to Events
-    m_buttonImportPermit->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(s63_pi_event_handler::OnImportPermitClick), NULL, m_event_handler );
-
-    m_buttonRemovePermit->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(s63_pi_event_handler::OnRemovePermitClick), NULL, m_event_handler );
-
-    m_buttonImportCells->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-                                   wxCommandEventHandler(s63_pi_event_handler::OnImportCellsClick), NULL, m_event_handler );
-
-    m_buttonNewUP->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(s63_pi_event_handler::OnNewUserpermitClick), NULL, m_event_handler );
-
-    m_buttonNewIP->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-                            wxCommandEventHandler(s63_pi_event_handler::OnNewInstallpermitClick), NULL, m_event_handler );
-
-    m_permit_list->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED,
-                  wxListEventHandler( s63_pi_event_handler::OnSelectPermit ), NULL, m_event_handler );
-
-    m_buttonImportCert->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-                                  wxCommandEventHandler(s63_pi_event_handler::OnImportCertClick), NULL, m_event_handler );
-
-    m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-                            wxCommandEventHandler(s63_pi_event_handler::OnNewFPRClick), NULL, m_event_handler );
-
-#ifdef __WXMAC__
-    m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(s63_pi_event_handler::OnShowFPRClick), NULL, m_event_handler );
-#endif
-
-    g_benable_screenlog = true;
-
-    m_buttonImportPermit->SetFocus();
-#endif
-}
 
 void oesenc_pi::OnShowFPRClick( wxCommandEvent &event )
 {
@@ -1531,6 +1320,34 @@ void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
         
     }
     delete g_prefs_dialog;
+    g_prefs_dialog = NULL;
+}
+
+void oesenc_pi::ProcessChartManageResult( wxString result )
+{
+    if(g_prefs_dialog)
+       g_prefs_dialog->EndModal(0); 
+    
+    //qDebug() << result.mb_str();
+   
+    wxStringTokenizer st(result, _T(";"), wxTOKEN_DEFAULT);
+    while( st.HasMoreTokens() )
+    {
+        wxString dir = st.GetNextToken();
+        bool covered = false;
+        for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ ){
+            if( dir.StartsWith((GetChartDBDirArrayString().Item(i))) ) {
+                covered = true;
+                break;
+            }
+        }
+        if( !covered ){
+            AddChartDirectory( dir );
+            wxLogMessage(_T("osenc_pi adding chart directory: ") + dir);
+            //qDebug() << dir.mb_str();
+            
+        }
+    }
 }
 
 #if 0
@@ -2439,7 +2256,7 @@ bool validateUserKey( wxString sencFileName)
         b_Set = false;
         g_UserKey = GetUserKey( LEGEND_FIRST, true );
     }
-    
+        
     // Try to read the header of the supplied oeSENC file name
     Osenc senc;
     senc.setKey(g_UserKey);
@@ -3018,6 +2835,47 @@ bool CheckPendingJNIException()
     
 }
 
+wxString callActivityMethod_vs(const char *method)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        //qDebug() << "Activity is not valid";
+        return return_string;
+    }
+    
+    //  Call the desired method
+    QAndroidJniObject data = activity.callObjectMethod(method, "()Ljava/lang/String;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    jstring s = data.object<jstring>();
+    //qDebug() << s;
+    
+    if(s){
+        //  Need a Java environment to decode the resulting string
+        if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+            //qDebug() << "GetEnv failed.";
+        }
+        else {
+            const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+            return_string = wxString(ret_string, wxConvUTF8);
+        }
+    }
+    
+    return return_string;
+}
+
+
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2)
 {
     if(CheckPendingJNIException())
@@ -3120,6 +2978,126 @@ wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString par
         
 }
 
+wxString callActivityMethod_s5s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        return return_string;
+    }
+    
+    //  Need a Java environment to decode the resulting string
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+        return _T("jenv Error");
+    }
+    
+    wxCharBuffer p1b = parm1.ToUTF8();
+    jstring p1 = (jenv)->NewStringUTF(p1b.data());
+    
+    wxCharBuffer p2b = parm2.ToUTF8();
+    jstring p2 = (jenv)->NewStringUTF(p2b.data());
+    
+    wxCharBuffer p3b = parm3.ToUTF8();
+    jstring p3 = (jenv)->NewStringUTF(p3b.data());
+    
+    wxCharBuffer p4b = parm4.ToUTF8();
+    jstring p4 = (jenv)->NewStringUTF(p4b.data());
+    
+    wxCharBuffer p5b = parm5.ToUTF8();
+    jstring p5 = (jenv)->NewStringUTF(p5b.data());
+    
+    QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                                                       p1, p2, p3, p4, p5);
+    (jenv)->DeleteLocalRef(p1);
+    (jenv)->DeleteLocalRef(p2);
+    (jenv)->DeleteLocalRef(p3);
+    (jenv)->DeleteLocalRef(p4);
+    (jenv)->DeleteLocalRef(p5);
+    
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    jstring s = data.object<jstring>();
+        
+    if( (jenv)->GetStringLength( s )){
+        const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+        return_string = wxString(ret_string, wxConvUTF8);
+    }
+        
+    return return_string;
+        
+}
+
+wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5, wxString parm6)
+{
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    JNIEnv* jenv;
+    
+    wxString return_string;
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",
+                                                                           "activity", "()Landroid/app/Activity;");
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    if ( !activity.isValid() ){
+        return return_string;
+    }
+    
+    //  Need a Java environment to decode the resulting string
+    if (java_vm->GetEnv( (void **) &jenv, JNI_VERSION_1_6) != JNI_OK) {
+        return _T("jenv Error");
+    }
+    
+    wxCharBuffer p1b = parm1.ToUTF8();
+    jstring p1 = (jenv)->NewStringUTF(p1b.data());
+    
+    wxCharBuffer p2b = parm2.ToUTF8();
+    jstring p2 = (jenv)->NewStringUTF(p2b.data());
+    
+    wxCharBuffer p3b = parm3.ToUTF8();
+    jstring p3 = (jenv)->NewStringUTF(p3b.data());
+    
+    wxCharBuffer p4b = parm4.ToUTF8();
+    jstring p4 = (jenv)->NewStringUTF(p4b.data());
+    
+    wxCharBuffer p5b = parm5.ToUTF8();
+    jstring p5 = (jenv)->NewStringUTF(p5b.data());
+
+    wxCharBuffer p6b = parm6.ToUTF8();
+    jstring p6 = (jenv)->NewStringUTF(p6b.data());
+    
+    QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                                                       p1, p2, p3, p4, p5, p6);
+    (jenv)->DeleteLocalRef(p1);
+    (jenv)->DeleteLocalRef(p2);
+    (jenv)->DeleteLocalRef(p3);
+    (jenv)->DeleteLocalRef(p4);
+    (jenv)->DeleteLocalRef(p5);
+    (jenv)->DeleteLocalRef(p6);
+    
+    if(CheckPendingJNIException())
+        return _T("NOK");
+    
+    jstring s = data.object<jstring>();
+    
+    if( (jenv)->GetStringLength( s )){
+        const char *ret_string = (jenv)->GetStringUTFChars(s, NULL);
+        return_string = wxString(ret_string, wxConvUTF8);
+    }
+    
+    return return_string;
+    
+}
+
 
 wxString callActivityMethod_ss(const char *method, wxString parm)
 {
@@ -3210,6 +3188,11 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
 	m_buttonShowFPR->Enable( g_fpr_file != wxEmptyString );
 
 	m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
+        
+#ifdef __OCPN__ANDROID__
+        m_buttonShowFPR->Hide();
+#endif
+        
         m_sdbSizer1 = new wxStdDialogButtonSizer();
 //         m_sdbSizer1OK = new wxButton( this, wxID_OK );
 //         m_sdbSizer1->AddButton( m_sdbSizer1OK );
@@ -3253,16 +3236,49 @@ void oesencPrefsDialog::OnPrefsOkClick(wxCommandEvent& event)
 
 // An Event handler class to catch events from UI dialog
 //      Implementation
+#define ANDROID_EVENT_TIMER 4392
+#define ACTION_ARB_RESULT_POLL 1
+
+BEGIN_EVENT_TABLE ( oesenc_pi_event_handler, wxEvtHandler )
+EVT_TIMER ( ANDROID_EVENT_TIMER, oesenc_pi_event_handler::onTimerEvent )
+END_EVENT_TABLE()
 
 oesenc_pi_event_handler::oesenc_pi_event_handler(oesenc_pi *parent)
 {
     m_parent = parent;
+    m_eventTimer.SetOwner( this, ANDROID_EVENT_TIMER );
+    m_timerAction = -1;
+    
 }
 
 oesenc_pi_event_handler::~oesenc_pi_event_handler()
 {
 }
 
+void oesenc_pi_event_handler::onTimerEvent(wxTimerEvent &event)
+{
+#ifdef __OCPN__ANDROID__    
+    if(ACTION_ARB_RESULT_POLL == m_timerAction){
+        wxString status = callActivityMethod_vs("getArbActivityStatus");
+        //qDebug() << status.mb_str();
+        
+        if(status == _T("COMPLETE")){
+            m_eventTimer.Stop();
+            m_timerAction = -1;
+            
+            qDebug() << "Got COMPLETE";
+            wxString result = callActivityMethod_vs("getArbActivityResult");
+            qDebug() << result.mb_str();
+            processArbResult(result);
+        }
+    }
+#endif    
+}
+
+void oesenc_pi_event_handler::processArbResult( wxString result )
+{
+    m_parent->ProcessChartManageResult(result);
+}
 
 
 void oesenc_pi_event_handler::OnShowFPRClick( wxCommandEvent &event )
@@ -3280,7 +3296,7 @@ void oesenc_pi_event_handler::OnShowFPRClick( wxCommandEvent &event )
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 {
-    
+#ifndef __OCPN__ANDROID__    
     wxString msg = _("To obtain a User Key, you must generate a unique System Identifier File.\n");
     msg += _("This file is also known as a\"fingerprint\" file.\n");
     msg += _("The fingerprint file contains information to uniquely identifiy this computer.\n\n");
@@ -3487,6 +3503,134 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                 m_parent->Set_FPR();
            
     }
+#else
+
+        // Get XFPR from the oeserverda helper utility.
+        //  The target binary executable
+        wxString cmd = g_sencutil_bin;
+
+//  Set up the parameter passed as the local app storage directory, and append "cache/" to it
+        wxString dataLoc = *GetpPrivateApplicationDataLocation();
+        wxFileName fn(dataLoc);
+        wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        dataDir += _T("cache/");
+
+        wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+//  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        wxString libLocn = *GetpSharedDataLocation();
+        wxFileName fnl(libLocn);
+        fnl.RemoveLastDir();                // remove "files/"
+        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+
+        wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
+
+        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-f"), dataDir, libDir);
+
+        wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
+
+        
+        wxString sFPRPlus;              // The composite string we will pass to the management activity
+        
+        // Convert the XFPR to an ASCII string for transmission inter-process...
+        // Find the file...
+        wxArrayString files;
+        wxString lastFile = _T("NOT_FOUND");
+        time_t tmax = -1;
+        size_t nf = wxDir::GetAllFiles(dataDir, &files, _T("*.fpr"), wxDIR_FILES);
+        if(nf){
+            for(size_t i = 0 ; i < files.GetCount() ; i++){
+                qDebug() << "looking at FPR file: " << files[i].mb_str();
+                time_t t = ::wxFileModificationTime(files[i]);
+                if(t > tmax){
+                    tmax = t;
+                    lastFile = files[i];
+                }
+            }
+        }
+        
+        qDebug() << "last FPR file: " << lastFile.mb_str();
+            
+        //Read the file, convert to ASCII hex, and build a string
+        if(::wxFileExists(lastFile)){
+            wxString stringFPR;
+            wxFileInputStream stream(lastFile);
+            while(stream.IsOk() && !stream.Eof() ){
+                char c = stream.GetC();
+                if(!stream.Eof()){
+                    wxString sc;
+                    //sc.Printf(_T("%02X"), c);
+                    sc = wxString(c);
+                    stringFPR += sc;
+                }
+            }
+            sFPRPlus += _T("FPR:");                 // name        
+            sFPRPlus += stringFPR;                  // values
+            sFPRPlus += _T(";");                    // delimiter
+        }
+
+        // We can safely delete the FPR file now.
+        if(::wxFileExists(lastFile))
+            wxRemoveFile( lastFile );
+        
+        // Get and add other name/value pairs to the sFPRPlus string
+        sFPRPlus += _T("User:");
+        sFPRPlus += _T("testuser@yahoo.com");
+        sFPRPlus += _T(";");                    // delimiter
+        
+        sFPRPlus += _T("Cookie:");
+        sFPRPlus += _T("testCookie");
+        sFPRPlus += _T(";");                    // delimiter
+        
+        
+        qDebug() << "sFPRPlus: " << sFPRPlus.mb_str();
+        
+        m_eventTimer.Stop();
+            
+        
+        // Start the Chart management activity
+        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oplugininstaller"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("installLocation") );
+        
+        // Start a timer to poll for results.
+        m_timerAction = ACTION_ARB_RESULT_POLL;
+        m_eventTimer.Start(1000, wxTIMER_CONTINUOUS);
+        
+        
+#endif
+        
+}
+
+void oesenc_pi_event_handler::OnGetHWIDClick( wxCommandEvent &event )
+{
+#ifndef __OCPN__ANDROID__    
+
+#else
+
+        // Get XFPR from the oeserverda helper utility.
+        //  The target binary executable
+        wxString cmd = g_sencutil_bin;
+
+//  Set up the parameter passed as the local app storage directory, and append "cache/" to it
+        wxString dataLoc = *GetpPrivateApplicationDataLocation();
+        wxFileName fn(dataLoc);
+        wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+        wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+//  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        wxString libLocn = *GetpSharedDataLocation();
+        wxFileName fnl(libLocn);
+        fnl.RemoveLastDir();                // remove "files/"
+        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+
+        wxLogMessage(_T("oesenc_pi: Getting HWID: Starting: ") + cmd );
+
+        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-w"), dataDir, libDir);
+
+        wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
+
+#endif
+        
 }
 
 bool CheckEULA( void )
@@ -4424,6 +4568,108 @@ void androidHideBusyIcon()
     QAndroidJniObject data = activity.callObjectMethod("hideBusyCircle", "()Ljava/lang/String;");
         
 //    b_androidBusyShown = false;
+}
+#endif
+
+
+
+void oesenc_pi::OnSetupOptions( void )
+{
+    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oesenc Charts") );
+    if( ! m_pOptionsPage )
+    {
+        wxLogMessage( _T("Error: oesenc_pi::OnSetupOptions AddOptionsPage failed!") );
+        return;
+    }
+    wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
+    m_pOptionsPage->SetSizer( sizer );
+    
+    m_oesencpanel = new oesencPanel( this, m_pOptionsPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+    
+    m_pOptionsPage->InvalidateBestSize();
+    sizer->Add( m_oesencpanel, 1, wxALL | wxEXPAND );
+    m_oesencpanel->FitInside();
+}
+
+oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+{
+    
+    int border_size = 2;
+    
+    //   Main Sizer
+    wxBoxSizer* mainSizer = new wxBoxSizer( wxVERTICAL );
+    SetSizer( mainSizer );
+    
+    //  Buttons
+    mainSizer->AddSpacer(20);
+    wxBoxSizer* bSizerBtns = new wxBoxSizer( wxVERTICAL );
+    mainSizer->Add( bSizerBtns, 0, wxALL | wxEXPAND, border_size );
+    
+    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oesenc Chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    //m_bManageCharts->SetToolTip( _("Add a new chart catalog.") );
+    bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 5 );
+    bSizerBtns->AddSpacer(20);
+    
+    m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Vist O-Charts Website"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_bVisitOcharts->SetToolTip( _("Here you may order new oesenc chartsets.") );
+    bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 5 );
+    bSizerBtns->AddSpacer(20);
+    
+    m_bCreateHWID = new wxButton( this, wxID_ANY, _("Create HWID (Test, remove for Production)"), wxDefaultPosition, wxDefaultSize, 0 );
+    bSizerBtns->Add( m_bCreateHWID, 0, wxALL|wxEXPAND, 5 );
+    bSizerBtns->AddSpacer(20);
+    
+    this->Layout();
+    
+    
+    // Connect Events
+    m_bManageCharts->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( oesencPanel::ManageCharts ), NULL, this );
+    m_bVisitOcharts->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( oesencPanel::VisitOCharts ), NULL, this );
+    m_bCreateHWID->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( oesencPanel::CreateHWID ), NULL, this );
+
+}
+oesencPanel::~oesencPanel()
+{
+}
+
+void oesencPanel::ManageCharts( wxCommandEvent &evt )
+{
+    if(g_event_handler)
+        g_event_handler->OnNewFPRClick(evt);
+    
+}
+
+void oesencPanel::VisitOCharts( wxCommandEvent &evt )
+{
+}
+
+void oesencPanel::CreateHWID( wxCommandEvent &evt )
+{
+    if(g_event_handler)
+        g_event_handler->OnGetHWIDClick(evt);
+}
+
+
+#if 0
+IMPLEMENT_DYNAMIC_CLASS( oesencPanelImpl, oesencPanel )
+BEGIN_EVENT_TABLE( oesencPanelImpl, oesencPanel )
+END_EVENT_TABLE()
+
+oesencPanelImpl::~oesencPanelImpl()
+{
+}
+
+oesencPanelImpl::oesencPanelImpl( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
+        : oesencPanel( parent, id, pos, size, style )
+{
+}
+
+void oesencPanelImpl::ManageCharts( wxCommandEvent &evt )
+{
+}
+
+void oesencPanelImpl::VisitOCharts( wxCommandEvent &evt )
+{
 }
 #endif
 

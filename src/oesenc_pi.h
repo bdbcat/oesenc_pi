@@ -77,8 +77,8 @@ extern "C++" wxArrayString exec_SENCutil_sync( wxString cmd, bool bshowlog );
 class   oesenc_pi;
 class   OCPNPermitList;
 class   OCPNCertificateList;
-class oesenc_pi_event_handler;
-
+class   oesenc_pi_event_handler;
+class   oesencPanel;
 
 
 
@@ -139,15 +139,7 @@ public:
     void SetColorScheme(PI_ColorScheme cs);
     
     void SetPluginMessage(wxString &message_id, wxString &message_body);
-//     int ImportCellPermits( void );
-//     int RemoveCellPermit( void );
-//     int ImportCells( void );
-//     int ImportCert( void );
     void Set_FPR();
-
-//     void EnablePermitRemoveButton(bool benable){ m_buttonRemovePermit->Enable(benable); }
-//     void GetNewUserpermit(void);
-//     void GetNewInstallpermit(void);
 
     bool SaveConfig( void );
 
@@ -157,22 +149,17 @@ public:
     wxStaticText        *m_ip_text;
     wxStaticText        *m_fpr_text;
 
-//     wxScrolledWindow    *m_s63chartPanelWinTop;
-//     wxPanel             *m_s63chartPanelWin;
-//     wxPanel             *m_s63chartPanelKeys;
-//     wxNotebook          *m_s63NB;
-
     void OnNewFPRClick( wxCommandEvent &event );
     void OnShowFPRClick( wxCommandEvent &event );
-
+    
+    void ProcessChartManageResult(wxString result);
+    
 private:
 //    wxString GetPermitDir();
     bool ScrubChartinfoList( void );
     
-//    Catalog31 *CreateCatalog31(const wxString &file31);
 
     int ProcessCellPermit( wxString &permit, bool b_confirm_existing );
-//    int AuthenticateCell( const wxString & cell_file );
 
     bool LoadConfig( void );
 
@@ -201,6 +188,8 @@ private:
     bool                m_bSSE26_shown;
     TexFont             m_TexFontMessage;
     
+    wxScrolledWindow    *m_pOptionsPage;
+    oesencPanel         *m_oesencpanel;
     
 
 };
@@ -243,8 +232,19 @@ public:
     
     void OnNewFPRClick( wxCommandEvent &event );
     void OnShowFPRClick( wxCommandEvent &event );
-
+    void onTimerEvent(wxTimerEvent &event);
+    void OnGetHWIDClick( wxCommandEvent &event );
+    
+private:
+    void processArbResult( wxString result );
+    
     oesenc_pi  *m_parent;
+    
+    wxTimer     m_eventTimer;
+    int         m_timerAction;
+    
+    DECLARE_EVENT_TABLE()
+    
 };
 
 class S63ScreenLog : public wxWindow
@@ -490,6 +490,88 @@ private:
     
     //wxSize m_displaySize;
     
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class oesencPanel
+///////////////////////////////////////////////////////////////////////////////
+class oesencPanel : public wxPanel
+{
+private:
+    
+protected:
+    wxButton* m_bManageCharts;
+    wxButton* m_bVisitOcharts;
+    wxButton* m_bCreateHWID;
+    
+    // Virtual event handlers, overide them in your derived class
+    //virtual void DoHelp( wxCommandEvent& event ) { event.Skip(); }
+    virtual void ManageCharts( wxCommandEvent& event );
+    virtual void VisitOCharts( wxCommandEvent& event );    
+    virtual void CreateHWID( wxCommandEvent& event );    
+    
+    
+public:
+    oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id = wxID_ANY,
+                 const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL );
+        
+    virtual ~oesencPanel();
+    oesencPanel() { }
+};
+
+
+
+
+/** Implementing oesencPanel */
+class oesencPanelImpl : public oesencPanel
+{
+    friend class oesenc_pi;
+private:
+   
+protected:
+    // Handlers for oesencPanel events.
+    
+    void ManageCharts( wxCommandEvent& event );
+    void VisitOCharts( wxCommandEvent& event );
+    
+#if 0    
+    void            SetSource( int id );
+    void            SelectSource( wxListEvent& event );
+    void            AddSource( wxCommandEvent& event );
+    void            DeleteSource( wxCommandEvent& event );
+    void            EditSource( wxCommandEvent& event );
+    void            UpdateChartList( wxCommandEvent& event );
+    void            OnDownloadCharts( wxCommandEvent& event );
+    void            DownloadCharts( );
+    void            DoHelp( wxCommandEvent& event )
+    {
+        #ifdef __WXMSW__
+        wxLaunchDefaultBrowser( _T("file:///") + *GetpSharedDataLocation() + _T("plugins/chartdldr_pi/data/doc/index.html") );
+        #else
+        wxLaunchDefaultBrowser( _T("file://") + *GetpSharedDataLocation() + _T("plugins/chartdldr_pi/data/doc/index.html") );
+        #endif
+    }
+    void            UpdateAllCharts( wxCommandEvent& event );
+    void            OnShowLocalDir( wxCommandEvent& event );
+    void            OnPaint( wxPaintEvent& event );
+    void            OnLeftDClick( wxMouseEvent& event );
+    
+    void            CleanForm();
+    void            FillFromFile( wxString url, wxString dir, bool selnew = false, bool selupd = false );
+    
+    void            OnContextMenu( wxMouseEvent& event );
+    void            SetBulkUpdate( bool bulk_update );
+#endif    
+    
+public:
+    oesencPanelImpl() { }
+    ~oesencPanelImpl();
+    oesencPanelImpl( oesenc_pi* plugin, wxWindow* parent, wxWindowID id = wxID_ANY, 
+                     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+    
+private:
+    DECLARE_DYNAMIC_CLASS( oesencPanelImpl )
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

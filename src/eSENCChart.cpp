@@ -920,9 +920,14 @@ int eSENCChart::Init( const wxString& name, int init_flags )
         m_SENCFileName = name;
         ret_val = PostInit( init_flags, global_color_scheme );
     }
-        
-      s_PI_bInS57--;
-      return ret_val;
+    
+    // On any error, allow a new reload of UserKey from ChartInfo files
+    // presumably coming from another directory.
+    if(ret_val != PI_INIT_OK)
+        g_bUserKeyHintTaken = false;
+    
+    s_PI_bInS57--;
+    return ret_val;
 }
 
 
@@ -5634,7 +5639,7 @@ bool eSENCChart::IsPointInObjArea( float lat, float lon, float select_radius, S5
 {
     bool ret = false;
     
-    if( obj->pPolyTessGeo ) {
+    if( obj->pPolyTessGeo && obj->pPolyTessGeo->IsOk()) {               // do not return "deferred tesselation" objects.
         
         PolyTriGroup *ppg = ((PolyTessGeo *)obj->pPolyTessGeo)->Get_PolyTriGroup_head();
         
@@ -5650,7 +5655,7 @@ bool eSENCChart::IsPointInObjArea( float lat, float lon, float select_radius, S5
        
         while( pTP ) {
             //  Coarse test
-            if( pTP->box.Contains( lat, lon ) ) {
+            if( pTP->tri_box.Contains( lat, lon ) ) {
                 
                 if(ppg->data_type == DATA_TYPE_DOUBLE) {
                     
@@ -5779,110 +5784,6 @@ bool eSENCChart::IsPointInObjArea( float lat, float lon, float select_radius, S5
         
     }           // if pPolyTessGeo
  
-#if 0
-    else if( obj->pPolyTrapGeo ) {
-        if( !obj->pPolyTrapGeo->IsOk() ) obj->pPolyTrapGeo->BuildTess();
-        
-        PolyTrapGroup *ptg = obj->pPolyTrapGeo->Get_PolyTrapGroup_head();
-        
-        //  Polygon geometry is carried in SM coordinates, so...
-        //  make the hit test thus.
-        //  However, since PolyTrapGeo geometry is (always??) in cm-93 coordinates, convert to sm as necessary
-        double easting, northing;
-        toSM( lat, lon, ref_lat, ref_lon, &easting, &northing );
-        
-        int ntraps = ptg->ntrap_count;
-        trapz_t *ptraps = ptg->trap_array;
-        MyPoint *segs = (MyPoint *) ptg->ptrapgroup_geom; //TODO convert MyPoint to wxPoint2DDouble globally
-        
-        MyPoint pvert_list[4];
-        
-        double y_rate = obj->y_rate;
-        double y_origin = obj->y_origin;
-        
-        for( int i = 0; i < ntraps; i++, ptraps++ ) {
-            //      Y test
-            
-            double hiy = ( ptraps->hiy * y_rate ) + y_origin;
-            if( northing > hiy ) continue;
-            
-            double loy = ( ptraps->loy * y_rate ) + y_origin;
-            if( northing < loy ) continue;
-            
-            //      Use the segment endpoints to calculate the corners of a trapezoid
-            int lseg = ptraps->ilseg;
-            int rseg = ptraps->irseg;
-            
-            //    Left edge
-            double xmax = segs[lseg].x;
-            double xmin = segs[lseg + 1].x;
-            
-            double ymax = segs[lseg].y;
-            double ymin = segs[lseg + 1].y;
-            
-            double xt, yt, xca, xcb;
-            
-            if( ymax < ymin ) {
-                xt = xmin;
-                xmin = xmax;
-                xmax = xt;                // interchange min/max
-                yt = ymin;
-                ymin = ymax;
-                ymax = yt;
-            }
-            
-            if( xmin == xmax ) {
-                xca = xmin;
-                xcb = xmin;
-            } else {
-                double slope = ( ymax - ymin ) / ( xmax - xmin );
-                xca = xmin + ( ptraps->loy - ymin ) / slope;
-                xcb = xmin + ( ptraps->hiy - ymin ) / slope;
-            }
-            
-            pvert_list[0].x = ( xca * obj->x_rate ) + obj->x_origin;
-            pvert_list[0].y = loy;
-            
-            pvert_list[1].x = ( xcb * obj->x_rate ) + obj->x_origin;
-            pvert_list[1].y = hiy;
-            
-            //    Right edge
-            xmax = segs[rseg].x;
-            xmin = segs[rseg + 1].x;
-            ymax = segs[rseg].y;
-            ymin = segs[rseg + 1].y;
-            
-            if( ymax < ymin ) {
-                xt = xmin;
-                xmin = xmax;
-                xmax = xt;
-                yt = ymin;
-                ymin = ymax;
-                ymax = yt;
-            }
-            
-            if( xmin == xmax ) {
-                xca = xmin;
-                xcb = xmin;
-            } else {
-                double slope = ( ymax - ymin ) / ( xmax - xmin );
-                xca = xmin + ( ptraps->hiy - ymin ) / slope;
-                xcb = xmin + ( ptraps->loy - ymin ) / slope;
-            }
-            
-            pvert_list[2].x = ( xca * obj->x_rate ) + obj->x_origin;
-            pvert_list[2].y = hiy;
-            
-            pvert_list[3].x = ( xcb * obj->x_rate ) + obj->x_origin;
-            pvert_list[3].y = loy;
-            
-            if( G_PtInPolygon( (MyPoint *) pvert_list, 4, easting, northing ) ) {
-                ret = true;
-                break;
-            }
-        }
-    }           // if pPolyTrapGeo
-#endif    
     return ret;
 }
 

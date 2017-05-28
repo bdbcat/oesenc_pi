@@ -34,6 +34,7 @@
 #include "oesenc_pi.h"
 
 class wxGLContext;
+class Extended_Geometry;
 
 #include "LLRegion.h"
 //#include "ocpn_types.h"
@@ -232,6 +233,8 @@ public:
     
     bool EnableGLLS(bool benable);
 
+    Extended_Geometry *buildExtendedGeom( S57Obj *obj );
+    
     bool IsObjNoshow( const char *objcl);
     void AddObjNoshow( const char *objcl);
     void RemoveObjNoshow( const char *objcl);
@@ -446,7 +449,7 @@ private:
     void Polygon();
 
     s52plib* plib;
-    int scaleFactor;
+    float scaleFactor;
 
     wxDC* targetDC;
 #if wxUSE_GRAPHICS_CONTEXT

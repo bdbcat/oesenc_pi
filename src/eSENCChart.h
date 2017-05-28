@@ -224,6 +224,10 @@ class  eSENCChart : public PlugInChartBaseExtended
       sm_parms    vp_transform;
       
       ViewPort    m_cvp;
+
+      double      m_ref_lat;
+      double      m_ref_lon;
+      
 protected:
 //    Methods
       bool              CreateHeaderDataFromeSENC(void);
@@ -330,9 +334,6 @@ protected:
       int         *m_pNoCOVRTablePoints;                  // int table of number of points in each NoCoverage table entry
       float       **m_pNoCOVRTable;                       // table of pointers to list of floats describing valid NOCOVR
 
-      double      m_ref_lat;
-      double      m_ref_lon;
-      
       VE_Hash     m_ve_hash;
       VC_Hash     m_vc_hash;
 

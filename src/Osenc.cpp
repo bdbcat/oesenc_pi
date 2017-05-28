@@ -3904,7 +3904,7 @@ PolyTessGeo *Osenc::BuildPolyTessGeo(_OSENC_AreaGeometry_Record_Payload *record,
         tp->maxyt = *pbb;
         #endif
         
-        tp->box.Set(tp->minyt, tp->minxt, tp->maxyt, tp->maxxt);
+        tp->tri_box.Set(tp->minyt, tp->minxt, tp->maxyt, tp->maxxt);
         
         pPayloadRun += 4 * sizeof(double);
         
@@ -3957,6 +3957,8 @@ PolyTessGeo *Osenc::BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *r
     PolyTessGeo *pPTG = new PolyTessGeo();
     
     pPTG->SetExtents(record->extent_w_lon, record->extent_s_lat, record->extent_e_lon, record->extent_n_lat);
+    pPTG->m_ref_lat = m_ref_lat;
+    pPTG->m_ref_lon = m_ref_lon;
     
     unsigned int n_TriPrim = record->triprim_count;
     int nContours = record->contour_count;
@@ -4004,69 +4006,72 @@ PolyTessGeo *Osenc::BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *r
     
     double scaler = record->scaleFactor;
     
-    for(unsigned int i=0 ; i < n_TriPrim ; i++){
-        tri_type = *pPayloadRun++;
-        nvert = *(uint32_t *)pPayloadRun;
-        pPayloadRun += sizeof(uint32_t);
-        
-        
-        TriPrim *tp = new TriPrim;
-        *p_prev_triprim = tp;                               // make the link
-        p_prev_triprim = &(tp->p_next);
-        tp->p_next = NULL;
-        
-        tp->type = tri_type;
-        tp->nVert = nvert;
-        
-        nvert_max = wxMax(nvert_max, nvert);       // Keep a running tab of largest vertex count
-        
-        //  Read the triangle primitive bounding box as F16 SM coords
-        int16_t *pbb = (int16_t *)pPayloadRun;
-        
-        double minxt, minyt, maxxt, maxyt;
-        //double east_min, north_min, east_max, north_max;
-        
-        fromSM_Plugin( pbb[0] / scaler, pbb[2] / scaler, m_ref_lat, m_ref_lon, &minyt, &minxt );
-        fromSM_Plugin( pbb[1] / scaler, pbb[3] / scaler, m_ref_lat, m_ref_lon, &maxyt, &maxxt );
-        
-        #if 0        
-        #ifdef __ARM_ARCH
-        double abox[4];
-        memcpy(&abox[0], pbb, 4 * sizeof(double));
-        
-        minxt = abox[0];
-        maxxt = abox[1];
-        minyt = abox[2];
-        maxyt = abox[3];
-        #else            
-        minxt = *pbb++;
-        maxxt = *pbb++;
-        minyt = *pbb++;
-        maxyt = *pbb;
-        #endif
-        #endif
-        
-        tp->box.Set(minyt, minxt, maxyt, maxxt);
-        
-        pPayloadRun += 4 * sizeof(int16_t);
-        
-        
-        int float_byte_size = nvert * 2 * sizeof(float);              // the vertices
-        float_total_byte_size += float_byte_size;
-        
-        int byte_size = nvert * 2 * sizeof(int16_t);                 // the vertices
-        
-        tp->p_vertex = (double *)malloc(byte_size);
-        memcpy(tp->p_vertex, pPayloadRun, byte_size);                 //transcribe the uint16_t vertices
-        
-        
-        pPayloadRun += byte_size;
-        
+    if(n_TriPrim){                              // pre-tesselated, or deferred?
+        for(unsigned int i=0 ; i < n_TriPrim ; i++){
+            tri_type = *pPayloadRun++;
+            nvert = *(uint32_t *)pPayloadRun;
+            pPayloadRun += sizeof(uint32_t);
+            
+            
+            TriPrim *tp = new TriPrim;
+            *p_prev_triprim = tp;                               // make the link
+            p_prev_triprim = &(tp->p_next);
+            tp->p_next = NULL;
+            
+            tp->type = tri_type;
+            tp->nVert = nvert;
+            
+            nvert_max = wxMax(nvert_max, nvert);       // Keep a running tab of largest vertex count
+            
+            //  Read the triangle primitive bounding box as F16 SM coords
+            int16_t *pbb = (int16_t *)pPayloadRun;
+            
+            double minxt, minyt, maxxt, maxyt;
+            //double east_min, north_min, east_max, north_max;
+            
+            fromSM_Plugin( pbb[0] / scaler, pbb[2] / scaler, m_ref_lat, m_ref_lon, &minyt, &minxt );
+            fromSM_Plugin( pbb[1] / scaler, pbb[3] / scaler, m_ref_lat, m_ref_lon, &maxyt, &maxxt );
+            
+            #if 0        
+            #ifdef __ARM_ARCH
+            double abox[4];
+            memcpy(&abox[0], pbb, 4 * sizeof(double));
+            
+            minxt = abox[0];
+            maxxt = abox[1];
+            minyt = abox[2];
+            maxyt = abox[3];
+            #else            
+            minxt = *pbb++;
+            maxxt = *pbb++;
+            minyt = *pbb++;
+            maxyt = *pbb;
+            #endif
+            #endif
+            tp->tri_box.Set(minyt, minxt, maxyt, maxxt);
+            
+            pPayloadRun += 4 * sizeof(int16_t);
+            
+            
+            int float_byte_size = nvert * 2 * sizeof(float);              // the vertices
+            float_total_byte_size += float_byte_size;
+            
+            int byte_size = nvert * 2 * sizeof(int16_t);                 // the vertices
+            
+            tp->p_vertex = (double *)malloc(byte_size);
+            memcpy(tp->p_vertex, pPayloadRun, byte_size);                 //transcribe the uint16_t vertices
+            
+            
+            pPayloadRun += byte_size;
+            
+        }
     }
     
     if(next_byte)
         *next_byte = pPayloadRun;
     
+    if(n_TriPrim){
+        
     //  Convert the vertex arrays into a single float memory allocation to enable efficient access later
         unsigned char *vbuf = (unsigned char *)malloc(float_total_byte_size);
         
@@ -4099,11 +4104,14 @@ PolyTessGeo *Osenc::BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *r
         
         pPTG->SetPPGHead(ppg);
         pPTG->SetnVertexMax( nvert_max );
-        
-        
+    }
+    
+    if(n_TriPrim)
         pPTG->Set_OK( true );
+    else
+        pPTG->Set_OK( false );                  // mark for deferred tesselation
         
-        return pPTG;
+    return pPTG;
 }
 
 

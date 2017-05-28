@@ -40,10 +40,11 @@
 
 #include <math.h>
 #include "triangulate.h"
+#include "ocpn_plugin.h"
 
 #ifdef ocpnUSE_GL
 
-#ifdef USE_GLU_TESS
+//#ifdef USE_GLU_TESS
 #ifdef __WXOSX__
 #include "GL/gl.h"
 #include "GL/glu.h"
@@ -52,7 +53,7 @@
 #include <GL/glu.h>
 #endif
 
-#endif
+//#endif
 
 #ifdef __WXMSW__
 #include <windows.h>
@@ -141,7 +142,7 @@ typedef void GLvoid;
 //      Module Internal Prototypes
 
 
-#ifdef USE_GLU_TESS
+//#ifdef USE_GLU_TESS
 static int            s_nvcall;
 static int            s_nvmax;
 static double         *s_pwork_buf;
@@ -160,10 +161,12 @@ static double         s_transform_x_origin;
 static double         s_transform_y_rate;
 static double         s_transform_y_origin;
 wxArrayPtrVoid        *s_pCombineVertexArray;
+static int            tess_orient;
+static bool           s_bSENC_SM;
 
 static const double   CM93_semimajor_axis_meters = 6378388.0;            // CM93 semimajor axis
 
-#endif
+//#endif
 
 
 int s_idx;
@@ -219,8 +222,30 @@ bool           s_glu_dll_ready;
 HINSTANCE      s_hGLU_DLL;                   // Handle to DLL
 #endif
 
+/**
+ * Returns TRUE if the ring has clockwise winding.
+ *
+ * @return TRUE if clockwise otherwise FALSE.
+ */
 
+bool isRingClockwise(wxPoint2DDouble *pp, int nPointCount)
 
+{
+    double dfSum = 0.0;
+    
+    for( int iVert = 0; iVert < nPointCount-1; iVert++ )
+    {
+        dfSum += pp[iVert].m_x * pp[iVert+1].m_y
+        - pp[iVert].m_y * pp[iVert+1].m_x;
+    }
+    
+    dfSum += pp[nPointCount-1].m_x * pp[0].m_y
+    - pp[nPointCount-1].m_y * pp[0].m_x;
+    
+    return dfSum < 0.0;
+}
+
+/*
 bool ispolysame(polyout *p1, polyout *p2)
 {
     int i2;
@@ -250,6 +275,7 @@ bool ispolysame(polyout *p1, polyout *p2)
     return true;
 }
 
+*/
 
 //------------------------------------------------------------------------------
 //          Extended_Geometry Implementation
@@ -273,7 +299,8 @@ Extended_Geometry::~Extended_Geometry()
 PolyTessGeo::PolyTessGeo()
 {
     m_pxgeom = NULL;
-    
+    m_ppg_head = NULL;
+    ErrorCode = 0;
 }
 
 #if 0
@@ -315,182 +342,6 @@ ErrorCode = PolyTessGeoTri(poly, bSENC_SM, ref_lat, ref_lon);
 }
 #endif
 
-#if 0
-//      Build PolyGeo Object from SENC file record
-PolyTessGeo::PolyTessGeo(unsigned char *polybuf, int nrecl, int index,  int senc_file_version)
-{
-#define POLY_LINE_HDR_MAX 1000
-//      Todo Add a try/catch set here, in case SENC file is corrupted??
-
-    m_pxgeom = NULL;
-
-    char hdr_buf[POLY_LINE_HDR_MAX];
-    int twkb_len;
-
-    m_buf_head = (char *) polybuf;                      // buffer beginning
-    m_buf_ptr = m_buf_head;
-    m_nrecl = nrecl;
-
-
-    my_bufgets( hdr_buf, POLY_LINE_HDR_MAX );
-    //  Read the s57obj extents as lat/lon
-    sscanf(hdr_buf, "  POLYTESSGEOPROP %lf %lf %lf %lf",
-           &xmin, &ymin, &xmax, &ymax);
-
-
-    PolyTriGroup *ppg = new PolyTriGroup;
-    ppg->m_bSMSENC = true;
-    ppg->data_type = DATA_TYPE_DOUBLE;
-
-    int nctr;
-    my_bufgets( hdr_buf, POLY_LINE_HDR_MAX );
-    sscanf(hdr_buf, "Contours/nWKB %d %d", &nctr, &twkb_len);
-    ppg->nContours = nctr;
-    ppg->pn_vertex = (int *)malloc(nctr * sizeof(int));
-    int *pctr = ppg->pn_vertex;
-
-    size_t buf_len = wxMax(twkb_len + 2, 20 + (nctr * 6));
-    char *buf = (char *)malloc(buf_len);        // allocate a buffer guaranteed big enough
-
-    my_bufgets( buf, buf_len );                 // contour nVert, as a char line
-
-    wxString ivc_str(buf + 10,  wxConvUTF8);
-    wxStringTokenizer tkc(ivc_str, wxT(" ,\n"));
-    long icv = 0;
-
-    while ( tkc.HasMoreTokens() )
-    {
-        wxString token = tkc.GetNextToken();
-        if(token.ToLong(&icv))
-        {
-            if(icv)
-            {
-                *pctr = icv;
-                pctr++;
-            }
-        }
-    }
-
-
-    //  Read Raw Geometry
-
-    float *ppolygeo = (float *)malloc(twkb_len + 1);    // allow for crlf
-    memmove(ppolygeo,  m_buf_ptr, twkb_len + 1);
-    m_buf_ptr += twkb_len + 1;
-    ppg->pgroup_geom = ppolygeo;
-
-
-
-    TriPrim **p_prev_triprim = &(ppg->tri_prim_head);
-
-    //  Read the PTG_Triangle Geometry in a loop
-    unsigned int tri_type;
-    int nvert;
-    int nvert_max = 0;
-    int total_byte_size = 0;
-    bool not_finished = true;
-    while(not_finished)
-    {
-        if((m_buf_ptr - m_buf_head) != m_nrecl)
-        {
-            int *pi = (int *)m_buf_ptr;
-            tri_type = *pi++;
-            nvert = *pi;
-            m_buf_ptr += 2 * sizeof(int);
-
-            //    Here is the usual stop condition, which results from
-            //    interpreting the string "POLYEND" as an int
-            if(tri_type == 0x594c4f50)
-            {
-                  not_finished = false;
-                  break;
-            }
-
-            TriPrim *tp = new TriPrim;
-            *p_prev_triprim = tp;                               // make the link
-            p_prev_triprim = &(tp->p_next);
-            tp->p_next = NULL;
-
-            tp->type = tri_type;
-            tp->nVert = nvert;
-
-            if(nvert > nvert_max )                          // Keep a running tab of largest vertex count
-                  nvert_max = nvert;
-
-            if(senc_file_version > 122){
-                int byte_size = nvert * 2 * sizeof(float);
-                total_byte_size += byte_size;
-
-                tp->p_vertex = (double *)malloc(byte_size);
-                memmove(tp->p_vertex, m_buf_ptr, byte_size);
-                m_buf_ptr += byte_size;
-            }
-            else{
-                int byte_size = nvert * 2 * sizeof(double);
-                total_byte_size += byte_size;
-
-                tp->p_vertex = (double *)malloc(byte_size);
-                memmove(tp->p_vertex, m_buf_ptr, byte_size);
-                m_buf_ptr += byte_size;
-            }
-
-            //  Read the triangle primitive bounding box as lat/lon
-            double *pbb = (double *)m_buf_ptr;
-
-#ifdef ARMHF
-            double abox[4];
-            memcpy(&abox[0], pbb, 4 * sizeof(double));
-            tp->minxt = abox[0];
-            tp->maxxt = abox[1];
-            tp->minyt = abox[2];
-            tp->maxyt = abox[3];
-#else
-            tp->minxt = *pbb++;
-            tp->maxxt = *pbb++;
-            tp->minyt = *pbb++;
-            tp->maxyt = *pbb;
-#endif
-
-                //TODO move minxt from triprim member to local variable, since now using box.
-                //  also in osenc.cpp
-            tp->box.Set(tp->minyt, tp->minxt, tp->maxyt, tp->maxxt);
-            
-            m_buf_ptr += 4 * sizeof(double);
-
-        }
-        else                                    // got end of poly
-            not_finished = false;
-    }                   // while
-
-   //  Convert the vertex arrays into a single float memory allocation to enable efficient access later
-    if(senc_file_version > 122){
-        unsigned char *vbuf = (unsigned char *)malloc(total_byte_size);
-        TriPrim *p_tp = ppg->tri_prim_head;
-        unsigned char *p_run = vbuf;
-        while( p_tp ) {
-            memcpy(p_run, p_tp->p_vertex, p_tp->nVert * 2 * sizeof(float));
-            free(p_tp->p_vertex);
-            p_tp->p_vertex = (double  *)p_run;
-            p_run += p_tp->nVert * 2 * sizeof(float);
-            p_tp = p_tp->p_next; // pick up the next in chain
-        }
-        ppg->bsingle_alloc = true;
-        ppg->single_buffer = vbuf;
-        ppg->single_buffer_size = total_byte_size;
-        ppg->data_type = DATA_TYPE_FLOAT;
-    }
-
-
-    m_ppg_head = ppg;
-    m_nvertex_max = nvert_max;
-
-    free(buf);
-
-    m_bOK = true;
-
-}
-
-#endif
 
 //      Build PolyTessGeo Object from OGR Polygon
 //      Using internal Triangle tesselator
@@ -1173,13 +1024,14 @@ PolyTessGeo::~PolyTessGeo()
 
 }
 
+
 int PolyTessGeo::BuildDeferredTess(void)
 {
-#ifdef USE_GLU_TESS
-    return BuildTessGL();
-#else
-    return 0;
-#endif
+//#ifdef USE_GLU_TESS
+    return BuildTessGLFromXG();
+//#else
+//    return 0;
+//#endif
 }
 
 
@@ -1192,7 +1044,7 @@ void PolyTessGeo::GetRefPos( double *lat, double *lon)
 }
 
 
-#ifdef USE_GLU_TESS
+//#ifdef USE_GLU_TESS
 
 
 #ifdef __WXMSW__
@@ -1211,6 +1063,7 @@ void __CALL_CONVENTION combineCallback(GLdouble coords[3],
                      GLfloat weight[4], GLdouble **dataOut );
 
 
+#if 0
 //      Build PolyTessGeo Object from OGR Polygon
 //      Using OpenGL/GLU tesselator
 int PolyTessGeo::PolyTessGeoGL(OGRPolygon *poly, bool bSENC_SM, double ref_lat, double ref_lon)
@@ -1645,9 +1498,11 @@ int PolyTessGeo::PolyTessGeoGL(OGRPolygon *poly, bool bSENC_SM, double ref_lat, 
 
     return 0;
 }
+#endif
 
-int PolyTessGeo::BuildTessGL(void)
+int PolyTessGeo::BuildTessGLFromXG(void)
 {
+    
 #ifdef ocpnUSE_GL
 
       int iir, ip;
@@ -1780,30 +1635,23 @@ int PolyTessGeo::BuildTessGL(void)
 
 
 //  Check and account for winding direction of ring
-      bool cw = true;
+      wxPoint2DDouble *pp = m_pxgeom->vertex_array;
+      
+      bool cw = isRingClockwise(pp, npte);
+      
 
       double x0, y0, x, y;
-      OGRPoint p;
-
-      wxPoint2DDouble *pp = m_pxgeom->vertex_array;
-      pp++;       // skip 0?
 
       if(cw)
       {
-//            poly->getExteriorRing()->getPoint(0, &p);
             x0 = pp->m_x;
             y0 = pp->m_y;
       }
       else
       {
-//            poly->getExteriorRing()->getPoint(npte-1, &p);
             x0 = pp[npte-1].m_x;
             y0 = pp[npte-1].m_y;
-//            x0 = p.getX();
-//            y0 = p.getY();
       }
-
-//      pp++;
 
       gluTessBeginContour(GLUtessobj);
 
@@ -1818,11 +1666,9 @@ int PolyTessGeo::BuildTessGL(void)
             else
                   pidx = ip;
 
-//            poly->getExteriorRing()->getPoint(pidx, &p);
             x = pp[pidx].m_x;
             y = pp[pidx].m_y;
 
-//            pp++;
 
             if((fabs(x-x0) > EQUAL_EPS) || (fabs(y-y0) > EQUAL_EPS))
             {
@@ -1841,7 +1687,6 @@ int PolyTessGeo::BuildTessGL(void)
                   *ppt++ = 0.0;
 
                   gluTessVertex( GLUtessobj, ppt_temp, ppt_temp ) ;
- //printf("tess from xgeom, external vertex %g %g\n", x, y);
 
             }
             else
@@ -1855,18 +1700,16 @@ int PolyTessGeo::BuildTessGL(void)
 
 
       int index_offset = npte;
-#if 1
 //  Now the interior contours
       for(iir=0; iir < ncnt-1; iir++)
       {
             gluTessBeginContour(GLUtessobj);
 
-//            int npti = cntr[iir];
             int npti  = m_pxgeom->contour_array[iir+1];
 
       //  Check and account for winding direction of ring
-            bool cw = false; //!(poly->getInteriorRing(iir)->isClockwise() == 0);
-
+            bool cw = isRingClockwise(&pp[index_offset], npti);
+            
             if(!cw)
             {
                   x0 = pp[index_offset].m_x;
@@ -1882,7 +1725,6 @@ int PolyTessGeo::BuildTessGL(void)
 //   also, accounting for tess_orient
             for(int ip = 0 ; ip < npti ; ip++)
             {
-                  OGRPoint p;
                   int pidx;
                   if(!cw)                               // interior contours must be cw
                         pidx = npti - ip - 1;
@@ -1924,18 +1766,14 @@ int PolyTessGeo::BuildTessGL(void)
 
             index_offset += npti;
       }
-#endif
 
     //  Store some SM conversion data in static store,
     //  for callback access
       s_bSENC_SM =  false;
 
-      s_bmerc_transform = true;
-      s_transform_x_rate   =  m_pxgeom->x_rate;
-      s_transform_x_origin =  m_pxgeom->x_offset;
-      s_transform_y_rate   =  m_pxgeom->y_rate;
-      s_transform_y_origin =  m_pxgeom->y_offset;
-
+      s_ref_lat = m_ref_lat;
+      s_ref_lon = m_ref_lon;
+      
 
     //      Ready to kick off the tesselator
 
@@ -1966,12 +1804,13 @@ int PolyTessGeo::BuildTessGL(void)
 //  allowing for tess_orient
 //  Also, convert to SM if requested
 
-      int nptfinal = npta;
+#if 0
+    int nptfinal = npta;
 
       //  No longer need the full geometry in the SENC,
       nptfinal = 1;
 
-      m_nwkb = (nptfinal +1) * 2 * sizeof(float);
+      int m_nwkb = (nptfinal +1) * 2 * sizeof(float);
       m_ppg_head->pgroup_geom = (float *)malloc(m_nwkb);
       float *vro = m_ppg_head->pgroup_geom;
       ppt = geoPt;
@@ -2006,7 +1845,7 @@ int PolyTessGeo::BuildTessGL(void)
 
             ppt++;                      // skip z
       }
-
+#endif
       m_ppg_head->tri_prim_head = s_pTPG_Head;         // head of linked list of TriPrims
 
       //  Convert the Triangle vertex arrays into a single memory allocation of floats
@@ -2119,8 +1958,7 @@ void __CALL_CONVENTION endCallback(void)
             pTPG->type = s_gltri_type;
             pTPG->nVert = s_nvcall;
 
-        //  Calculate bounding box
-            pTPG->p_bbox = new wxBoundingBox;
+        //  Calculate bounding box in lat/lon
 
             float sxmax = -1000;                   // this poly BBox
             float sxmin = 1000;
@@ -2134,59 +1972,22 @@ void __CALL_CONVENTION endCallback(void)
                 xd = *pvr++;
                 yd = *pvr++;
 
-                if(s_bmerc_transform)
-                {
-                      double valx = ( xd * s_transform_x_rate ) + s_transform_x_origin;
-                      double valy = ( yd * s_transform_y_rate ) + s_transform_y_origin;
-
-                      //    Convert to lat/lon
-                      double lat = ( 2.0 * atan ( exp ( valy/CM93_semimajor_axis_meters ) ) - PI/2. ) / DEGREE;
-                      double lon = ( valx / ( DEGREE * CM93_semimajor_axis_meters ) );
-
-                      sxmax = fmax(lon, sxmax);
-                      sxmin = fmin(lon, sxmin);
-                      symax = fmax(lat, symax);
-                      symin = fmin(lat, symin);
-                }
-                else
-                {
-                      sxmax = fmax(xd, sxmax);
-                      sxmin = fmin(xd, sxmin);
-                      symax = fmax(yd, symax);
-                      symin = fmin(yd, symin);
-                }
+                double lat, lon;
+                fromSM_Plugin(xd, yd, s_ref_lat, s_ref_lon, &lat, &lon);
+                
+                sxmax = fmax(lon, sxmax);
+                sxmin = fmin(lon, sxmin);
+                symax = fmax(lat, symax);
+                symin = fmin(lat, symin);
             }
 
-            pTPG->p_bbox->SetMin(sxmin, symin);
-            pTPG->p_bbox->SetMax(sxmax, symax);
+            pTPG->tri_box.Set(symin, sxmin, symax, sxmax);
+            
 
+            //  Transcribe this geometry to TriPrim
 
-            //  Transcribe this geometry to TriPrim, converting to SM if called for
-
-            if(s_bSENC_SM)
-            {
-                double *pds = s_pwork_buf;
-                pTPG->p_vertex = (double *)malloc(s_nvcall * 2 * sizeof(double));
-                double *pdd = pTPG->p_vertex;
-
-                for(int ip = 0 ; ip < s_nvcall ; ip++)
-                {
-                    double dlon = *pds++;
-                    double dlat = *pds++;
-
-                    double easting, northing;
-                    toSM(dlat, dlon, s_ref_lat, s_ref_lon, &easting, &northing);
-                    double deast = easting;
-                    double dnorth = northing;
-                    *pdd++ = deast;
-                    *pdd++ = dnorth;
-                }
-            }
-            else
-            {
-                pTPG->p_vertex = (double *)malloc(s_nvcall * 2 * sizeof(double));
-                memcpy(pTPG->p_vertex, s_pwork_buf, s_nvcall * 2 * sizeof(double));
-            }
+            pTPG->p_vertex = (double *)malloc(s_nvcall * 2 * sizeof(double));
+            memcpy(pTPG->p_vertex, s_pwork_buf, s_nvcall * 2 * sizeof(double));
 
 
             break;
@@ -2256,7 +2057,7 @@ void __CALL_CONVENTION combineCallback(GLdouble coords[3],
 }
 
 
-#endif
+//#endif
 wxStopWatch *s_stwt;
 
 #if 0
