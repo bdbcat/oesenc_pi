@@ -184,6 +184,10 @@ wxFileConfig                    *g_pconfig;
 wxString                        g_csv_locn;
 
 long                            g_serverProc;
+wxString                        g_deviceInfo;
+wxString                        g_systemName;
+wxString                        g_loginUser;
+wxString                        g_loginKey;
 
 bool shutdown_SENC_server( void );
 bool ShowAlwaysEULAs();
@@ -751,7 +755,7 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             
             wxWindow *cc1 = GetOCPNCanvasWindow();
             if(cc1){
-                int display_size_mm = wxMax(g_display_size_mm, 200);
+                int display_size_mm = wxMax(g_display_size_mm, 75);
                 
                 int sx, sy;
                 wxDisplaySize( &sx, &sy );
@@ -762,6 +766,7 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                     ps52plib->SetPPMM( pix_per_mm );
                 
                 g_pix_per_mm = pix_per_mm;
+                
             }
         }
         
@@ -1178,8 +1183,12 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("LastFPRFile"), &g_fpr_file);
         pConf->Read( _T("DEBUG_SERVER"), &g_serverDebug);
         pConf->Read( _T("DEBUG_LEVEL"), &g_debugLevel);
-        
-        g_debugLevel = 1;
+
+#ifdef __OCPN__ANDROID__        
+        pConf->Read( _T("systemName"), &g_systemName);
+        pConf->Read( _T("loginUser"), &g_loginUser);
+        pConf->Read( _T("loginKey"), &g_loginKey);
+#endif        
         
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
@@ -1255,6 +1264,12 @@ bool oesenc_pi::SaveConfig( void )
 
         pConf->Write( _T("UserKey"), g_UserKey );
         pConf->Write( _T("LastFPRFile"), g_fpr_file);
+
+#ifdef __OCPN__ANDROID__        
+        pConf->Write( _T("systemName"), g_systemName);
+        pConf->Write( _T("loginUser"), g_loginUser);
+        pConf->Write( _T("loginKey"), g_loginKey);
+#endif        
         
         //  Save the persistent Chartinfo strings
         pConf->DeleteGroup(_T ( "/PlugIns/oesenc/ChartinfoList"));
@@ -1328,24 +1343,41 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
     if(g_prefs_dialog)
        g_prefs_dialog->EndModal(0); 
     
-    //qDebug() << result.mb_str();
+    qDebug() << "ProcessChartManageResult: " << result.mb_str();
    
     wxStringTokenizer st(result, _T(";"), wxTOKEN_DEFAULT);
     while( st.HasMoreTokens() )
     {
-        wxString dir = st.GetNextToken();
-        bool covered = false;
-        for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ ){
-            if( dir.StartsWith((GetChartDBDirArrayString().Item(i))) ) {
-                covered = true;
-                break;
+        wxString token = st.GetNextToken();
+        if(token.StartsWith(_T("InstallDir"))){
+            wxString dir = token.AfterFirst(':');
+            bool covered = false;
+            for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ ){
+                if( dir.StartsWith((GetChartDBDirArrayString().Item(i))) ) {
+                    covered = true;
+                    break;
+                }
+            }
+            if( !covered ){
+                AddChartDirectory( dir );
+                wxLogMessage(_T("osenc_pi adding chart directory: ") + dir);
+                qDebug() << "adding dir: " << dir.mb_str();
             }
         }
-        if( !covered ){
-            AddChartDirectory( dir );
-            wxLogMessage(_T("osenc_pi adding chart directory: ") + dir);
-            //qDebug() << dir.mb_str();
-            
+        
+        else if(token.StartsWith(_T("UserName"))){
+            g_loginUser = token.AfterFirst(':');
+            qDebug() << "g_loginUser: " << g_loginUser.mb_str();
+        }
+        
+        else if(token.StartsWith(_T("LoginKey"))){
+            g_loginKey = token.AfterFirst(':');
+            qDebug() << "g_loginKey: " << g_loginKey.mb_str();
+        }
+        
+        else if(token.StartsWith(_T("SystemName"))){
+            g_systemName = token.AfterFirst(':');
+            qDebug() << "g_systemName: " << g_systemName.mb_str();
         }
     }
 }
@@ -3234,6 +3266,29 @@ void oesencPrefsDialog::OnPrefsOkClick(wxCommandEvent& event)
  
 }
 
+#ifdef __OCPN__ANDROID__
+wxString androidGetSystemNameHint()
+{
+    if(!g_deviceInfo.Length())
+        g_deviceInfo = callActivityMethod_vs("getDeviceInfo");
+    
+    wxStringTokenizer tkz(g_deviceInfo, _T("\n"));
+    while( tkz.HasMoreTokens() )
+    {
+        wxString s1 = tkz.GetNextToken();
+        if(wxNOT_FOUND != s1.Find(_T("Device"))){
+            int a = s1.Find(_T(":"));
+            if(wxNOT_FOUND != a){
+                wxString b = s1.Mid(a+1).Trim(true).Trim(false);
+                g_systemName = b;
+            }
+        }
+    }
+    
+    return g_deviceInfo;
+}
+#endif
+
 // An Event handler class to catch events from UI dialog
 //      Implementation
 #define ANDROID_EVENT_TIMER 4392
@@ -3525,7 +3580,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 
         wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
 
-        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-f"), dataDir, libDir);
+        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
 
         wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
 
@@ -3559,8 +3614,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                 char c = stream.GetC();
                 if(!stream.Eof()){
                     wxString sc;
-                    //sc.Printf(_T("%02X"), c);
-                    sc = wxString(c);
+                    sc.Printf(_T("%02X"), c);
                     stringFPR += sc;
                 }
             }
@@ -3568,6 +3622,14 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             sFPRPlus += stringFPR;                  // values
             sFPRPlus += _T(";");                    // delimiter
         }
+        
+        //  Add the filename
+        wxFileName fnxpr(lastFile);
+        wxString fprName = fnxpr.GetName();
+        sFPRPlus += _T("fprName:");                 // name        
+        sFPRPlus += fprName;                  // values
+        sFPRPlus += _T(";");                    // delimiter
+        
 
         // We can safely delete the FPR file now.
         if(::wxFileExists(lastFile))
@@ -3575,11 +3637,22 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         
         // Get and add other name/value pairs to the sFPRPlus string
         sFPRPlus += _T("User:");
-        sFPRPlus += _T("testuser@yahoo.com");
+        sFPRPlus += g_loginUser;
         sFPRPlus += _T(";");                    // delimiter
         
-        sFPRPlus += _T("Cookie:");
-        sFPRPlus += _T("testCookie");
+        sFPRPlus += _T("loginKey:");
+        if(!g_loginKey.Length())
+            sFPRPlus += _T("?");
+        else
+            sFPRPlus += g_loginKey;
+        sFPRPlus += _T(";");                    // delimiter
+        
+        //  System Name
+        if(!g_systemName.Length()){             // suggest a name
+            androidGetSystemNameHint();
+        }
+        sFPRPlus += _T("systemName:");
+        sFPRPlus += g_systemName;
         sFPRPlus += _T(";");                    // delimiter
         
         
@@ -3589,7 +3662,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
             
         
         // Start the Chart management activity
-        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oplugininstaller"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("installLocation") );
+        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oplugininstaller"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("ManageResult") );
         
         // Start a timer to poll for results.
         m_timerAction = ACTION_ARB_RESULT_POLL;
@@ -3599,6 +3672,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 #endif
         
 }
+
 
 void oesenc_pi_event_handler::OnGetHWIDClick( wxCommandEvent &event )
 {
@@ -4486,6 +4560,8 @@ bool processChartinfo(const wxString &oesenc_file)
 
 void processUserKeyHint(const wxString &oesenc_file)
 {
+    if(g_debugLevel) wxLogMessage(_T("processUserKeyHint() start."));
+                                     
     // get the Chartinfo as a wxTextFile
     wxFileName fn(oesenc_file);
     wxString userkey = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
@@ -4502,6 +4578,8 @@ void processUserKeyHint(const wxString &oesenc_file)
             if(line.StartsWith( _T("UserKey:" ) ) ) {
                 wxString content = line.AfterFirst(':').Trim().Trim(false);
                 g_UserKey = content;
+                if(g_debugLevel) wxLogMessage(_T("processUserKeyHint: taking UserKey: ") + content);
+                                                 
                 break;
             }
             
@@ -4510,6 +4588,8 @@ void processUserKeyHint(const wxString &oesenc_file)
         
         g_bUserKeyHintTaken = true;
     }
+    
+    if(g_debugLevel) wxLogMessage(_T("processUserKeyHint() done. g_UserKey: ") + g_UserKey);
 }
 
 bool ShowAlwaysEULAs()
@@ -4603,20 +4683,20 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     //  Buttons
     mainSizer->AddSpacer(20);
     wxBoxSizer* bSizerBtns = new wxBoxSizer( wxVERTICAL );
-    mainSizer->Add( bSizerBtns, 0, wxALL | wxEXPAND, border_size );
+    mainSizer->Add( bSizerBtns, 0, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, border_size );
     
-    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oesenc Chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oesenc chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     //m_bManageCharts->SetToolTip( _("Add a new chart catalog.") );
-    bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 5 );
+    bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
-    m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Vist O-Charts Website"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Vist o-charts.org Website"), wxDefaultPosition, wxDefaultSize, 0 );
     m_bVisitOcharts->SetToolTip( _("Here you may order new oesenc chartsets.") );
-    bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 5 );
+    bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
-    m_bCreateHWID = new wxButton( this, wxID_ANY, _("Create HWID (Test, remove for Production)"), wxDefaultPosition, wxDefaultSize, 0 );
-    bSizerBtns->Add( m_bCreateHWID, 0, wxALL|wxEXPAND, 5 );
+    m_bCreateHWID = new wxButton( this, wxID_ANY, _T("Create HWID (Test, remove\n for Production)"), wxDefaultPosition, wxDefaultSize, 0 );
+    bSizerBtns->Add( m_bCreateHWID, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
     this->Layout();
@@ -4641,6 +4721,10 @@ void oesencPanel::ManageCharts( wxCommandEvent &evt )
 
 void oesencPanel::VisitOCharts( wxCommandEvent &evt )
 {
+#ifdef __OCPN__ANDROID__    
+    qDebug() << "VisitOCharts";
+    callActivityMethod_ss("launchBrowser", _T("http://o-charts.org"));
+#endif    
 }
 
 void oesencPanel::CreateHWID( wxCommandEvent &evt )
@@ -4649,29 +4733,6 @@ void oesencPanel::CreateHWID( wxCommandEvent &evt )
         g_event_handler->OnGetHWIDClick(evt);
 }
 
-
-#if 0
-IMPLEMENT_DYNAMIC_CLASS( oesencPanelImpl, oesencPanel )
-BEGIN_EVENT_TABLE( oesencPanelImpl, oesencPanel )
-END_EVENT_TABLE()
-
-oesencPanelImpl::~oesencPanelImpl()
-{
-}
-
-oesencPanelImpl::oesencPanelImpl( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-        : oesencPanel( parent, id, pos, size, style )
-{
-}
-
-void oesencPanelImpl::ManageCharts( wxCommandEvent &evt )
-{
-}
-
-void oesencPanelImpl::VisitOCharts( wxCommandEvent &evt )
-{
-}
-#endif
 
 
 
