@@ -1342,7 +1342,8 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
 {
     if(g_prefs_dialog)
        g_prefs_dialog->EndModal(0); 
-    
+
+#ifdef __OCPN__ANDROID__    
     qDebug() << "ProcessChartManageResult: " << result.mb_str();
    
     wxStringTokenizer st(result, _T(";"), wxTOKEN_DEFAULT);
@@ -1380,51 +1381,10 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
             qDebug() << "g_systemName: " << g_systemName.mb_str();
         }
     }
-}
-
-#if 0
-void oesenc_pi::GetNewUserpermit(void)
-{
-    g_old_userpermit = g_userpermit;
-
-    g_userpermit = _T("");
-    wxString new_permit = GetUserpermit();
-
-    if( new_permit != _T("Invalid")){
-        g_userpermit = new_permit;
-        g_pi->SaveConfig();
-
-        if(m_up_text) {
-            m_up_text->SetLabel( g_userpermit );
-        }
-    }
-    else
-        g_userpermit = g_old_userpermit;
-
-}
-
-
-void oesenc_pi::GetNewInstallpermit(void)
-{
-    g_old_installpermit = g_installpermit;
-
-    g_installpermit = _T("");
-    wxString new_permit = GetInstallpermit();
-
-    if( new_permit != _T("Invalid")){
-        g_installpermit = new_permit;
-        g_pi->SaveConfig();
-
-        if(m_ip_text) {
-            m_ip_text->SetLabel( g_installpermit );
-        }
-    }
-    else
-        g_installpermit = g_old_installpermit;
-
-}
-
 #endif
+
+}
+
 
 #if 0
 // An Event handler class to catch events from S63 UI dialog
@@ -3267,7 +3227,7 @@ void oesencPrefsDialog::OnPrefsOkClick(wxCommandEvent& event)
 }
 
 #ifdef __OCPN__ANDROID__
-wxString androidGetSystemNameHint()
+void androidGetDeviceName()
 {
     if(!g_deviceInfo.Length())
         g_deviceInfo = callActivityMethod_vs("getDeviceInfo");
@@ -3285,7 +3245,6 @@ wxString androidGetSystemNameHint()
         }
     }
     
-    return g_deviceInfo;
 }
 #endif
 
@@ -3628,6 +3587,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         wxString fprName = fnxpr.GetName();
         sFPRPlus += _T("fprName:");                 // name        
         sFPRPlus += fprName;                  // values
+        sFPRPlus += _T(".fpr");
         sFPRPlus += _T(";");                    // delimiter
         
 
@@ -3648,9 +3608,6 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         sFPRPlus += _T(";");                    // delimiter
         
         //  System Name
-        if(!g_systemName.Length()){             // suggest a name
-            androidGetSystemNameHint();
-        }
         sFPRPlus += _T("systemName:");
         sFPRPlus += g_systemName;
         sFPRPlus += _T(";");                    // delimiter
@@ -4690,7 +4647,7 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
-    m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Vist o-charts.org Website"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Visit o-charts.org Website"), wxDefaultPosition, wxDefaultSize, 0 );
     m_bVisitOcharts->SetToolTip( _("Here you may order new oesenc chartsets.") );
     bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
