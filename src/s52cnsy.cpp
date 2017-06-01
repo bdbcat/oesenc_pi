@@ -2551,7 +2551,7 @@ wxString SNDFRM02(S57Obj *obj, double depth_value_in)
     
     // FIXME: test to fix the rounding error (!?)
     depth_value  += (depth_value > 0.0)? 0.01: -0.01;
-    leading_digit = (int) depth_value;
+    leading_digit = (int) fabs(depth_value);
     
     if (depth_value <= safety_depth)            //S52_getMarinerParam(S52_MAR_SAFETY_DEPTH)
         symbol_prefix = _T("SOUNDS");
@@ -2627,17 +2627,18 @@ wxString SNDFRM02(S57Obj *obj, double depth_value_in)
     
     if (fabs(depth_value) < 31.0) {
         bool b_2digit = false;
+        double depth_value_pos = fabs(depth_value);
         
         //      If showing as "feet", round off to two digits only
-        if( (ps52plib->m_nDepthUnitDisplay == 0) && (fabs(depth_value) > 0) ){
+        if( (ps52plib->m_nDepthUnitDisplay == 0) && (depth_value_pos > 0) ){
             double r1 = depth_value ;
             depth_value = wxRound( r1 ) ;
-            leading_digit = (int) fabs(depth_value);
+            leading_digit = (int) depth_value_pos;
             b_2digit = true;
         }
         
         
-        double fraction = fabs(depth_value - floor(leading_digit));
+        double fraction = fabs(depth_value_pos - floor(leading_digit));
         
         if (fraction != 0.0) {
             fraction = fraction * 10;
