@@ -767,6 +767,9 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 
                 g_pix_per_mm = pix_per_mm;
                 
+                wxString msg;
+                msg.Printf(_T("oesenc_pi:  Calculated pix/mm = %g"), g_pix_per_mm);
+                wxLogMessage(msg);
             }
         }
         

@@ -3204,16 +3204,29 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     glColor3ub( c->R, c->G, c->B );
 
     //    Set drawing width
+    float lineWidth = w;
+    
     if( w > 1 ) {
         GLint parms[2];
         glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
         if( w > parms[1] )
-            glLineWidth( wxMax(g_GLMinCartographicLineWidth, parms[1]) );
+            lineWidth = wxMax(g_GLMinCartographicLineWidth, parms[1]);
         else
-            glLineWidth( wxMax(g_GLMinCartographicLineWidth, w) );
+            lineWidth = wxMax(g_GLMinCartographicLineWidth, w);
     } else
-        glLineWidth( wxMax(g_GLMinCartographicLineWidth, 1) );
+        lineWidth = wxMax(g_GLMinCartographicLineWidth, 1);
 
+    // Manage super high density displays
+    if(g_pix_per_mm > 8){               // arbitrary
+        float target_w_mm = ((float)w) / 4.0;  // Target width in mm
+                                               //  The value "w" comes from S52 library CNSY procedures, in "nominal" pixels
+                                               // the value "4" comes from semi-standard LCD display densities
+                                               // or something like 0.25 mm pitch, or 4 pix per mm.
+        lineWidth =  wxMax(g_GLMinCartographicLineWidth, target_w_mm * g_pix_per_mm);
+    }
+
+    glLineWidth(lineWidth);
+    
 #ifndef ocpnUSE_GLES // linestipple is emulated poorly
     if( !strncmp( str, "DASH", 4 ) ) {
         glLineStipple( 1, 0x3F3F );
@@ -3227,7 +3240,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glDisable( GL_LINE_STIPPLE );
 #endif
 
-    if(w >= 2){
+    if(lineWidth > 2){
          glEnable( GL_LINE_SMOOTH );
          glEnable( GL_BLEND );
     }
