@@ -619,6 +619,7 @@ public:
     ~Osenc_instream();
     
     void Init();
+    void ReInit();
     void Close();
     bool Open( unsigned char cmd, wxString senc_file_name, wxString crypto_key );
     

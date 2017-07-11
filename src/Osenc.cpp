@@ -63,6 +63,8 @@ void OpenCPN_OGRErrorHandler( CPLErr eErrClass, int nError,
 
 
 #ifdef __OCPN__ANDROID__
+#include "qdebug.h"
+
 //--------------------------------------------------------------------------
 //      Osenc_instream implementation as Kernel Socket
 //--------------------------------------------------------------------------
@@ -90,6 +92,12 @@ Osenc_instream::Osenc_instream()
 Osenc_instream::~Osenc_instream()
 {
     Close();
+    if(publicSocket > 0){
+       // qDebug() << "dtor Close Socket" << publicSocket;
+        close( publicSocket );
+        publicSocket = -1;
+    }
+        
 }
 
 void Osenc_instream::Init()
@@ -105,20 +113,49 @@ void Osenc_instream::Init()
     strcpy(publicsocket_name,"com.whoever.xfer");
     
     if (makeAddr(publicsocket_name, &sockAddr, &sockLen) < 0){
-        if(g_debugLevel)printf("   Cannot makeAddr...: %s \n", publicsocket_name);
         wxLogMessage(_T("oesenc_pi: Could not makeAddr for PUBLIC socket"));
     }
     
     publicSocket = socket(AF_LOCAL, SOCK_STREAM, PF_UNIX);
     if (publicSocket < 0) {
-        if(g_debugLevel)printf("   Cannot make socket...: %s \n", publicsocket_name);
         wxLogMessage(_T("oesenc_pi: Could not make PUBLIC socket"));
     }
+    //else
+    //    qDebug() << "Init() create Socket" << publicSocket;
+    
+    
+}
+
+void Osenc_instream::ReInit()
+{
+    privatefifo = -1;
+    publicfifo = -1;
+    m_OK = true;
+    m_lastBytesRead = 0;
+    m_lastBytesReq = 0;
+    m_uncrypt_stream = 0;
+    publicSocket = -1;
+    
+    strcpy(publicsocket_name,"com.whoever.xfer");
+    
+    if (makeAddr(publicsocket_name, &sockAddr, &sockLen) < 0){
+        wxLogMessage(_T("oesenc_pi: Could not makeAddr for PUBLIC socket"));
+    }
+    
+    publicSocket = socket(AF_LOCAL, SOCK_STREAM, PF_UNIX);
+    if (publicSocket < 0) {
+        wxLogMessage(_T("oesenc_pi: Could not make PUBLIC socket"));
+    }
+    //else
+        //qDebug() << "ReInit() create Socket" << publicSocket;
+    
     
 }
 
 void Osenc_instream::Close()
 {
+    wxLogMessage(_T("Osenc_instream::Close()"));
+    
     if(-1 != privatefifo){
         if(g_debugLevel)printf("   Close private fifo: %s \n", privatefifo_name);
         close(privatefifo);
@@ -134,11 +171,12 @@ void Osenc_instream::Close()
     }
     
     if(-1 != publicSocket){
-        if(g_debugLevel)printf("   Close publicSocket: %s \n", publicsocket_name);
+        //qDebug() << "Close() Close Socket" << publicSocket;
         close( publicSocket );
+        publicSocket = -1;
     }
     
-    Init();             // In case it want to be used again
+    ReInit();             // In case it want to be used again
 }
 
 
@@ -867,8 +905,11 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
         wxMilliSleep(100);
         fpx.Read(&first_record, sizeof(OSENC_Record_Base));
         
-        if(!fpx.IsOk())
-            return ERROR_SENC_CORRUPT;        
+        if(!fpx.IsOk()){
+            if(g_debugLevel)printf("verifySENC E2.5\n");
+            wxLogMessage(_T("verifySENC E2.5"));
+            return ERROR_SENC_CORRUPT;
+        }
     }
     
     if(( first_record.record_type == HEADER_SENC_VERSION ) && (first_record.record_length < 16) ){
@@ -960,6 +1001,7 @@ int Osenc::ingestHeader(const wxString &senc_file_name)
     //  Read oSENC header records, stopping at the first Feature_ID record
     //  Then check to see if everything is defined as required.
     
+    if(g_debugLevel) wxLogMessage(_T("ingestHeader"));
     
     int ret_val = SENC_NO_ERROR;                    // default is OK
     
@@ -1431,8 +1473,8 @@ int Osenc::ingest200(const wxString &senc_file_name,
                 
                 std::string acronym = GetFeatureAcronymFromTypecode( featureTypeCode );
                 
-//                if(!strncmp("BCNLAT", acronym.c_str(), 6))
-//                    int yyp = 0; 
+ //               if(!strncmp("CTNARE", acronym.c_str(), 6))
+ //                   int yyp = 0; 
                 
                 if(acronym.length()){
                     obj = new S57Obj(acronym.c_str());
