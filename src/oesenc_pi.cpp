@@ -583,7 +583,6 @@ oesenc_pi::~oesenc_pi()
 
 int oesenc_pi::Init(void)
 {
-     wxLogMessage(_T("oeSENCPI DateCode: 0703"));
     
     //  Get the path of the PlugIn itself
     g_pi_filename = GetPlugInPath(this);
