@@ -1102,22 +1102,13 @@ wxBitmap *eSENCChart::GetThumbnail(int tnx, int tny, int cs)
 
 }
 
+
     //    Read the  oeSENC file (CURRENT_SENC_FORMAT_VERSION >= 200) and create required Chartbase data structures
 bool eSENCChart::CreateHeaderDataFromeSENC( void )
 {
+    
     bool ret_val = true;
 
-    wxFFileInputStream fpx( m_SENCFileName.GetFullPath() );
-    if (!fpx.IsOk()) {
-        if( !m_SENCFileName.FileExists() ) {
-            wxString msg( _T("   Cannot open SENC file ") );
-            msg.Append( m_SENCFileName.GetFullPath() );
-            wxLogMessage( msg );
-
-        }
-        return false;
-    }
-    
     if(!validateUserKey(m_SENCFileName.GetFullPath())){
         wxString msg( _T("   UserKey Invalid for SENC file ") );
         msg.Append( m_SENCFileName.GetFullPath() );
@@ -1136,8 +1127,19 @@ bool eSENCChart::CreateHeaderDataFromeSENC( void )
           wxString msg( _T("   Cannot load SENC file ") );
           msg.Append( m_SENCFileName.GetFullPath() );
           wxLogMessage( msg );
-                
-          return false;
+ 
+          wxLogMessage(_T("Retry..."));
+          
+          validate_SENC_server();               // reset the server...
+          
+          retCode = senc.ingestHeader( m_SENCFileName.GetFullPath() );
+          if(retCode != SENC_NO_ERROR){
+              wxString msg( _T("   Again, cannot load SENC file ") );
+              msg.Append( m_SENCFileName.GetFullPath() );
+              wxLogMessage( msg );
+              return false;
+          }
+         
     }
     
     //  Header has loaded OK
@@ -5910,6 +5912,8 @@ ListOfPI_S57Obj *eSENCChart::GetObjRuleListAtLatLon(float lat, float lon, float 
     return obj_list;
 }
 
+bool isPointInObjectBoundary( double east, double north, S57Obj *obj );
+
 bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radius, S57Obj *obj )
 {
     switch( obj->Primitive_type ){
@@ -5964,9 +5968,20 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
         }
         case GEO_AREA: {
             //  Coarse test first
-            if( !obj->BBObj.ContainsMarge( lat, lon, select_radius ) ) return false;
-            else
-                return IsPointInObjArea( lat, lon, select_radius, obj );
+            if( !obj->BBObj.ContainsMarge( lat, lon, select_radius ) )
+                return false;
+            else{
+                //      If the area has not been tesselated yet (or maybe never will be...)
+                //      then use simple boundary test using the linesegment outlines if available
+                if( obj->pPolyTessGeo && obj->pPolyTessGeo->IsOk()) {
+                    return IsPointInObjArea( lat, lon, select_radius, obj );
+                }
+                else{
+                    double easting, northing;
+                    toSM_Plugin( lat, lon, m_ref_lat, m_ref_lon, &easting, &northing );
+                    return isPointInObjectBoundary( easting, northing, obj );
+                }
+            }
         }
         
         case GEO_LINE: {
@@ -9008,7 +9023,7 @@ bool S57Obj::SetPointGeometry( double lat, double lon, double ref_lat, double re
     m_lat = lat;
     
     //  Set initial Point BoundingBox limits quite small...
-    BBObj.Set(m_lat - .001, m_lon - .001, m_lat + .001, m_lon + .001);
+    BBObj.Set(m_lat - .0001, m_lon - .0001, m_lat + .0001, m_lon + .0001);
     bBBObj_valid = true;
     
     //  Calculate SM from chart common reference point
@@ -9125,7 +9140,74 @@ bool S57Obj::SetMultipointGeometry( MultipointGeometryDescriptor *pGeo, double r
 }
 
 
-//----------------------------------------------------------------------------------
-//      S57Obj CTOR from SENC file
-//----------------------------------------------------------------------------------
+int Intersect(MyPoint, MyPoint, MyPoint, MyPoint) ;
+
+bool isPointInObjectBoundary( double east, double north, S57Obj *obj )
+{
+    int count = 0;
+    
+    if( obj->m_ls_list )
+    {
+      
+        float *ppt;
+        
+        unsigned char *vbo_point = (unsigned char *)obj->m_chart_context->chart->GetLineVertexBuffer();;
+        line_segment_element *ls = obj->m_ls_list;
+        
+        MyPoint rinf;
+        rinf.x = 1e8;
+        rinf.y = north;
+        MyPoint p;
+        p.x = east;
+        p.y = north;
+        
+        while(ls){
+                
+            {
+                    
+                    int nPoints;
+                    // fetch the first point
+                    if(ls->ls_type == TYPE_EE){
+                        ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
+                        nPoints = ls->pedge->nCount;
+                    }
+                    else{
+                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                        nPoints = 2;
+                    }
+                    
+                    MyPoint l, r;
+                    l.x = ppt[0];
+                    l.y = ppt[1];
+                    
+                    ppt += 2;
+                    
+                    int x0, y0, x1, y1;
+                    for(int ip=0 ; ip < nPoints - 1 ; ip++){
+
+                        
+                        r.x = ppt[0], r.y = ppt[1];
+                        
+                        // test intersect with right-infinite ray
+                        int isect = Intersect(l, r, p, rinf);
+                        if(isect)
+                            count++;
+                            
+                        
+                         
+                        l.x = r.x;
+                        l.y = r.y;
+                        
+                        ppt += 2;
+                    }
+                }
+                
+                ls = ls->next;
+            }
+    }
+    
+    
+    return( (count&1) == 1);
+}
+
 
