@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-09 10:42+0100\n"
-"PO-Revision-Date: 2017-03-14 08:54-0400\n"
+"POT-Creation-Date: 2017-07-02 21:17-0400\n"
+"PO-Revision-Date: 2017-07-03 13:25-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Finnish\n"
 "Language: fi_FI\n"
@@ -16,212 +16,227 @@ msgstr ""
 "X-Crowdin-Language: fi\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
-#: src\eSENCChart.cpp:3143 src\eSENCChart.cpp:3147
+#: src/eSENCChart.cpp:3192 src/eSENCChart.cpp:3196
 msgid "Building eSENC"
-msgstr ""
+msgstr "Muodostetaan eSENC"
 
-#: src\eSENCChart.cpp:6411
+#: src/eSENCChart.cpp:6389
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Sektorikulmat ovat tosisuuntia merikohteesta"
 
-#: src\oesenc_pi.cpp:239 src\oesenc_pi.cpp:379 src\oesenc_pi.cpp:3393
-#: src\oesenc_pi.cpp:3445 src\oesenc_pi.cpp:3600
+#: src/oesenc_pi.cpp:273 src/oesenc_pi.cpp:415 src/oesenc_pi.cpp:2051
+#: src/oesenc_pi.cpp:2080 src/oesenc_pi.cpp:3885 src/oesenc_pi.cpp:3937
+#: src/oesenc_pi.cpp:4103
 msgid "Dialog"
-msgstr ""
+msgstr "Dialogi"
 
-#: src\oesenc_pi.cpp:631
+#: src/oesenc_pi.cpp:688
 msgid "oeSENC"
-msgstr ""
+msgstr "oeSENC"
 
-#: src\oesenc_pi.cpp:637
+#: src/oesenc_pi.cpp:694
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr ""
+msgstr "OpenCPN oeSENC karttalisäosa"
 
-#: src\oesenc_pi.cpp:643
+#: src/oesenc_pi.cpp:700
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr ""
+msgstr "OpenCPN karttalisäosa tukee oeSENC karttoja.\n\n"
 
-#: src\oesenc_pi.cpp:1020 src\oesenc_pi.cpp:3058
+#: src/oesenc_pi.cpp:870 src/oesenc_pi.cpp:3375
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr ""
+msgstr "Saadaksesi käyttäjätunnuksen Sinun on luotava yksilöllinen järjestelmän tunnistus tiedosto.\n"
 
-#: src\oesenc_pi.cpp:1021 src\oesenc_pi.cpp:3059
+#: src/oesenc_pi.cpp:871 src/oesenc_pi.cpp:3376
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr ""
+msgstr "Tämä tiedosto tunnetaan myös \"sormenjälki\" tiedostona.\n"
 
-#: src\oesenc_pi.cpp:1022 src\oesenc_pi.cpp:3060
+#: src/oesenc_pi.cpp:872 src/oesenc_pi.cpp:3377
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
-msgstr ""
+msgstr "Sormenjälkitiedosto sisältää tämän tietokoneen yksilöinti tiedot.\n\n"
 
-#: src\oesenc_pi.cpp:1023 src\oesenc_pi.cpp:3061
+#: src/oesenc_pi.cpp:873 src/oesenc_pi.cpp:3378
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr ""
+msgstr "Luotuasi tämän tiedoston, tarvitset sitä, kun muodostat asennusluvan o.-charts.org shop:ssa.\n\n"
 
-#: src\oesenc_pi.cpp:1024 src\oesenc_pi.cpp:3062
+#: src/oesenc_pi.cpp:874 src/oesenc_pi.cpp:3379
 msgid "Proceed to create Fingerprint file?"
-msgstr ""
+msgstr "Ryhdytkö Fingerprint tiedoston luontiin?"
 
-#: src\oesenc_pi.cpp:1026 src\oesenc_pi.cpp:3064 src\oesenc_pi.cpp:3794
+#: src/oesenc_pi.cpp:876 src/oesenc_pi.cpp:3381 src/oesenc_pi.cpp:4288
+#: src/oesenc_pi.cpp:4368
 msgid "oeSENC_PI Message"
-msgstr ""
+msgstr "oeSENC_PI viesti"
 
-#: src\oesenc_pi.cpp:1463 src\oesenc_pi.h:222
+#: src/oesenc_pi.cpp:1325 src/oesenc_pi.h:211
 msgid "oeSENC_PI Preferences"
-msgstr ""
+msgstr "oeSENC_PI asetukset"
 
-#: src\oesenc_pi.cpp:2197
+#: src/oesenc_pi.cpp:2083
 msgid "OpenCPN oeSENC UserKey Required"
-msgstr ""
+msgstr "OpenCPN oeSENC käyttäjätunnus tarvitaan"
 
-#: src\oesenc_pi.cpp:2217
+#: src/oesenc_pi.cpp:2101
 msgid "Enter UserKey"
-msgstr ""
+msgstr "Kirjoita UserKey"
 
-#: src\oesenc_pi.cpp:2236
+#: src/oesenc_pi.cpp:2120
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
-msgstr ""
+msgstr "Aakkosnumeerinen muoto on kelvollinen oeSENC käyttäjätunnus: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Sinun oeSENC käyttäjätunnus saadaan karttojen toimittajalta."
 
-#: src\oesenc_pi.cpp:2242
+#: src/oesenc_pi.cpp:2126
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "Virhe: Annettu käyttäjätunnus ei kelpaa tähän oeSENC karttasarjaan. Tarkista oma käyttäjätunnus ja yritä uudelleen.\n\n"
+"Aakkosnumeerinen muoto on kelvollinen oeSENC käyttäjätunnus: AAAA-BBBB-CCCC-DDDD-EEEE-FF oeSENC käyttäjätunnus saadaan karttatoimittajalta.\n\n"
 
-#: src\oesenc_pi.cpp:2250
+#: src/oesenc_pi.cpp:2134
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "Virhe: Annettu käyttäjätunnus ei kelpaa tähän oeSENC karttasarjaan.\n\n"
+"oeSENC kartat poistetaan käytöstä tämän istunnon ajaksi.\n"
+"Tarkista käyttäjätunnuksesi ja käynnistä udelleen OpenCPN.\n\n"
+"Saat oeSENC käyttäjätunnuksen kartan toimittajaltasi.\n\n"
 
-#: src\oesenc_pi.cpp:2261
+#: src/oesenc_pi.cpp:2145
 msgid "UserKey accepted.\n\n"
-msgstr ""
+msgstr "Käyttäjätunnus hyväksytty.\n\n"
 
-#: src\oesenc_pi.cpp:2298
+#: src/oesenc_pi.cpp:2182
 msgid "Cancel"
-msgstr ""
+msgstr "Peruuta"
 
-#: src\oesenc_pi.cpp:2305
+#: src/oesenc_pi.cpp:2189
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
-#: src\oesenc_pi.cpp:2766
+#: src/oesenc_pi.cpp:2724
 msgid "Checking oeserverd utility at "
-msgstr ""
+msgstr "Tarkistetaan Oeserverd apuohjelmaa "
 
-#: src\oesenc_pi.cpp:2774
+#: src/oesenc_pi.cpp:2732
 msgid "Cannot find the oserverd utility at \n"
-msgstr ""
+msgstr "Ei löydetä Oeserverd apuohjelmaa\n"
 
-#: src\oesenc_pi.cpp:2778 src\oesenc_pi.cpp:2799 src\oesenc_pi.cpp:2839
-#: src\oesenc_pi.cpp:2914 src\oesenc_pi.cpp:3194 src\oesenc_pi.cpp:3224
-#: src\oesenc_pi.cpp:3237
+#: src/oesenc_pi.cpp:2736 src/oesenc_pi.cpp:2844 src/oesenc_pi.cpp:3527
+#: src/oesenc_pi.cpp:3557 src/oesenc_pi.cpp:3570
 msgid "oeSENC_pi Message"
-msgstr ""
+msgstr "oeSENC_pi viesti"
 
-#: src\oesenc_pi.cpp:2795
-msgid "Cannot execute oeserverd utility at \n"
-msgstr ""
-
-#: src\oesenc_pi.cpp:2829 src\oesenc_pi.cpp:2889 src\oesenc_pi.cpp:2909
+#: src/oesenc_pi.cpp:2815 src/oesenc_pi.cpp:2839
 msgid "oeserverd utility at \n"
-msgstr ""
+msgstr "oeserverd apuohjelma\n"
 
-#: src\oesenc_pi.cpp:2833
-msgid " is incorrect version, reports as:\n\n"
-msgstr ""
-
-#: src\oesenc_pi.cpp:2837
-msgid "This version of oesenc_PI requires oeserverd of version 1.00 or later."
-msgstr ""
-
-#: src\oesenc_pi.cpp:2893
+#: src/oesenc_pi.cpp:2819
 msgid " reports Unavailable.\n\n"
-msgstr ""
+msgstr " raportteja ei käytettävissä.\n\n"
 
-#: src\oesenc_pi.cpp:2913
+#: src/oesenc_pi.cpp:2843
 msgid " could not be started.\n\n"
-msgstr ""
+msgstr " ei voitu käynnistää.\n\n"
 
-#: src\oesenc_pi.cpp:2959
+#: src/oesenc_pi.cpp:3216
 msgid "System Identification"
-msgstr ""
+msgstr "Järjestelmän tunnistus"
 
-#: src\oesenc_pi.cpp:2969
+#: src/oesenc_pi.cpp:3226
 msgid "Create System Identifier file..."
-msgstr ""
+msgstr "Luo järjestelmätunniste tiedosto..."
 
-#: src\oesenc_pi.cpp:2977
+#: src/oesenc_pi.cpp:3234
 msgid "Show In Finder"
-msgstr ""
+msgstr "Näytä Finderissa"
 
-#: src\oesenc_pi.cpp:2979
+#: src/oesenc_pi.cpp:3236
 msgid "Show on disk"
-msgstr ""
+msgstr "Näytä levyllä"
 
-#: src\oesenc_pi.cpp:3194
-msgid "Administrator priveleges are required to create fpr.\n"
+#: src/oesenc_pi.cpp:3527
+msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
 msgstr ""
 
-#: src\oesenc_pi.cpp:3218
+#: src/oesenc_pi.cpp:3551
 msgid "Fingerprint file created.\n"
-msgstr ""
+msgstr "Fingerprint tiedosto luotu.\n"
 
-#: src\oesenc_pi.cpp:3222
+#: src/oesenc_pi.cpp:3555
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
-msgstr ""
+msgstr "\n\n"
+"Fingerprint tiedosto kopioidaan myös työpöydälle."
 
-#: src\oesenc_pi.cpp:3535
+#: src/oesenc_pi.cpp:4027
 msgid "Could not open oesenc_pi EULA: "
-msgstr ""
+msgstr "Oesenc_pi Käyttöoikeussopimus ei voitu avata: "
 
-#: src\oesenc_pi.cpp:3597
+#: src/oesenc_pi.cpp:4100
 msgid "oeSENC PlugIn for OpenCPN"
-msgstr ""
+msgstr "oeSENC lisäosa OpenCPN:ään"
 
-#: src\oesenc_pi.cpp:3660
+#: src/oesenc_pi.cpp:4163
 msgid "License"
-msgstr ""
+msgstr "Lisenssi"
 
-#: src\oesenc_pi.cpp:3685
+#: src/oesenc_pi.cpp:4188
 msgid "Accept"
-msgstr ""
+msgstr "Hyväksy"
 
-#: src\oesenc_pi.cpp:3690
+#: src/oesenc_pi.cpp:4193
 msgid "Reject"
+msgstr "Hylkää"
+
+#: src/oesenc_pi.cpp:4234
+msgid "Available Chart sets:"
 msgstr ""
 
-#: src\oesenc_pi.cpp:3729
+#: src/oesenc_pi.cpp:4303
 msgid "The following Chart sets are available:"
-msgstr ""
+msgstr "Seuraavat karttasarjat ovat saatavana:"
 
-#: src\oesenc_pi.cpp:3739
+#: src/oesenc_pi.cpp:4313
 msgid "Chart set"
-msgstr ""
+msgstr "Kartta sarja"
 
-#: src\oesenc_pi.cpp:3743
+#: src/oesenc_pi.cpp:4317
 msgid "Version"
-msgstr ""
+msgstr "Versio"
 
-#: src\oesenc_pi.cpp:3747
+#: src/oesenc_pi.cpp:4321
 msgid "Valid until"
+msgstr "Voimassa saakka"
+
+#: src/oesenc_pi.cpp:4675
+msgid "oesenc Charts"
 msgstr ""
 
-#: src\oesenc_pi.h:298
+#: src/oesenc_pi.cpp:4705
+msgid "Add/Update oesenc chartsets"
+msgstr ""
+
+#: src/oesenc_pi.cpp:4710
+msgid "Visit o-charts.org Website"
+msgstr ""
+
+#: src/oesenc_pi.cpp:4711
+msgid "Here you may order new oesenc chartsets."
+msgstr ""
+
+#: src/oesenc_pi.h:298
 msgid "OpenCPN SENC UserKey Required"
-msgstr ""
+msgstr "OpenCPN oeSENC käyttäjätunnus tarvitaan"
 
-#: src\oesenc_pi.h:426
+#: src/oesenc_pi.h:426
 msgid "oeSENC_PI Information"
-msgstr ""
+msgstr "oeSENC_PI tiedot"
 
-#: src\s52plib.cpp:1881 src\s52plib.cpp:1950 src\s52plib.cpp:2126
+#: src/s52plib.cpp:1956 src/s52plib.cpp:2050 src/s52plib.cpp:2226
 msgid "ChartTexts"
-msgstr ""
+msgstr "Karttatekstit"
 
