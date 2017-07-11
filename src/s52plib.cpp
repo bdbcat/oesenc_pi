@@ -3206,9 +3206,12 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     //    Set drawing width
     float lineWidth = w;
     
+    GLint parms[2];
+    glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
+    GLint parmsa[2];
+    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parmsa[0] );
+    
     if( w > 1 ) {
-        GLint parms[2];
-        glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
         if( w > parms[1] )
             lineWidth = wxMax(g_GLMinCartographicLineWidth, parms[1]);
         else
@@ -3216,17 +3219,32 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     } else
         lineWidth = wxMax(g_GLMinCartographicLineWidth, 1);
 
+    
     // Manage super high density displays
-    if(g_pix_per_mm > 8){               // arbitrary
-        float target_w_mm = ((float)w) / 4.0;  // Target width in mm
+    float target_w_mm = 0.5 * w;
+    if(g_pix_per_mm > 7){               // arbitrary
+        target_w_mm = ((float)w) / 6.0;  // Target width in mm
                                                //  The value "w" comes from S52 library CNSY procedures, in "nominal" pixels
-                                               // the value "4" comes from semi-standard LCD display densities
-                                               // or something like 0.25 mm pitch, or 4 pix per mm.
+                                               // the value "6" comes from semi-standard LCD display densities
+                                               // or something like 0.18 mm pitch, or 6 pix per mm.
         lineWidth =  wxMax(g_GLMinCartographicLineWidth, target_w_mm * g_pix_per_mm);
     }
 
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_BLEND );
+        
+#ifdef __OCPN__ANDROID__
+    lineWidth = wxMin(lineWidth, parms[1]);
     glLineWidth(lineWidth);
     
+#else    
+    glLineWidth(lineWidth);
+    if(lineWidth > 4.0){
+         glEnable( GL_LINE_SMOOTH );
+         glEnable( GL_BLEND );
+    }
+#endif
+
 #ifndef ocpnUSE_GLES // linestipple is emulated poorly
     if( !strncmp( str, "DASH", 4 ) ) {
         glLineStipple( 1, 0x3F3F );
@@ -3240,11 +3258,6 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glDisable( GL_LINE_STIPPLE );
 #endif
 
-    if(lineWidth > 2){
-         glEnable( GL_LINE_SMOOTH );
-         glEnable( GL_BLEND );
-    }
-            
     glPushMatrix();
 
     // Set up the OpenGL transform matrix for this object
@@ -4414,6 +4427,21 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     Rule *prule = rules->razRule;
 
+    float scale_factor = 1.0;
+    
+    // The dimensions of the light are presented here as pixels on-screen.
+    // We must scale the rendered size based on the device pixel density
+    // Let us declare that the width of the arc should be no less than X mm
+    float wx = 1.0;
+    
+    float pd_scale = 1.0;
+    float nominal_arc_width_pix = wxMax(1.0, floor(GetPPMM() * wx));             // { wx } mm nominal, but not less than 1 pixel
+    pd_scale = nominal_arc_width_pix / arc_width;
+    
+    //scale_factor *= pd_scale;
+    //qDebug() << GetPPMM() << arc_width << nominal_arc_width_pix << pd_scale;
+    
+    
     // Adjust size
     //  Some plain lights have no SCAMIN attribute.
     //  This causes display congestion at small viewing scales, since the objects are rendered at fixed pixel dimensions from the LUP rules.
@@ -4424,18 +4452,17 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     if(1/*rzRules->obj->Scamin > 10000000*/){                        // huge (unset) SCAMIN)
         float radius_meters_target = 200;
 
-        //float fsf = 100 / canvas_pix_per_mm;
-
-        float radius_meters = ( radius * canvas_pix_per_mm ) / vp->view_scale_ppm;
+         float radius_meters = ( radius * canvas_pix_per_mm ) / vp->view_scale_ppm;
 
         xscale = radius_meters_target / radius_meters;
         xscale = wxMin(xscale, 1.0);
         xscale = wxMax(.4, xscale);
 
-//    printf("CARC   xscale: %g  radius_meters %g\n",  xscale, radius_meters);
         radius *= xscale;
     }
 
+    ///scale_factor *= xscale;
+    
     carc_hash += _T(".");
     wxString xs;
     xs.Printf( _T("%5g"), xscale );
@@ -4568,7 +4595,7 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                 //    Draw the outer border
                 wxColour color = getwxColour( outline_color );
 
-                wxPen *pthispen = wxThePenList->FindOrCreatePen( color, outline_width, wxPENSTYLE_SOLID );
+                wxPen *pthispen = wxThePenList->FindOrCreatePen( color, outline_width * scale_factor, wxPENSTYLE_SOLID );
                 mdc.SetPen( *pthispen );
                 wxBrush *pthisbrush = wxTheBrushList->FindOrCreateBrush( color, wxBRUSHSTYLE_TRANSPARENT );
                 mdc.SetBrush( *pthisbrush );
@@ -4580,7 +4607,7 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
                     if( !colorb.IsOk() ) colorb = getwxColour( _T("CHMGD") );
 
-                    pthispen = wxThePenList->FindOrCreatePen( colorb, arc_width, wxPENSTYLE_SOLID );
+                    pthispen = wxThePenList->FindOrCreatePen( colorb, arc_width * scale_factor, wxPENSTYLE_SOLID );
                     mdc.SetPen( *pthispen );
 
                     mdc.DrawEllipticArc( width / 2 - rad, height / 2 - rad, rad * 2, rad * 2, sb, se );
@@ -4617,7 +4644,6 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 #ifdef ocpnUSE_GL
     CARC_Buffer buffer;
 
-    float scale_factor = 1.0;
 
     // Light arcs are specified in terms of absolute dimensions on screen, and should not be scaled.
 //     if(g_bresponsive){
@@ -4675,8 +4701,9 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                 buffer.color[2][1] = c.Green();
                 buffer.color[2][2] = c.Blue();
                 buffer.color[2][3] = c.Alpha();
-                buffer.line_width[2] = wxMax(g_GLMinSymbolLineWidth, (float)0.7) * scale_factor;
-
+                //buffer.line_width[2] = wxMax(g_GLMinSymbolLineWidth, (float)0.5) * scale_factor;
+                buffer.line_width[2] = wxMax(1.0, floor(GetPPMM() * 0.2));             //0.4 mm nominal, but not less than 1 pixel
+                
                 float a = ( sectr1 - 90 ) * PI / 180.;
                 buffer.data[s++] = 0;
                 buffer.data[s++] = 0;
@@ -4728,6 +4755,8 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         glLineWidth(buffer.line_width[1]);
         glDrawArrays(GL_LINE_STRIP, 0, buffer.steps);
 
+        //qDebug() << buffer.line_width[0] << buffer.line_width[1] << buffer.line_width[2];
+        
         if(buffer.line_width[2]) {
 #ifndef ocpnUSE_GLES // linestipple is emulated poorly
             glLineStipple( 1, 0x3F3F );
@@ -5299,7 +5328,7 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
     if( IsObjNoshow( rzRules->LUP->OBCL) )
         return 0;
 
-//    if(!strncmp(rzRules->obj->FeatureName, "SLCONS", 6))
+//    if(!strncmp(rzRules->obj->FeatureName, "RESARE", 6))
 //        int yyp = 0;
 
     if( !ObjectRenderCheckCat( rzRules, vp ) ) {
@@ -7726,8 +7755,8 @@ void s52plib::RenderPolytessGL(ObjRazRules *rzRules, ViewPort *vp, double z_clip
 
 int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp )
 {
-     //if(!strncmp("PRCARE", rzRules->obj->FeatureName, 6))
-       //  int yyp = 0;
+//     if(!strncmp("RESARE", rzRules->obj->FeatureName, 6))
+//         int yyp = 0;
 
      //TODO  Debugging
 //     if(rzRules->obj->Index != 1060)
@@ -9132,7 +9161,10 @@ Extended_Geometry *s52plib::buildExtendedGeom( S57Obj *obj )
     
     unsigned int index = 0;
     int nls = 0;
-    float lpx, lpy, fpx, fpy;
+    float lpx = 0;
+    float lpy = 0;
+    float fpx, fpy;
+    
     float *ppt;
     
     int direction = 1;
