@@ -92,6 +92,9 @@ void androidShowBusyIcon();
 void androidHideBusyIcon();
 #endif
 
+bool testSENCServer();
+bool validate_SENC_server(void);
+
 #include <wx/arrimpl.cpp> 
 WX_DEFINE_OBJARRAY(EULAArray);
 
@@ -531,32 +534,7 @@ oesenc_pi::oesenc_pi(void *ppimgr)
 
       g_event_handler = new oesenc_pi_event_handler(this);
 
-      wxFileName fn_exe(GetOCPN_ExePath());
-
-      //        Specify the location of the oeserverd helper.
-      g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
-      //g_sencutil_bin = _T("/home/dsr/Projects/oeserver_dp/build/oeserverd");
-      
-
-#ifdef __WXMSW__
-      g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-      _T("plugins\\oesenc_pi\\oeserverd.exe\"");
-#endif
-
-#ifdef __WXOSX__
-      fn_exe.RemoveLastDir();
-      g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-      _T("PlugIns/oesenc_pi/oeserverd\"");
-#endif
-
-#ifdef __OCPN__ANDROID__
-      wxString exeLocn = *GetpSharedDataLocation();
-      wxFileName fnl(exeLocn);
-      fnl.RemoveLastDir();                // remove "files/"
-      g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
-      g_serverProc = 0;
-#endif
-      
+     
       g_bSENCutil_valid = false;                // not confirmed yet
 
 
@@ -593,10 +571,6 @@ oesenc_pi::oesenc_pi(void *ppimgr)
           g_CommonDataDir += wxFileName::GetPathSeparator();
       }
 
-      //        Set up a globally accesible string pointing to the eSENC storage location
-      g_SENCdir = g_CommonDataDir;
-      g_SENCdir += _T("s63SENC");
-
 
       gb_global_log = false;
 
@@ -609,6 +583,8 @@ oesenc_pi::~oesenc_pi()
 
 int oesenc_pi::Init(void)
 {
+     wxLogMessage(_T("oeSENCPI DateCode: 0703"));
+    
     //  Get the path of the PlugIn itself
     g_pi_filename = GetPlugInPath(this);
 
@@ -617,12 +593,38 @@ int oesenc_pi::Init(void)
       //    Build an arraystring of dynamically loadable chart class names
     m_class_name_array.Add(_T("eSENCChart"));
 
+     
+    //        Specify the location of the oeserverd helper.
+    wxFileName fn_exe(GetOCPN_ExePath());
+    g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
+       
+    
+#ifdef __WXMSW__
+    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
+    _T("plugins\\oesenc_pi\\oeserverd.exe\"");
+#endif
+    
+#ifdef __WXOSX__
+    fn_exe.RemoveLastDir();
+    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
+    _T("PlugIns/oesenc_pi/oeserverd\"");
+#endif
+    
+#ifdef __OCPN__ANDROID__
+    wxString piLocn = GetPlugInPath(this); //*GetpSharedDataLocation();
+    wxFileName fnl(piLocn);
+    g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
+    g_serverProc = 0;
+#endif
+    
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
     g_benable_screenlog = g_buser_enable_screenlog;
     
     g_ChartInfoArray.Clear();
    
+    testSENCServer();
+    
     int flags =  INSTALLS_PLUGIN_CHART_GL |
                  WANTS_PLUGIN_MESSAGING   |
                  WANTS_OVERLAY_CALLBACK   |
@@ -1197,7 +1199,7 @@ bool oesenc_pi::LoadConfig( void )
             g_fpr_file = wxEmptyString;
         
         pConf->Read( _T("UserKey"), &g_UserKey );
-        
+
         //  Load the persistent Chartinfo strings
         pConf->SetPath ( _T ( "/PlugIns/oesenc/ChartinfoList" ) );
         
@@ -1348,6 +1350,7 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
 
 #ifdef __OCPN__ANDROID__    
     qDebug() << "ProcessChartManageResult: " << result.mb_str();
+    bool b_forceUpdate = false;
    
     wxStringTokenizer st(result, _T(";"), wxTOKEN_DEFAULT);
     while( st.HasMoreTokens() )
@@ -1355,6 +1358,13 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
         wxString token = st.GetNextToken();
         if(token.StartsWith(_T("InstallDir"))){
             wxString dir = token.AfterFirst(':');
+            
+            // Strip any trailing '/'
+            wxString rest;
+            if(dir.EndsWith("/", &rest)){
+                dir = rest;
+            }
+            
             bool covered = false;
             for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ ){
                 if( dir.StartsWith((GetChartDBDirArrayString().Item(i))) ) {
@@ -1367,6 +1377,8 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
                 wxLogMessage(_T("osenc_pi adding chart directory: ") + dir);
                 qDebug() << "adding dir: " << dir.mb_str();
             }
+            
+            b_forceUpdate = true;
         }
         
         else if(token.StartsWith(_T("UserName"))){
@@ -1384,6 +1396,10 @@ void oesenc_pi::ProcessChartManageResult( wxString result )
             qDebug() << "g_systemName: " << g_systemName.mb_str();
         }
     }
+    
+    // This is a bit harsh, but always works...
+    if(b_forceUpdate)
+        ForceChartDBUpdate();
 #endif
 
 }
@@ -2268,10 +2284,23 @@ bool validateUserKey( wxString sencFileName)
             
             // We try once, quietly
             int retCode_retry0 = senc.ingestHeader( sencFileName );
-            if(retCode_retry0 == SENC_NO_ERROR)
+            if(retCode_retry0 == SENC_NO_ERROR){
+                wxLogMessage(_T("OK after quiet retry."));
                 return true;
+            }
                 
-            wxLogMessage(_T("validateUserKey E2"));
+            wxLogMessage(_T("validateUserKey E2, reset server"));
+            
+            validate_SENC_server();             // reset the server
+ 
+            int retCode_retry1 = senc.ingestHeader( sencFileName );
+            if(retCode_retry1 == SENC_NO_ERROR){
+                wxLogMessage(_T("OK after server reset."));
+                return true;
+            }
+            
+            wxLogMessage(_T("validateUserKey E2.5"));
+            
             //  On a hard signature error, we try once more, allowing user to enter a new key
             wxString key = GetUserKey( LEGEND_SECOND, true );
             
@@ -2623,14 +2652,45 @@ void initLibraries(void)
 }
 
 
+bool testSENCServer()
+{
+#ifdef __OCPN__ANDROID__    
+    qDebug() << "Testing SENC server";
+    
+    //  The target binary executable
+    wxString cmd = g_sencutil_bin;
+    
+    //  Set up the parameter passed as the local app storage directory
+    wxString dataLoc = *GetpPrivateApplicationDataLocation();
+    wxFileName fn(dataLoc);
+    wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+    // This will be {dir of g_sencutil_bin}/lib
+    wxFileName fnl(cmd);
+    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+        
+    wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
+    
+    wxString result = callActivityMethod_s4s("createProcSync", cmd, _T("-a"), dataDir, libDir);
+    
+    wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
+    
+ 
+#endif    
+    return true;
+}
+
 bool validate_SENC_server(void)
 {
-
+      
+    
     if(g_debugLevel)printf("\n-------validate_SENC_server\n");
     wxLogMessage(_T("validate_SENC_server"));
 
     if(g_serverProc){
     // Check to see if the server is already running, and available
+        //qDebug() << "Check running server Proc";
         Osenc_instream testAvail;
         if(testAvail.isAvailable(g_UserKey)){
             wxLogMessage(_T("Available TRUE"));
@@ -2719,11 +2779,10 @@ bool validate_SENC_server(void)
     wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
     //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-    wxString libLocn = *GetpSharedDataLocation();
-    wxFileName fnl(libLocn);
-    fnl.RemoveLastDir();                // remove "files/"
+    // This will be {dir of g_sencutil_bin}/lib
+    wxFileName fnl(cmd);
     wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+    
     wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
     
     wxString result = callActivityMethod_s4s("createProc", cmd, _T("-q"), dataDir, libDir);
@@ -2892,9 +2951,11 @@ wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString par
         return _T("jenv Error");
     }
     
-    jstring p1 = (jenv)->NewStringUTF(parm1.c_str());
-    jstring p2 = (jenv)->NewStringUTF(parm2.c_str());
+    wxCharBuffer p1b = parm1.ToUTF8();
+    jstring p1 = (jenv)->NewStringUTF(p1b.data());
     
+    wxCharBuffer p2b = parm2.ToUTF8();
+    jstring p2 = (jenv)->NewStringUTF(p2b.data());
     
     
     QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", p1, p2);
@@ -3534,12 +3595,11 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-//  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        wxString libLocn = *GetpSharedDataLocation();
-        wxFileName fnl(libLocn);
-        fnl.RemoveLastDir();                // remove "files/"
+        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        // This will be {dir of g_sencutil_bin}/lib
+        wxFileName fnl(cmd);
         wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-
+        
         wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
@@ -3620,9 +3680,10 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         
         m_eventTimer.Stop();
             
+        wxLogMessage(_T("sFPRPlus: ") + sFPRPlus);
         
         // Start the Chart management activity
-        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oplugininstaller"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("ManageResult") );
+        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oesencplugin"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("ManageResult") );
         
         // Start a timer to poll for results.
         m_timerAction = ACTION_ARB_RESULT_POLL;
@@ -3651,12 +3712,11 @@ void oesenc_pi_event_handler::OnGetHWIDClick( wxCommandEvent &event )
         
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-//  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        wxString libLocn = *GetpSharedDataLocation();
-        wxFileName fnl(libLocn);
-        fnl.RemoveLastDir();                // remove "files/"
+        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        // This will be {dir of g_sencutil_bin}/lib
+        wxFileName fnl(cmd);
         wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-
+        
         wxLogMessage(_T("oesenc_pi: Getting HWID: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-w"), dataDir, libDir);
@@ -4658,6 +4718,7 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     m_bCreateHWID = new wxButton( this, wxID_ANY, _T("Create HWID (Test, remove\n for Production)"), wxDefaultPosition, wxDefaultSize, 0 );
     bSizerBtns->Add( m_bCreateHWID, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
+    m_bCreateHWID->Hide();
     
     this->Layout();
     
