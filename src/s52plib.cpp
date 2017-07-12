@@ -118,6 +118,22 @@ WX_DEFINE_LIST( TextObjList );
 WX_DEFINE_OBJARRAY(ArrayOfNoshow);
 
 
+S52_TextC::S52_TextC()
+{ 
+    pcol = NULL;
+    pFont = NULL;
+    texobj = 0;
+    bnat = false;
+    bspecial_char = false;
+}
+
+S52_TextC::~S52_TextC()
+{
+    if(texobj){
+        glDeleteTextures(1, (GLuint *)(&this->texobj) );
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 //      Comparison Function for LUPArray sorting
@@ -1706,8 +1722,8 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 
             // Has font size changed?  If so, clear the cached bitmap, and rebuild it
             if( (h_scaled - descent) != ptext->rendered_char_height){
-                free(ptext->m_pRGBA);
-                ptext->m_pRGBA = NULL;
+                glDeleteTextures(1, (GLuint *)&ptext->texobj);
+                ptext->texobj = 0;
             }
 
             ptext->rendered_char_height = h_scaled - descent;
@@ -1717,7 +1733,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
         // or if we do we would need a hashmap to cache and extract them
         // And we also do this if the text is to be scaled up artificially.
         if( (ptext->bspecial_char) || b_force_no_texture) {
-            if( !ptext->m_pRGBA ) // is RGBA bitmap ready?
+            if( !ptext->texobj ) // is texture ready?
             {
                 wxScreenDC sdc;
 
@@ -1743,16 +1759,17 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     mdc.Clear();
 
                     mdc.DrawText( ptext->frmtd, 0, 0 );
-
+                    mdc.SelectObject( wxNullBitmap );
+                    
                     wxImage image = bmp.ConvertToImage();
                     int ws = image.GetWidth(), hs = image.GetHeight();
 
                     ptext->RGBA_width = ws;
                     ptext->RGBA_height = hs;
-                    ptext->m_pRGBA = (unsigned char *) malloc( 4 * ws * hs );
+                    unsigned char *pRGBA = (unsigned char *) malloc( 4 * ws * hs );
 
                     unsigned char *d = image.GetData();
-                    unsigned char *pdest = ptext->m_pRGBA;
+                    unsigned char *pdest = pRGBA;
                     S52color *ccolor = ptext->pcol;
 
                     if(d){
@@ -1760,6 +1777,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                             for( int x = 0; x < ws; x++ ) {
                                 unsigned char r, g, b;
                                 int off = ( y * ws + x );
+                              
                                 r = d[off * 3 + 0];
                                 g = d[off * 3 + 1];
                                 b = d[off * 3 + 2];
@@ -1773,13 +1791,31 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                             }
                     }
 
-                    mdc.SelectObject( wxNullBitmap );
+ 
+                    int draw_width = ptext->RGBA_width;
+                    int draw_height = ptext->RGBA_height;
+                
+                    GLuint texobj;
+                    glGenTextures( 1, &texobj );
+                    glBindTexture( GL_TEXTURE_2D, texobj );
+                
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST/*GL_LINEAR*/ );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+                
+                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, draw_width, draw_height, 0,
+                              GL_RGBA, GL_UNSIGNED_BYTE, pRGBA );
+                    
+                    free( pRGBA );
+                
+                    ptext->texobj = texobj;
+                
                 } // mdc OK
+            } // Building texobj
 
-            } // Building m_RGBA
-
-            //    Render the bitmap
-            if( ptext->m_pRGBA ) {
+            //    Render the texture
+            if( ptext->texobj ) {
                 //  Adjust the y position to account for the convention that S52 text is drawn
                 //  with the lower left corner at the specified point, instead of the wx convention
                 //  using upper right corner
@@ -1827,49 +1863,49 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 }
 
                 if( bdraw ) {
-                    int x_offset = 0;
-                    int y_offset = 0;
+
                     int draw_width = ptext->RGBA_width;
                     int draw_height = ptext->RGBA_height;
-
-                    //  glDrawPixels fails if the origin of the pixel array is clipped by the matrix model
-                    //  So, we adjust the pixel array offsets to compensate.
-                    //  Sadly, the same logic does not work for rotated matrices, so we have to let them clip.
-                    //  TODO...do manual matrix operation to determine adjusted pixel array offsets for rotated case
-                    if( fabs( vp->rotation ) < 0.01 ) {
-
-                        if( xp < 0 ) {
-                            x_offset = -xp;
-                            draw_width += xp;
-                        }
-                        if( yp < 0 ) {
-                            y_offset = -yp;
-                            draw_height += yp;
-                        }
+ 
+                    extern GLenum       g_texture_rectangle_format;
+                    
+                    glEnable( GL_BLEND );
+                    glEnable( g_texture_rectangle_format );
+                    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+                    
+                    glPushMatrix();
+                    glTranslatef(xp, yp, 0);
+                    
+                    /* undo previous rotation to make text level */
+                    glRotatef(vp->rotation*180/PI, 0, 0, -1);
+ 
+                    glBindTexture( GL_TEXTURE_2D, ptext->texobj );
+                    
+                    float tx1 = 0, tx2 = draw_width;
+                    float ty1 = 0, ty2 = draw_height;
+                    
+                    if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+                        
+                        tx1 /= draw_width, tx2 /= draw_width;
+                        ty1 /= draw_height, ty2 /= draw_height;
                     }
-
-                    if( ( draw_width > 0 ) && ( draw_height > 0 ) ) {
-                        glColor4f( 1, 1, 1, 1 );
-
-                        glEnable( GL_BLEND );
-                        glPixelZoom( 1, -1 );
-
-                        glPushClientAttrib( GL_CLIENT_PIXEL_STORE_BIT );
-
-                        glPixelStorei( GL_UNPACK_ROW_LENGTH, ptext->RGBA_width );
-
-                        glRasterPos2i( xp + x_offset + 1, yp + y_offset + 1 );
-
-                        glPixelStorei( GL_UNPACK_SKIP_PIXELS, x_offset );
-                        glPixelStorei( GL_UNPACK_SKIP_ROWS, y_offset );
-
-                        glDrawPixels( draw_width, draw_height, GL_RGBA, GL_UNSIGNED_BYTE, ptext->m_pRGBA );
-                        glPixelZoom( 1, 1 );
-
-                        glPopClientAttrib();
-
-                        glDisable( GL_BLEND );
-                    }
+                    
+                    
+                    glBegin( GL_QUADS );
+                    
+                    glTexCoord2f( tx1, ty1 );  glVertex2i( 0, 0 );
+                    glTexCoord2f( tx2, ty1 );  glVertex2i( draw_width, 0 );
+                    glTexCoord2f( tx2, ty2 );  glVertex2i( draw_width, draw_height );
+                    glTexCoord2f( tx1, ty2 );  glVertex2i( 0, draw_height );
+                    
+                    glEnd();
+                    
+                    glPopMatrix();
+                    
+                    glDisable( g_texture_rectangle_format );
+                    glDisable( GL_BLEND );
+                    
+                    
                 } // bdraw
 
             }
