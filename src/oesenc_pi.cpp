@@ -158,6 +158,8 @@ wxArrayString                   g_ChartInfoArray;
 EULAArray                       g_EULAArray;
 wxArrayString                   g_EULAShaArray;
 
+int                             g_admin;
+
 std::map<std::string, ChartInfoItem *> info_hash;
 
 double g_overzoom_emphasis_base;
@@ -1192,6 +1194,7 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("systemName"), &g_systemName);
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
+        pConf->Read( _T("ADMIN"), &g_admin);
 #endif        
         
         if( !wxFileExists(g_fpr_file) )
@@ -3674,6 +3677,10 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         sFPRPlus += g_systemName;
         sFPRPlus += _T(";");                    // delimiter
         
+        //  ADMIN mode bit
+        sFPRPlus += _T("ADMIN:");
+        sFPRPlus += g_admin ? _T("1"):_T("0");
+        sFPRPlus += _T(";");                    // delimiter
         
         qDebug() << "sFPRPlus: " << sFPRPlus.mb_str();
         
@@ -4714,10 +4721,11 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
-    m_bCreateHWID = new wxButton( this, wxID_ANY, _T("Create HWID (Test, remove\n for Production)"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_bCreateHWID = new wxButton( this, wxID_ANY, _T("Create HWID (ADMIN mode)"), wxDefaultPosition, wxDefaultSize, 0 );
     bSizerBtns->Add( m_bCreateHWID, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
-    m_bCreateHWID->Hide();
+    if(!g_admin)
+        m_bCreateHWID->Hide();
     
     this->Layout();
     
