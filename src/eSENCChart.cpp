@@ -1814,7 +1814,8 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
         glEnable( GL_DEPTH_TEST );
 
     glDisable( GL_DEPTH_TEST );
-
+    glDisable( GL_STENCIL_TEST );
+    
     
     
     
@@ -1908,7 +1909,7 @@ bool eSENCChart::DoRenderRectOnGLTextOnly( const wxGLContext &glc, const ViewPor
         glEnable( GL_DEPTH_TEST );
 
     glDisable( GL_DEPTH_TEST );
-
+    glDisable( GL_STENCIL_TEST );
 
     // TODO WHY is this necessary? 
     glDisable( GL_DEPTH_TEST );
