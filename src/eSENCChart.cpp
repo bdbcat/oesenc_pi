@@ -3641,7 +3641,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
 
     
     wxString msgss;
-    msgss.Printf(_T("%d"), m_ve_hash.size());
+    msgss.Printf(_T("%zd"), m_ve_hash.size());
     if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  VE_hash Size: ") + msgss);
     
     if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Process Edge Vectors OK"));
@@ -6784,7 +6784,7 @@ void eSENCChart::AssembleLineGeometry( void )
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Start "));
     
     wxString msgss;
-    msgss.Printf(_T("%d"), m_ve_hash.size());
+    msgss.Printf(_T("%zd"), m_ve_hash.size());
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  VE_hash Size: ") + msgss);
     
 //    OCPNStopWatch sw;
@@ -6803,7 +6803,7 @@ void eSENCChart::AssembleLineGeometry( void )
 
 //    printf("time0 %f\n", sw.GetTime());
     wxString msgc;
-    msgc.Printf( _T("%d"), nPoints);
+    msgc.Printf( _T("%zd"), nPoints);
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Got Point count: ") + msgc);
     
     
