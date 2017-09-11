@@ -927,7 +927,7 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
         }
         
         //  Is the oeSENC version compatible?
-        if(m_senc_file_read_version != 200){
+        if((m_senc_file_read_version < 200) || (m_senc_file_read_version > 299)){
             if(g_debugLevel) wxLogMessage(_T("verifySENC E4"));
             return ERROR_SENC_VERSION_MISMATCH;
         }
@@ -969,7 +969,7 @@ int Osenc::verifySENC(Osenc_instream &fpx, const wxString &senc_file_name)
                 }
                 
                 //  Is the oeSENC version compatible?
-                if(m_senc_file_read_version != 200){
+                if((m_senc_file_read_version < 200) || (m_senc_file_read_version > 299)){
                     if(g_debugLevel) wxLogMessage(_T("verifySENC E9"));
                     return ERROR_SENC_VERSION_MISMATCH;
                 }
@@ -1607,9 +1607,12 @@ int Osenc::ingest200(const wxString &senc_file_name,
                     pDescriptor->indexCount = pPayload->edgeVector_count;
                     
                     // Copy the line index table, which in this case is offset in the payload
-                    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * 3 * sizeof(int));
-                    memcpy( pDescriptor->indexTable, next_byte,
-                            pPayload->edgeVector_count * 3 * sizeof(int) );
+                    int table_stride = 3;
+                    if(m_senc_file_read_version > 200)
+                        table_stride = 4;
+                        
+                    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * table_stride * sizeof(int));
+                    memcpy( pDescriptor->indexTable, next_byte, pPayload->edgeVector_count * table_stride * sizeof(int) );
                     
                     
                     obj->SetLineGeometry( pDescriptor, GEO_AREA, m_ref_lat, m_ref_lon ) ;
@@ -1649,9 +1652,13 @@ int Osenc::ingest200(const wxString &senc_file_name,
                     pDescriptor->indexCount = pPayload->edgeVector_count;
                     
                     // Copy the line index table, which in this case is offset in the payload
-                    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * 3 * sizeof(int));
+                    int table_stride = 3;
+                    if(m_senc_file_read_version > 200)
+                        table_stride = 4;
+                    
+                    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * table_stride * sizeof(int));
                     memcpy( pDescriptor->indexTable, next_byte,
-                            pPayload->edgeVector_count * 3 * sizeof(int) );
+                            pPayload->edgeVector_count * table_stride * sizeof(int) );
                     
                     
                     obj->SetLineGeometry( pDescriptor, GEO_AREA, m_ref_lat, m_ref_lon ) ;
@@ -3850,8 +3857,12 @@ LineGeometryDescriptor *Osenc::BuildLineGeometry( _OSENC_LineGeometry_Record_Pay
     pDescriptor->indexCount = pPayload->edgeVector_count;
     
     // Copy the payload tables
-    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * 3 * sizeof(int));
-    memcpy( pDescriptor->indexTable, &pPayload->payLoad, pPayload->edgeVector_count * 3 * sizeof(int) );
+    int table_stride = 3;
+    if(m_senc_file_read_version > 200)
+        table_stride = 4;
+    
+    pDescriptor->indexTable = (int *)malloc(pPayload->edgeVector_count * table_stride * sizeof(int));
+    memcpy( pDescriptor->indexTable, &pPayload->payLoad, pPayload->edgeVector_count * table_stride * sizeof(int) );
     
     return pDescriptor;
 }

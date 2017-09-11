@@ -470,6 +470,7 @@ public:
     void setRefLocn( double lat, double lon){ m_ref_lat = lat; m_ref_lon = lon; }
     void setKey( wxString& key){ m_key = key; }
     
+    int getReadVersion(){ return m_senc_file_read_version; }
     wxString getUpdateDate(){ return m_LastUpdateDate; }
     wxString getBaseDate(){ return m_sdate000; }
     

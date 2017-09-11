@@ -344,7 +344,6 @@ protected:
       
       ObjRazRules *razRules[PRIO_NUM][LUPNAME_NUM];
       
-      //ArrayOfSortedDoubles   *m_pcontour_array;
       
       //  DEPCNT VALDCO array members
       int         m_nvaldco;
@@ -370,6 +369,8 @@ protected:
       std::vector<VE_Element *> m_pve_vector;
       
       wxStringHashMap   m_TXTDSC_map;           // maps file names to content
+      int               m_sencReadVersion;
+      
 };
 
 class PI_S57ObjX : public PI_S57Obj

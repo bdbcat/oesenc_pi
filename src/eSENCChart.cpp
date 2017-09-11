@@ -3578,6 +3578,10 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     m_ref_lat = (ext.NLAT + ext.SLAT) / 2.;
     m_ref_lon = (ext.ELON + ext.WLON) / 2.;
     
+    
+    //  Record the SENC file version just read
+    m_sencReadVersion = sencfile->getReadVersion();
+    
     //  Process the Edge feature arrays.
    
     //    Create a hash map of VE_Element pointers as a chart class member
@@ -3811,77 +3815,78 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         //  Get the hashmap containing any TXTDSC info file records
         m_TXTDSC_map = sencfile->GetTXTDSC_Map();
         
-        
-        // Validate hash maps....
-        //TODO  Do we really need to do this?
-        // nedd to fix up the negatives?
-        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start Validate Hashmaps..."));
-                                         
-        ObjRazRules *top;
-        ObjRazRules *nxx;
-        
-        for( int i = 0; i < PRIO_NUM; ++i ) {
-            for( int j = 0; j < LUPNAME_NUM; j++ ) {
-                top = razRules[i][j];
-                while( top != NULL ) {
-                    S57Obj *obj = top->obj;
-                    
-                    ///
-                    for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                        int seg_index = iseg * 3;
-                        int *index_run = &obj->m_lsindex_array[seg_index];
+        if(m_sencReadVersion == 200){
+            // Validate hash maps....
+            //TODO  Do we really need to do this?
+            // nedd to fix up the negatives?
+            if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start Validate Hashmaps..."));
+                                            
+            ObjRazRules *top;
+            ObjRazRules *nxx;
+            
+            for( int i = 0; i < PRIO_NUM; ++i ) {
+                for( int j = 0; j < LUPNAME_NUM; j++ ) {
+                    top = razRules[i][j];
+                    while( top != NULL ) {
+                        S57Obj *obj = top->obj;
                         
-                        //  Get first connected node
-                        int inode = *index_run;
-                        if( ( inode ) ) {
-                            if( m_vc_hash.find( inode ) == m_vc_hash.end() ) {
-                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad inode 0"));
-                                //    Must be a bad index in the SENC file
-                                //    Stuff a recognizable flag to indicate invalidity
-                                *index_run = 0;
-//                                m_vc_hash[0] = 0;
+                        ///
+                        for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
+                            int seg_index = iseg * 3;
+                            int *index_run = &obj->m_lsindex_array[seg_index];
+                            
+                            //  Get first connected node
+                            int inode = *index_run;
+                            if( ( inode ) ) {
+                                if( m_vc_hash.find( inode ) == m_vc_hash.end() ) {
+                                    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad inode 0"));
+                                    //    Must be a bad index in the SENC file
+                                    //    Stuff a recognizable flag to indicate invalidity
+                                    *index_run = 0;
+    //                                m_vc_hash[0] = 0;
+                                }
                             }
-                        }
-                        index_run++;
-                        
-                        //  Get the edge
-                        int enode = *index_run;
-                        if(enode < 0)
-                            enode = -enode;
-                        if( ( enode ) ) {
-                            if( m_ve_hash.find( enode ) == m_ve_hash.end() ) {
-                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad enode 1"));
-                                
-                                //    Must be a bad index in the SENC file
-                                //    Stuff a recognizable flag to indicate invalidity
-                                *index_run = 0;
-//                                m_ve_hash[0] = 0;
+                            index_run++;
+                            
+                            //  Get the edge
+                            int enode = *index_run;
+                            if(enode < 0)
+                                enode = -enode;
+                            if( ( enode ) ) {
+                                if( m_ve_hash.find( enode ) == m_ve_hash.end() ) {
+                                    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad enode 1"));
+                                    
+                                    //    Must be a bad index in the SENC file
+                                    //    Stuff a recognizable flag to indicate invalidity
+                                    *index_run = 0;
+    //                                m_ve_hash[0] = 0;
+                                }
                             }
-                        }
-                        
-                        index_run++;
-                        
-                        //  Get last connected node
-                        int jnode = *index_run;
-                        if( ( jnode ) ) {
-                            if( m_vc_hash.find( jnode ) == m_vc_hash.end() ) {
-                                //    Must be a bad index in the SENC file
-                                //    Stuff a recognizable flag to indicate invalidity
-                                if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad jnode 2"));
-                                *index_run = 0;
-//                                m_vc_hash[0] = 0;
+                            
+                            index_run++;
+                            
+                            //  Get last connected node
+                            int jnode = *index_run;
+                            if( ( jnode ) ) {
+                                if( m_vc_hash.find( jnode ) == m_vc_hash.end() ) {
+                                    //    Must be a bad index in the SENC file
+                                    //    Stuff a recognizable flag to indicate invalidity
+                                    if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Bad jnode 2"));
+                                    *index_run = 0;
+    //                                m_vc_hash[0] = 0;
+                                }
                             }
+                            index_run++;
+                            
                         }
-                        index_run++;
-                        
+                        ///
+                        nxx = top->next;
+                        top = nxx;
                     }
-                    ///
-                    nxx = top->next;
-                    top = nxx;
                 }
             }
+            if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Validate Hashmaps OK"));
         }
-        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Validate Hashmaps OK"));
         
         //  Set up the chart context
         m_this_chart_context = (chart_context *)calloc( sizeof(chart_context), 1);
@@ -3890,7 +3895,7 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
         //  Loop and populate all the objects
         for( int i = 0; i < PRIO_NUM; ++i ) {
             for( int j = 0; j < LUPNAME_NUM; j++ ) {
-                top = razRules[i][j];
+                ObjRazRules *top = razRules[i][j];
                 while( top != NULL ) {
                     S57Obj *obj = top->obj;
                     obj->m_chart_context = m_this_chart_context;
@@ -6820,6 +6825,9 @@ void eSENCChart::AssembleLineGeometry( void )
     
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Start Object Walk"));
                                      
+    int edge_table_stride = 3;
+    if(m_sencReadVersion > 200)
+        edge_table_stride = 4;
     
     //  Get the end node connected segments.  To do this, we
     //  walk the Feature array and process each feature that potentially has a LINE type element
@@ -6833,9 +6841,9 @@ void eSENCChart::AssembleLineGeometry( void )
                 list_top.next = 0;
                 
                 line_segment_element *le_current = &list_top;
-                
+
                 for( int iseg = 0; iseg < obj->m_n_lsindex; iseg++ ) {
-                    int seg_index = iseg * 3;
+                    int seg_index = iseg * edge_table_stride;
                     int *index_run = &obj->m_lsindex_array[seg_index];
                     
                     //  Get first connected node
@@ -6844,17 +6852,24 @@ void eSENCChart::AssembleLineGeometry( void )
                     //  Get the edge
                     bool edge_dir = true;
                     int venode = *index_run++;
-                    if(venode < 0){
-                        venode = -venode;
-                        edge_dir = false;
-                    }
                     
+                    if(m_sencReadVersion < 201){
+                        if(venode < 0){
+                            venode = -venode;
+                            edge_dir = false;
+                        }
+                    }
                     
                     VE_Element *pedge = 0;
                     pedge = m_ve_hash[venode];
                     
                     //  Get end connected node
                     unsigned int enode = *index_run++;
+ 
+                    if(m_sencReadVersion > 200){
+                        unsigned int dir_flag = *index_run++;
+                        edge_dir = (dir_flag == 0);             // zero means direction forward
+                    }
                     
                     //  Get first connected node
                     VC_Element *ipnode = 0;
