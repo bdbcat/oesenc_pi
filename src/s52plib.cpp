@@ -4495,6 +4495,7 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         xscale = wxMax(.4, xscale);
 
         radius *= xscale;
+        sector_radius *= xscale;
     }
 
     ///scale_factor *= xscale;
