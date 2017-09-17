@@ -1382,18 +1382,26 @@ static void *LIGHTS05 (void *param)
           double arc_radius = 20.;                // mm
           double sector_radius = 25.;
 
+#if 0
           //      Another non-standard extension....
           //      Sector light arc radius is scaled if the light has a reasonable VALNMR attribute
           if(valnmr > 0)
           {
-                if(valnmr < 15.0)
+                if(valnmr < 15.0){
                       arc_radius = 10.;
-                else if(valnmr < 30.0)
+                      sector_radius = 15.;
+                }
+                else if(valnmr < 30.0){
                       arc_radius = 15.;
-                else
+                      sector_radius = 20.;
+                }
+                else{
                       arc_radius = 20.;
+                      sector_radius = 25.;
+                }
           }
-
+#endif
+          
           char sym[80];
           strcpy(sym,";CA(OUTLW, 4");
 
