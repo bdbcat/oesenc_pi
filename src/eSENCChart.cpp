@@ -3644,9 +3644,11 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
     }
 
     
+#ifndef __WXMSW__
     wxString msgss;
     msgss.Printf(_T("%zd"), m_ve_hash.size());
     if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  VE_hash Size: ") + msgss);
+#endif
     
     if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Process Edge Vectors OK"));
                                      
@@ -6788,9 +6790,11 @@ void eSENCChart::AssembleLineGeometry( void )
 {
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Start "));
     
+#ifndef __WXMSW__
     wxString msgss;
     msgss.Printf(_T("%zd"), m_ve_hash.size());
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  VE_hash Size: ") + msgss);
+#endif
     
 //    OCPNStopWatch sw;
     
@@ -6807,11 +6811,12 @@ void eSENCChart::AssembleLineGeometry( void )
     }
 
 //    printf("time0 %f\n", sw.GetTime());
+#ifndef __WXMSW__
     wxString msgc;
     msgc.Printf( _T("%zd"), nPoints);
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Got Point count: ") + msgc);
-    
-    
+#endif
+        
     std::map<std::string, connector_segment *> ce_connector_hash;
     std::map<std::string, connector_segment *> ec_connector_hash;
     std::map<std::string, connector_segment *> cc_connector_hash;
