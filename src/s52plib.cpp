@@ -4759,6 +4759,19 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
         } else
             buffer = m_CARC_hashmap[carc_hash];
+        
+        int border_fluff = 4; // by how much should the blit bitmap be "fluffed"
+        bm_width = rad * 2 + ( border_fluff * 2 );
+        bm_height = rad * 2 + ( border_fluff * 2 );
+        bm_orgx = -bm_width / 2;
+        bm_orgy = -bm_height / 2;
+        
+        prule->parm2 = bm_orgx;
+        prule->parm3 = bm_orgy;
+        prule->parm5 = bm_width;
+        prule->parm6 = bm_height;
+        prule->parm7 = xscale;
+        
     } // instantiation
 #endif
 
