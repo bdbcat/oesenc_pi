@@ -55,7 +55,6 @@ using namespace std;
 
 #include <wx/arrimpl.cpp>
 WX_DEFINE_ARRAY( float*, MyFloatPtrArray );
-WX_DEFINE_OBJARRAY( SENCFloatPtrArray );
 
 //      External definitions
 void OpenCPN_OGRErrorHandler( CPLErr eErrClass, int nError,
@@ -870,6 +869,21 @@ Osenc::Osenc()
 
 Osenc::~Osenc()
 {
+    // Free the coverage arrays, if they exist
+    SENCFloatPtrArray &AuxPtrArray = getSENCReadAuxPointArray();
+    wxArrayInt &AuxCntArray = getSENCReadAuxPointCountArray();
+    int nCOVREntries = AuxCntArray.GetCount();
+    for( unsigned int j = 0; j < (unsigned int) nCOVREntries; j++ ) {
+        free(AuxPtrArray.Item(j));
+    }
+
+    SENCFloatPtrArray &AuxNoPtrArray = getSENCReadNOCOVRPointArray();
+    wxArrayInt &AuxNoCntArray = getSENCReadNOCOVRPointCountArray();
+    int nNoCOVREntries = AuxNoCntArray.GetCount();
+    for( unsigned int j = 0; j < (unsigned int) nNoCOVREntries; j++ ) {
+        free(AuxNoPtrArray.Item(j));
+    }
+
     free(pBuffer);
 }
 
