@@ -1256,16 +1256,22 @@ bool eSENCChart::RenderRegionViewOnDCTextOnly(wxMemoryDC& dc, const PlugIn_ViewP
     
     SetVPParms( VPoint );
    
-    
-    wxRegionIterator upd( Region ); // get the Region rect list
-    while( upd.HaveRects() ) {
-        wxRect rect = upd.GetRect();
-        
-        wxDCClipper clip(dc, rect);
+    //  If the viewport is rotated, there will only be one rectangle in the region
+    //  so we can take a shortcut...
+    if(fabs(VPoint.rotation) > .01){
         DCRenderText( dc, VPoint );
+    }
+    else{
+        wxRegionIterator upd( Region ); // get the Region rect list
+        while( upd.HaveRects() ) {
+            wxRect rect = upd.GetRect();
         
-        upd++;
-    }  //while
+            wxDCClipper clip(dc, rect);
+            DCRenderText( dc, VPoint );
+        
+            upd++;
+        }  //while
+    }
     
     return true;
 }
@@ -1994,7 +2000,34 @@ bool eSENCChart::DCRenderText( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp )
     ObjRazRules *top;
     ObjRazRules *crnt;
     
-    ViewPort tvp = CreateCompatibleViewport( vp );
+    //    Create a system ViewPort
+    ViewPort tvp;
+    
+    tvp.clat =                   vp.clat;                   // center point
+    tvp.clon =                   vp.clon;
+    tvp.view_scale_ppm =         vp.view_scale_ppm;
+    tvp.skew =                   vp.skew;
+    tvp.rotation =               vp.rotation;
+    tvp.chart_scale =            vp.chart_scale;
+    tvp.pix_width =              vp.pix_width;
+    tvp.pix_height =             vp.pix_height;
+    tvp.rv_rect =                vp.rv_rect;
+    tvp.b_quilt =                vp.b_quilt;
+    tvp.m_projection_type =      vp.m_projection_type;
+    
+    tvp.ref_scale = vp.chart_scale;
+    
+    tvp.SetBoxes();
+    
+    //  If the viewport is rotated, then the VP passed in has already been expanded
+    //  to encompass the full rotated space.
+    //  So, we need to partially undo the action of SetBoxes() to keep the rv_rect coherent.
+    if(fabs(vp.rotation) > .01){
+        tvp.rv_rect = vp.rv_rect;
+    }
+    
+    tvp.Validate();                 // This VP is valid
+    
     
     for( i = 0; i < PRIO_NUM; ++i ) {
         
