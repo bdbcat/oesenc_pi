@@ -60,7 +60,7 @@ typedef struct _Extent{
 
 WX_DECLARE_HASH_MAP( int, int, wxIntegerHash, wxIntegerEqual, VectorHelperHash );
 
-WX_DECLARE_OBJARRAY(float *,   SENCFloatPtrArray);
+WX_DEFINE_ARRAY_PTR(float *, SENCFloatPtrArray);
 
 //      Various error return enums
 #define         SENC_NO_ERROR                           0
