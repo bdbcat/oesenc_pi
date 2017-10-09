@@ -4781,8 +4781,8 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     if( !m_pdc ) // opengl
     {
         //    Is there not already an generated vbo the CARC_hashmap for this object?
+        rad = (int) ( radius * canvas_pix_per_mm );
         if( m_CARC_hashmap.find( carc_hash ) == m_CARC_hashmap.end() ) {
-            int rad = (int) ( radius * canvas_pix_per_mm );
 
             if( sectr1 > sectr2 ) sectr2 += 360;
 
