@@ -554,6 +554,8 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       g_pconfig = GetOCPNConfigObject();
 
       m_up_text = NULL;
+      m_pOptionsPage = 0;
+
       LoadConfig();
       ScrubChartinfoList(  );
       g_bEULA_Rejected = false;
