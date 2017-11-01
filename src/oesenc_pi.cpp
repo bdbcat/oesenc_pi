@@ -174,6 +174,11 @@ float g_GLMinSymbolLineWidth;
 GLenum g_texture_rectangle_format;
 bool pi_bopengl;
 
+bool g_b_useStencil;
+bool g_b_useStencilAP;
+bool g_b_useScissorTest;
+bool g_b_useFBO;
+
 oesencPrefsDialog               *g_prefs_dialog;
 
 PFNGLGENBUFFERSPROC                 s_glGenBuffers;
@@ -782,6 +787,40 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             ps52plib->GenerateStateHash();
             
     }
+    else if(message_id == _T("OCPN_OPENGL_CONFIG"))
+    {
+        // construct the JSON root object
+        wxJSONValue  root;
+        // construct a JSON parser
+        wxJSONReader reader;
+        
+        // now read the JSON text and store it in the 'root' structure
+        // check for errors before retreiving values...
+        int numErrors = reader.Parse( message_body, &root );
+        if ( numErrors > 0 )  {
+            //              const wxArrayString& errors = reader.GetErrors();
+            return;
+        }
+        
+        float g_GLMinCartographicLineWidth;
+        bool  g_b_EnableVBO;
+        float g_GLMinSymbolLineWidth;
+        GLenum g_texture_rectangle_format;
+        bool pi_bopengl;
+        
+        // Capture the OpenCPN OpenGL config, and inform the PLIB
+        g_b_EnableVBO = root[_T("useVBO")].AsBool();
+        g_texture_rectangle_format = root[_T("TextureRectangleFormat")].AsInt();
+
+        g_b_useStencil = root[_T("useStencil")].AsBool();
+        g_b_useStencilAP = root[_T("useStencilAP")].AsBool();
+        g_b_useScissorTest = root[_T("useScissorTest")].AsBool();
+        g_b_useFBO = root[_T("useFBO")].AsBool();
+        
+        if(ps52plib)
+            ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
+    }
+        
 }
 
 void oesenc_pi::SetColorScheme(PI_ColorScheme cs)
@@ -2646,6 +2685,10 @@ void initLibraries(void)
             
             double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
             ps52plib->SetPPMM( pix_per_mm );
+            
+            //  Setup device dependent OpenGL options as communicated from core by JSON message
+            ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
+            
         }
     } else {
         wxLogMessage( _T("   S52PLIB Initialization failed, oesenc_pi disabling Vector charts.") );

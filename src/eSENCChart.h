@@ -26,6 +26,7 @@ class connector_segment;
 class S57Obj;
 class LUPrec;
 class ViewPort;
+class Extended_Geometry;
 
 #include "oesenc_pi.h"
 #include "pi_s52s57.h"
@@ -284,6 +285,8 @@ protected:
       void BuildDepthContourArray( void );
       void SetSafetyContour(void);
       
+
+      Extended_Geometry *buildExtendedGeom( S57Obj *obj );
       
       int               my_fgets( char *buf, int buf_len_max, CryptInputStream &ifs );
 
@@ -429,15 +432,15 @@ WX_DECLARE_OBJARRAY(PI_VC_Element, PI_ArrayOfVC_Elements);
 
 
 
-class PI_connector_segment
-{
-public:
-    void *start;
-    void *end;
-    SegmentType type;
-    int vbo_offset;
-    int max_priority;
-};
+// class PI_connector_segment
+// {
+// public:
+//     void *start;
+//     void *end;
+//     SegmentType type;
+//     int vbo_offset;
+//     int max_priority;
+// };
 
 //----------------------------------------------------------------------------------
 //      SENC Server Process container

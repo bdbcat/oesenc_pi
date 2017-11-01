@@ -40,6 +40,7 @@ class OGREnvelope;
 class OGRGeometry;
 class wxBoundingBox;
 class line_segment_element;
+class PI_line_segment_element;
 class PolyTessGeo;
 class eSENCChart;
 class S57Obj;
@@ -474,6 +475,7 @@ public:
     int                     *m_lsindex_array;
     int                     m_n_edge_max_points;
     line_segment_element    *m_ls_list;
+    PI_line_segment_element *m_ls_list_legacy;
     
     DisCat                  m_DisplayCat;
     int                     m_DPRI;                 // display priority, assigned from initial LUP

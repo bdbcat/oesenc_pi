@@ -43,7 +43,7 @@
 #include "mygdal/ogr_s57.h"
 #include "mygdal/cpl_string.h"
 
-#include "mygeom63.h"
+#include "mygeom.h"
 //#include <../opencpn/plugins/chartdldr_pi/src/unrar/rartypes.hpp>
 #include "georef.h"
 #include "ocpn_plugin.h"
@@ -1486,9 +1486,6 @@ int Osenc::ingest200(const wxString &senc_file_name,
 //                    int yyp = 5;
                 
                 std::string acronym = GetFeatureAcronymFromTypecode( featureTypeCode );
-                
- //               if(!strncmp("CTNARE", acronym.c_str(), 6))
- //                   int yyp = 0; 
                 
                 if(acronym.length()){
                     obj = new S57Obj(acronym.c_str());

@@ -171,7 +171,7 @@ SET(SRC_OESENC
             src/eSENCChart.h
             src/Osenc.cpp
             src/Osenc.h
-            src/mygeom63.h
+            src/mygeom.h
             src/mygeom63.cpp
             src/tri.c
             src/TexFont.cpp
@@ -189,6 +189,7 @@ SET(SRC_OESENC
             src/tinyxml.cpp
             src/tinyxmlerror.cpp
             src/tinyxmlparser.cpp
+            src/razdsparser.cpp
      )
 
 SET(SRC_CPL

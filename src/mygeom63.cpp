@@ -36,7 +36,7 @@
 #include <wx/mstream.h>
 
 
-#include "mygeom63.h"
+#include "mygeom.h"
 
 #include <math.h>
 #include "triangulate.h"
