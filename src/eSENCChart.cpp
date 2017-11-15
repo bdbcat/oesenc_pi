@@ -65,6 +65,9 @@
 
 #endif
 
+#ifdef __OCPN__ANDROID__
+#include "qdebug.h"
+#endif
 
 
 
@@ -1296,7 +1299,7 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
     
     if( Region != m_last_Region ) force_new_view = true;
     
-    ps52plib->PrepareForRender();
+    ps52plib->PrepareForRender(&m_cvp);
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
@@ -1455,7 +1458,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         
     SetVPParms( VPoint );
 
-    ps52plib->PrepareForRender();
+    ps52plib->PrepareForRender(&m_cvp);
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
@@ -1479,7 +1482,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     //        Clear the text declutter list
     ps52plib->ClearTextList();
     
-    glPushMatrix();
+///    glPushMatrix();
 
     wxRegionIterator upd( Region ); // get the Region rect list
         while( upd.HaveRects() ) {
@@ -1541,7 +1544,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
     m_last_vp = VPoint;
     m_last_Region = Region;
 
-    glPopMatrix();
+///    glPopMatrix();
 
 #endif
     return true;
@@ -1557,10 +1560,10 @@ int eSENCChart::RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const Plug
     
     SetVPParms( VPoint );
     
-    ps52plib->PrepareForRender();
+    ps52plib->PrepareForRender(&m_cvp);
     
     //    Adjust for rotation
-    glPushMatrix();
+///    glPushMatrix();
     
     
     {
@@ -1614,12 +1617,13 @@ int eSENCChart::RenderRegionViewOnGLTextOnly( const wxGLContext &glc, const Plug
         }
     }
     
-    glPopMatrix();
+///    glPopMatrix();
     
 #endif
     return true;
 }
 
+#if 0
 void eSENCChart::SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
         const wxRegion &Region, bool b_render_nodta, bool b_useStencil )
 {
@@ -1634,7 +1638,10 @@ void eSENCChart::SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort&
         //    We are going to write "1" into the stencil buffer wherever the region is valid
         glStencilFunc( GL_ALWAYS, 1, 1 );
         glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
-    } else              //  Use depth buffer for clipping
+    }
+#ifndef USE_ANDROID_GLES2
+    
+    else              //  Use depth buffer for clipping
     {
         glEnable( GL_DEPTH_TEST ); // to enable writing to the depth buffer
         glDepthFunc( GL_ALWAYS );  // to ensure everything you draw passes
@@ -1642,6 +1649,7 @@ void eSENCChart::SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort&
 
         glClear( GL_DEPTH_BUFFER_BIT ); // for a fresh start
     }
+#endif
 
     //    As a convenience, while we are creating the stencil or depth mask,
     //    also render the default "NODTA" background if selected
@@ -1791,6 +1799,8 @@ void eSENCChart::SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort&
     glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );  // re-enable color buffer
 #endif
 }
+
+#endif
 
 bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil )
 {
@@ -7297,10 +7307,14 @@ void eSENCChart::BuildLineVBO( void )
         (s_glBindBuffer)(GL_ARRAY_BUFFER, vboId);
         
         // upload data to VBO
+#ifndef USE_ANDROID_GLES2
         glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+#endif
         (s_glBufferData)(GL_ARRAY_BUFFER, m_vbo_byte_length, m_line_vertex_buffer, GL_STATIC_DRAW);
         
+#ifndef USE_ANDROID_GLES2
         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
+#endif
         (s_glBindBuffer)(GL_ARRAY_BUFFER, 0);
         
         //  Loop and populate all the objects

@@ -263,10 +263,10 @@ protected:
       bool IsCacheValid(){ return (pDIB != NULL); }
       void InvalidateCache();
 
-      void SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
-                            const wxRegion &Region, bool b_render_nodta, bool b_useStencil );
-      void SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint, const wxRect &Rect,
-                            bool b_render_nodta, bool b_useStencil );
+//       void SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
+//                             const wxRegion &Region, bool b_render_nodta, bool b_useStencil );
+//       void SetClipRegionGL( const wxGLContext &glc, const PlugIn_ViewPort& VPoint, const wxRect &Rect,
+//                             bool b_render_nodta, bool b_useStencil );
       bool DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil );
       bool DoRenderRectOnGLTextOnly( const wxGLContext &glc, const ViewPort& VPoint, wxRect &rect, bool b_useStencil );
       

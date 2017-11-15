@@ -120,7 +120,6 @@ ENDIF(NOT QT_ANDROID)
 #  So the OpenGL include directories, flags, etc must be stated explicitly
 #  without trying to locate them on the host build system.
 IF(QT_ANDROID)
-    MESSAGE (STATUS "Using GLESv1 for Android")
     ADD_DEFINITIONS(-DocpnUSE_GLES)
     ADD_DEFINITIONS(-DocpnUSE_GL)
 #    ADD_DEFINITIONS(-DUSE_GLU_TESS)
@@ -128,6 +127,17 @@ IF(QT_ANDROID)
 
     SET(OPENGLES_FOUND "YES")
     SET(OPENGL_FOUND "YES")
+    
+      
+  SET(USE_GLES2 ON )
+
+  IF(USE_GLES2)
+    MESSAGE (STATUS "Using GLESv2 for Android")
+    ADD_DEFINITIONS(-DUSE_ANDROID_GLES2)
+    ADD_DEFINITIONS(-DUSE_GLSL)
+  ENDIF(USE_GLES2)
+
+
 
 ENDIF(QT_ANDROID)
 

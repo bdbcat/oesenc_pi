@@ -2221,6 +2221,9 @@ PolyTriGroup::PolyTriGroup()
     single_buffer = NULL;
     single_buffer_size = 0;
     data_type = DATA_TYPE_DOUBLE;
+    sfactor = 1.0;
+    soffset = 0.0;
+    
 
 }
 

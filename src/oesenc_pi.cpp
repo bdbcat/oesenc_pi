@@ -803,7 +803,7 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         }
         
         float g_GLMinCartographicLineWidth;
-        bool  g_b_EnableVBO;
+        // is global ...bool  g_b_EnableVBO;
         float g_GLMinSymbolLineWidth;
         GLenum g_texture_rectangle_format;
         bool pi_bopengl;
@@ -862,6 +862,7 @@ bool oesenc_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 
 bool oesenc_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
+#ifndef USE_ANDROID_GLES2    
     if(g_brendered_expired && !g_bnoShow_sse25){
         wxString msg = _T("SSE 25..The ENC permit for this cell has expired.\n This cell may be out of date and MUST NOT be used for NAVIGATION.");
 
@@ -895,6 +896,7 @@ bool oesenc_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
         g_brendered_expired = false;
 
     }
+#endif    
     return false;
 }
 
@@ -2562,7 +2564,7 @@ void initLibraries(void)
     }
     
     
-    g_b_EnableVBO = false;
+    ///g_b_EnableVBO = false;
     g_GLMinCartographicLineWidth = 1.0;
     g_GLMinSymbolLineWidth = 1.0;
     

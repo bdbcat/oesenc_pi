@@ -59,7 +59,7 @@
 
 #define DATA_TYPE_FLOAT         0
 #define DATA_TYPE_DOUBLE        1
-
+#define DATA_TYPE_SHORT         2
 
 //--------------------------------------------------------------------------------------------------
 //
@@ -157,6 +157,8 @@ public:
         unsigned char   *single_buffer;
         int             single_buffer_size;
         int             data_type;              //  p_vertex in TriPrim chain is FLOAT or DOUBLE
+        float           sfactor;
+        float           soffset;
         
     private:
         int my_bufgets( char *buf, int buf_len_max );
