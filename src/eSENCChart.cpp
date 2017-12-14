@@ -1457,7 +1457,7 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
 #ifdef ocpnUSE_GL
  
-    OCPNStopWatch sw;
+    //OCPNStopWatch sw;
  
     m_cvp = CreateCompatibleViewport( VPoint );
         
@@ -1864,7 +1864,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     glDisable( GL_STENCIL_TEST );
 //#endif    
     
-    OCPNStopWatch sw;
+    //OCPNStopWatch sw;
     
     
     
