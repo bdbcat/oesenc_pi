@@ -1262,6 +1262,7 @@ bool oesenc_pi::LoadConfig( void )
                 pitem->config_string = kval;
                 info_hash[key] = pitem;
                 if(g_debugLevel) wxLogMessage(_T("Loadconfig adding: ") + strk);
+                wxLogMessage(_T("Loadconfig adding info string: ") + kval);
                 
             }
                 
@@ -2535,6 +2536,147 @@ static GLboolean QueryExtension( const char *extName )
     return GL_FALSE;
 }
 
+typedef void (*GenericFunction)(void);
+void (*glXGetProcAddress(const GLubyte *procname))( void );
+
+#if defined(__WXMSW__)
+#define systemGetProcAddress(ADDR) wglGetProcAddress(ADDR)
+#elif defined(__WXOSX__)
+#include <dlfcn.h>
+#define systemGetProcAddress(ADDR) dlsym( RTLD_DEFAULT, ADDR)
+#elif defined(__OCPN__ANDROID__)
+#define systemGetProcAddress(ADDR) eglGetProcAddress(ADDR)
+#else
+#define systemGetProcAddress(ADDR) glXGetProcAddress((const GLubyte*)ADDR)
+#endif
+
+GenericFunction ocpnGetProcAddress(const char *addr, const char *extension)
+{
+    char addrbuf[256];
+    if(!extension)
+        return (GenericFunction)NULL;
+    
+#ifndef __OCPN__ANDROID__    
+        //  If this is an extension entry point,
+        //  We look explicitly in the extensions list to confirm
+        //  that the request is actually supported.
+        // This may be redundant, but is conservative, and only happens once per session.    
+        if(extension && strlen(extension)){
+            wxString s_extension(&addr[2], wxConvUTF8);
+            wxString s_family;
+            s_family = wxString(extension, wxConvUTF8);
+            s_extension.Prepend(_T("_"));
+            s_extension.Prepend(s_family);
+            
+            s_extension.Prepend(_T("GL_"));
+            
+            if(!QueryExtension( s_extension.mb_str() )){
+                return (GenericFunction)NULL;
+            }
+        }
+#endif    
+        
+        snprintf(addrbuf, sizeof addrbuf, "%s%s", addr, extension);
+        return (GenericFunction)systemGetProcAddress(addrbuf);
+        
+}
+
+bool  b_glEntryPointsSet;
+
+static void GetglEntryPoints( void )
+{
+    b_glEntryPointsSet = true;
+    
+    // the following are all part of framebuffer object,
+    // according to opengl spec, we cannot mix EXT and ARB extensions
+    // (I don't know that it could ever happen, but if it did, bad things would happen)
+    
+#ifndef __OCPN__ANDROID__
+    const char *extensions[] = {"", "ARB", "EXT", 0 };
+#else
+    const char *extensions[] = {"", "OES", 0 };
+#endif
+    
+    unsigned int n_ext = (sizeof extensions) / (sizeof *extensions);
+    
+    unsigned int i;
+    for(i=0; i<n_ext; i++) {
+        if((s_glGenBuffers = (PFNGLGENBUFFERSPROC)
+            ocpnGetProcAddress( "glGenBuffers", extensions[i])))
+            break;
+    }
+    
+    if(i<n_ext){
+#if 0
+        s_glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)
+        ocpnGetProcAddress( "glGenRenderbuffers", extensions[i]);
+        s_glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)
+        ocpnGetProcAddress( "glFramebufferTexture2D", extensions[i]);
+        s_glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)
+        ocpnGetProcAddress( "glBindFramebuffer", extensions[i]);
+        s_glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)
+        ocpnGetProcAddress( "glFramebufferRenderbuffer", extensions[i]);
+        s_glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)
+        ocpnGetProcAddress( "glRenderbufferStorage", extensions[i]);
+        s_glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)
+        ocpnGetProcAddress( "glBindRenderbuffer", extensions[i]);
+        s_glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)
+        ocpnGetProcAddress( "glCheckFramebufferStatus", extensions[i]);
+        s_glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)
+        ocpnGetProcAddress( "glDeleteFramebuffers", extensions[i]);
+        s_glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)
+        ocpnGetProcAddress( "glDeleteRenderbuffers", extensions[i]);
+        s_glGenerateMipmap = (PFNGLGENERATEMIPMAPEXTPROC)
+        ocpnGetProcAddress( "glGenerateMipmap", extensions[i]);
+#endif        
+        //VBO
+        s_glGenBuffers = (PFNGLGENBUFFERSPROC)
+        ocpnGetProcAddress( "glGenBuffers", extensions[i]);
+        s_glBindBuffer = (PFNGLBINDBUFFERPROC)
+        ocpnGetProcAddress( "glBindBuffer", extensions[i]);
+        s_glBufferData = (PFNGLBUFFERDATAPROC)
+        ocpnGetProcAddress( "glBufferData", extensions[i]);
+        s_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)
+        ocpnGetProcAddress( "glDeleteBuffers", extensions[i]);
+        
+//         s_glGetBufferParameteriv = (PFNGLGETBUFFERPARAMETERIV)
+//         ocpnGetProcAddress( "glGetBufferParameteriv", extensions[i]);
+        
+    }
+    
+    //  Retry VBO entry points with all extensions
+    if(0 == s_glGenBuffers){
+        for( i=0; i<n_ext; i++) {
+            if((s_glGenBuffers = (PFNGLGENBUFFERSPROC)ocpnGetProcAddress( "glGenBuffers", extensions[i])) )
+                break;
+        }
+        
+        if( i < n_ext ){
+            s_glBindBuffer = (PFNGLBINDBUFFERPROC) ocpnGetProcAddress( "glBindBuffer", extensions[i]);
+            s_glBufferData = (PFNGLBUFFERDATAPROC) ocpnGetProcAddress( "glBufferData", extensions[i]);
+            s_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC) ocpnGetProcAddress( "glDeleteBuffers", extensions[i]);
+        }
+    }
+    
+ 
+#if 0 
+#ifndef __OCPN__ANDROID__            
+    for(i=0; i<n_ext; i++) {
+        if((s_glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC)
+            ocpnGetProcAddress( "glCompressedTexImage2D", extensions[i])))
+            break;
+    }
+    
+    if(i<n_ext){
+        s_glGetCompressedTexImage = (PFNGLGETCOMPRESSEDTEXIMAGEPROC)
+        ocpnGetProcAddress( "glGetCompressedTexImage", extensions[i]);
+    }
+#else    
+    s_glCompressedTexImage2D =          glCompressedTexImage2D;
+#endif
+#endif
+    
+}
 
 void initLibraries(void)
 {
@@ -2563,16 +2705,27 @@ void initLibraries(void)
         renderer = wxString( render_string, wxConvUTF8 );
     }
     
+    GetglEntryPoints();
     
     ///g_b_EnableVBO = false;
     g_GLMinCartographicLineWidth = 1.0;
     g_GLMinSymbolLineWidth = 1.0;
     
     //  Set the minimum line width
+    glGetError();       // Clear errors
+        
     GLint parms[2];
     glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
-    g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
-    g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
+    if(glGetError())
+        glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
+    if(!glGetError()){
+        g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
+        g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
+    }
+    
+    wxString lwmsg;
+    lwmsg.Printf(_T("oeSENC_PI:  OpenGL-> Minimum cartographic line width: %4.1f"), g_GLMinCartographicLineWidth);
+    wxLogMessage(lwmsg);
     
     //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
     //    This is most evident on rendered symbols which have horizontal or vertical line segments
@@ -2721,7 +2874,7 @@ bool testSENCServer()
         
     wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
     
-    wxString result = callActivityMethod_s4s("createProcSync", cmd, _T("-a"), dataDir, libDir);
+    wxString result = callActivityMethod_s4s("createProcSync", cmd, _T("-w"), dataDir, libDir);
     
     wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
     
@@ -2981,6 +3134,8 @@ wxString callActivityMethod_vs(const char *method)
 
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2)
 {
+    wxLogMessage(_T("PI s2s: ") + parm1 + parm2);
+    
     if(CheckPendingJNIException())
         return _T("NOK");
     JNIEnv* jenv;
@@ -3000,13 +3155,18 @@ wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString par
         return _T("jenv Error");
     }
     
-    wxCharBuffer p1b = parm1.ToUTF8();
-    jstring p1 = (jenv)->NewStringUTF(p1b.data());
-    
-    wxCharBuffer p2b = parm2.ToUTF8();
-    jstring p2 = (jenv)->NewStringUTF(p2b.data());
-    
-    
+     wxCharBuffer p1b = parm1.ToUTF8();
+     jstring p1 = (jenv)->NewStringUTF(p1b.data());
+     
+     wxCharBuffer p2b = parm2.ToUTF8();
+     jstring p2 = (jenv)->NewStringUTF(p2b.data());
+
+     if( (jenv)->GetStringLength( p2 )){
+         const char *v_string = (jenv)->GetStringUTFChars(p2, NULL);
+         wxString vw_string = wxString(v_string, wxConvUTF8);
+         wxLogMessage(_T("PI s2s p2String: ") + vw_string);
+     }
+     
     QAndroidJniObject data = activity.callObjectMethod(method, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", p1, p2);
     
     (jenv)->DeleteLocalRef(p1);
@@ -4607,6 +4767,7 @@ bool processChartinfo(const wxString &oesenc_file)
                         pitem->config_string = content;
                         info_hash[key] = pitem;
                         if(g_debugLevel) wxLogMessage(_T("processChartInfo adding: ") + keyn);
+                        wxLogMessage(_T("processChartInfo adding config_string: ") + content);
                         
                         g_binfoShown = false;                           // added a line, so force re-display
                     }

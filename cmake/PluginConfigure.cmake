@@ -172,7 +172,8 @@ IF (QT_ANDROID )
         ${Qt_Base}/${Qt_Build}/lib/libQt5Widgets.so
         ${Qt_Base}/${Qt_Build}/lib/libQt5Gui.so
         ${Qt_Base}/${Qt_Build}/lib/libQt5AndroidExtras.so
-
+        libGLESv2.so
+        libEGL.so
         )
 
 ENDIF(QT_ANDROID)

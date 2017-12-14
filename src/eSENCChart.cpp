@@ -138,15 +138,11 @@ WX_DEFINE_LIST(ListOfPI_S57Obj);                // Implement a list of PI_S57 Ob
 WX_DEFINE_LIST(ListOfS57Obj);                // Implement a list of S57 Objects
 WX_DEFINE_LIST(ListOfObjRazRules);
 
-#if 0
-#ifdef BUILD_VBO
 #ifdef ocpnUSE_GL                         
 extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
 extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
 extern PFNGLBUFFERDATAPROC                 s_glBufferData;
 extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
-#endif
-#endif
 #endif
 
 extern bool              g_b_EnableVBO;
@@ -538,6 +534,8 @@ eSENCChart::eSENCChart()
     //m_pcontour_array = new ArrayOfSortedDoubles;
     
     m_next_safe_contour = 1e6;
+    m_LineVBO_name = -1;
+    
     m_plib_state_hash = 0;
     
     m_line_vertex_buffer = 0;
@@ -637,6 +635,11 @@ eSENCChart::~eSENCChart()
       }
       m_vc_hash.clear();
 
+#ifdef ocpnUSE_GL
+      if(s_glDeleteBuffers && (m_LineVBO_name > 0))
+          s_glDeleteBuffers(1, (GLuint *)&m_LineVBO_name);
+#endif
+          
       for(unsigned int i=0 ; i < m_pcs_vector.size() ; i++)
           delete m_pcs_vector.at(i);                    // destroy the connector segments
           
@@ -1453,12 +1456,18 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 {
 
 #ifdef ocpnUSE_GL
-    
+ 
+    OCPNStopWatch sw;
+ 
     m_cvp = CreateCompatibleViewport( VPoint );
         
     SetVPParms( VPoint );
-
+    
+    //qDebug() << "PI RenderTime1" << sw.GetTime();
+    
     ps52plib->PrepareForRender(&m_cvp);
+
+    //qDebug() << "PI RenderTime2" << sw.GetTime();
     
     if( m_plib_state_hash != PI_GetPLIBStateHash() ) {
         m_bLinePrioritySet = false;                     // need to reset line priorities
@@ -1477,10 +1486,15 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         ResetPointBBoxes( m_last_vp, VPoint );
     }
 
+    BuildLineVBO();
     SetLinePriorities();
 
+    //qDebug() << "PI RenderTime3" << sw.GetTime();
+    
     //        Clear the text declutter list
     ps52plib->ClearTextList();
+
+    //qDebug() << "PI RenderTime3a" << sw.GetTime();
     
 ///    glPushMatrix();
 
@@ -1488,6 +1502,8 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         while( upd.HaveRects() ) {
             wxRect rect = upd.GetRect();
 //            printf("  wSENCChart::RRVGL:  rect: %d %d %d %d \n", rect.x, rect.y, rect.width, rect.height);
+            
+            //qDebug() << "Rect" << rect.x << rect.y << rect.width << rect.height;
             
 
             //  Build synthetic ViewPort on this rectangle
@@ -1533,10 +1549,22 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
             
             //SetClipRegionGL( glc, temp_vp, rect, true /*!b_overlay*/, b_use_stencil );
             ps52plib->m_last_clip_rect = rect;
-            //wxRect clip_rect = rect;
-            
-            DoRenderRectOnGL( glc, temp_vp, rect, b_use_stencil);
 
+#ifdef USE_ANDROID_GLES2            
+             glEnable(GL_SCISSOR_TEST);
+             glScissor(rect.x, m_cvp.pix_height-rect.height-rect.y, rect.width, rect.height);
+             //qDebug() << "Scissor" << rect.x << m_cvp.pix_height-rect.height-rect.y << rect.width << rect.height;
+            
+#endif            
+
+             
+            DoRenderRectOnGL( glc, temp_vp, rect, b_use_stencil);
+            //qDebug() << "PI RenderTime4" << sw.GetTime();
+            
+#ifdef USE_ANDROID_GLES2            
+             glDisable( GL_SCISSOR_TEST );
+#endif
+            
             upd++;
         }  //while
 
@@ -1547,6 +1575,8 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 ///    glPopMatrix();
 
 #endif
+    //qDebug() << "PI RenderTime5" << sw.GetTime();
+    
     return true;
 }
 
@@ -1829,9 +1859,12 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     else
         glEnable( GL_DEPTH_TEST );
 
+//#ifndef USE_ANDROID_GLES2    
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_STENCIL_TEST );
+//#endif    
     
+    OCPNStopWatch sw;
     
     
     
@@ -1859,6 +1892,8 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
         }
     }
 
+    //qDebug() << "PI RenderTimeD1" << sw.GetTime();
+    
     // TODO WHY is this necessary? 
     glDisable( GL_DEPTH_TEST );
     
@@ -1874,7 +1909,12 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             crnt->sm_transform_parms = &vp_transform;
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
-
+    }
+    
+    //qDebug() << "PI RenderTimeD2" << sw.GetTime();
+    
+    for( i = 0; i < PRIO_NUM; ++i ) {
+        
         top = razRules[i][2];           //LINES
         while( top != NULL ) {
             ObjRazRules *crnt = top;
@@ -1882,7 +1922,11 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             crnt->sm_transform_parms = &vp_transform;
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
-
+    }
+    
+    //qDebug() << "PI RenderTimeD3" << sw.GetTime();
+        
+    for( i = 0; i < PRIO_NUM; ++i ) {
         if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
             top = razRules[i][0];       //SIMPLIFIED Points
         else
@@ -1894,9 +1938,11 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             crnt->sm_transform_parms = &vp_transform;
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
-
+        
     }
 
+    //qDebug() << "PI RenderTimeD4" << sw.GetTime();
+    
     glDisable( GL_STENCIL_TEST );
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_SCISSOR_TEST );
@@ -7287,15 +7333,14 @@ void eSENCChart::AssembleLineGeometry( void )
 
 
 
-
 void eSENCChart::BuildLineVBO( void )
 {
     
-#ifdef BUILD_VBO    
+//#ifdef BUILD_VBO    
 #ifdef ocpnUSE_GL
      
-    if(!g_b_EnableVBO)
-        return;
+    //if(!g_b_EnableVBO)
+      //  return;
     
     if(m_LineVBO_name == -1){
         
@@ -7317,11 +7362,15 @@ void eSENCChart::BuildLineVBO( void )
 #endif
         (s_glBindBuffer)(GL_ARRAY_BUFFER, 0);
         
-        //  Loop and populate all the objects
+         //  Loop and populate all the objects
         for( int i = 0; i < PRIO_NUM; ++i ) {
             for( int j = 0; j < LUPNAME_NUM; j++ ) {
-                PI_S57Obj *obj = razRules[i][j];
-                obj->auxParm2 = vboId;
+                ObjRazRules *top = razRules[i][j];
+                while( top != NULL ) {
+                    S57Obj *obj = top->obj;
+                    obj->auxParm2 = vboId;
+                    top = top->next;
+                }
             }
         }
         
@@ -7329,7 +7378,7 @@ void eSENCChart::BuildLineVBO( void )
         
     }
 #endif    
-#endif
+//#endif
 }
 
 
