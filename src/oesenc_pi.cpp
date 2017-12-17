@@ -2537,7 +2537,7 @@ static GLboolean QueryExtension( const char *extName )
 }
 
 typedef void (*GenericFunction)(void);
-void (*glXGetProcAddress(const GLubyte *procname))( void );
+extern "C" void (*glXGetProcAddress(const GLubyte *procname))( void );
 
 #if defined(__WXMSW__)
 #define systemGetProcAddress(ADDR) wglGetProcAddress(ADDR)
