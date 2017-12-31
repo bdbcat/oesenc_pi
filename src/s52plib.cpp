@@ -414,6 +414,8 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_lightsOff = false;
     m_anchorOn = false;
 
+    m_qualityOfDataOn = false;
+
     GenerateStateHash();
 
     HPGL = new RenderFromHPGL( this );
@@ -632,16 +634,38 @@ bool s52plib::GetAnchorOn()
                     old_vis = pOLE->nViz;
                     break;
                 }
-                pOLE = NULL;
             }
     }
     else if(OTHER == GetDisplayCategory())
         old_vis = true;
 
-    const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
-    unsigned int num = sizeof(categories) / sizeof(categories[0]);
+    // const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
 
     old_vis &= !IsObjNoshow("SBDARE");
+
+    return (old_vis != 0);
+}
+
+bool s52plib::GetQualityOfDataOn()
+{
+    //  Investigate and report the logical condition that "Quality of Data Condition" is shown
+
+    int old_vis =  0;
+    OBJLElement *pOLE = NULL;
+
+    if(  MARINERS_STANDARD == GetDisplayCategory()){
+            for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+                OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
+                if( !strncmp( pOLE->OBJLName, "M_QUAL", 6 ) ) {
+                    old_vis = pOLE->nViz;
+                    break;
+                }
+            }
+    }
+    else if(OTHER == GetDisplayCategory())
+        old_vis = true;
+
+    old_vis &= !IsObjNoshow("M_QUAL");
 
     return (old_vis != 0);
 }
@@ -9621,7 +9645,7 @@ int s52plib::RenderAreaToGL( const wxGLContext &glcc, ObjRazRules *rzRules, View
     //if(rzRules->obj->Index != 1434)
     //    return 0;
         
-    if( !ObjectRenderCheckRules( rzRules, vp ) )
+    if( !ObjectRenderCheckRules( rzRules, vp, true ) )
         return 0;
 
     Rules *rules = rzRules->LUP->ruleList;
@@ -10074,7 +10098,7 @@ int s52plib::RenderAreaToDC( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp,
         render_canvas_parms *pb_spec )
 {
 
-    if( !ObjectRenderCheckRules( rzRules, vp ) )
+    if( !ObjectRenderCheckRules( rzRules, vp, true ) )
         return 0;
 
     m_pdc = pdcin; // use this DC
@@ -10271,7 +10295,7 @@ bool s52plib::ObjectRenderCheckCat( ObjRazRules *rzRules, ViewPort *vp )
     if( m_nDisplayCategory == OTHER ){
         if(OTHER == obj_cat){
             if( !strncmp( rzRules->LUP->OBCL, "M_", 2 ) )
-                if( !m_bShowMeta ) return false;
+                if( !m_bShowMeta &&  strncmp( rzRules->LUP->OBCL, "M_QUAL", 6 )) return false;
         }
     }
 
@@ -10670,6 +10694,21 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
                         }
                     }
                     if( cnt == num ) break;
+                }
+            }
+            // Handle Quality of data toggle
+            bool bQuality = m_qualityOfDataOn;
+            if(!bQuality){
+                AddObjNoshow("M_QUAL");
+            }
+            else{
+                RemoveObjNoshow("M_QUAL");
+                for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+                    OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
+                    if( !strncmp( pOLE->OBJLName, "M_QUAL", 6 ) ) {
+                        pOLE->nViz = 1;         // force on
+                        break;
+                    }
                 }
             }
         }

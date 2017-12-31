@@ -749,6 +749,7 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
             ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
             ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            ps52plib->SetQualityOfDataOn( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool());
             
             int icat;
             if( root[_T("OpenCPN S52PLIB DisplayCategory")].AsInt(icat) ){
