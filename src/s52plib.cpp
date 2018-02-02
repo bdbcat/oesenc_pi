@@ -75,6 +75,13 @@ extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
 extern PFNGLBUFFERDATAPROC                 s_glBufferData;
 extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 
+#ifndef USE_ANDROID_GLES2
+#define glGenBuffers (s_glGenBuffers);
+#define glBindBuffer (s_glBindBuffer);
+#define glBufferData (s_glBufferData);
+#define glDeleteBuffers (s_glDeleteBuffers);
+#endif
+
 void DrawAALine( wxDC *pDC, int x0, int y0, int x1, int y1, wxColour clrLine, int dash, int space );
 extern bool GetDoubleAttr( S57Obj *obj, const char *AttrName, double &val );
 void PLIBDrawGLThickLine( float x1, float y1, float x2, float y2, wxPen pen, bool b_hiqual );
@@ -3674,7 +3681,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     //   Has line segment PBO been allocated for this chart?
     if(b_useVBO){
-        (s_glBindBuffer)(GL_ARRAY_BUFFER, rzRules->obj->auxParm2);
+        glBindBuffer(GL_ARRAY_BUFFER, rzRules->obj->auxParm2);
     }
 
 
@@ -3818,7 +3825,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     }
 
      if(b_useVBO)
-         (s_glBindBuffer)(GL_ARRAY_BUFFER_ARB, 0);
+         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 
 
 #ifndef USE_ANDROID_GLES2
@@ -5941,7 +5948,6 @@ int s52plib::RenderCARC_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         arcw =wxMin(arcw, rad/10);
         sec_rad *= xscale;
     }
-
     //      Enable anti-aliased lines, at best quality
     glEnable( GL_BLEND );
 
@@ -8471,12 +8477,12 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
                     GLuint vboId;
                     // generate a new VBO and get the associated ID
-                    (s_glGenBuffers)(1, &vboId);
+                    glGenBuffers(1, &vboId);
 
                     rzRules->obj->auxParm0 = vboId;
 
                     // bind VBO in order to use
-                    (s_glBindBuffer)(GL_ARRAY_BUFFER, vboId);
+                    glBindBuffer(GL_ARRAY_BUFFER, vboId);
                     GLenum err = glGetError();
                     if(err){
                         wxString msg;
@@ -8489,7 +8495,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 #ifndef USE_ANDROID_GLES2
                     glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 #endif
-                    (s_glBufferData)(GL_ARRAY_BUFFER,
+                    glBufferData(GL_ARRAY_BUFFER,
                                     ppg_vbo->single_buffer_size, ppg_vbo->single_buffer, GL_STATIC_DRAW);
                     err = glGetError();
                     if(err){
@@ -8501,7 +8507,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
                 }
                 else {
-                    (s_glBindBuffer)(GL_ARRAY_BUFFER, rzRules->obj->auxParm0);
+                    glBindBuffer(GL_ARRAY_BUFFER, rzRules->obj->auxParm0);
                     GLenum err = glGetError();
                     if(err){
                         wxString msg;
@@ -8666,7 +8672,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         } // while
 
         if(b_useVBO)
-            (s_glBindBuffer)(GL_ARRAY_BUFFER_ARB, 0);
+            glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 
 
 #ifndef USE_ANDROID_GLES2
@@ -8682,8 +8688,8 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
 
         if( b_useVBO && b_temp_vbo){
-            (s_glBufferData)(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
-            s_glDeleteBuffers(1, (unsigned int *)&rzRules->obj->auxParm0);
+            glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
+            glDeleteBuffers(1, (unsigned int *)&rzRules->obj->auxParm0);
             rzRules->obj->auxParm0 = 0;
         }
     } // if pPolyTessGeo
@@ -9323,22 +9329,22 @@ int s52plib::RenderToGLAP_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *vp
 
                         GLuint vboId;
                         // generate a new VBO and get the associated ID
-                        (s_glGenBuffers)(1, &vboId);
+                        glGenBuffers(1, &vboId);
 
                         rzRules->obj->auxParm0 = vboId;
 
                         // bind VBO in order to use
-                        (s_glBindBuffer)(GL_ARRAY_BUFFER, vboId);
+                        glBindBuffer(GL_ARRAY_BUFFER, vboId);
 
                         // upload data to VBO
 #ifndef USE_ANDROID_GLES2
                         glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 #endif
-                        (s_glBufferData)(GL_ARRAY_BUFFER, ppg_vbo->single_buffer_size, ppg_vbo->single_buffer, GL_STATIC_DRAW);
+                        glBufferData(GL_ARRAY_BUFFER, ppg_vbo->single_buffer_size, ppg_vbo->single_buffer, GL_STATIC_DRAW);
 
                     }
                     else {
-                        (s_glBindBuffer)(GL_ARRAY_BUFFER, rzRules->obj->auxParm0);
+                        glBindBuffer(GL_ARRAY_BUFFER, rzRules->obj->auxParm0);
 #ifndef USE_ANDROID_GLES2
                         glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 #endif
@@ -9489,7 +9495,7 @@ int s52plib::RenderToGLAP_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *vp
             } // while
 
             if(b_useVBO)
-                (s_glBindBuffer)(GL_ARRAY_BUFFER_ARB, 0);
+                glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
 
 #ifndef USE_ANDROID_GLES2
             glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
@@ -11901,6 +11907,7 @@ static const GLchar* S52color_tri_vertex_shader_source =
 
     // Simple 2D texture shader
 static const GLchar* S52texture_2D_vertex_shader_source =
+    "precision highp float;\n"
     "attribute vec2 position;\n"
     "attribute vec2 aUV;\n"
     "uniform mat4 MVMatrix;\n"
@@ -11924,7 +11931,7 @@ static const GLchar* S52texture_2D_fragment_shader_source =
     //  Circle shader
 
 static const GLchar* S52circle_filled_vertex_shader_source =
-    "precision lowp float;\n"
+    "precision highp float;\n"
     "attribute vec2 aPos;\n"
     "uniform mat4 MVMatrix;\n"
     "uniform mat4 TransformMatrix;\n"
@@ -11933,7 +11940,7 @@ static const GLchar* S52circle_filled_vertex_shader_source =
     "}\n";
 
 static const GLchar* S52circle_filled_fragment_shader_source =
-    "precision lowp float;\n"
+    "precision highp float;\n"
     "uniform float border_width;\n"
     "uniform float circle_radius;\n"
     "uniform vec4 circle_color;\n"
@@ -11954,7 +11961,7 @@ static const GLchar* S52circle_filled_fragment_shader_source =
     //  Ring shader
 
 static const GLchar* S52ring_vertex_shader_source =
-    "precision lowp float;\n"
+    "precision highp float;\n"
     "attribute vec2 aPos;\n"
     "uniform mat4 MVMatrix;\n"
     "uniform mat4 TransformMatrix;\n"
@@ -11963,7 +11970,7 @@ static const GLchar* S52ring_vertex_shader_source =
     "}\n";
 
 static const GLchar* S52ring_fragment_shader_source =
-    "precision lowp float;\n"
+    "precision highp float;\n"
     "uniform float border_width;\n"
     "uniform float circle_radius;\n"
     "uniform float ring_width;\n"
