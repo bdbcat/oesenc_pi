@@ -67,6 +67,7 @@
         #include <GL/gl.h>
         #include <GL/glu.h>
         #include <GL/glext.h>
+        #include <GL/glx.h>
     #else
         #include <qopengl.h>
         #include <GL/gl_private.h>              // this is a cut-down version of gl.h
@@ -2537,7 +2538,7 @@ static GLboolean QueryExtension( const char *extName )
 }
 
 typedef void (*GenericFunction)(void);
-void (*glXGetProcAddress(const GLubyte *procname))( void );
+//void (*glXGetProcAddress(const GLubyte *procname))( void );
 
 #if defined(__WXMSW__)
 #define systemGetProcAddress(ADDR) wglGetProcAddress(ADDR)
