@@ -76,10 +76,10 @@ extern PFNGLBUFFERDATAPROC                 s_glBufferData;
 extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 
 #ifndef USE_ANDROID_GLES2
-#define glGenBuffers (s_glGenBuffers);
-#define glBindBuffer (s_glBindBuffer);
-#define glBufferData (s_glBufferData);
-#define glDeleteBuffers (s_glDeleteBuffers);
+#define glGenBuffers (s_glGenBuffers)
+#define glBindBuffer (s_glBindBuffer)
+#define glBufferData (s_glBufferData)
+#define glDeleteBuffers (s_glDeleteBuffers)
 #endif
 
 void DrawAALine( wxDC *pDC, int x0, int y0, int x1, int y1, wxColour clrLine, int dash, int space );
