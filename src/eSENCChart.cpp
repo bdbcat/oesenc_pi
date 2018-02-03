@@ -145,6 +145,13 @@ extern PFNGLBUFFERDATAPROC                 s_glBufferData;
 extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 #endif
 
+#ifndef USE_ANDROID_GLES2
+#define glGenBuffers (s_glGenBuffers)
+#define glBindBuffer (s_glBindBuffer)
+#define glBufferData (s_glBufferData)
+#define glDeleteBuffers (s_glDeleteBuffers)
+#endif
+
 extern bool              g_b_EnableVBO;
 
 extern void initLibraries(void);
@@ -7346,21 +7353,21 @@ void eSENCChart::BuildLineVBO( void )
         
         //      Create the VBO
         GLuint vboId;
-        (s_glGenBuffers)(1, &vboId);
+        glGenBuffers(1, &vboId);
         
         // bind VBO in order to use
-        (s_glBindBuffer)(GL_ARRAY_BUFFER, vboId);
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
         
         // upload data to VBO
 #ifndef USE_ANDROID_GLES2
         glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 #endif
-        (s_glBufferData)(GL_ARRAY_BUFFER, m_vbo_byte_length, m_line_vertex_buffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m_vbo_byte_length, m_line_vertex_buffer, GL_STATIC_DRAW);
         
 #ifndef USE_ANDROID_GLES2
         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
 #endif
-        (s_glBindBuffer)(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         
          //  Loop and populate all the objects
         for( int i = 0; i < PRIO_NUM; ++i ) {
