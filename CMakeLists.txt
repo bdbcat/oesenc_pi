@@ -245,9 +245,10 @@ IF (QT_ANDROID )
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lgnustl_shared")
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lz" )
 ENDIF(QT_ANDROID)
-
+  
 IF(WIN32)
-  SET(OPENCPN_IMPORT_LIB "C:/Projects/opencpn/build/${CMAKE_CFG_INTDIR}/opencpn.lib")
+  # SET(OPENCPN_IMPORT_LIB "C:/Projects/opencpn/build/${CMAKE_CFG_INTDIR}/opencpn.lib")
+  SET(OPENCPN_IMPORT_LIB "C:/Builds/OCPN/OpenCPN/build/Release/opencpn.lib")
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OPENCPN_IMPORT_LIB} )
 ENDIF(WIN32)
 
