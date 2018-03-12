@@ -238,7 +238,59 @@ SET(SRC_JSON
             src/wxJSON/jsonwriter.cpp
         )
 
-ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_OESENC} ${SRC_CPL} ${SRC_ISO8211} ${SRC_DSA} ${SRC_S57ENC} ${SRC_JSON})
+IF(NOT QT_ANDROID)
+    SET(SRC_OSHOP 
+        src/ochartShop.cpp
+        src/ochartShop.h
+        )
+ENDIF(NOT QT_ANDROID)
+
+    INCLUDE("Curl.cmake")
+    MESSAGE (STATUS "Using local curl library...")
+ 
+IF(WIN32) 
+    SET(SRC_WXCURL
+        src/wxcurl/base.cpp
+        src/wxcurl/dav.cpp
+        src/wxcurl/davtool.cpp
+        src/wxcurl/dialog.cpp
+        src/wxcurl/ftp.cpp
+        src/wxcurl/ftpparse.cpp
+        src/wxcurl/ftptool.cpp
+        src/wxcurl/http.cpp
+        src/wxcurl/panel.cpp
+        src/wxcurl/telnet.cpp
+        src/wxcurl/thread.cpp
+        src/wxcurl/utils.cpp
+    )
+    
+
+ENDIF(WIN32)
+
+#    ADD_LIBRARY(WXCURL ${SRC_WXCURL})
+    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/wxcurl)
+#    SET(EXTRA_LIBS ${EXTRA_LIBS} WXCURL)
+#    SET(EXTRA_LIBS ${EXTRA_LIBS} ${CURL_LIBRARIES})
+    
+    MESSAGE (STATUS "wxCurl configured...")
+
+IF(UNIX AND NOT APPLE)
+ INCLUDE("cmake/FindTinyXML.cmake")
+ FIND_PACKAGE(TinyXML QUIET)
+ENDIF(UNIX AND NOT APPLE)
+
+IF(TINYXML_FOUND)
+ message (STATUS "oeSENCr_pi building with system tinyxml")
+ INCLUDE_DIRECTORIES(${TINYXML_INCLUDE_DIR})
+  TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${TINYXML_LIBRARIES})
+ELSE(TINYXML_FOUND)
+ message (STATUS "oeSENC_pi building with embedded tinyxml")
+ INCLUDE_DIRECTORIES(src/tinyxml/)
+ENDIF(TINYXML_FOUND)
+ADD_DEFINITIONS(-DTIXML_USE_STL)
+
+
+ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_OESENC} ${SRC_CPL} ${SRC_ISO8211} ${SRC_DSA} ${SRC_S57ENC} ${SRC_JSON} ${SRC_OSHOP} ${SRC_WXCURL} ${SRC_LTINYXML})
 
 IF (QT_ANDROID )
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OCPN_Core_LIBRARIES} )
@@ -249,6 +301,8 @@ ENDIF(QT_ANDROID)
 IF(WIN32)
   SET(OPENCPN_IMPORT_LIB "C:/Projects/opencpn/build/${CMAKE_CFG_INTDIR}/opencpn.lib")
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OPENCPN_IMPORT_LIB} )
+  TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${CURL_LIBRARIES})
+
 ENDIF(WIN32)
 
 IF(NOT APPLE)

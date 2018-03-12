@@ -57,6 +57,7 @@
 #include "jsonreader.h"
 #include "dsa_utils.h"
 #include "sha1.h"
+#include "ochartShop.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -67,7 +68,9 @@
         #include <GL/gl.h>
         #include <GL/glu.h>
         #include <GL/glext.h>
-        #include <GL/glx.h>
+        #ifndef __WXMSW__
+            #include <GL/glx.h>
+        #endif    
     #else
         #include <qopengl.h>
         #include <GL/gl_private.h>              // this is a cut-down version of gl.h
@@ -158,6 +161,7 @@ wxString                        g_pipeParm;
 wxArrayString                   g_ChartInfoArray;
 EULAArray                       g_EULAArray;
 wxArrayString                   g_EULAShaArray;
+wxString                        g_PrivateDataDir;
 
 int                             g_admin;
 
@@ -559,6 +563,14 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       //    Get a pointer to the opencpn configuration object
       g_pconfig = GetOCPNConfigObject();
 
+      // Get and build if necessary a private data dir
+      g_PrivateDataDir = *GetpPrivateApplicationDataLocation();
+      g_PrivateDataDir += wxFileName::GetPathSeparator();
+      g_PrivateDataDir += _T("oesenc_pi");
+      g_PrivateDataDir += wxFileName::GetPathSeparator();
+      if(!::wxDirExists( g_PrivateDataDir ))
+          ::wxMkdir( g_PrivateDataDir );
+      
       m_up_text = NULL;
       m_pOptionsPage = 0;
 
@@ -639,12 +651,12 @@ int oesenc_pi::Init(void)
                  WANTS_OVERLAY_CALLBACK   |
                  WANTS_OPENGL_OVERLAY_CALLBACK;
 
-#ifdef __OCPN__ANDROID__
-    flags |= INSTALLS_TOOLBOX_PAGE;
-#else    
+#ifndef __OCPN__ANDROID__
     flags |= WANTS_PREFERENCES;
 #endif
-    
+
+    flags |= INSTALLS_TOOLBOX_PAGE;             // for o-charts shop interface
+
     return flags;
     
 }
@@ -803,11 +815,11 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             return;
         }
         
-        float g_GLMinCartographicLineWidth;
+        //float g_GLMinCartographicLineWidth;
         // is global ...bool  g_b_EnableVBO;
-        float g_GLMinSymbolLineWidth;
+        //float g_GLMinSymbolLineWidth;
         GLenum g_texture_rectangle_format;
-        bool pi_bopengl;
+        //bool pi_bopengl;
         
         // Capture the OpenCPN OpenGL config, and inform the PLIB
         g_b_EnableVBO = root[_T("useVBO")].AsBool();
@@ -1234,12 +1246,10 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("DEBUG_SERVER"), &g_serverDebug);
         pConf->Read( _T("DEBUG_LEVEL"), &g_debugLevel);
 
-#ifdef __OCPN__ANDROID__        
         pConf->Read( _T("systemName"), &g_systemName);
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
         pConf->Read( _T("ADMIN"), &g_admin);
-#endif        
         
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
@@ -3522,6 +3532,200 @@ void androidGetDeviceName()
 }
 #endif
 
+wxString getFPR( bool bCopyToDesktop, bool &bCopyOK)
+{
+            
+            wxString msg1;
+            wxString fpr_file;
+            wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
+            
+#ifdef __WXMSW__
+            
+            //  On XP, we simply use the root directory, since any other directory may be hidden
+            int major, minor;
+            ::wxGetOsVersion( &major, &minor );
+            if( (major == 5) && (minor == 1) )
+                fpr_dir = _T("C:\\");
+#endif        
+            
+            if( fpr_dir.Last() != wxFileName::GetPathSeparator() )
+                fpr_dir += wxFileName::GetPathSeparator();
+            
+            wxString cmd = g_sencutil_bin;
+            cmd += _T(" -g ");                  // Make fingerprint
+            
+#ifndef __WXMSW__
+            cmd += _T("\"");
+            cmd += fpr_dir;
+            
+            //cmd += _T("my fpr/");             // testing
+            
+            //            wxString tst_cedilla = wxString::Format(_T("my fpr copy %cCedilla/"), 0x00E7);       // testing French cedilla
+            //            cmd += tst_cedilla;            // testing
+            
+            cmd += _T("\"");
+#else
+            cmd += wxString('\"'); 
+            cmd += fpr_dir;
+            
+            //            cmd += _T("my fpr\\");            // testing spaces in path
+            
+            //            wxString tst_cedilla = wxString::Format(_T("my%c\\"), 0x00E7);       // testing French cedilla
+            //            cmd += tst_cedilla;            // testing
+#endif            
+            wxLogMessage(_T("Create FPR command: ") + cmd);
+            
+            ::wxBeginBusyCursor();
+            
+            wxArrayString ret_array;      
+            wxExecute(cmd, ret_array, ret_array );
+            
+            ::wxEndBusyCursor();
+            
+            bool berr = false;
+            for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
+                wxString line = ret_array[i];
+                if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
+                    berr = true;
+                    break;
+                }
+                if(line.Upper().Find(_T("FPR")) != wxNOT_FOUND){
+                    fpr_file = line.AfterFirst(':');
+                }
+                
+            }
+            
+            bool berror = false;
+            
+            if( bCopyToDesktop && !berr && fpr_file.Length()){
+                
+                bool bcopy = false;
+                wxString sdesktop_path;
+                
+#ifdef __WXMSW__
+                TCHAR desktop_path[MAX_PATH*2] = { 0 };
+                bool bpathGood = false;
+                HRESULT  hr;
+                HANDLE ProcToken = NULL;
+                OpenProcessToken( GetCurrentProcess(), TOKEN_READ, &ProcToken );
+                
+                hr = SHGetFolderPath( NULL,  CSIDL_DESKTOPDIRECTORY, ProcToken, 0, desktop_path);
+                if (SUCCEEDED(hr))    
+                    bpathGood = true;
+                
+                CloseHandle( ProcToken );
+                
+                //                wchar_t *desktop_path = 0;
+                //                bool bpathGood = false;
+                
+                //               if( (major == 5) && (minor == 1) ){             //XP
+                //                    if(S_OK == SHGetFolderPath( (HWND)0,  CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, desktop_path))
+                //                        bpathGood = true;
+                
+                
+                //                 }
+                //                 else{
+                    //                     if(S_OK == SHGetKnownFolderPath( FOLDERID_Desktop, 0, 0, &desktop_path))
+                //                         bpathGood = true;
+                //                 }
+                
+                
+                if(bpathGood){
+                    
+                    char str[128];
+                    wcstombs(str, desktop_path, 128);
+                    wxString desktop_fpr(str, wxConvAuto());
+                    
+                    sdesktop_path = desktop_fpr;
+                    if( desktop_fpr.Last() != wxFileName::GetPathSeparator() )
+                        desktop_fpr += wxFileName::GetPathSeparator();
+                    
+                    wxFileName fn(fpr_file);
+                    wxString desktop_fpr_file = desktop_fpr + fn.GetFullName();
+                    
+                    
+                    wxString exe = _T("xcopy");
+                    wxString parms = fpr_file.Trim() + _T(" ") + wxString('\"') + desktop_fpr + wxString('\"');
+                    wxLogMessage(_T("FPR copy command: ") + exe + _T(" ") + parms);
+                    
+                    const wchar_t *wexe = exe.wc_str(wxConvUTF8);
+                    const wchar_t *wparms = parms.wc_str(wxConvUTF8);
+                    
+                    if( (major == 5) && (minor == 1) ){             //XP
+                        // For some reason, this does not work...
+                        //8:43:13 PM: Error: Failed to copy the file 'C:\oc01W_1481247791.fpr' to '"C:\Documents and Settings\dsr\Desktop\oc01W_1481247791.fpr"'
+                        //                (error 123: the filename, directory name, or volume label syntax is incorrect.)
+                        //8:43:15 PM: oesenc fpr file created as: C:\oc01W_1481247791.fpr
+                        
+                        bcopy = wxCopyFile(fpr_file.Trim(false), _T("\"") + desktop_fpr_file + _T("\""));
+                    }
+                    else{
+                        ::wxBeginBusyCursor();
+                        
+                        // Launch oeserverd as admin
+                        SHELLEXECUTEINFO sei = { sizeof(sei) };
+                        sei.lpVerb = L"runas";
+                        sei.lpFile = wexe;
+                        sei.hwnd = NULL;
+                        sei.lpParameters = wparms;
+                        sei.nShow = SW_SHOWMINIMIZED;
+                        sei.fMask = SEE_MASK_NOASYNC;
+                        
+                        if (!ShellExecuteEx(&sei))
+                        {
+                            DWORD dwError = GetLastError();
+                            if (dwError == ERROR_CANCELLED)
+                            {
+                                // The user refused to allow privileges elevation.
+                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to copy fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
+                                berror = true;
+                            }
+                        }
+                        else
+                            bcopy = true;
+                        
+                        ::wxEndBusyCursor();
+                        
+                    }  
+                }
+#endif            // MSW
+
+#ifdef __WXOSX__
+                wxFileName fn(fpr_file);
+                wxString desktop_fpr_path = ::wxGetHomeDir() + wxFileName::GetPathSeparator() +
+                _T("Desktop") + wxFileName::GetPathSeparator() + fn.GetFullName();
+                
+                bcopy =  ::wxCopyFile(fpr_file.Trim(false), desktop_fpr_path);
+                sdesktop_path = desktop_fpr_path;
+                msg1 += _T("\n\n OSX ");
+#endif
+                
+                
+                wxLogMessage(_T("oeSENC fpr file created as: ") + fpr_file);
+                if(bCopyToDesktop && bcopy)
+                    wxLogMessage(_T("oeSENC fpr file created in desktop folder: ") + sdesktop_path);
+                
+                if(bcopy)
+                    bCopyOK = true;
+        }
+        else if(berr){
+            wxLogMessage(_T("oesenc_pi: oeserverd results:"));
+            for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
+                wxString line = ret_array[i];
+                wxLogMessage( line );
+            }
+            berror = true;
+        }
+        
+        if(berror)
+            return _T("");
+        else
+            return fpr_file;
+        
+}
+
+
+
 // An Event handler class to catch events from UI dialog
 //      Implementation
 #define ANDROID_EVENT_TIMER 4392
@@ -3594,6 +3798,30 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
     int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
     
     if(ret == wxID_YES){
+        wxString msg1;
+        
+        bool b_copyOK = false;
+        wxString fpr_file = getFPR( true , b_copyOK);
+        
+        if(fpr_file.Len()){
+            msg1 += _("Fingerprint file created.\n");
+            msg1 += fpr_file;
+            
+            if(b_copyOK)
+                msg1 += _("\n\n Fingerprint file is also copied to desktop.");
+            
+            OCPNMessageBox_PlugIn(NULL, msg1, _("oeSENC_pi Message"), wxOK);
+            
+            m_parent->Set_FPR();
+            
+        }
+        else{
+            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
+        }
+        
+        g_fpr_file = fpr_file;
+        
+#if 0        
        
         wxString msg1;
         wxString fpr_file;
@@ -3784,13 +4012,9 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
                 
                 berror = true;
             }
-            
-            g_fpr_file = fpr_file;
-
-            if (!berror)
-                m_parent->Set_FPR();
+#endif            
            
-    }
+    }           // yes
 #else
 
         // Get XFPR from the oeserverda helper utility.
@@ -3906,6 +4130,131 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         
 #endif
         
+}
+
+
+void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
+{
+    
+#ifndef __OCPN__ANDROID__
+
+        doShop();
+#else
+
+        // Get XFPR from the oeserverda helper utility.
+        //  The target binary executable
+        wxString cmd = g_sencutil_bin;
+
+//  Set up the parameter passed as the local app storage directory, and append "cache/" to it
+        wxString dataLoc = *GetpPrivateApplicationDataLocation();
+        wxFileName fn(dataLoc);
+        wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        dataDir += _T("cache/");
+
+        wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        // This will be {dir of g_sencutil_bin}/lib
+        wxFileName fnl(cmd);
+        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+        
+        wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
+
+        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
+
+        wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
+
+        
+        wxString sFPRPlus;              // The composite string we will pass to the management activity
+        
+        // Convert the XFPR to an ASCII string for transmission inter-process...
+        // Find the file...
+        wxArrayString files;
+        wxString lastFile = _T("NOT_FOUND");
+        time_t tmax = -1;
+        size_t nf = wxDir::GetAllFiles(dataDir, &files, _T("*.fpr"), wxDIR_FILES);
+        if(nf){
+            for(size_t i = 0 ; i < files.GetCount() ; i++){
+                qDebug() << "looking at FPR file: " << files[i].mb_str();
+                time_t t = ::wxFileModificationTime(files[i]);
+                if(t > tmax){
+                    tmax = t;
+                    lastFile = files[i];
+                }
+            }
+        }
+        
+        qDebug() << "last FPR file: " << lastFile.mb_str();
+            
+        //Read the file, convert to ASCII hex, and build a string
+        if(::wxFileExists(lastFile)){
+            wxString stringFPR;
+            wxFileInputStream stream(lastFile);
+            while(stream.IsOk() && !stream.Eof() ){
+                char c = stream.GetC();
+                if(!stream.Eof()){
+                    wxString sc;
+                    sc.Printf(_T("%02X"), c);
+                    stringFPR += sc;
+                }
+            }
+            sFPRPlus += _T("FPR:");                 // name        
+            sFPRPlus += stringFPR;                  // values
+            sFPRPlus += _T(";");                    // delimiter
+        }
+        
+        //  Add the filename
+        wxFileName fnxpr(lastFile);
+        wxString fprName = fnxpr.GetName();
+        sFPRPlus += _T("fprName:");                 // name        
+        sFPRPlus += fprName;                  // values
+        sFPRPlus += _T(".fpr");
+        sFPRPlus += _T(";");                    // delimiter
+        
+
+        // We can safely delete the FPR file now.
+        if(::wxFileExists(lastFile))
+            wxRemoveFile( lastFile );
+        
+        // Get and add other name/value pairs to the sFPRPlus string
+        sFPRPlus += _T("User:");
+        sFPRPlus += g_loginUser;
+        sFPRPlus += _T(";");                    // delimiter
+        
+        sFPRPlus += _T("loginKey:");
+        if(!g_loginKey.Length())
+            sFPRPlus += _T("?");
+        else
+            sFPRPlus += g_loginKey;
+        sFPRPlus += _T(";");                    // delimiter
+        
+        //  System Name
+        sFPRPlus += _T("systemName:");
+        sFPRPlus += g_systemName;
+        sFPRPlus += _T(";");                    // delimiter
+        
+        //  ADMIN mode bit
+        sFPRPlus += _T("ADMIN:");
+        sFPRPlus += g_admin ? _T("1"):_T("0");
+        sFPRPlus += _T(";");                    // delimiter
+        
+        qDebug() << "sFPRPlus: " << sFPRPlus.mb_str();
+        
+        m_eventTimer.Stop();
+            
+        wxLogMessage(_T("sFPRPlus: ") + sFPRPlus);
+        
+        // Start the Chart management activity
+        callActivityMethod_s5s( "startActivityWithIntent", _T("org.opencpn.oesencplugin"), _T("ChartsetListActivity"), _T("FPRPlus"), sFPRPlus, _T("ManageResult") );
+        
+        // Start a timer to poll for results.
+        m_timerAction = ACTION_ARB_RESULT_POLL;
+        m_eventTimer.Start(1000, wxTIMER_CONTINUOUS);
+        
+
+#endif  // Android
+
+    
 }
 
 
@@ -4890,6 +5239,7 @@ void androidHideBusyIcon()
 
 void oesenc_pi::OnSetupOptions( void )
 {
+#if 0
     m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oesenc Charts") );
     if( ! m_pOptionsPage )
     {
@@ -4904,6 +5254,23 @@ void oesenc_pi::OnSetupOptions( void )
     m_pOptionsPage->InvalidateBestSize();
     sizer->Add( m_oesencpanel, 1, wxALL | wxEXPAND );
     m_oesencpanel->FitInside();
+#else
+    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oesenc Charts") );
+    if( ! m_pOptionsPage )
+    {
+        wxLogMessage( _T("Error: oesenc_pi::OnSetupOptions AddOptionsPage failed!") );
+        return;
+    }
+    wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
+    m_pOptionsPage->SetSizer( sizer );
+    
+    m_shoppanel = new shopPanel( m_pOptionsPage, wxID_ANY, wxDefaultPosition, wxDefaultSize );
+    
+    m_pOptionsPage->InvalidateBestSize();
+    sizer->Add( m_shoppanel, 1, wxALL | wxEXPAND );
+    m_shoppanel->FitInside();
+
+#endif
 }
 
 oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
@@ -4952,7 +5319,7 @@ oesencPanel::~oesencPanel()
 void oesencPanel::ManageCharts( wxCommandEvent &evt )
 {
     if(g_event_handler)
-        g_event_handler->OnNewFPRClick(evt);
+        g_event_handler->OnManageShopClick(evt);
     
 }
 

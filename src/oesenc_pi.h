@@ -79,7 +79,7 @@ class   OCPNPermitList;
 class   OCPNCertificateList;
 class   oesenc_pi_event_handler;
 class   oesencPanel;
-
+class   shopPanel;
 
 
 class ChartInfoItem {
@@ -190,6 +190,7 @@ private:
     
     wxScrolledWindow    *m_pOptionsPage;
     oesencPanel         *m_oesencpanel;
+    shopPanel           *m_shoppanel;
     
 
 };
@@ -234,6 +235,7 @@ public:
     void OnShowFPRClick( wxCommandEvent &event );
     void onTimerEvent(wxTimerEvent &event);
     void OnGetHWIDClick( wxCommandEvent &event );
+    void OnManageShopClick( wxCommandEvent &event );
     
 private:
     void processArbResult( wxString result );
