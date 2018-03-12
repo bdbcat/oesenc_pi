@@ -3,26 +3,26 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-10 22:35-0500\n"
-"PO-Revision-Date: 2018-03-11 10:37-0400\n"
+"PO-Revision-Date: 2018-03-11 10:38-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
-"Language-Team: Danish\n"
-"Language: da_DK\n"
+"Language-Team: Indonesian\n"
+"Language: id_ID\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: opencpn\n"
-"X-Crowdin-Language: da\n"
+"X-Crowdin-Language: id\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
 #: src/eSENCChart.cpp:3297 src/eSENCChart.cpp:3301
 msgid "Building eSENC"
-msgstr ""
+msgstr "Membangun eSENC"
 
 #: src/eSENCChart.cpp:6524
 msgid "Sector angles are True Bearings from Seaward"
-msgstr ""
+msgstr "Sudut sektor adalah True Bearings dari Seaward"
 
 #: src/oesenc_pi.cpp:283 src/oesenc_pi.cpp:425 src/oesenc_pi.cpp:2112
 #: src/oesenc_pi.cpp:2141 src/oesenc_pi.cpp:4453 src/oesenc_pi.cpp:4505
@@ -31,7 +31,7 @@ msgstr ""
 #: src/ochartShop.cpp:2518 src/ochartShop.cpp:2543 src/ochartShop.cpp:2768
 #: src/ochartShop.cpp:2796
 msgid "Dialog"
-msgstr ""
+msgstr "Percakapan"
 
 #: src/oesenc_pi.cpp:713
 msgid "oeSENC"
@@ -39,38 +39,38 @@ msgstr ""
 
 #: src/oesenc_pi.cpp:719
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr ""
+msgstr "PlugIn untuk diagram OeSENC OpenCPN"
 
 #: src/oesenc_pi.cpp:725
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr ""
+msgstr "PlugIn untuk OpenCPN Menyediakan dukungan untuk bagan oeSENC.\n\n"
 
 #: src/oesenc_pi.cpp:931 src/oesenc_pi.cpp:3794
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr ""
+msgstr "Untuk mendapatkan User Key, Anda harus membuat File System Identifier yang unik.\n"
 
 #: src/oesenc_pi.cpp:932 src/oesenc_pi.cpp:3795
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr ""
+msgstr "File ini juga dikenal sebagai file \"sidik jari\".\n"
 
 #: src/oesenc_pi.cpp:933 src/oesenc_pi.cpp:3796
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
-msgstr ""
+msgstr "File sidik jari berisi informasi untuk mengidentifikasi secara unik komputer ini.\n\n"
 
 #: src/oesenc_pi.cpp:934 src/oesenc_pi.cpp:3797
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr ""
+msgstr "Setelah membuat file ini, Anda memerlukannya untuk mendapatkan User Key Anda di toko o-charts.org.\n\n"
 
 #: src/oesenc_pi.cpp:935 src/oesenc_pi.cpp:3798
 msgid "Proceed to create Fingerprint file?"
-msgstr ""
+msgstr "Lanjutkan untuk membuat file sidik jari?"
 
 #: src/oesenc_pi.cpp:937 src/oesenc_pi.cpp:3800 src/oesenc_pi.cpp:4856
 #: src/oesenc_pi.cpp:4936 src/ochartShop.cpp:754 src/ochartShop.cpp:1763
 #: src/ochartShop.cpp:1783 src/ochartShop.cpp:1812 src/ochartShop.cpp:2170
 msgid "oeSENC_PI Message"
-msgstr ""
+msgstr "pesan oeSENC_PI"
 
 #: src/oesenc_pi.cpp:1386 src/oesenc_pi.h:212
 msgid "oeSENC_PI Preferences"
@@ -78,52 +78,52 @@ msgstr ""
 
 #: src/oesenc_pi.cpp:2144
 msgid "OpenCPN oeSENC UserKey Required"
-msgstr ""
+msgstr "OpenCPN oeSENC UserKey Diperlukan"
 
 #: src/oesenc_pi.cpp:2162
 msgid "Enter UserKey"
-msgstr ""
+msgstr "Masukkan UserKey"
 
 #: src/oesenc_pi.cpp:2181
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
-msgstr ""
+msgstr "OASENC UserKey yang valid memiliki format alfanumerik: AAAA-BBBB-CCCC-DDDD-EEEE-FF Pengguna Anda mungkin berasal dari penyedia bagan Anda."
 
 #: src/oesenc_pi.cpp:2187
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "KESALAHAN: UserKey masuk tidak berlaku untuk kumpulan grafik oeSENC ini. Harap verifikasi UserKey Anda dan coba lagi. OASENC UserKey yang valid memiliki format alfanumerik: AAAA-BBBB-CCCC-DDDD-EEEE-FF Pengguna Anda mungkin berasal dari penyedia bagan Anda.\n\n"
 
 #: src/oesenc_pi.cpp:2195
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr ""
+msgstr "KESALAHAN: UserKey masuk tidak berlaku untuk kumpulan grafik oeSENC ini. Diagram oeSENC akan dinonaktifkan untuk sesi ini. Harap verifikasi UserKey Anda dan restart OpenCPN. Pengguna Anda mungkin berasal dari penyedia bagan Anda.\n\n"
 
 #: src/oesenc_pi.cpp:2206
 msgid "UserKey accepted.\n\n"
-msgstr ""
+msgstr "UserKey diterima.\n\n"
 
 #: src/oesenc_pi.cpp:2243 src/ochartShop.cpp:2458 src/ochartShop.cpp:2590
 #: src/ochartShop.cpp:2850
 msgid "Cancel"
-msgstr ""
+msgstr "Membatalkan"
 
 #: src/oesenc_pi.cpp:2250 src/ochartShop.cpp:2463 src/ochartShop.cpp:2594
 #: src/ochartShop.cpp:2855
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: src/oesenc_pi.cpp:2941
 msgid "Checking oeserverd utility at "
-msgstr ""
+msgstr "Memeriksa utilitas oeserverd di "
 
 #: src/oesenc_pi.cpp:2949
 msgid "Cannot find the oserverd utility at \n"
-msgstr ""
+msgstr "Tidak dapat menemukan utilitas oserverd di \n"
 
 #: src/oesenc_pi.cpp:2953 src/oesenc_pi.cpp:3061 src/oesenc_pi.cpp:3682
 #: src/oesenc_pi.cpp:3815 src/oesenc_pi.cpp:3821 src/oesenc_pi.cpp:3970
@@ -131,7 +131,7 @@ msgstr ""
 #: src/ochartShop.cpp:494 src/ochartShop.cpp:879 src/ochartShop.cpp:1149
 #: src/ochartShop.cpp:1820
 msgid "oeSENC_pi Message"
-msgstr ""
+msgstr "pesan oeSENC_pi"
 
 #: src/oesenc_pi.cpp:3032 src/oesenc_pi.cpp:3056
 msgid "oeserverd utility at \n"
@@ -139,101 +139,103 @@ msgstr ""
 
 #: src/oesenc_pi.cpp:3036
 msgid " reports Unavailable.\n\n"
-msgstr ""
+msgstr " laporan tidak tersedia.\n\n"
 
 #: src/oesenc_pi.cpp:3060
 msgid " could not be started.\n\n"
-msgstr ""
+msgstr " tidak bisa memulai.\n\n"
 
 #: src/oesenc_pi.cpp:3441
 msgid "System Identification"
-msgstr ""
+msgstr "Identifikasi Sistem"
 
 #: src/oesenc_pi.cpp:3451
 msgid "Create System Identifier file..."
-msgstr ""
+msgstr "Buat file System Identifier..."
 
 #: src/oesenc_pi.cpp:3459
 msgid "Show In Finder"
-msgstr ""
+msgstr "Tampilkan pencarian"
 
 #: src/oesenc_pi.cpp:3461
 msgid "Show on disk"
-msgstr ""
+msgstr "Menampilkan pada disk"
 
 #: src/oesenc_pi.cpp:3682 src/oesenc_pi.cpp:3970
 msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
-msgstr ""
+msgstr "Administrator priveleges diminta untuk menyalin fpr.\n"
+"  Silakan coba lagi...."
 
 #: src/oesenc_pi.cpp:3809 src/oesenc_pi.cpp:3994
 msgid "Fingerprint file created.\n"
-msgstr ""
+msgstr "File sidik jari dibuat.\n"
 
 #: src/oesenc_pi.cpp:3813 src/oesenc_pi.cpp:3998
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
-msgstr ""
+msgstr "\n\n"
+" File sidik jari juga disalin ke desktop."
 
 #: src/oesenc_pi.cpp:4595
 msgid "Could not open oesenc_pi EULA: "
-msgstr ""
+msgstr "Tidak bisa membuka oesenc_pi EULA: "
 
 #: src/oesenc_pi.cpp:4668
 msgid "oeSENC PlugIn for OpenCPN"
-msgstr ""
+msgstr "oeSENC PlugIn untuk OpenCPN"
 
 #: src/oesenc_pi.cpp:4731
 msgid "License"
-msgstr ""
+msgstr "Lisensi"
 
 #: src/oesenc_pi.cpp:4756
 msgid "Accept"
-msgstr ""
+msgstr "Menerima"
 
 #: src/oesenc_pi.cpp:4761
 msgid "Reject"
-msgstr ""
+msgstr "Menolak"
 
 #: src/oesenc_pi.cpp:4802
 msgid "Available Chart sets:"
-msgstr ""
+msgstr "Kumpulan Bagan yang tersedia:"
 
 #: src/oesenc_pi.cpp:4871
 msgid "The following Chart sets are available:"
-msgstr ""
+msgstr "Bagan berikut tersedia:"
 
 #: src/oesenc_pi.cpp:4881
 msgid "Chart set"
-msgstr ""
+msgstr "Bagan ditetapkan"
 
 #: src/oesenc_pi.cpp:4885
 msgid "Version"
-msgstr ""
+msgstr "Versi"
 
 #: src/oesenc_pi.cpp:4889
 msgid "Valid until"
-msgstr ""
+msgstr "Berlaku hingga"
 
 #: src/oesenc_pi.cpp:5245 src/oesenc_pi.cpp:5260
 msgid "oesenc Charts"
-msgstr ""
+msgstr "oesenc Charts"
 
 #: src/oesenc_pi.cpp:5292
 msgid "Add/Update oesenc chartsets"
-msgstr ""
+msgstr "Tambahkan / Perbarui grafik oesenc"
 
 #: src/oesenc_pi.cpp:5297
 msgid "Visit o-charts.org Website"
-msgstr ""
+msgstr "Kunjungi situs o-charts.org"
 
 #: src/oesenc_pi.cpp:5298
 msgid "Here you may order new oesenc chartsets."
-msgstr ""
+msgstr "Di sini Anda bisa memesan charts oesenc baru."
 
 #: src/oesenc_pi.h:300
 msgid "OpenCPN SENC UserKey Required"
-msgstr ""
+msgstr "OpenCPN SENC UserKey Diperlukan"
 
 #: src/oesenc_pi.h:428
 msgid "oeSENC_PI Information"
