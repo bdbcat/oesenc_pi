@@ -40,7 +40,7 @@
 #include "wxcurl/wx/curl/http.h"
 #include "wxcurl/wx/curl/thread.h"
 #include <tinyxml.h>
-#include <../../opencpn/plugins/wmm_pi/src/WMMHeader.h>
+//#include <../../opencpn/plugins/wmm_pi/src/WMMHeader.h>
 #include "wx/wfstream.h"
 #include <wx/zipstrm.h>
 #include <memory>
@@ -2785,9 +2785,9 @@ END_EVENT_TABLE()
                                               
      m_CancelButton = new wxButton( itemDialog1, ID_GETIP_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
      itemBoxSizer16->Add( m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
-     m_CancelButton->SetDefault();
                                               
      m_OKButton = new wxButton( itemDialog1, ID_GETIP_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+     m_OKButton->SetDefault();
      itemBoxSizer16->Add( m_OKButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
                                               
                                               
@@ -3051,14 +3051,12 @@ void oeSENCLogin::CreateControls(  )
     wxBoxSizer* itemBoxSizer16 = new wxBoxSizer( wxHORIZONTAL );
     itemBoxSizer2->Add( itemBoxSizer16, 0, wxALIGN_RIGHT | wxALL, 5 );
     
-    {
-        m_CancelButton = new wxButton( itemDialog1, ID_GETIP_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-        itemBoxSizer16->Add( m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
-        m_CancelButton->SetDefault();
-    }
+    m_CancelButton = new wxButton( itemDialog1, ID_GETIP_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer16->Add( m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
     
-    m_OKButton = new wxButton( itemDialog1, ID_GETIP_OK, _("OK"), wxDefaultPosition,
-                                                           wxDefaultSize, 0 );
+    m_OKButton = new wxButton( itemDialog1, ID_GETIP_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_OKButton->SetDefault();
+    
     itemBoxSizer16->Add( m_OKButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
     
     
