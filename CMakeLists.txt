@@ -173,7 +173,6 @@ SET(SRC_OESENC
             src/Osenc.h
             src/mygeom.h
             src/mygeom63.cpp
-            src/tri.c
             src/TexFont.cpp
             src/TexFont.h
             src/s52plib.cpp
