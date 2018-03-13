@@ -61,7 +61,7 @@ IF (NOT WIN32)
 
     IF (EXISTS /etc/debian_version)
       SET (PACKAGE_FORMAT "DEB")
-      SET (PACKAGE_DEPS "libc6, libwxgtk3.0-0, libglu1-mesa (>= 7.0.0)")
+      SET (PACKAGE_DEPS "libc6, libwxgtk3.0-0, libglu1-mesa (>= 7.0.0) curl")
       SET (LIB_INSTALL_DIR "lib")
       IF (CMAKE_SIZEOF_VOID_P MATCHES "8")
         SET (ARCH "amd64")
@@ -244,11 +244,31 @@ IF(NOT QT_ANDROID)
         )
 ENDIF(NOT QT_ANDROID)
 
-    INCLUDE("Curl.cmake")
-    MESSAGE (STATUS "Using local curl library...")
+OPTION(OCPN_USE_CURL "Use Curl libraries" ON)
+ADD_DEFINITIONS(-D__OCPN_USE_CURL__)
+
+IF(WIN32)
+    OPTION(OCPN_USE_EXTERN_CURL "Use external libcurl" OFF)
+ELSE(WIN32)
+    SET(OCPN_USE_EXTERN_CURL ON)
+ENDIF(WIN32)
+
+IF(NOT QT_ANDROID)
+
+    IF(OCPN_USE_EXTERN_CURL)
+        FIND_PACKAGE(CURL REQUIRED)
+        IF(CURL_FOUND)
+            MESSAGE (STATUS "Using SYSTEM curl library...${CURL_LIBRARIES}")
+        ENDIF(CURL_FOUND)
+        INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+    ELSE(OCPN_USE_EXTERN_CURL)
+        INCLUDE("Curl.cmake")
+        MESSAGE (STATUS "Using local curl library...")
+    ENDIF(OCPN_USE_EXTERN_CURL)
+
  
-IF(WIN32) 
-    SET(SRC_WXCURL
+    IF(WIN32) 
+        SET(SRC_WXCURL
         src/wxcurl/base.cpp
         src/wxcurl/dav.cpp
         src/wxcurl/davtool.cpp
@@ -261,10 +281,8 @@ IF(WIN32)
         src/wxcurl/telnet.cpp
         src/wxcurl/thread.cpp
         src/wxcurl/utils.cpp
-    )
-    
-
-ENDIF(WIN32)
+        )
+    ENDIF(WIN32)
 
 #    ADD_LIBRARY(WXCURL ${SRC_WXCURL})
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/wxcurl)
@@ -272,6 +290,8 @@ ENDIF(WIN32)
 #    SET(EXTRA_LIBS ${EXTRA_LIBS} ${CURL_LIBRARIES})
     
     MESSAGE (STATUS "wxCurl configured...")
+
+ENDIF(NOT QT_ANDROID)
 
 IF(UNIX AND NOT APPLE)
  INCLUDE("cmake/FindTinyXML.cmake")
