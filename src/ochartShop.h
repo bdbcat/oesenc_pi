@@ -54,11 +54,15 @@ class InProgressIndicator;
 
 enum{
         STAT_UNKNOWN = 0,
-        STAT_AVAILABLE,
+        STAT_PURCHASED,
         STAT_CURRENT,
         STAT_STALE,
         STAT_EXPIRED,
-        STAT_EXPIRED_MINE
+        STAT_EXPIRED_MINE,
+        STAT_PREPARING,
+        STAT_READY_DOWNLOAD,
+        STAT_REQUESTABLE,
+        STAT_NEED_REFRESH
 };
         
         
@@ -74,12 +78,14 @@ public:
     wxString getDownloadPath(int slot); 
     bool isChartsetFullyAssigned();
     bool isChartsetAssignedToMe(wxString systemName);
+    bool isChartsetExpired();
+    bool isChartsetDontShow();
     
 public:    
     wxString getOrderRef() { return orderRef;}
     bool isEnabled(){ return m_bEnabled; }
-    wxString getStatus();
-    int getChartStatus(){ return m_status; }
+    wxString getStatusString();
+    int getChartStatus();
     wxBitmap& GetChartThumbnail(int size);
     
     //wxString ident;
@@ -269,9 +275,9 @@ public:
     int m_prepareProgress;
     wxTimer m_prepareTimer;
     int m_activeSlot;
-    wxString m_prepareChartSelectedID;
-    wxString m_prepareChartSelectedOrder;
-    wxString m_prepareChartSelectedQty;
+    wxString m_ChartSelectedID;
+    wxString m_ChartSelectedOrder;
+    wxString m_ChartSelectedQty;
     wxButton* m_buttonCancelOp;
     bool m_binstallChain;
     bool m_bAbortingDownload;
