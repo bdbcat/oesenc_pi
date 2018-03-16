@@ -71,6 +71,7 @@ OESENC_CURL_EvtHandler *g_CurlEventHandler;
 wxCurlDownloadThread *g_curlDownloadThread;
 wxFFileOutputStream *downloadOutStream;
 bool g_chartListUpdatedOK;
+wxString g_statusOverride;
 
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
@@ -132,6 +133,28 @@ bool itemChart::isChartsetFullyAssigned() {
     return bFull;
 }
 
+bool itemChart::isChartsetExpired() {
+    
+    bool bExp = false;
+    if (statusID0.IsSameAs("expired") || statusID1.IsSameAs("expired")) {
+        bExp = true;
+    }
+    return bExp;
+}
+
+bool itemChart::isChartsetDontShow()
+{
+    if(isChartsetFullyAssigned() && !isChartsetAssignedToMe(g_systemName))
+        return true;
+    
+    else if(isChartsetExpired() && !isChartsetAssignedToMe(g_systemName))
+        return true;
+    
+    else
+        return false;
+}
+    
+    
 //  Current status can be one of:
 /*
  *      1.  Available for Installation.
@@ -140,106 +163,115 @@ bool itemChart::isChartsetFullyAssigned() {
  *      4.  Expired.
  */        
 
-wxString itemChart::getStatus()
+int itemChart::getChartStatus()
 {
-    if(!g_chartListUpdatedOK)
-        return _("Please update Chart List.");
+    if(!g_chartListUpdatedOK){
+        m_status = STAT_NEED_REFRESH;
+        return m_status;
+    }
+
+    if(isChartsetExpired()){
+        m_status = STAT_EXPIRED;
+        return m_status;
+    }
+    
+    if(!isChartsetAssignedToMe( g_systemName )){
+        m_status = STAT_PURCHASED;
+        return m_status;
+    }
+    
+    // We know that chart is assigned to me, so one of the sysIDx fields will match
+    wxString cStat = statusID0;
+    if(sysID1.IsSameAs(g_systemName))
+        cStat = statusID1;
+        
+    if(cStat.IsSameAs(_T("requestable"))){
+        m_status = STAT_REQUESTABLE;
+        return m_status;
+    }
+
+    if(cStat.IsSameAs(_T("processing"))){
+        m_status = STAT_PREPARING;
+        return m_status;
+    }
+
+    if(cStat.IsSameAs(_T("download"))){
+        m_status = STAT_READY_DOWNLOAD;
+        
+        if(sysID0.IsSameAs(g_systemName)){
+            if(  (installLocation0.Length() > 0) && (fileDownloadPath0.Length() > 0) ){
+                m_status = STAT_CURRENT;
+                if(!lastRequestEdition0.IsSameAs(currentChartEdition)){
+                    m_status = STAT_STALE;
+                }
+            }
+        }
+        else if(sysID1.IsSameAs(g_systemName)){
+            if(  (installLocation1.Length() > 0) && (fileDownloadPath1.Length() > 0) ){
+                m_status = STAT_CURRENT;
+                if(!lastRequestEdition1.IsSameAs(currentChartEdition)){
+                    m_status = STAT_STALE;
+                }
+                
+            }
+        }
+    }
+
+     
+    return m_status;
+    
+}
+wxString itemChart::getStatusString()
+{
+    getChartStatus();
     
     wxString sret;
     
-    if(isChartsetAssignedToMe( g_systemName )){
-        if(sysID0.IsSameAs(g_systemName)){
-            if( statusID0.IsSameAs(_T("requestable")) || statusID0.IsSameAs(_T("processing")) || statusID0.IsSameAs(_T("download")) ){
-                sret = _("Available for Installation.");
-                m_status = STAT_AVAILABLE;
-            }
-        }
-
-        else if(sysID1.IsSameAs(g_systemName)){
-            if( statusID1.IsSameAs(_T("requestable")) || statusID1.IsSameAs(_T("processing")) || statusID1.IsSameAs(_T("download")) ){
-                sret = _("Available for Installation.");
-                m_status = STAT_AVAILABLE;
-            }
-        }
+    switch(m_status){
         
-    }
-    else {
-        if( statusID0.IsSameAs(_T("unassigned")) || statusID1.IsSameAs(_T("unassigned"))){
-            sret = _("Available for Installation.");
-            m_status = STAT_AVAILABLE;
-        }
+        case STAT_UNKNOWN:
+            break;
+            
+        case STAT_PURCHASED:
+            sret = _("Available.");
+            break;
+            
+        case STAT_CURRENT:
+            sret = _("Installed, Up-to-date.");
+            break;
+            
+        case STAT_STALE:
+            sret = _("Installed, Update available.");
+            break;
+            
+        case STAT_EXPIRED:
+        case STAT_EXPIRED_MINE:
+            sret = _("Expired.");
+            break;
+            
+        case STAT_PREPARING:
+            sret = _("Preparing your chartset.");
+            break;
+            
+        case STAT_READY_DOWNLOAD:
+            sret = _("Ready for download.");
+            break;
+            
+        case STAT_NEED_REFRESH:
+            sret = _("Please update Chart List.");
+            break;
+
+        case STAT_REQUESTABLE:
+            sret = _("Ready for Download Request.");
+            break;
+            
+        default:
+            break;
     }
     
-    //  Already been downloaded/installed?
-    if(isChartsetAssignedToMe( g_systemName )){
-        if(sysID0.IsSameAs(g_systemName)){
-            if( statusID0.IsSameAs(_T("download")) && (installLocation0.Length() > 0) && (fileDownloadPath0.Length() > 0) ){
-                sret = _("Installed, Up-to-date.");
-                m_status = STAT_CURRENT;
-            }
-                
-        }
-        
-        if(sysID1.IsSameAs(g_systemName)){
-            if( statusID1.IsSameAs(_T("download")) && (installLocation1.Length() > 0) && (fileDownloadPath1.Length() > 0) ){
-                sret = _("Installed, Up-to-date.");
-                m_status = STAT_CURRENT;
-            }
-        }
-    }
-
-    // Up-to-date?
-    if(isChartsetAssignedToMe( g_systemName )){
-        if(sysID0.IsSameAs(g_systemName)){
-            if( statusID0.IsSameAs(_T("download")) && (installLocation0.Length() > 0) && (fileDownloadPath0.Length() > 0) ){
-                if(!lastRequestEdition0.IsSameAs(currentChartEdition)){
-                    sret = _("Installed, Update available.");
-                    m_status = STAT_STALE;
-                }
-            }
-        }
-        
-        if(sysID1.IsSameAs(g_systemName)){
-            if( statusID1.IsSameAs(_T("download")) && (installLocation1.Length() > 0) && (fileDownloadPath1.Length() > 0) ){
-                if(!lastRequestEdition1.IsSameAs(currentChartEdition)){
-                    sret = _("Installed, Update available.");
-                    m_status = STAT_STALE;
-                }
-            }
-        }
-    }
-        
-    // Expired?
-    if(isChartsetAssignedToMe( g_systemName )){
-        if(sysID0.IsSameAs(g_systemName)){
-            if( statusID0.IsSameAs(_T("expired")) ){
-                sret = _("Expired.");
-                m_status = STAT_EXPIRED_MINE;
-            }
-        }
-            
-        if(sysID1.IsSameAs(g_systemName)){
-            if( statusID1.IsSameAs(_T("expired")) ){
-                sret = _("Expired.");
-                m_status = STAT_EXPIRED_MINE;
-            }
-        }
-    }
-    else{
-            if( statusID0.IsSameAs(_T("expired")) ){
-                sret = _("Expired.");
-                m_status = STAT_EXPIRED;
-            }
-        
-            if( statusID1.IsSameAs(_T("expired")) ){
-                sret = _("Expired.");
-                m_status = STAT_EXPIRED;
-            }
-    }
-        
-
-
     return sret;
+    
+
 }
 
 wxBitmap& itemChart::GetChartThumbnail(int size)
@@ -397,70 +429,7 @@ void saveShopConfig()
 }
 
             
-bool doLogin()
-{
-    oeSENCLogin login(g_shopPanel);
-    login.ShowModal();
-    if(!login.GetReturnCode() == 0){
-        g_shopPanel->setStatusText( _("Invalid Login."));
-        wxYield();
-        return false;
-    }
-    
-    g_loginUser = login.m_UserNameCtl->GetValue();
-    wxString pass = login.m_PasswordCtl->GetValue();
-    
-    wxString url = userURL;
-    if(g_admin)
-        url = adminURL;
-
-    url +=_T("?fc=module&module=occharts&controller=api");
-
-    wxString loginParms;
-    loginParms += _T("taskId=login");
-    loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&password=") + pass;
-    
-    wxCurlHTTP post;
-    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
-    
-    // get the response code of the server
-    int iResponseCode;
-    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-    
-    TiXmlDocument * doc = new TiXmlDocument();
-    const char *rr = doc->Parse( post.GetResponseBody().c_str());
-    
-    wxString queryResult;
-    wxString loginKey;
-    
-    if( res )
-    {
-        TiXmlElement * root = doc->RootElement();
-        wxString rootName = wxString::FromUTF8( root->Value() );
-        TiXmlNode *child;
-        for ( child = root->FirstChild(); child != 0; child = child->NextSibling()){
-            wxString s = wxString::FromUTF8(child->Value());
-            
-            if(!strcmp(child->Value(), "result")){
-                TiXmlNode *childResult = child->FirstChild();
-                queryResult =  wxString::FromUTF8(childResult->Value());
-            }
-            else if(!strcmp(child->Value(), "key")){
-                TiXmlNode *childResult = child->FirstChild();
-                loginKey =  wxString::FromUTF8(childResult->Value());
-            }
-        }
-    }
-    
-    if(queryResult == _T("1"))
-        g_loginKey = loginKey;
-    
-    return true;
-}
-
-int checkResult(wxString &result)
+int checkResult(wxString &result, bool bShowErrorDialog = true)
 {
     if(g_shopPanel){
         g_shopPanel->getInProcessGuage()->Stop();
@@ -471,13 +440,22 @@ int checkResult(wxString &result)
         if(dresult == 1)
             return 0;
         else{
-            wxString msg = _("o-charts API error code: ");
-            wxString msg1;
-            msg1.Printf(_T("{%d}\n "), dresult);
-            msg += msg1;
-            msg += _("Check your configuration and try again.");
-            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
-            
+            if(bShowErrorDialog){
+                wxString msg = _("o-charts API error code: ");
+                wxString msg1;
+                msg1.Printf(_T("{%d}\n\n"), dresult);
+                msg += msg1;
+                switch(dresult){
+                    case 3:
+                        msg += _("Invalid user/email name or password.");
+                        break;
+                    default:    
+                        msg += _("Check your configuration and try again.");
+                        break;
+                }
+                
+                OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+            }
             return dresult;
         }
     }
@@ -504,6 +482,80 @@ int checkResponseCode(int iResponseCode)
     else
         return iResponseCode;
         
+}
+
+bool doLogin()
+{
+    oeSENCLogin login(g_shopPanel);
+    login.ShowModal();
+    if(!login.GetReturnCode() == 0){
+        g_shopPanel->setStatusText( _("Invalid Login."));
+        wxYield();
+        return false;
+    }
+    
+    g_loginUser = login.m_UserNameCtl->GetValue();
+    wxString pass = login.m_PasswordCtl->GetValue();
+    
+    wxString url = userURL;
+    if(g_admin)
+        url = adminURL;
+    
+    url +=_T("?fc=module&module=occharts&controller=api");
+    
+    wxString loginParms;
+    loginParms += _T("taskId=login");
+    loginParms += _T("&username=") + g_loginUser;
+    loginParms += _T("&password=") + pass;
+    
+    wxCurlHTTP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    int iResponseCode;
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+    if(iResponseCode == 200){
+        TiXmlDocument * doc = new TiXmlDocument();
+        const char *rr = doc->Parse( post.GetResponseBody().c_str());
+        
+        wxString queryResult;
+        wxString loginKey;
+        
+        if( res )
+        {
+            TiXmlElement * root = doc->RootElement();
+            if(!root){
+                wxString r = _T("50");
+                checkResult(r);                              // undetermined error??
+                return false;
+            }
+            
+            wxString rootName = wxString::FromUTF8( root->Value() );
+            TiXmlNode *child;
+            for ( child = root->FirstChild(); child != 0; child = child->NextSibling()){
+                wxString s = wxString::FromUTF8(child->Value());
+                
+                if(!strcmp(child->Value(), "result")){
+                    TiXmlNode *childResult = child->FirstChild();
+                    queryResult =  wxString::FromUTF8(childResult->Value());
+                }
+                else if(!strcmp(child->Value(), "key")){
+                    TiXmlNode *childResult = child->FirstChild();
+                    loginKey =  wxString::FromUTF8(childResult->Value());
+                }
+            }
+        }
+        
+        if(queryResult == _T("1"))
+            g_loginKey = loginKey;
+        
+        return (checkResult(queryResult) == 0);
+    }
+    else
+        return false;
+    
 }
 
 
@@ -675,7 +727,7 @@ wxString ProcessResponse(std::string body)
 
     
 
-int getChartList(){
+int getChartList( bool bShowErrorDialogs = true){
     
     // We query the server for the list of charts associated with our account
     wxString url = userURL;
@@ -707,7 +759,7 @@ int getChartList(){
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
         
-        return checkResult( result );
+        return checkResult( result, bShowErrorDialogs );
     }
     else
         return checkResponseCode(iResponseCode);
@@ -784,7 +836,11 @@ int doAssign(itemChart *chart, int slot)
         if(result.IsSameAs(_T("8"))){                    // Unknown system name
             return 0;
         }
-            
+
+        if(result.IsSameAs(_T("50"))){                  // General network error
+            return 0;                                   // OK
+        }
+        
         return checkResult(result);
     }
     else
@@ -852,6 +908,10 @@ int doUploadXFPR()
                 if(result.IsSameAs(_T("8"))){                    // Unknown system name
                     return 0;                                   // OK
                 }
+
+                if(result.IsSameAs(_T("50"))){                  // General network error
+                    return 0;                                   // OK
+                }
                 
                 int iret = checkResult(result);
                 
@@ -916,6 +976,10 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
+        
+        if(result.IsSameAs(_T("50"))){                  // General network error
+            return 0;                                   // OK
+        }
         
         return checkResult(result);
     }
@@ -1109,7 +1173,11 @@ int doUnzip(itemChart *chart, int slot)
     wxString chosenInstallDir;
     if(1/*!installDir.Length()*/){
         
-        wxDirDialog dirSelector( NULL, _("Choose chart install location."), g_PrivateDataDir, wxDD_DEFAULT_STYLE  );
+        wxString installLocn = g_PrivateDataDir;
+        if(installDir.Length())
+            installLocn = installDir;
+        
+        wxDirDialog dirSelector( NULL, _("Choose chart install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
         
         if(result == wxID_OK){
@@ -1244,6 +1312,12 @@ oeSencChartPanel::~oeSencChartPanel()
 
 void oeSencChartPanel::OnChartSelected( wxMouseEvent &event )
 {
+    // Do not allow de-selection by mouse if this chart is busy, i.e. being prepared, or being downloaded 
+    if(m_pChart){
+       if(g_statusOverride.Length())
+           return;
+    }
+           
     if(!m_bSelected){
         SetSelected( true );
         m_pContainer->SelectChart( this );
@@ -1372,7 +1446,9 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         
         tx = _("Status:");
         dc.DrawText( tx, text_x, yPos);
-        tx = m_pChart->getStatus();
+        tx = m_pChart->getStatusString();
+        if(g_statusOverride.Len())
+            tx = g_statusOverride;
         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
 
@@ -1644,8 +1720,11 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     this->SetSizer(boxSizerTop);
     
     wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Charts")), wxVERTICAL);
-    
     boxSizerTop->Add(staticBoxSizerChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+
+    m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
+    staticBoxSizerChartList->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
     
     wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
     staticBoxSizerChartList->Add(cPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -1654,14 +1733,13 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     
     m_scrollWinChartList = new wxScrolledWindow(cPanel, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBORDER_RAISED | wxVSCROLL | wxBG_STYLE_ERASE );
     m_scrollWinChartList->SetScrollRate(5, 5);
-    
     boxSizercPanel->Add(m_scrollWinChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
     boxSizerCharts = new wxBoxSizer(wxVERTICAL);
     m_scrollWinChartList->SetSizer(boxSizerCharts);
  
-    m_scrollWinChartList->SetMinSize(wxSize(-1,300));
-    staticBoxSizerChartList->SetMinSize(wxSize(-1,320));
+    m_scrollWinChartList->SetMinSize(wxSize(-1,15 * GetCharHeight()));
+    staticBoxSizerChartList->SetMinSize(wxSize(-1,16 * GetCharHeight()));
     
     wxStaticBoxSizer* staticBoxSizerAction = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("Actions")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerAction, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -1680,7 +1758,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     staticBoxSizerAction->Add(sLine1, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
     
-    m_staticTextStatus = new wxStaticText(this, wxID_ANY, _("Status: Chart List Update required."), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_staticTextStatus = new wxStaticText(this, wxID_ANY, _("Status: Chart List Refresh required."), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     staticBoxSizerAction->Add(m_staticTextStatus, 0, wxALL|wxALIGN_LEFT, WXC_FROM_DIP(5));
 
     m_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
@@ -1698,7 +1776,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     
         
         
-    wxGridSizer* flexGridSizer123ActionButtons = new wxGridSizer(1, 3, 0, 0);
+    wxGridSizer* flexGridSizer123ActionButtons = new wxGridSizer(1, 2, 0, 0);
     staticBoxSizerAction->Add(flexGridSizer123ActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
     m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
@@ -1709,13 +1787,13 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
      flexGridSizer123ActionButtons->Add(m_buttonCancelOp, 1, wxALL, WXC_FROM_DIP(5));
     
-    m_buttonUpdate = new wxButton(this, wxID_ANY, _("Update Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-    flexGridSizer123ActionButtons->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+//     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Update Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+//     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
+//     flexGridSizer123ActionButtons->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
 
    
     SetName(wxT("shopPanel"));
-    SetSize(500,600);
+    //SetSize(500,600);
     if (GetSizer()) {
         GetSizer()->Fit(this);
     }
@@ -1818,6 +1896,19 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     if(!g_systemName.Len()){
         doSystemNameWizard();
+        
+        if(!g_systemName.Len()){
+            wxString msg = _("Invalid System Name");
+            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+            
+            // Give one more chance...
+            doSystemNameWizard();
+            
+            if(!g_systemName.Len()){
+                wxString msg = _("Invalid System Name");
+                OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+            }
+        }
     }
     
     wxString sn = _("System Name:");
@@ -1854,6 +1945,8 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             }
             
             //  Download is apparently done.
+            g_statusOverride.Clear();
+            
             //We can check some data to be sure.
             
             // Does the download destination file exist, and have the correct length?
@@ -1902,18 +1995,17 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
             
             if(ret == wxID_YES){
+                g_statusOverride = _("Installing charts");
+                
                 int rv = doUnzip(chart, m_activeSlot);
                 
+                g_statusOverride.Clear();
                 setStatusText( _("Status: Ready"));
                 
                 if(0 == rv)
                     OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
                 
-                m_prepareChartSelectedID = chart->chartID;           // save a copy of the selected chart
-                m_prepareChartSelectedOrder = chart->orderRef;
-                m_prepareChartSelectedQty = chart->quantityId;
                 UpdateChartList();
-                SelectChartByID(m_prepareChartSelectedID, m_prepareChartSelectedOrder, m_prepareChartSelectedQty);
                 
             }
             
@@ -2071,14 +2163,16 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     int assignResult;
     if(bNeedAssign){
         assignResult = doAssign(chart, slot);
-        if(assignResult != 0)
+        if(assignResult != 0){
+            m_buttonInstall->Enable();
             return;
+        }
     }
     
     if(1){
-        m_prepareChartSelectedID = chart->chartID;           // save a copy of the selected chart
-        m_prepareChartSelectedOrder = chart->orderRef;
-        m_prepareChartSelectedQty = chart->quantityId;
+        m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
+        m_ChartSelectedOrder = chart->orderRef;
+        m_ChartSelectedQty = chart->quantityId;
         
         m_activeSlot = slot;
         
@@ -2161,9 +2255,9 @@ void shopPanel::OnButtonDownload( wxCommandEvent& event )
         return;
    
     itemChart *chart = m_ChartSelected->m_pChart;
-    m_prepareChartSelectedID = chart->chartID;           // save a copy of the selected chart
-    m_prepareChartSelectedOrder = chart->orderRef;
-    m_prepareChartSelectedQty = chart->quantityId;
+    m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
+    m_ChartSelectedOrder = chart->orderRef;
+    m_ChartSelectedQty = chart->quantityId;
     
     // What slot?
     m_activeSlot = -1;
@@ -2250,6 +2344,9 @@ int shopPanel::doDownloadGui()
     m_buttonCancelOp->Show();
     GetButtonUpdate()->Disable();
     
+    g_statusOverride = _("Downloading...");
+    UpdateChartList();
+    
     wxYield();
     
     m_binstallChain = true;
@@ -2277,6 +2374,12 @@ void shopPanel::OnButtonCancelOp( wxCommandEvent& event )
     
     setStatusText( _("Status: OK"));
     m_buttonCancelOp->Hide();
+    
+    g_statusOverride.Clear();
+    m_buttonInstall->Enable();
+    
+    UpdateChartList();
+    
 }
 
 void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
@@ -2293,8 +2396,10 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
     //  Check the status every n seconds
     
     if((m_prepareTimerCount % 10) == 0){
-        int err_code = getChartList();
+        int err_code = getChartList(false);     // Do not show error dialogs
         
+        /*
+         * Safe to ignore errors, since this is only a status loop that will time out eventually
         if(err_code != 0){                  // Some error
             wxString ec;
             ec.Printf(_T(" { %d }"), err_code);     
@@ -2306,6 +2411,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
             
             return;
         }
+        */
         
         if(!m_ChartSelected) {               // No chart selected
             setStatusText( _("Status: OK"));
@@ -2328,7 +2434,6 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         
         if(1/*bDownloadReady*/){
             UpdateChartList();
-            SelectChartByID(m_prepareChartSelectedID, m_prepareChartSelectedOrder, m_prepareChartSelectedQty);
             wxYield();
         }
         
@@ -2352,6 +2457,8 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         wxString msg = _("Your chart preparation is not complete.");
         msg += _T("\n");
         msg += _("You may continue to wait, or return to this screen later to complete the download.");
+        msg += _T("\n");
+        msg += _("You will receive an email message when preparation for download is complete");
         msg += _T("\n\n");
         msg += _("Continue waiting?");
         msg += _T("\n\n");
@@ -2383,6 +2490,16 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
 
 void shopPanel::UpdateChartList( )
 {
+    // Capture the state of any selected chart
+    if(m_ChartSelected){
+        itemChart *chart = m_ChartSelected->m_pChart;
+        if(chart){
+            m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
+            m_ChartSelectedOrder = chart->orderRef;
+            m_ChartSelectedQty = chart->quantityId;
+        }
+    }
+    
     m_scrollWinChartList->ClearBackground();
     
     // Clear any existing panels
@@ -2393,12 +2510,9 @@ void shopPanel::UpdateChartList( )
     m_ChartSelected = NULL;
 
     
-#if 1    
     // Add new panels
     for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
-        g_ChartArray.Item(i)->getStatus();
-        int stat = g_ChartArray.Item(i)->getChartStatus();
-        if( !g_chartListUpdatedOK ||(stat == STAT_AVAILABLE) || (stat == STAT_CURRENT) || (stat == STAT_STALE) || (stat == STAT_EXPIRED_MINE)){
+        if(!g_chartListUpdatedOK || !g_ChartArray.Item(i)->isChartsetDontShow()){
             oeSencChartPanel *chartPanel = new oeSencChartPanel( m_scrollWinChartList, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
             chartPanel->SetSelected(false);
         
@@ -2406,8 +2520,10 @@ void shopPanel::UpdateChartList( )
 //            boxSizerCharts->Layout();
             m_panelArray.Add( chartPanel );
         } 
-    }       
-#endif
+    }
+    
+    SelectChartByID(m_ChartSelectedID, m_ChartSelectedOrder, m_ChartSelectedQty);
+    
     m_scrollWinChartList->ClearBackground();
     m_scrollWinChartList->GetSizer()->Layout();
 
@@ -2426,41 +2542,22 @@ void shopPanel::UpdateChartList( )
 void shopPanel::UpdateActionControls()
 {
     //  Turn off all buttons.
-//     m_buttonAssign->Hide();
-//     m_buttonDownload->Hide();
     m_buttonInstall->Hide();
     
-    if(!m_ChartSelected)                // No chart selected
+    
+    if(!m_ChartSelected){                // No chart selected
+        m_buttonInstall->Enable();
         return;
+    }
+    
+    if(!g_statusOverride.Length()){
+        m_buttonInstall->Enable();
+    }
     
     itemChart *chart = m_ChartSelected->m_pChart;
 
-#if 0    
-    // "Assign" button
-    if(!chart->statusID0.IsSameAs(_T("expired")) && !chart->statusID1.IsSameAs(_T("expired")) ){   // Not expired
-        if(chart->statusID0.IsSameAs(_T("unassigned")) || chart->statusID1.IsSameAs(_T("unassigned")) ){   // available for assignment
-            m_buttonAssign->Show();
-            m_buttonAssign->Enable();
-        }
-    }
-    //  Check if I am already assigned to this chart
-    if(chart->statusID0.IsSameAs(_T("requestable"))){
-        if(chart->sysID0.IsSameAs(g_systemName))
-            m_buttonAssign->Disable();
-    }
-    if(chart->statusID1.IsSameAs(_T("requestable"))){
-        if(chart->sysID1.IsSameAs(g_systemName))
-            m_buttonAssign->Disable();
-    }
-    
-    //"Download" button
-    //m_buttonDownload->Show();
-    
-    //"Install" button
-    m_buttonInstall->Show();
-#endif
 
-    if(chart->getChartStatus() == STAT_AVAILABLE){
+    if(chart->getChartStatus() == STAT_PURCHASED){
         m_buttonInstall->SetLabel(_("Install Selected Chart"));
         m_buttonInstall->Show();
     }
@@ -2471,9 +2568,16 @@ void shopPanel::UpdateActionControls()
     else if(chart->getChartStatus() == STAT_STALE){
         m_buttonInstall->SetLabel(_("Update Selected Chart"));
         m_buttonInstall->Show();
-    } 
-        
-
+    }
+    else if(chart->getChartStatus() == STAT_READY_DOWNLOAD){
+        m_buttonInstall->SetLabel(_("Download Selected Chart"));
+        m_buttonInstall->Show();       
+    }
+    else if(chart->getChartStatus() == STAT_REQUESTABLE){
+        m_buttonInstall->SetLabel(_("Download Selected Chart"));
+        m_buttonInstall->Show();
+    }
+    
 }
 
     
@@ -2540,6 +2644,26 @@ wxString shopPanel::doGetNewSystemName( )
     wxString sName;
     if(ret == 0){               // OK
         sName = dlg.GetNewName();
+        
+        // Check system name rules...
+        const char *s = sName.c_str();
+        if( (strlen(s) < 3) || (strlen(s) > 15))
+            return wxEmptyString;
+        
+        char *t = (char *)s;
+        for(unsigned int i = 0; i < strlen(s); i++, t++){
+            bool bok = false;
+            if( ((*t >= 'A') && (*t <= 'Z')) ||
+                ((*t >= 'a') && (*t <= 'z')) ||
+                ((*t >= '0') && (*t <= '9')) ){
+                
+                bok = true;
+            }
+            else{
+                sName.Clear();
+                break;
+            }
+        }
     }
     
     
@@ -3034,7 +3158,7 @@ void oeSENCLogin::CreateControls(  )
     
     itemStaticBoxSizer4->Add(flexGridSizerActionStatus, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
-    wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _("User Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _("email address:"), wxDefaultPosition, wxDefaultSize, 0 );
     flexGridSizerActionStatus->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
     
     m_UserNameCtl = new wxTextCtrl( itemDialog1, ID_GETIP_IP, _T(""), wxDefaultPosition, wxSize( ref_len * 10, -1 ), 0 );

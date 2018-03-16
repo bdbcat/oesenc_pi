@@ -5240,7 +5240,7 @@ void androidHideBusyIcon()
 void oesenc_pi::OnSetupOptions( void )
 {
 #if 0
-    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oesenc Charts") );
+    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
     if( ! m_pOptionsPage )
     {
         wxLogMessage( _T("Error: oesenc_pi::OnSetupOptions AddOptionsPage failed!") );
@@ -5255,7 +5255,7 @@ void oesenc_pi::OnSetupOptions( void )
     sizer->Add( m_oesencpanel, 1, wxALL | wxEXPAND );
     m_oesencpanel->FitInside();
 #else
-    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oesenc Charts") );
+    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
     if( ! m_pOptionsPage )
     {
         wxLogMessage( _T("Error: oesenc_pi::OnSetupOptions AddOptionsPage failed!") );
@@ -5287,13 +5287,13 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     wxBoxSizer* bSizerBtns = new wxBoxSizer( wxVERTICAL );
     mainSizer->Add( bSizerBtns, 0, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, border_size );
     
-    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oesenc chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oeSENC chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     //m_bManageCharts->SetToolTip( _("Add a new chart catalog.") );
     bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
     m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Visit o-charts.org Website"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_bVisitOcharts->SetToolTip( _("Here you may order new oesenc chartsets.") );
+    m_bVisitOcharts->SetToolTip( _("Here you may order new oeSENC chartsets.") );
     bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
