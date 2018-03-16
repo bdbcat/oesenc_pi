@@ -76,7 +76,49 @@ wxString g_statusOverride;
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
 
-// Private class implemetations
+// Private class implementations
+
+class wxCurlHTTPNoZIP : public wxCurlHTTP
+{
+public:
+    wxCurlHTTPNoZIP(const wxString& szURL = wxEmptyString,
+               const wxString& szUserName = wxEmptyString,
+               const wxString& szPassword = wxEmptyString,
+               wxEvtHandler* pEvtHandler = NULL, int id = wxID_ANY,
+               long flags = wxCURL_DEFAULT_FLAGS);
+    
+   ~wxCurlHTTPNoZIP();
+    
+protected:
+    void SetCurlHandleToDefaults(const wxString& relativeURL);
+};
+
+wxCurlHTTPNoZIP::wxCurlHTTPNoZIP(const wxString& szURL /*= wxEmptyString*/, 
+                       const wxString& szUserName /*= wxEmptyString*/, 
+                       const wxString& szPassword /*= wxEmptyString*/, 
+                       wxEvtHandler* pEvtHandler /*= NULL*/, 
+                       int id /*= wxID_ANY*/,
+                       long flags /*= wxCURL_DEFAULT_FLAGS*/)
+: wxCurlHTTP(szURL, szUserName, szPassword, pEvtHandler, id, flags)
+
+{
+}
+
+wxCurlHTTPNoZIP::~wxCurlHTTPNoZIP()
+{
+    ResetPostData();
+}
+
+void wxCurlHTTPNoZIP::SetCurlHandleToDefaults(const wxString& relativeURL)
+{
+    wxCurlBase::SetCurlHandleToDefaults(relativeURL);
+    
+    if(m_bUseCookies)
+    {
+        SetStringOpt(CURLOPT_COOKIEJAR, m_szCookieFile);
+    }
+}
+
 
 // itemChart
 //------------------------------------------------------------------------------------------
@@ -443,7 +485,7 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
             if(bShowErrorDialog){
                 wxString msg = _("o-charts API error code: ");
                 wxString msg1;
-                msg1.Printf(_T("{%d}\n\n"), dresult);
+                msg1.Printf(_T("{%ld}\n\n"), dresult);
                 msg += msg1;
                 switch(dresult){
                     case 3:
@@ -741,7 +783,7 @@ int getChartList( bool bShowErrorDialogs = true){
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
     
-    wxCurlHTTP post;
+    wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     //post.SetFlags(post.GetFlags() | wxCURL_SEND_BEGINEND_EVENTS | wxCURL_SEND_PROGRESS_EVENTS);
     //post.SetEvtHandler(g_CurlEventHandler);
