@@ -72,6 +72,7 @@ wxCurlDownloadThread *g_curlDownloadThread;
 wxFFileOutputStream *downloadOutStream;
 bool g_chartListUpdatedOK;
 wxString g_statusOverride;
+wxString g_lastInstallDir;
 
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
@@ -399,9 +400,10 @@ void loadShopConfig()
         pConf->Read( _T("systemName"), &g_systemName);
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
+        pConf->Read( _T("lastInstllDir"), &g_lastInstallDir);
         
         pConf->Read( _T("ADMIN"), &g_admin);
-        
+                
         pConf->SetPath ( _T ( "/PlugIns/oesenc/charts" ) );
         wxString strk;
         wxString kval;
@@ -455,6 +457,7 @@ void saveShopConfig()
       pConf->Write( _T("systemName"), g_systemName);
       pConf->Write( _T("loginUser"), g_loginUser);
       pConf->Write( _T("loginKey"), g_loginKey);
+      pConf->Write( _T("lastInstllDir"), g_lastInstallDir);
       
       pConf->DeleteGroup( _T("/PlugIns/oesenc/charts") );
       pConf->SetPath( _T("/PlugIns/oesenc/charts") );
@@ -1197,6 +1200,8 @@ int doUnzip(itemChart *chart, int slot)
         wxString installLocn = g_PrivateDataDir;
         if(installDir.Length())
             installLocn = installDir;
+        else if(g_lastInstallDir.Length())
+            installLocn = g_lastInstallDir;
         
         wxDirDialog dirSelector( NULL, _("Choose chart install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
@@ -1260,6 +1265,10 @@ int doUnzip(itemChart *chart, int slot)
     else if(slot == 1){
         chart->installLocation1 = chosenInstallDir;
     }
+    
+    g_lastInstallDir = chosenInstallDir;
+    
+    ForceChartDBUpdate();
     
     saveShopConfig();
     
