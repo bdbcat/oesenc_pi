@@ -2314,7 +2314,7 @@ int shopPanel::doPrepareGUI()
     
     setStatusText( _("Preparing your charts..."));
     
-    m_prepareTimerCount = 0;
+    m_prepareTimerCount = 8;            // First status query happens in 2 seconds
     m_prepareProgress = 0;
     m_prepareTimeout = 60;
     
@@ -2489,7 +2489,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         if(ret == wxID_YES){
             m_prepareTimerCount = 0;
             m_prepareProgress = 0;
-            m_prepareTimeout = 15;
+            m_prepareTimeout = 60;
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
             
