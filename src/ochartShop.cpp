@@ -1754,7 +1754,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-    staticBoxSizerChartList->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+    staticBoxSizerChartList->Add(m_buttonUpdate, 1, wxBOTTOM | wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
     
     wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
     staticBoxSizerChartList->Add(cPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -1774,54 +1774,39 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     wxStaticBoxSizer* staticBoxSizerAction = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("Actions")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerAction, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    wxBoxSizer *boxSizerAction0 = new wxBoxSizer(wxHORIZONTAL);
-    staticBoxSizerAction->Add(boxSizerAction0, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_staticLine121 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
+    staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
-    wxString sn = _("System Name:");
-    sn += _T(" ");
-    sn += g_systemName;
+    ///Buttons
+    wxGridSizer* gridSizerActionButtons = new wxGridSizer(1, 2, 0, 0);
+    staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
     
-    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    boxSizerAction0->Add(m_staticTextSystemName, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    gridSizerActionButtons->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
+    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
+    gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+
     wxStaticLine* sLine1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
     staticBoxSizerAction->Add(sLine1, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-
     
+    
+    ///Status
     m_staticTextStatus = new wxStaticText(this, wxID_ANY, _("Status: Chart List Refresh required."), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     staticBoxSizerAction->Add(m_staticTextStatus, 0, wxALL|wxALIGN_LEFT, WXC_FROM_DIP(5));
 
     m_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
     staticBoxSizerAction->Add(m_ipGauge, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, WXC_FROM_DIP(5));
-    
-    wxFlexGridSizer* flexGridSizerActionStatus = new wxFlexGridSizer(0, 2, 0, 0);
-    flexGridSizerActionStatus->SetFlexibleDirection( wxBOTH );
-    flexGridSizerActionStatus->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-    flexGridSizerActionStatus->AddGrowableCol(0);
-    
-    staticBoxSizerAction->Add(flexGridSizerActionStatus, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    
-    m_staticLine121 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
-    staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    
-        
-        
-    wxGridSizer* flexGridSizer123ActionButtons = new wxGridSizer(1, 2, 0, 0);
-    staticBoxSizerAction->Add(flexGridSizer123ActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    flexGridSizer123ActionButtons->Add(m_buttonInstall, 1, wxALL, WXC_FROM_DIP(5));
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
     
-   
-    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
-     flexGridSizer123ActionButtons->Add(m_buttonCancelOp, 1, wxALL, WXC_FROM_DIP(5));
+    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    staticBoxSizerAction->Add(m_staticTextSystemName, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
-//     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Update Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-//     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-//     flexGridSizer123ActionButtons->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
-
-   
+    
     SetName(wxT("shopPanel"));
     //SetSize(500,600);
     if (GetSizer()) {
