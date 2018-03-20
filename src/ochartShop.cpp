@@ -34,7 +34,7 @@
 #include <wx/fileconf.h>
 #include <wx/uri.h>
 #include "wx/tokenzr.h"
-
+#include <wx/dir.h>
 #include "ochartShop.h"
 #include "ocpn_plugin.h"
 #include "wxcurl/wx/curl/http.h"
@@ -79,6 +79,20 @@ wxString g_lastInstallDir;
 
 // Private class implementations
 
+size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcharbuf)
+{
+    size_t iRealSize = size * nmemb;
+    wxCharBuffer* pStr = (wxCharBuffer*) pcharbuf;
+    
+    if(pStr)
+    {
+        wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8);
+        *pStr = str.mb_str();
+    }
+    
+    return iRealSize;
+}
+
 class wxCurlHTTPNoZIP : public wxCurlHTTP
 {
 public:
@@ -90,8 +104,11 @@ public:
     
    ~wxCurlHTTPNoZIP();
     
+   bool Post(wxInputStream& buffer, const wxString& szRemoteFile /*= wxEmptyString*/);
+   bool Post(const char* buffer, size_t size, const wxString& szRemoteFile /*= wxEmptyString*/);
 protected:
     void SetCurlHandleToDefaults(const wxString& relativeURL);
+    
 };
 
 wxCurlHTTPNoZIP::wxCurlHTTPNoZIP(const wxString& szURL /*= wxEmptyString*/, 
@@ -122,6 +139,45 @@ void wxCurlHTTPNoZIP::SetCurlHandleToDefaults(const wxString& relativeURL)
     }
 }
 
+bool wxCurlHTTPNoZIP::Post(const char* buffer, size_t size, const wxString& szRemoteFile /*= wxEmptyString*/)
+{
+    wxMemoryInputStream inStream(buffer, size);
+    
+    return Post(inStream, szRemoteFile);
+}
+
+bool wxCurlHTTPNoZIP::Post(wxInputStream& buffer, const wxString& szRemoteFile /*= wxEmptyString*/)
+{
+    curl_off_t iSize = 0;
+    
+    if(m_pCURL && buffer.IsOk())
+    {
+        SetCurlHandleToDefaults(szRemoteFile);
+        
+        SetHeaders();
+        iSize = buffer.GetSize();
+        
+        if(iSize == (~(ssize_t)0))      // wxCurlHTTP does not know how to upload unknown length streams.
+            return false;
+        
+        SetOpt(CURLOPT_POST, TRUE);
+        SetOpt(CURLOPT_POSTFIELDSIZE_LARGE, iSize);
+        SetStreamReadFunction(buffer);
+        
+        //  Use a private data write trap function to handle UTF8 content
+        //SetStringWriteFunction(m_szResponseBody);
+        SetOpt(CURLOPT_WRITEFUNCTION, wxcurl_string_write_UTF8);         // private function
+        SetOpt(CURLOPT_WRITEDATA, (void*)&m_szResponseBody);
+        
+        if(Perform())
+        {
+            ResetHeaders();
+            return IsResponseOk();
+        }
+    }
+    
+    return false;
+}
 
 // itemChart
 //------------------------------------------------------------------------------------------
@@ -137,21 +193,21 @@ itemChart::itemChart( wxString &order_ref, wxString &chartid, wxString &quantity
 
 
 
-void itemChart::setDownloadPath(int slot, wxString path) {
-    if (slot == 0)
-        fileDownloadPath0 = path;
-    else if (slot == 1)
-        fileDownloadPath1 = path;
-}
+// void itemChart::setDownloadPath(int slot, wxString path) {
+//     if (slot == 0)
+//         fileDownloadPath0 = path;
+//     else if (slot == 1)
+//         fileDownloadPath1 = path;
+// }
 
-wxString itemChart::getDownloadPath(int slot) {
-    if (slot == 0)
-        return fileDownloadPath0;
-    else if (slot == 1)
-        return fileDownloadPath1;
-    else
-        return _T("");
-}
+// wxString itemChart::getDownloadPath(int slot) {
+//     if (slot == 0)
+//         return fileDownloadPath0;
+//     else if (slot == 1)
+//         return fileDownloadPath1;
+//     else
+//         return _T("");
+// }
 
 bool itemChart::isChartsetAssignedToMe(wxString systemName){
     
@@ -244,17 +300,17 @@ int itemChart::getChartStatus()
         m_status = STAT_READY_DOWNLOAD;
         
         if(sysID0.IsSameAs(g_systemName)){
-            if(  (installLocation0.Length() > 0) && (fileDownloadPath0.Length() > 0) ){
+            if(  (installLocation0.Length() > 0) && (installedFileDownloadPath0.Length() > 0) ){
                 m_status = STAT_CURRENT;
-                if(!lastRequestEdition0.IsSameAs(currentChartEdition)){
+                if(!installedEdition0.IsSameAs(currentChartEdition)){
                     m_status = STAT_STALE;
                 }
             }
         }
         else if(sysID1.IsSameAs(g_systemName)){
-            if(  (installLocation1.Length() > 0) && (fileDownloadPath1.Length() > 0) ){
+            if(  (installLocation1.Length() > 0) && (installedFileDownloadPath1.Length() > 0) ){
                 m_status = STAT_CURRENT;
-                if(!lastRequestEdition1.IsSameAs(currentChartEdition)){
+                if(!installedEdition1.IsSameAs(currentChartEdition)){
                     m_status = STAT_STALE;
                 }
                 
@@ -435,12 +491,16 @@ void loadShopConfig()
             wxString dl0 = tkz.GetNextToken();
             wxString install1 = tkz.GetNextToken();
             wxString dl1 = tkz.GetNextToken();
+            wxString ied0 = tkz.GetNextToken();
+            wxString ied1 = tkz.GetNextToken();
             
             pItem->chartName = name;
             if(pItem->installLocation0.IsEmpty())   pItem->installLocation0 = install0;
-            if(pItem->fileDownloadPath0.IsEmpty())  pItem->fileDownloadPath0 = dl0;
+            if(pItem->installedFileDownloadPath0.IsEmpty())  pItem->installedFileDownloadPath0 = dl0;
             if(pItem->installLocation1.IsEmpty())   pItem->installLocation1 = install1;
-            if(pItem->fileDownloadPath1.IsEmpty())  pItem->fileDownloadPath1 = dl1;
+            if(pItem->installedFileDownloadPath1.IsEmpty())  pItem->installedFileDownloadPath1 = dl1;
+            pItem->installedEdition0 = ied0;
+            pItem->installedEdition1 = ied1;
             
             bContk = pConf->GetNextEntry( strk, dummyval );
         }
@@ -467,9 +527,11 @@ void saveShopConfig()
           wxString key = chart->chartID + _T("-") + chart->quantityId + _T("-") + chart->orderRef;
           wxString val = chart->chartName + _T(";");
           val += chart->installLocation0 + _T(";");
-          val += chart->fileDownloadPath0 + _T(";");
+          val += chart->installedFileDownloadPath0 + _T(";");
           val += chart->installLocation1 + _T(";");
-          val += chart->fileDownloadPath1 + _T(";");
+          val += chart->installedFileDownloadPath1 + _T(";");
+          val += chart->installedEdition0 + _T(";");
+          val += chart->installedEdition1 + _T(";");
           pConf->Write( key, val );
       }
    }
@@ -801,6 +863,11 @@ int getChartList( bool bShowErrorDialogs = true){
     std::string b = post.GetErrorString();
     std::string c = post.GetResponseBody();
     
+    printf("%s", post.GetResponseBody().c_str());
+    
+    wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
+    
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
         
@@ -1054,11 +1121,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     wxFileName fn(serverFilename);
     
     wxString downloadFile = g_PrivateDataDir + fn.GetFullName();
-    
-    if(slot == 0)                                       // persist the downloaded name
-        chart->fileDownloadPath0 = downloadFile;
-    else if(slot == 1)
-        chart->fileDownloadPath1 = downloadFile;
+    chart->downloadingFile = downloadFile;
     
     downloadOutStream = new wxFFileOutputStream(downloadFile);
     
@@ -1259,11 +1322,68 @@ int doUnzip(itemChart *chart, int slot)
         AddChartDirectory( targetAddDir );
     }
     
+    //  Is this an update?
+    wxString lastInstalledZip;
+    bool b_update = false;
+    
+    if(slot == 0){
+        if(!chart->installedEdition0.IsSameAs(chart->lastRequestEdition0)){
+            b_update = true;
+            lastInstalledZip = chart->installedFileDownloadPath0;
+        }
+    }
+    else if(slot == 1){
+        if(!chart->installedEdition1.IsSameAs(chart->lastRequestEdition1)){
+            b_update = true;
+            lastInstalledZip = chart->installedFileDownloadPath1;
+        }
+    }
+    
+    if(b_update){
+        
+        // It would be nice here to remove the now obsolete chart dir from the OCPN core set.
+        //  Not possible with current API, 
+        //  So, best we can do is to rename it, so that it will disappear from the scanning.
+ 
+        wxString installParent;
+        if(slot == 0)
+            installParent = chart->installLocation0;
+        else if(slot == 1)
+            installParent = chart->installLocation1;
+ 
+        if(installParent.Len() && lastInstalledZip.Len()){
+            wxFileName fn(lastInstalledZip);
+            wxString lastInstall = installParent + wxFileName::GetPathSeparator() + fn.GetName();
+                
+            if(!lastInstall.IsSameAs(targetAddDir)){
+                if(::wxDirExists(lastInstall)){
+                    
+                    //const wxString obsDir = lastInstall + _T(".OBSOLETE");
+                    //bool success = ::wxRenameFile(lastInstall, obsDir);
+                    
+                    // Delete all the files in this directory
+                    wxArrayString files;
+                    wxDir::GetAllFiles(lastInstall, &files);
+                    for(unsigned int i = 0 ; i < files.GetCount() ; i++){
+                        ::wxRemoveFile(files[i]);
+                    }
+                    ::wxRmdir(lastInstall);
+                    
+                }
+            }
+        }
+    }
+    
+    // Update the config persistence
     if(slot == 0){
         chart->installLocation0 = chosenInstallDir;
+        chart->installedEdition0 = chart->lastRequestEdition0;
+        chart->installedFileDownloadPath0 = chart->fileDownloadPath0;
     }
     else if(slot == 1){
         chart->installLocation1 = chosenInstallDir;
+        chart->installedEdition1 = chart->lastRequestEdition1;
+        chart->installedFileDownloadPath1 = chart->fileDownloadPath1;
     }
     
     g_lastInstallDir = chosenInstallDir;
@@ -1946,7 +2066,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
     if(!chart)
         return;
     
-    // Might be chained through from download end event
+    // Chained through from download end event
         if(m_binstallChain){
             
             
@@ -1964,19 +2084,9 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             
             //We can check some data to be sure.
             
-            // Does the download destination file exist, and have the correct length?
-            wxString dlFile;
-            wxString dlSize;
-            if(m_activeSlot == 0){
-                dlFile = chart->fileDownloadPath0;
-                dlSize = chart->filedownloadSize0;
-            }
-            else if(m_activeSlot == 1){
-                dlFile = chart->fileDownloadPath1;
-                dlSize = chart->filedownloadSize1;
-            }
+            // Does the download destination file exist?
             
-            if(!::wxFileExists( dlFile )){
+            if(!::wxFileExists( chart->downloadingFile )){
                 OCPNMessageBox_PlugIn(NULL, _("Chart download error, missing file."), _("oeSENC_PI Message"), wxOK);
                 m_buttonInstall->Enable();
                 return;
@@ -2001,8 +2111,17 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
              }
              */      
             // So far, so good.
-            // Download exists, and is the correct length.
             
+            // Download exists
+
+            // Update the records
+            if(m_activeSlot == 0){
+                chart->fileDownloadPath0 = chart->downloadingFile;
+            }
+            else if(m_activeSlot == 1){
+                chart->fileDownloadPath1 = chart->downloadingFile;
+            }
+                
             wxString msg = _("Chart download complete.");
             msg +=_T("\n\n");
             msg += _("Proceed to install?");
@@ -2037,91 +2156,6 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     itemChart *chart = m_ChartSelected->m_pChart;
     if(!chart)
         return;
-#if 0    
-    // Might be chained through from download end event
-    if(m_binstallChain){
-        
-        if(!m_startedDownload){                 // catch unexpected end event
-            return;                             // ignore, and let the download proceed.
-        }
-        
-        m_binstallChain = false;
-        
-        if(m_bAbortingDownload){
-            m_bAbortingDownload = false;
-            OCPNMessageBox_PlugIn(NULL, _("Chart download cancelled."), _("oeSENC_PI Message"), wxOK);
-            m_buttonInstall->Enable();
-            return;
-        }
-        
-        //  Download is apparently done.
-        //We can check some data to be sure.
-        
-        // Does the download destination file exist, and have the correct length?
-        wxString dlFile;
-        wxString dlSize;
-        if(m_activeSlot == 0){
-            dlFile = chart->fileDownloadPath0;
-            dlSize = chart->filedownloadSize0;
-        }
-        else if(m_activeSlot == 1){
-            dlFile = chart->fileDownloadPath1;
-            dlSize = chart->filedownloadSize1;
-        }
-        
-        if(!::wxFileExists( dlFile )){
-            OCPNMessageBox_PlugIn(NULL, _("Chart download error, missing file."), _("oeSENC_PI Message"), wxOK);
-            m_buttonInstall->Enable();
-            return;
-        }
-
-/*        
-        long dlFileLength = 0;
-        
-        wxFile tFile(dlFile);
-        if(tFile.IsOpened())
-            dlFileLength = tFile.Length();
-        else
-            return;
-        
-        long testLength;
-        if(!dlSize.ToLong(&testLength))
-            return;
-        
-        if(testLength != dlFileLength){
-            OCPNMessageBox_PlugIn(NULL, _("Chart download error, wrong file length."), _("oeSENC_PI Message"), wxOK);
-            return;
-        }
-  */      
-        // So far, so good.
-        // Download exists, and is the correct length.
-        
-        wxString msg = _("Chart download complete.");
-        msg +=_T("\n\n");
-        msg += _("Proceed to install?");
-        msg += _T("\n\n");
-        int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
-        
-        if(ret == wxID_YES){
-            int rv = doUnzip(chart, m_activeSlot);
-            
-            setStatusText( _("Status: Ready"));
-            
-            if(0 == rv)
-                OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
-            
-            m_prepareChartSelectedID = chart->chartID;           // save a copy of the selected chart
-            m_prepareChartSelectedOrder = chart->orderRef;
-            m_prepareChartSelectedQty = chart->quantityId;
-            UpdateChartList();
-            SelectChartByID(m_prepareChartSelectedID, m_prepareChartSelectedOrder, m_prepareChartSelectedQty);
-            
-        }
-        
-        m_buttonInstall->Enable();
-        return;
-    }
-#endif
 
     // Is chart already in "download" state for me?
     int dlSlot = -1;
@@ -3042,10 +3076,7 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
         if(g_shopPanel->GetSelectedChart()){
             itemChart *chart = g_shopPanel->GetSelectedChart()->m_pChart;
             if(chart){
-                if(g_shopPanel->m_activeSlot == 0)
-                    chart->fileDownloadPath0.Clear();
-                else if(g_shopPanel->m_activeSlot == 1)
-                    chart->fileDownloadPath1.Clear();
+                chart->downloadingFile.Clear();
             }
         }
     }
