@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-14 22:21-0400\n"
-"PO-Revision-Date: 2018-03-16 19:10-0400\n"
+"PO-Revision-Date: 2018-03-20 18:24-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Spanish\n"
 "Language: es_ES\n"
@@ -228,11 +228,11 @@ msgstr "Válido hasta"
 
 #: src/oesenc_pi.cpp:5243 src/oesenc_pi.cpp:5258
 msgid "oeSENC Charts"
-msgstr ""
+msgstr "Cartas oeSENC"
 
 #: src/oesenc_pi.cpp:5290
 msgid "Add/Update oeSENC chartsets"
-msgstr ""
+msgstr "Añadir/actualizar cartas oeSENC"
 
 #: src/oesenc_pi.cpp:5295
 msgid "Visit o-charts.org Website"
@@ -240,7 +240,7 @@ msgstr "Visita el sitio web o-charts.org"
 
 #: src/oesenc_pi.cpp:5296
 msgid "Here you may order new oeSENC chartsets."
-msgstr ""
+msgstr "Aquí puedes licenciar nuevas cartas oeSENC."
 
 #: src/oesenc_pi.h:300
 msgid "OpenCPN SENC UserKey Required"
@@ -257,7 +257,7 @@ msgstr "Texto JuegosCarta"
 
 #: src/ochartShop.cpp:236
 msgid "Available."
-msgstr ""
+msgstr "Disponible."
 
 #: src/ochartShop.cpp:240
 msgid "Installed, Up-to-date."
@@ -273,11 +273,11 @@ msgstr "Caducada."
 
 #: src/ochartShop.cpp:253
 msgid "Preparing your chartset."
-msgstr ""
+msgstr "Preparando sus cartas."
 
 #: src/ochartShop.cpp:257
 msgid "Ready for download."
-msgstr ""
+msgstr "Listo para descargar."
 
 #: src/ochartShop.cpp:261
 msgid "Please update Chart List."
@@ -285,7 +285,7 @@ msgstr "Por favor actualice el listado de cartas."
 
 #: src/ochartShop.cpp:265
 msgid "Ready for Download Request."
-msgstr ""
+msgstr "Listo para solicitud de descarga."
 
 #: src/ochartShop.cpp:444
 msgid "o-charts API error code: "
@@ -293,7 +293,7 @@ msgstr "Código de error o-charts API: "
 
 #: src/ochartShop.cpp:450
 msgid "Invalid user/email name or password."
-msgstr ""
+msgstr "Nombre de usuario/correo o contraseña inválida."
 
 #: src/ochartShop.cpp:453
 msgid "Check your configuration and try again."
@@ -401,7 +401,7 @@ msgstr "Mis cartas"
 
 #: src/ochartShop.cpp:1725
 msgid "Refresh Chart List"
-msgstr ""
+msgstr "Actualizar gráfico"
 
 #: src/ochartShop.cpp:1744
 msgid "Actions"
@@ -413,7 +413,7 @@ msgstr "Nombre del sistema:"
 
 #: src/ochartShop.cpp:1761
 msgid "Status: Chart List Refresh required."
-msgstr ""
+msgstr "Estado: Requiere actualización de la lista de cartas."
 
 #: src/ochartShop.cpp:1782 src/ochartShop.cpp:2561
 msgid "Install Selected Chart"
@@ -433,7 +433,7 @@ msgstr "Estado: Error de comunicaciones."
 
 #: src/ochartShop.cpp:1901 src/ochartShop.cpp:1908
 msgid "Invalid System Name"
-msgstr ""
+msgstr "Nombre de sistema no válido"
 
 #: src/ochartShop.cpp:1920 src/ochartShop.cpp:2003 src/ochartShop.cpp:2093
 msgid "Status: Ready"
@@ -457,7 +457,7 @@ msgstr "¿Proceder con la instalación?"
 
 #: src/ochartShop.cpp:1998
 msgid "Installing charts"
-msgstr ""
+msgstr "Instalando cartas"
 
 #: src/ochartShop.cpp:2006 src/ochartShop.cpp:2096
 msgid "Chart installation complete."
@@ -473,7 +473,7 @@ msgstr "Status: descargando..."
 
 #: src/ochartShop.cpp:2347
 msgid "Downloading..."
-msgstr ""
+msgstr "Descargando..."
 
 #: src/ochartShop.cpp:2375 src/ochartShop.cpp:2417 src/ochartShop.cpp:2480
 #: src/ochartShop.cpp:3014
@@ -490,7 +490,7 @@ msgstr "Usted puede continuar esperando o volver a esta pantalla más tarde para
 
 #: src/ochartShop.cpp:2461
 msgid "You will receive an email message when preparation for download is complete"
-msgstr ""
+msgstr "Reciberá un correo cuando la preparación de cartas esté terminada"
 
 #: src/ochartShop.cpp:2463
 msgid "Continue waiting?"
@@ -506,7 +506,7 @@ msgstr "Actualizar las cartas seleccionadas"
 
 #: src/ochartShop.cpp:2573 src/ochartShop.cpp:2577
 msgid "Download Selected Chart"
-msgstr ""
+msgstr "Descargar cartas seleccionadas"
 
 #: src/ochartShop.cpp:2736
 msgid "New OpenCPN oeSENC System Name"
@@ -558,7 +558,7 @@ msgstr "Visita o-charts.org"
 
 #: src/ochartShop.cpp:3161
 msgid "email address:"
-msgstr ""
+msgstr "dirección de email:"
 
 #: src/ochartShop.cpp:3168
 msgid "Password:"

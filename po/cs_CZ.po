@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-14 22:21-0400\n"
-"PO-Revision-Date: 2018-03-16 19:11-0400\n"
+"PO-Revision-Date: 2018-03-20 18:24-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -227,11 +227,11 @@ msgstr "Platná do"
 
 #: src/oesenc_pi.cpp:5243 src/oesenc_pi.cpp:5258
 msgid "oeSENC Charts"
-msgstr ""
+msgstr "Mapy oeSENC"
 
 #: src/oesenc_pi.cpp:5290
 msgid "Add/Update oeSENC chartsets"
-msgstr ""
+msgstr "Přidat/aktualizovat sady map oeSENC"
 
 #: src/oesenc_pi.cpp:5295
 msgid "Visit o-charts.org Website"
@@ -239,7 +239,7 @@ msgstr "Navštiv web o-charts.org"
 
 #: src/oesenc_pi.cpp:5296
 msgid "Here you may order new oeSENC chartsets."
-msgstr ""
+msgstr "Zde si můžeš objednat nové sady map oeSENC."
 
 #: src/oesenc_pi.h:300
 msgid "OpenCPN SENC UserKey Required"
@@ -256,7 +256,7 @@ msgstr "Texty map"
 
 #: src/ochartShop.cpp:236
 msgid "Available."
-msgstr ""
+msgstr "K dispozici."
 
 #: src/ochartShop.cpp:240
 msgid "Installed, Up-to-date."
@@ -272,11 +272,11 @@ msgstr "Platnost vypršela."
 
 #: src/ochartShop.cpp:253
 msgid "Preparing your chartset."
-msgstr ""
+msgstr "Příprava tvé sady map."
 
 #: src/ochartShop.cpp:257
 msgid "Ready for download."
-msgstr ""
+msgstr "Připraveno ke stažení."
 
 #: src/ochartShop.cpp:261
 msgid "Please update Chart List."
@@ -284,7 +284,7 @@ msgstr "Aktualizuj seznam map, prosím."
 
 #: src/ochartShop.cpp:265
 msgid "Ready for Download Request."
-msgstr ""
+msgstr "Připraveno k požadavku na stažení."
 
 #: src/ochartShop.cpp:444
 msgid "o-charts API error code: "
@@ -292,7 +292,7 @@ msgstr "kód chyby API o-charts: "
 
 #: src/ochartShop.cpp:450
 msgid "Invalid user/email name or password."
-msgstr ""
+msgstr "Neplatné uživatelské jméno nebo heslo."
 
 #: src/ochartShop.cpp:453
 msgid "Check your configuration and try again."
@@ -400,7 +400,7 @@ msgstr "Moje mapy"
 
 #: src/ochartShop.cpp:1725
 msgid "Refresh Chart List"
-msgstr ""
+msgstr "Aktualizovat seznam map"
 
 #: src/ochartShop.cpp:1744
 msgid "Actions"
@@ -412,7 +412,7 @@ msgstr "Název systému:"
 
 #: src/ochartShop.cpp:1761
 msgid "Status: Chart List Refresh required."
-msgstr ""
+msgstr "Stav: Je nutná aktualizace seznamu map."
 
 #: src/ochartShop.cpp:1782 src/ochartShop.cpp:2561
 msgid "Install Selected Chart"
@@ -432,7 +432,7 @@ msgstr "Stav: Chyba komunikace."
 
 #: src/ochartShop.cpp:1901 src/ochartShop.cpp:1908
 msgid "Invalid System Name"
-msgstr ""
+msgstr "Neplatné jméno systému"
 
 #: src/ochartShop.cpp:1920 src/ochartShop.cpp:2003 src/ochartShop.cpp:2093
 msgid "Status: Ready"
@@ -456,7 +456,7 @@ msgstr "Přejít k instalaci?"
 
 #: src/ochartShop.cpp:1998
 msgid "Installing charts"
-msgstr ""
+msgstr "Instalace map"
 
 #: src/ochartShop.cpp:2006 src/ochartShop.cpp:2096
 msgid "Chart installation complete."
@@ -472,7 +472,7 @@ msgstr "Stav: Stahování..."
 
 #: src/ochartShop.cpp:2347
 msgid "Downloading..."
-msgstr ""
+msgstr "Stahování..."
 
 #: src/ochartShop.cpp:2375 src/ochartShop.cpp:2417 src/ochartShop.cpp:2480
 #: src/ochartShop.cpp:3014
@@ -489,7 +489,7 @@ msgstr "Můžeš nadále čekat, nebo se vrať na tuto obrazovku později k doko
 
 #: src/ochartShop.cpp:2461
 msgid "You will receive an email message when preparation for download is complete"
-msgstr ""
+msgstr "Po dokončení přípravy ke stažení obdržíš e-mailovou zprávu "
 
 #: src/ochartShop.cpp:2463
 msgid "Continue waiting?"
@@ -505,7 +505,7 @@ msgstr "Aktualizovat vybranou mapu"
 
 #: src/ochartShop.cpp:2573 src/ochartShop.cpp:2577
 msgid "Download Selected Chart"
-msgstr ""
+msgstr "Stáhni vybranou mapu"
 
 #: src/ochartShop.cpp:2736
 msgid "New OpenCPN oeSENC System Name"
@@ -557,7 +557,7 @@ msgstr "Přihlášení do o-charts.org"
 
 #: src/ochartShop.cpp:3161
 msgid "email address:"
-msgstr ""
+msgstr "e-mailová adresa:"
 
 #: src/ochartShop.cpp:3168
 msgid "Password:"
