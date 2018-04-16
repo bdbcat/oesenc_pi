@@ -2626,6 +2626,10 @@ void shopPanel::UpdateActionControls()
         m_buttonInstall->SetLabel(_("Download Selected Chart"));
         m_buttonInstall->Show();
     }
+    else if(chart->getChartStatus() == STAT_PREPARING){
+        m_buttonInstall->Hide();
+    }
+    
     
 }
 
