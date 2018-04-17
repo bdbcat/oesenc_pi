@@ -593,14 +593,14 @@ int checkResponseCode(int iResponseCode)
         
 }
 
-bool doLogin()
+int doLogin()
 {
     oeSENCLogin login(g_shopPanel);
     login.ShowModal();
     if(!login.GetReturnCode() == 0){
         g_shopPanel->setStatusText( _("Invalid Login."));
         wxYield();
-        return false;
+        return 55;
     }
     
     g_loginUser = login.m_UserNameCtl->GetValue();
@@ -660,10 +660,16 @@ bool doLogin()
         if(queryResult == _T("1"))
             g_loginKey = loginKey;
         
-        return (checkResult(queryResult) == 0);
+        long dresult;
+        if(queryResult.ToLong(&dresult)){
+            return dresult;
+        }
+        else{
+            return 53;
+        }
     }
     else
-        return false;
+        return 54;
     
 }
 
@@ -2006,7 +2012,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     //  Do we need an initial login to get the persistent key?
     if(g_loginKey.Len() == 0){
-        if(!doLogin())
+        if(doLogin() != 1)
             return;
         saveShopConfig();
     }
@@ -2016,10 +2022,40 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
      wxYield();
 
     ::wxBeginBusyCursor();
-    int err_code = getChartList();
+    int err_code = getChartList( false );               // no error code dialog, we handle here
     ::wxEndBusyCursor();
+ 
+    // Could be a change in login_key, userName, or password.
+    // if so, force a full (no_key) login, and retry
+    if((err_code == 4) || (err_code == 5) || (err_code == 6)){
+        setStatusText( _("Status: Login error."));
+        m_ipGauge->Stop();
+        wxYield();
+        if(doLogin() != 1)      // if the second login attempt fails, return to GUI
+            return;
+        saveShopConfig();
+        
+        // Try to get the status one more time only.
+        ::wxBeginBusyCursor();
+        int err_code_2 = getChartList( false );               // no error code dialog, we handle here
+        ::wxEndBusyCursor();
+        
+        if(err_code_2 != 0){                  // Some error on second getlist() try, if so just return to GUI
+         
+            if((err_code_2 == 4) || (err_code_2 == 5) || (err_code_2 == 6))
+                setStatusText( _("Status: Login error."));
+            else{
+                wxString ec;
+                ec.Printf(_T(" { %d }"), err_code_2);
+                setStatusText( _("Status: Communications error.") + ec);
+            }
+            m_ipGauge->Stop();
+            wxYield();
+            return;
+        }
+    }
     
-    if(err_code != 0){                  // Some error
+    else if(err_code != 0){                  // Some other error
         wxString ec;
         ec.Printf(_T(" { %d }"), err_code);
         setStatusText( _("Status: Communications error.") + ec);
