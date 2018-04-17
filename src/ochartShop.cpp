@@ -679,7 +679,7 @@ wxString ProcessResponse(std::string body)
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( body.c_str());
     
-        doc->Print();
+        //doc->Print();
         
         wxString queryResult;
         wxString chartOrder;
@@ -869,7 +869,7 @@ int getChartList( bool bShowErrorDialogs = true){
     std::string b = post.GetErrorString();
     std::string c = post.GetResponseBody();
     
-    printf("%s", post.GetResponseBody().c_str());
+    //printf("%s", post.GetResponseBody().c_str());
     
     wxString tt(post.GetResponseBody().data(), wxConvUTF8);
     //wxLogMessage(tt);
