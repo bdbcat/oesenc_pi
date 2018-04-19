@@ -99,7 +99,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/de.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
@@ -113,139 +113,7 @@
 														<key>GID</key>
 														<integer>80</integer>
 														<key>PATH</key>
-														<string>de.lproj</string>
-														<key>PATH_TYPE</key>
-														<integer>0</integer>
-														<key>PERMISSIONS</key>
-														<integer>509</integer>
-														<key>TYPE</key>
-														<integer>2</integer>
-														<key>UID</key>
-														<integer>0</integer>
-													</dict>
-													<dict>
-														<key>CHILDREN</key>
-														<array>
-															<dict>
-																<key>CHILDREN</key>
-																<array/>
-																<key>GID</key>
-																<integer>80</integer>
-																<key>PATH</key>
-																<string>Resources/es.lproj/opencpn-oesenc_pi.mo</string>
-																<key>PATH_TYPE</key>
-																<integer>3</integer>
-																<key>PERMISSIONS</key>
-																<integer>420</integer>
-																<key>TYPE</key>
-																<integer>3</integer>
-																<key>UID</key>
-																<integer>0</integer>
-															</dict>
-														</array>
-														<key>GID</key>
-														<integer>80</integer>
-														<key>PATH</key>
-														<string>es.lproj</string>
-														<key>PATH_TYPE</key>
-														<integer>0</integer>
-														<key>PERMISSIONS</key>
-														<integer>509</integer>
-														<key>TYPE</key>
-														<integer>2</integer>
-														<key>UID</key>
-														<integer>0</integer>
-													</dict>
-													<dict>
-														<key>CHILDREN</key>
-														<array>
-															<dict>
-																<key>CHILDREN</key>
-																<array/>
-																<key>GID</key>
-																<integer>80</integer>
-																<key>PATH</key>
-																<string>Resources/et.lproj/opencpn-oesenc_pi.mo</string>
-																<key>PATH_TYPE</key>
-																<integer>3</integer>
-																<key>PERMISSIONS</key>
-																<integer>420</integer>
-																<key>TYPE</key>
-																<integer>3</integer>
-																<key>UID</key>
-																<integer>0</integer>
-															</dict>
-														</array>
-														<key>GID</key>
-														<integer>80</integer>
-														<key>PATH</key>
-														<string>et.lproj</string>
-														<key>PATH_TYPE</key>
-														<integer>0</integer>
-														<key>PERMISSIONS</key>
-														<integer>509</integer>
-														<key>TYPE</key>
-														<integer>2</integer>
-														<key>UID</key>
-														<integer>0</integer>
-													</dict>
-													<dict>
-														<key>CHILDREN</key>
-														<array>
-															<dict>
-																<key>CHILDREN</key>
-																<array/>
-																<key>GID</key>
-																<integer>80</integer>
-																<key>PATH</key>
-																<string>Resources/fr.lproj/opencpn-oesenc_pi.mo</string>
-																<key>PATH_TYPE</key>
-																<integer>3</integer>
-																<key>PERMISSIONS</key>
-																<integer>420</integer>
-																<key>TYPE</key>
-																<integer>3</integer>
-																<key>UID</key>
-																<integer>0</integer>
-															</dict>
-														</array>
-														<key>GID</key>
-														<integer>80</integer>
-														<key>PATH</key>
-														<string>fr.lproj</string>
-														<key>PATH_TYPE</key>
-														<integer>0</integer>
-														<key>PERMISSIONS</key>
-														<integer>509</integer>
-														<key>TYPE</key>
-														<integer>2</integer>
-														<key>UID</key>
-														<integer>0</integer>
-													</dict>
-													<dict>
-														<key>CHILDREN</key>
-														<array>
-															<dict>
-																<key>CHILDREN</key>
-																<array/>
-																<key>GID</key>
-																<integer>80</integer>
-																<key>PATH</key>
-																<string>Resources/pl.lproj/opencpn-oesenc_pi.mo</string>
-																<key>PATH_TYPE</key>
-																<integer>3</integer>
-																<key>PERMISSIONS</key>
-																<integer>420</integer>
-																<key>TYPE</key>
-																<integer>3</integer>
-																<key>UID</key>
-																<integer>0</integer>
-															</dict>
-														</array>
-														<key>GID</key>
-														<integer>80</integer>
-														<key>PATH</key>
-														<string>pl.lproj</string>
+														<string>.</string>
 														<key>PATH_TYPE</key>
 														<integer>0</integer>
 														<key>PERMISSIONS</key>
@@ -259,7 +127,7 @@
 												<key>GID</key>
 												<integer>80</integer>
 												<key>PATH</key>
-												<string>Resources</string>
+												<string>.</string>
 												<key>PATH_TYPE</key>
 												<integer>0</integer>
 												<key>PERMISSIONS</key>
