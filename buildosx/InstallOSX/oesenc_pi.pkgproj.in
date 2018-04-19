@@ -99,7 +99,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/de.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources/de_DE.lproj/opencpn-oesenc_pi.mo</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
@@ -132,7 +132,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/es.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources/es_ES.lproj/opencpn-oesenc_pi.mo</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
@@ -165,7 +165,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/et.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources/et_EE.lproj/opencpn-oesenc_pi.mo</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
@@ -198,7 +198,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/fr.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources/fr_FR.lproj/opencpn-oesenc_pi.mo</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
@@ -231,7 +231,7 @@
 																<key>GID</key>
 																<integer>80</integer>
 																<key>PATH</key>
-																<string>Resources/pl.lproj/opencpn-oesenc_pi.mo</string>
+																<string>Resources/pl_PL.lproj/opencpn-oesenc_pi.mo</string>
 																<key>PATH_TYPE</key>
 																<integer>3</integer>
 																<key>PERMISSIONS</key>
