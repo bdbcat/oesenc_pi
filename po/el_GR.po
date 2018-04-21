@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-14 22:21-0400\n"
-"PO-Revision-Date: 2018-03-16 19:11-0400\n"
+"PO-Revision-Date: 2018-04-19 21:27-0400\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -15,467 +15,551 @@ msgstr ""
 "X-Crowdin-Project: opencpn\n"
 "X-Crowdin-Language: el\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
-#
-msgid ""
-"\n"
-"\n"
-" Fingerprint file is also copied to desktop."
-msgstr ""
-"\n"
-"\n"
-"Το αρχείο ταυτοποίησης υπάρχει και στο desktop."
-#
-msgid ""
-" could not be started.\n"
-"\n"
-msgstr ""
-" δεν ήταν δυνατή η εκκίνηση.\n"
-"\n"
-#
-msgid " create a new System Name for this computer."
-msgstr ""
-#
-msgid ""
-" reports Unavailable.\n"
-"\n"
-msgstr ""
-" δεν υπάρχουν αναφορές.\n"
-"\n"
-#
-msgid "A valid System Name is 3 to 15 characters in length."
-msgstr ""
-#
-msgid ""
-"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
-"FF\n"
-"\n"
-"Your oeSENC UserKey may be obtained from your chart provider."
-msgstr ""
-"Ο κωδικός oeSENC έχει την αλφαριθμητική μορφή: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
-"\n"
-"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών."
-#
-msgid "Accept"
-msgstr "Αποδοχή"
-#
-msgid "Actions"
-msgstr ""
-#
-msgid "Add/Update oeSENC chartsets"
-msgstr ""
-#
-msgid ""
-"Administrator priveleges are required to copy fpr.\n"
-"  Please try again...."
-msgstr ""
-"Χρειάζονται προνόμια διαχειριστή για την αντιγραφή του fpr.\n"
-"  Ξαναδοκιμάστε...."
-#
-msgid ""
-"After creating this file, you will need it to obtain your User Key at the o-"
-"charts.org shop.\n"
-"\n"
-msgstr ""
-"Μετά τη δημιουργία αυτού του αρχείου, θα πρέπει να αποκτήσετε το User Key σας "
-"στο κατάστημα o-charts.org.\n"
-"\n"
-#
-msgid "Assigment 1"
-msgstr ""
-#
-msgid "Assigment 2"
-msgstr ""
-#
-msgid "Available Chart sets:"
-msgstr "Διαθέσιμοι χάρτες:"
-#
-msgid "Available."
-msgstr ""
-#
+
+#: src/eSENCChart.cpp:3297 src/eSENCChart.cpp:3301
 msgid "Building eSENC"
 msgstr "Δημιουργία eSENC"
-#
-msgid "Cancel"
-msgstr "Ακύρωση"
-#
-msgid "Cancel Operation"
-msgstr ""
-#
-msgid "Cannot find the oserverd utility at \n"
-msgstr "Δεν βρίσκω το πρόγραμμα oserverd στο\n"
-#
-msgid "Chart Edition:"
-msgstr ""
-#
-msgid "Chart Edition: "
-msgstr ""
-#
-msgid "Chart download cancelled."
-msgstr ""
-#
-msgid "Chart download complete."
-msgstr ""
-#
-msgid "Chart download error, missing file."
-msgstr ""
-#
-msgid "Chart installation complete."
-msgstr ""
-#
-msgid "Chart set"
-msgstr "Ομάδα χαρτών"
-#
-msgid "ChartTexts"
-msgstr "ΚείμεναΧάρτη"
-#
-msgid "Check your configuration and try again."
-msgstr ""
-#
-msgid "Check your connection and try again."
-msgstr ""
-#
-msgid "Checking oeserverd utility at "
-msgstr "Έλεγχος προγράμματος oeserverd στο "
-#
-msgid "Choose chart install location."
-msgstr ""
-#
-msgid "Contacting o-charts server..."
-msgstr ""
-#
-msgid "Continue waiting?"
-msgstr ""
-#
-msgid "Could not open oesenc_pi EULA: "
-msgstr "Δεν μπόρεσε να ανοίξει το oesenc_pi EULA: "
-#
-msgid "Create System Identifier file..."
-msgstr "Δημιουργία το αρχείο αναγνώρισης του συστήματος..."
-#
-msgid "Dialog"
-msgstr "Διάλογος"
-#
-msgid "Download Selected Chart"
-msgstr ""
-#
-msgid "Downloaded:  "
-msgstr ""
-#
-msgid "Downloading..."
-msgstr ""
-#
-msgid ""
-"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
-"\n"
-"oeSENC charts will be disabled for this session.\n"
-"Please verify your UserKey and restart OpenCPN.\n"
-"\n"
-"Your oeSENC UserKey may be obtained from your chart provider.\n"
-"\n"
-msgstr ""
-"ΣΦΑΛΜΑ: Ο κωδικός δεν είναι έγκυρος για αυτό το σετ χαρτών.\n"
-"\n"
-"Οι χάρτες oeSENC θα ακυρωθούν προσωρινά.\n"
-"Επιβεβαιώστε τον κωδικό σας και επανεκκινήστε το OpenCPN.\n"
-"\n"
-"\n"
-"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών.\n"
-"\n"
-#
-msgid ""
-"ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
-"Please verify your UserKey and try again.\n"
-"\n"
-"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-"
-"FF\n"
-"Your oeSENC UserKey may be obtained from your chart provider.\n"
-"\n"
-msgstr ""
-"ΣΦΑΛΜΑ: Ο κωδικός δεν είναι έγκυρος για αυτό το σετ χαρτών. Παρακαλώ "
-"επιβεβαιώστε τον κωδικό σας και προσπαθήστε ξανά.  \n"
-"\n"
-"Ο κωδικός oeSENC έχει την αλφαριθμητική μορφή: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
-"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών.\n"
-"\n"
-#
-msgid "Enter New System Name"
-msgstr ""
-#
-msgid "Enter UserKey"
-msgstr "Εισάγετε τον κωδικό"
-#
-msgid "Error extracting zip file"
-msgstr ""
-#
-msgid "Expiration date:"
-msgstr ""
-#
-msgid "Expiration date: "
-msgstr ""
-#
-msgid "Expired."
-msgstr ""
-#
-msgid "Fingerprint file created.\n"
-msgstr "Δημιουργήθηκε το αρχείο ταυτοποίησης.\n"
-#
-msgid "Here you may order new oeSENC chartsets."
-msgstr ""
-#
-msgid "Install Selected Chart"
-msgstr ""
-#
-msgid "Installed edition: "
-msgstr ""
-#
-msgid "Installed, Up-to-date."
-msgstr ""
-#
-msgid "Installed, Update available."
-msgstr ""
-#
-msgid "Installing charts"
-msgstr ""
-#
-msgid "Invalid Login."
-msgstr ""
-#
-msgid "Invalid System Name"
-msgstr ""
-#
-msgid "Invalid user/email name or password."
-msgstr ""
-#
-msgid "License"
-msgstr "Άδεια χρήσης"
-#
-msgid "Login to o-charts.org"
-msgstr ""
-#
-msgid "My Charts"
-msgstr ""
-#
-msgid "New OpenCPN oeSENC System Name"
-msgstr ""
-#
-msgid "No symbols or spaces are allowed."
-msgstr ""
-#
-msgid "OK"
-msgstr "Εντάξει"
-#
-msgid "OpenCPN SENC UserKey Required"
-msgstr "Απαιτείται κωδικός χρήστη OpenCPN oeSENC"
-#
-msgid "OpenCPN oeSENC UserKey Required"
-msgstr "Απαιτείται κωδικός χρήστη OpenCPN oeSENC"
-#
-msgid "Order Reference:"
-msgstr ""
-#
-msgid "Order Reference: "
-msgstr ""
-#
-msgid "Password:"
-msgstr ""
-#
-msgid "Please update Chart List."
-msgstr ""
-#
-msgid ""
-"PlugIn for OpenCPN\n"
-"Provides support of oeSENC charts.\n"
-"\n"
-msgstr ""
-"Πρόσθετο για το OpenCPN. Παρέχει υποστήριξη χαρτών oeSENC.\n"
-"\n"
-#
-msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr "Πρόσθετο για χάρτες OpenCPN oeSENC"
-#
-msgid "Preparing your charts..."
-msgstr ""
-#
-msgid "Preparing your chartset."
-msgstr ""
-#
-msgid "Proceed to create Fingerprint file?"
-msgstr "Συνέχεια με τη δημιουργία αρχείου ταυτοποίησης;"
-#
-msgid "Proceed to install?"
-msgstr ""
-#
-msgid "Proceed?"
-msgstr ""
-#
-msgid "Purchase date:"
-msgstr ""
-#
-msgid "Purchase date: "
-msgstr ""
-#
-msgid "Ready for Download Request."
-msgstr ""
-#
-msgid "Ready for download."
-msgstr ""
-#
-msgid "Ready for unzipping chart files."
-msgstr ""
-#
-msgid "Refresh Chart List"
-msgstr ""
-#
-msgid "Reinstall Selected Chart"
-msgstr ""
-#
-msgid "Reject"
-msgstr "Απόρριψη"
-#
+
+#: src/eSENCChart.cpp:6524
 msgid "Sector angles are True Bearings from Seaward"
 msgstr "Οι γωνίες των τομέων είναι αληθείς διοπτεύσεις από τη θάλασσα"
-#
-msgid "Select OpenCPN/oeSENC System Name"
-msgstr ""
-#
-msgid "Select your System Name from the following list, or "
-msgstr ""
-#
-msgid "Show In Finder"
-msgstr "Προβολή στον Finder"
-#
-msgid "Show on disk"
-msgstr "Προβολή στον δίσκο"
-#
-msgid "Status:"
-msgstr ""
-#
-msgid "Status: "
-msgstr ""
-#
-msgid "Status: Chart List Refresh required."
-msgstr ""
-#
-msgid "Status: Communications error."
-msgstr ""
-#
-msgid "Status: Downloading..."
-msgstr ""
-#
-msgid "Status: OK"
-msgstr ""
-#
-msgid "Status: Ready"
-msgstr ""
-#
-msgid "System Identification"
-msgstr "Αναγνώριση συστήματος"
-#
-msgid "System Name:"
-msgstr ""
-#
-msgid "System Names"
-msgstr ""
-#
-msgid "System: "
-msgstr ""
-#
-msgid ""
-"The fingerprint file contains information to uniquely identifiy this "
-"computer.\n"
-"\n"
-msgstr ""
-"Το αρχείο ταυτοποίησης περιλαμβάνει πληροφορίες για την αναγνώριση του "
-"υπολογιστή.\n"
-"\n"
-#
-msgid "The following Chart sets are available:"
-msgstr "Οι ακόλουθες ομάδες χαρτών είναι διαθέσιμες:"
-#
-msgid "This action will PERMANENTLY assign the chart:"
-msgstr ""
-#
-msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr "Αυτό το αρχείο είναι επίσης γνωστό ως ένα αρχείο «ταυτοποίησης».\n"
-#
-msgid ""
-"To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr ""
-"Για να αποκτήσετε ένα User Key, πρέπει να δημιουργήσετε ένα μοναδικό αρχείο "
-"System Identifier.\n"
-#
-msgid "Unzipping chart files..."
-msgstr ""
-#
-msgid "Update Selected Chart"
-msgstr ""
-#
-msgid ""
-"UserKey accepted.\n"
-"\n"
-msgstr ""
-"Αποδεκτός κωδικός.\n"
-"\n"
-#
-msgid "Valid until"
-msgstr "Έγκυρη μέχρι"
-#
-msgid "Version"
-msgstr "Έκδοση"
-#
-msgid "Visit o-charts.org Website"
-msgstr "Επισκεφτείτε την ιστοσελίδα o-charts.org"
-#
-msgid ""
-"You may continue to wait, or return to this screen later to complete the "
-"download."
-msgstr ""
-#
-msgid ""
-"You will receive an email message when preparation for download is complete"
-msgstr ""
-#
-msgid "Your chart preparation is not complete."
-msgstr ""
-#
-msgid "email address:"
-msgstr ""
-#
-msgid "internet communications error code: "
-msgstr ""
-#
-msgid "lower case letters and numbers only."
-msgstr ""
-#
-msgid "new..."
-msgstr ""
-#
-msgid "o-charts API error code: "
-msgstr ""
-#
+
+#: src/oesenc_pi.cpp:285 src/oesenc_pi.cpp:427 src/oesenc_pi.cpp:2110
+#: src/oesenc_pi.cpp:2139 src/oesenc_pi.cpp:4451 src/oesenc_pi.cpp:4503
+#: src/oesenc_pi.cpp:4669 src/ochartShop.cpp:1399 src/ochartShop.cpp:1465
+#: src/ochartShop.cpp:1592 src/ochartShop.cpp:2704 src/ochartShop.cpp:2733
+#: src/ochartShop.cpp:2838 src/ochartShop.cpp:2863 src/ochartShop.cpp:3097
+#: src/ochartShop.cpp:3125
+msgid "Dialog"
+msgstr "Διάλογος"
+
+#: src/oesenc_pi.cpp:711
 msgid "oeSENC"
 msgstr "oeSENC"
-#
-msgid "oeSENC Charts"
-msgstr ""
-#
-msgid "oeSENC PlugIn for OpenCPN"
-msgstr "Πρόσθετο oeSENC για το OpenCPN"
-#
-msgid "oeSENC_PI Information"
-msgstr "Πληροφορίες για το oeSENC_PI"
-#
+
+#: src/oesenc_pi.cpp:717
+msgid "PlugIn for OpenCPN oeSENC charts"
+msgstr "Πρόσθετο για χάρτες OpenCPN oeSENC"
+
+#: src/oesenc_pi.cpp:723
+msgid "PlugIn for OpenCPN\n"
+"Provides support of oeSENC charts.\n\n"
+msgstr "Πρόσθετο για το OpenCPN. Παρέχει υποστήριξη χαρτών oeSENC.\n\n"
+
+#: src/oesenc_pi.cpp:929 src/oesenc_pi.cpp:3792
+msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
+msgstr "Για να αποκτήσετε ένα User Key, πρέπει να δημιουργήσετε ένα μοναδικό αρχείο System Identifier.\n"
+
+#: src/oesenc_pi.cpp:930 src/oesenc_pi.cpp:3793
+msgid "This file is also known as a\"fingerprint\" file.\n"
+msgstr "Αυτό το αρχείο είναι επίσης γνωστό ως ένα αρχείο «ταυτοποίησης».\n"
+
+#: src/oesenc_pi.cpp:931 src/oesenc_pi.cpp:3794
+msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
+msgstr "Το αρχείο ταυτοποίησης περιλαμβάνει πληροφορίες για την αναγνώριση του υπολογιστή.\n\n"
+
+#: src/oesenc_pi.cpp:932 src/oesenc_pi.cpp:3795
+msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
+msgstr "Μετά τη δημιουργία αυτού του αρχείου, θα πρέπει να αποκτήσετε το User Key σας στο κατάστημα o-charts.org.\n\n"
+
+#: src/oesenc_pi.cpp:933 src/oesenc_pi.cpp:3796
+msgid "Proceed to create Fingerprint file?"
+msgstr "Συνέχεια με τη δημιουργία αρχείου ταυτοποίησης;"
+
+#: src/oesenc_pi.cpp:935 src/oesenc_pi.cpp:3798 src/oesenc_pi.cpp:4854
+#: src/oesenc_pi.cpp:4934 src/ochartShop.cpp:799 src/ochartShop.cpp:1942
+#: src/ochartShop.cpp:1965 src/ochartShop.cpp:1995 src/ochartShop.cpp:2037
+#: src/ochartShop.cpp:2058 src/ochartShop.cpp:2088 src/ochartShop.cpp:2466
 msgid "oeSENC_PI Message"
 msgstr "Μήνυμα oeSENC_PI"
-#
+
+#: src/oesenc_pi.cpp:1384 src/oesenc_pi.h:212
 msgid "oeSENC_PI Preferences"
 msgstr "Προτιμήσεις oeSENC_PI"
-#
+
+#: src/oesenc_pi.cpp:2142
+msgid "OpenCPN oeSENC UserKey Required"
+msgstr "Απαιτείται κωδικός χρήστη OpenCPN oeSENC"
+
+#: src/oesenc_pi.cpp:2160
+msgid "Enter UserKey"
+msgstr "Εισάγετε τον κωδικό"
+
+#: src/oesenc_pi.cpp:2179
+msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Your oeSENC UserKey may be obtained from your chart provider."
+msgstr "Ο κωδικός oeSENC έχει την αλφαριθμητική μορφή: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών."
+
+#: src/oesenc_pi.cpp:2185
+msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
+"Please verify your UserKey and try again.\n\n"
+"A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n\n"
+msgstr "ΣΦΑΛΜΑ: Ο κωδικός δεν είναι έγκυρος για αυτό το σετ χαρτών. Παρακαλώ επιβεβαιώστε τον κωδικό σας και προσπαθήστε ξανά.  \n\n"
+"Ο κωδικός oeSENC έχει την αλφαριθμητική μορφή: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
+"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών.\n\n"
+
+#: src/oesenc_pi.cpp:2193
+msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
+"oeSENC charts will be disabled for this session.\n"
+"Please verify your UserKey and restart OpenCPN.\n\n"
+"Your oeSENC UserKey may be obtained from your chart provider.\n\n"
+msgstr "ΣΦΑΛΜΑ: Ο κωδικός δεν είναι έγκυρος για αυτό το σετ χαρτών.\n\n"
+"Οι χάρτες oeSENC θα ακυρωθούν προσωρινά.\n"
+"Επιβεβαιώστε τον κωδικό σας και επανεκκινήστε το OpenCPN.\n\n\n"
+"Μπορείτε να πάρετε τον κωδικό oeSENC σας από τον πάροχο των χαρτών.\n\n"
+
+#: src/oesenc_pi.cpp:2204
+msgid "UserKey accepted.\n\n"
+msgstr "Αποδεκτός κωδικός.\n\n"
+
+#: src/oesenc_pi.cpp:2241 src/ochartShop.cpp:2778 src/ochartShop.cpp:2910
+#: src/ochartShop.cpp:3178
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: src/oesenc_pi.cpp:2248 src/ochartShop.cpp:2783 src/ochartShop.cpp:2913
+#: src/ochartShop.cpp:3181
+msgid "OK"
+msgstr "Εντάξει"
+
+#: src/oesenc_pi.cpp:2939
+msgid "Checking oeserverd utility at "
+msgstr "Έλεγχος προγράμματος oeserverd στο "
+
+#: src/oesenc_pi.cpp:2947
+msgid "Cannot find the oserverd utility at \n"
+msgstr "Δεν βρίσκω το πρόγραμμα oserverd στο\n"
+
+#: src/oesenc_pi.cpp:2951 src/oesenc_pi.cpp:3059 src/oesenc_pi.cpp:3680
+#: src/oesenc_pi.cpp:3813 src/oesenc_pi.cpp:3819 src/oesenc_pi.cpp:3968
+#: src/oesenc_pi.cpp:3998 src/oesenc_pi.cpp:4011 src/ochartShop.cpp:457
+#: src/ochartShop.cpp:473 src/ochartShop.cpp:932 src/ochartShop.cpp:1210
+#: src/ochartShop.cpp:1902 src/ochartShop.cpp:1909 src/ochartShop.cpp:2006
+#: src/ochartShop.cpp:2096
 msgid "oeSENC_pi Message"
 msgstr "Mήνυμα oeSENC_pi"
-#
+
+#: src/oesenc_pi.cpp:3030 src/oesenc_pi.cpp:3054
 msgid "oeserverd utility at \n"
 msgstr "oeserverd utility στο\n"
-#
+
+#: src/oesenc_pi.cpp:3034
+msgid " reports Unavailable.\n\n"
+msgstr " δεν υπάρχουν αναφορές.\n\n"
+
+#: src/oesenc_pi.cpp:3058
+msgid " could not be started.\n\n"
+msgstr " δεν ήταν δυνατή η εκκίνηση.\n\n"
+
+#: src/oesenc_pi.cpp:3439
+msgid "System Identification"
+msgstr "Αναγνώριση συστήματος"
+
+#: src/oesenc_pi.cpp:3449
+msgid "Create System Identifier file..."
+msgstr "Δημιουργία το αρχείο αναγνώρισης του συστήματος..."
+
+#: src/oesenc_pi.cpp:3457
+msgid "Show In Finder"
+msgstr "Προβολή στον Finder"
+
+#: src/oesenc_pi.cpp:3459
+msgid "Show on disk"
+msgstr "Προβολή στον δίσκο"
+
+#: src/oesenc_pi.cpp:3680 src/oesenc_pi.cpp:3968
+msgid "Administrator priveleges are required to copy fpr.\n"
+"  Please try again...."
+msgstr "Χρειάζονται προνόμια διαχειριστή για την αντιγραφή του fpr.\n"
+"  Ξαναδοκιμάστε...."
+
+#: src/oesenc_pi.cpp:3807 src/oesenc_pi.cpp:3992
+msgid "Fingerprint file created.\n"
+msgstr "Δημιουργήθηκε το αρχείο ταυτοποίησης.\n"
+
+#: src/oesenc_pi.cpp:3811 src/oesenc_pi.cpp:3996
+msgid "\n\n"
+" Fingerprint file is also copied to desktop."
+msgstr "\n\n"
+"Το αρχείο ταυτοποίησης υπάρχει και στο desktop."
+
+#: src/oesenc_pi.cpp:4593
+msgid "Could not open oesenc_pi EULA: "
+msgstr "Δεν μπόρεσε να ανοίξει το oesenc_pi EULA: "
+
+#: src/oesenc_pi.cpp:4666
+msgid "oeSENC PlugIn for OpenCPN"
+msgstr "Πρόσθετο oeSENC για το OpenCPN"
+
+#: src/oesenc_pi.cpp:4729
+msgid "License"
+msgstr "Άδεια χρήσης"
+
+#: src/oesenc_pi.cpp:4754
+msgid "Accept"
+msgstr "Αποδοχή"
+
+#: src/oesenc_pi.cpp:4759
+msgid "Reject"
+msgstr "Απόρριψη"
+
+#: src/oesenc_pi.cpp:4800
+msgid "Available Chart sets:"
+msgstr "Διαθέσιμοι χάρτες:"
+
+#: src/oesenc_pi.cpp:4869
+msgid "The following Chart sets are available:"
+msgstr "Οι ακόλουθες ομάδες χαρτών είναι διαθέσιμες:"
+
+#: src/oesenc_pi.cpp:4879
+msgid "Chart set"
+msgstr "Ομάδα χαρτών"
+
+#: src/oesenc_pi.cpp:4883
+msgid "Version"
+msgstr "Έκδοση"
+
+#: src/oesenc_pi.cpp:4887
+msgid "Valid until"
+msgstr "Έγκυρη μέχρι"
+
+#: src/oesenc_pi.cpp:5243 src/oesenc_pi.cpp:5258
+msgid "oeSENC Charts"
+msgstr ""
+
+#: src/oesenc_pi.cpp:5290
+msgid "Add/Update oeSENC chartsets"
+msgstr ""
+
+#: src/oesenc_pi.cpp:5295
+msgid "Visit o-charts.org Website"
+msgstr "Επισκεφτείτε την ιστοσελίδα o-charts.org"
+
+#: src/oesenc_pi.cpp:5296
+msgid "Here you may order new oeSENC chartsets."
+msgstr ""
+
+#: src/oesenc_pi.h:300
+msgid "OpenCPN SENC UserKey Required"
+msgstr "Απαιτείται κωδικός χρήστη OpenCPN oeSENC"
+
+#: src/oesenc_pi.h:428
+msgid "oeSENC_PI Information"
+msgstr "Πληροφορίες για το oeSENC_PI"
+
+#: src/s52plib.cpp:2314 src/s52plib.cpp:2339 src/s52plib.cpp:2447
+#: src/s52plib.cpp:2621 src/s52plib.cpp:2637
+msgid "ChartTexts"
+msgstr "ΚείμεναΧάρτη"
+
+#: src/ochartShop.cpp:236
+msgid "Available."
+msgstr ""
+
+#: src/ochartShop.cpp:240
+msgid "Installed, Up-to-date."
+msgstr ""
+
+#: src/ochartShop.cpp:244
+msgid "Installed, Update available."
+msgstr ""
+
+#: src/ochartShop.cpp:249
+msgid "Expired."
+msgstr ""
+
+#: src/ochartShop.cpp:253
+msgid "Preparing your chartset."
+msgstr ""
+
+#: src/ochartShop.cpp:257
+msgid "Ready for download."
+msgstr ""
+
+#: src/ochartShop.cpp:261
+msgid "Please update Chart List."
+msgstr ""
+
+#: src/ochartShop.cpp:265
+msgid "Ready for Download Request."
+msgstr ""
+
+#: src/ochartShop.cpp:444
+msgid "o-charts API error code: "
+msgstr ""
+
+#: src/ochartShop.cpp:450
+msgid "Invalid user/email name or password."
+msgstr ""
+
+#: src/ochartShop.cpp:453
+msgid "Check your configuration and try again."
+msgstr ""
+
+#: src/ochartShop.cpp:468
+msgid "internet communications error code: "
+msgstr ""
+
+#: src/ochartShop.cpp:472
+msgid "Check your connection and try again."
+msgstr ""
+
+#: src/ochartShop.cpp:492
+msgid "Invalid Login."
+msgstr ""
+
+#: src/ochartShop.cpp:789
+msgid "This action will PERMANENTLY assign the chart:"
+msgstr ""
+
+#: src/ochartShop.cpp:793
 msgid "to this systemName:"
 msgstr ""
+
+#: src/ochartShop.cpp:797
+msgid "Proceed?"
+msgstr ""
+
+#: src/ochartShop.cpp:1129 src/ochartShop.cpp:1201
+msgid "Unzipping chart files..."
+msgstr ""
+
+#: src/ochartShop.cpp:1180
+msgid "Choose chart install location."
+msgstr ""
+
+#: src/ochartShop.cpp:1194
+msgid "Ready for unzipping chart files."
+msgstr ""
+
+#: src/ochartShop.cpp:1210
+msgid "Error extracting zip file"
+msgstr ""
+
+#: src/ochartShop.cpp:1423
+msgid "Chart Edition:"
+msgstr ""
+
+#: src/ochartShop.cpp:1429
+msgid "Order Reference:"
+msgstr ""
+
+#: src/ochartShop.cpp:1435
+msgid "Purchase date:"
+msgstr ""
+
+#: src/ochartShop.cpp:1441
+msgid "Expiration date:"
+msgstr ""
+
+#: src/ochartShop.cpp:1447
+msgid "Status:"
+msgstr ""
+
+#: src/ochartShop.cpp:1498
+msgid "Chart Edition: "
+msgstr ""
+
+#: src/ochartShop.cpp:1502
+msgid "Order Reference: "
+msgstr ""
+
+#: src/ochartShop.cpp:1509
+msgid "Purchase date: "
+msgstr ""
+
+#: src/ochartShop.cpp:1513
+msgid "Expiration date: "
+msgstr ""
+
+#: src/ochartShop.cpp:1526
+msgid "Assigment 1"
+msgstr ""
+
+#: src/ochartShop.cpp:1530 src/ochartShop.cpp:1553
+msgid "System: "
+msgstr ""
+
+#: src/ochartShop.cpp:1534 src/ochartShop.cpp:1557
+msgid "Installed edition: "
+msgstr ""
+
+#: src/ochartShop.cpp:1542 src/ochartShop.cpp:1565
+msgid "Status: "
+msgstr ""
+
+#: src/ochartShop.cpp:1549
+msgid "Assigment 2"
+msgstr ""
+
+#: src/ochartShop.cpp:1722
+msgid "My Charts"
+msgstr ""
+
+#: src/ochartShop.cpp:1725
+msgid "Refresh Chart List"
+msgstr ""
+
+#: src/ochartShop.cpp:1744
+msgid "Actions"
+msgstr ""
+
+#: src/ochartShop.cpp:1750 src/ochartShop.cpp:1914 src/ochartShop.cpp:2619
+msgid "System Name:"
+msgstr ""
+
+#: src/ochartShop.cpp:1761
+msgid "Status: Chart List Refresh required."
+msgstr ""
+
+#: src/ochartShop.cpp:1782 src/ochartShop.cpp:2561
+msgid "Install Selected Chart"
+msgstr ""
+
+#: src/ochartShop.cpp:1786
+msgid "Cancel Operation"
+msgstr ""
+
+#: src/ochartShop.cpp:1879
+msgid "Contacting o-charts server..."
+msgstr ""
+
+#: src/ochartShop.cpp:1890 src/ochartShop.cpp:2325
+msgid "Status: Communications error."
+msgstr ""
+
+#: src/ochartShop.cpp:1901 src/ochartShop.cpp:1908
+msgid "Invalid System Name"
+msgstr ""
+
+#: src/ochartShop.cpp:1920 src/ochartShop.cpp:2003 src/ochartShop.cpp:2093
+msgid "Status: Ready"
+msgstr ""
+
+#: src/ochartShop.cpp:1942 src/ochartShop.cpp:2037
+msgid "Chart download cancelled."
+msgstr ""
+
+#: src/ochartShop.cpp:1965 src/ochartShop.cpp:2058
+msgid "Chart download error, missing file."
+msgstr ""
+
+#: src/ochartShop.cpp:1991 src/ochartShop.cpp:2084
+msgid "Chart download complete."
+msgstr ""
+
+#: src/ochartShop.cpp:1993 src/ochartShop.cpp:2086
+msgid "Proceed to install?"
+msgstr ""
+
+#: src/ochartShop.cpp:1998
+msgid "Installing charts"
+msgstr ""
+
+#: src/ochartShop.cpp:2006 src/ochartShop.cpp:2096
+msgid "Chart installation complete."
+msgstr ""
+
+#: src/ochartShop.cpp:2294
+msgid "Preparing your charts..."
+msgstr ""
+
+#: src/ochartShop.cpp:2342
+msgid "Status: Downloading..."
+msgstr ""
+
+#: src/ochartShop.cpp:2347
+msgid "Downloading..."
+msgstr ""
+
+#: src/ochartShop.cpp:2375 src/ochartShop.cpp:2417 src/ochartShop.cpp:2480
+#: src/ochartShop.cpp:3014
+msgid "Status: OK"
+msgstr ""
+
+#: src/ochartShop.cpp:2457
+msgid "Your chart preparation is not complete."
+msgstr ""
+
+#: src/ochartShop.cpp:2459
+msgid "You may continue to wait, or return to this screen later to complete the download."
+msgstr ""
+
+#: src/ochartShop.cpp:2461
+msgid "You will receive an email message when preparation for download is complete"
+msgstr ""
+
+#: src/ochartShop.cpp:2463
+msgid "Continue waiting?"
+msgstr ""
+
+#: src/ochartShop.cpp:2565
+msgid "Reinstall Selected Chart"
+msgstr ""
+
+#: src/ochartShop.cpp:2569
+msgid "Update Selected Chart"
+msgstr ""
+
+#: src/ochartShop.cpp:2573 src/ochartShop.cpp:2577
+msgid "Download Selected Chart"
+msgstr ""
+
+#: src/ochartShop.cpp:2736
+msgid "New OpenCPN oeSENC System Name"
+msgstr ""
+
+#: src/ochartShop.cpp:2753
+msgid "Enter New System Name"
+msgstr ""
+
+#: src/ochartShop.cpp:2764
+msgid "A valid System Name is 3 to 15 characters in length."
+msgstr ""
+
+#: src/ochartShop.cpp:2767
+msgid "lower case letters and numbers only."
+msgstr ""
+
+#: src/ochartShop.cpp:2770
+msgid "No symbols or spaces are allowed."
+msgstr ""
+
+#: src/ochartShop.cpp:2866
+msgid "Select OpenCPN/oeSENC System Name"
+msgstr ""
+
+#: src/ochartShop.cpp:2882
+msgid "Select your System Name from the following list, or "
+msgstr ""
+
+#: src/ochartShop.cpp:2887
+msgid " create a new System Name for this computer."
+msgstr ""
+
+#: src/ochartShop.cpp:2897
+msgid "new..."
+msgstr ""
+
+#: src/ochartShop.cpp:2899
+msgid "System Names"
+msgstr ""
+
+#: src/ochartShop.cpp:3066
+msgid "Downloaded:  "
+msgstr ""
+
+#: src/ochartShop.cpp:3144
+msgid "Login to o-charts.org"
+msgstr ""
+
+#: src/ochartShop.cpp:3161
+msgid "email address:"
+msgstr ""
+
+#: src/ochartShop.cpp:3168
+msgid "Password:"
+msgstr ""
+
