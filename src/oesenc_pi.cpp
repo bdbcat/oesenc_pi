@@ -1388,7 +1388,6 @@ bool oesenc_pi::SaveConfig( void )
 void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
     wxString titleString =  _("oeSENC_PI Preferences");
-    titleString += _T(" [ Version: ") + g_versionString + _T(" ]");
     
     g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
     g_prefs_dialog->Fit();
@@ -3443,6 +3442,11 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         wxBoxSizer* bSizer2;
         bSizer2 = new wxBoxSizer( wxVERTICAL );
+
+        // Plugin Version
+        wxString versionText = _T(" oeSENC Version: ") + g_versionString;
+        wxStaticText *versionTextBox = new wxStaticText(this, wxID_ANY, versionText);
+        bSizer2->Add(versionTextBox, 1, wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL, 10 );
         
         //  FPR File Permit
         wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
