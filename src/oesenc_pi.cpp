@@ -58,6 +58,7 @@
 #include "dsa_utils.h"
 #include "sha1.h"
 #include "ochartShop.h"
+#include "version.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -164,6 +165,7 @@ wxArrayString                   g_EULAShaArray;
 wxString                        g_PrivateDataDir;
 
 int                             g_admin;
+wxString g_versionString;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
@@ -539,6 +541,10 @@ OESENC_HTMLMessageDialog *pinfoDlg;
 oesenc_pi::oesenc_pi(void *ppimgr)
       :opencpn_plugin_111(ppimgr)
 {
+      wxString vs;
+      vs.Printf(_T("%d.%d.%d"), PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_PATCH);
+      g_versionString = vs;
+    
       // Create the PlugIn icons
       m_pplugin_icon = new wxBitmap(default_pi);
 
@@ -1381,7 +1387,10 @@ bool oesenc_pi::SaveConfig( void )
 
 void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
-    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, _("oeSENC_PI Preferences"), wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+    wxString titleString =  _("oeSENC_PI Preferences");
+    titleString += _T(" [ Version: ") + g_versionString + _T(" ]");
+    
+    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
     g_prefs_dialog->Fit();
 //    g_prefs_dialog->SetSize(wxSize(300, -1));
     wxColour cl;
