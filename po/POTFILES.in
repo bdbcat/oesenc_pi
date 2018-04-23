@@ -4,3 +4,4 @@ src/oesenc_pi.cpp
 src/oesenc_pi.h
 src/Osenc.cpp
 src/s52plib.cpp
+src/ochartShop.cpp
