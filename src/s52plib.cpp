@@ -7046,6 +7046,12 @@ int s52plib::SetLineFeaturePriority( ObjRazRules *rzRules, int npriority )
 
 int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
 {
+    if(!rzRules->obj->m_ls_list){
+        wxString msg = wxString(rzRules->obj->FeatureName, wxConvUTF8);
+        wxLogMessage(_T("Missing ls_list on FEATURE: ") + msg);
+    }
+        
+        
     if(rzRules->obj->m_ls_list){
 
         VE_Element *pedge;
