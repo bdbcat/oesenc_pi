@@ -2092,16 +2092,8 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                         break;
                 }
 
-//                 if(fabs(vp->rotation) > 0.01){
-//                     float c = cosf(-vp->rotation );
-//                     float s = sinf(-vp->rotation );
-//                     float x = xadjust;
-//                     float y = yadjust;
-//                     xadjust =  x*c - y*s;
-//                     yadjust =  x*s + y*c;
-// 
-//                 }
 
+#if 0
                 int xp = x;
                 int yp = y;
 
@@ -2120,7 +2112,23 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 
                 xp+= xadjust;
                 yp+= yadjust;
-
+#endif
+                if(fabs(vp->rotation) > 0.01){
+                    float c = cosf(-vp->rotation );
+                    float s = sinf(-vp->rotation );
+                    float x = xadjust;
+                    float y = yadjust;
+                    xadjust =  x*c - y*s;
+                    yadjust =  x*s + y*c;
+                    
+                }
+                
+                int xp = x;
+                int yp = y;
+                
+                xp+= xadjust;
+                yp+= yadjust;
+                
 
                 pRectDrawn->SetX( xp );
                 pRectDrawn->SetY( yp );
@@ -2268,16 +2276,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     break;
             }
 
-//             if(fabs(vp->rotation) > 0.01){
-//                 float c = cosf(-vp->rotation );
-//                 float s = sinf(-vp->rotation );
-//                 float x = xadjust;
-//                 float y = yadjust;
-//                 xadjust =  x*c - y*s;
-//                 yadjust =  x*s + y*c;
-// 
-//             }
-
+#if 0
             int xp = x;
             int yp = y;
 
@@ -2296,7 +2295,25 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 
             xp+= xadjust;
             yp+= yadjust;
-
+#endif
+            if(fabs(vp->rotation) > 0.01){
+                float c = cosf(-vp->rotation );
+                float s = sinf(-vp->rotation );
+                float x = xadjust;
+                float y = yadjust;
+                xadjust =  x*c - y*s;
+                yadjust =  x*s + y*c;
+                
+            }
+            
+            int xp = x;
+            int yp = y;
+            
+            xp+= xadjust;
+            yp+= yadjust;
+            
+            
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );
@@ -2731,7 +2748,7 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
     //  Compensate for various display resolutions
     //  Develop empirically, making a flare light about 6 mm long
     double pix_factor = GetPPMM() / 6.0;
-    xscale *= pix_factor;
+///    xscale *= pix_factor;
     
 
     if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6))
