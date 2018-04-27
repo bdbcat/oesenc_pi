@@ -2744,12 +2744,14 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
 
     float xscale = 1.0;
+    
+#ifdef __OCPN__ANDROID__    
     //  Set the onscreen size of the symbol
     //  Compensate for various display resolutions
     //  Develop empirically, making a flare light about 6 mm long
     double pix_factor = GetPPMM() / 6.0;
-///    xscale *= pix_factor;
-    
+    xscale *= pix_factor;
+#endif    
 
     if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6))
         || (!strncmp(rzRules->obj->FeatureName, "DWRTPT", 6))
@@ -3000,6 +3002,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     scale_factor *=  g_ChartScaleFactorExp;
     scale_factor *= g_scaminScale;
 
+#ifdef __OCPN__ANDROID__    
     //  Set the onscreen size of the symbol
     //  Compensate for various display resolutions
     //  Develop empirically, making a buoy about 4 mm tall
@@ -3016,7 +3019,6 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     double pix_factor = targetHeight / boyHeight;
     
     
-    
     //qDebug() << "scaleing" << m_display_size_mm  << targetHeight0 << targetHeight << GetPPMM() << boyHeight << pix_factor;
     
     // for Hubert, and my moto 
@@ -3030,6 +3032,8 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     
     
     scale_factor *= pix_factor;
+#endif
+    
     
     if(g_oz_vector_scale && vp->b_quilt){
         double sfactor = vp->ref_scale/vp->chart_scale;
