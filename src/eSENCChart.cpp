@@ -9052,6 +9052,7 @@ void S57Obj::Init()
     m_lsindex_array = NULL;
     m_n_edge_max_points = 0;
     m_ls_list = 0;
+    m_ls_list_legacy = NULL;
     
     iOBJL = -1; // deferred, done by OBJL filtering in the PLIB as needed
     bBBObj_valid = false;

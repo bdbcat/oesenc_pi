@@ -84,12 +84,24 @@ size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcha
     size_t iRealSize = size * nmemb;
     wxCharBuffer* pStr = (wxCharBuffer*) pcharbuf;
     
+//     if(pStr)
+//     {
+//         wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8);
+//         *pStr = str.mb_str();
+//     }
+ 
     if(pStr)
     {
-        wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8);
-        *pStr = str.mb_str();
+#ifdef __WXMSW__        
+        wxString str1a = wxString(*pStr);
+        wxString str2 = wxString((const char*)ptr, wxConvUTF8, iRealSize);
+        *pStr = (str1a + str2).mb_str();
+#else        
+        wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8, iRealSize);
+        *pStr = str.mb_str(wxConvUTF8);
+#endif        
     }
-    
+ 
     return iRealSize;
 }
 
@@ -629,6 +641,10 @@ int doLogin()
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( post.GetResponseBody().c_str());
         
+        wxString p = wxString(post.GetResponseBody().c_str(), wxConvUTF8);
+        wxLogMessage(_T("doLogin results:"));
+        wxLogMessage(p);
+        
         wxString queryResult;
         wxString loginKey;
         
@@ -697,6 +713,10 @@ wxString ProcessResponse(std::string body)
         wxString chartLink;
         wxString chartSize;
         wxString chartThumbURL;
+
+//         wxString p = wxString(body.c_str(), wxConvUTF8);
+//         wxLogMessage(_T("ProcessResponse results:"));
+//         wxLogMessage(p);
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
@@ -2742,8 +2762,7 @@ wxString shopPanel::doGetNewSystemName( )
         char *t = (char *)s;
         for(unsigned int i = 0; i < strlen(s); i++, t++){
             bool bok = false;
-            if( ((*t >= 'A') && (*t <= 'Z')) ||
-                ((*t >= 'a') && (*t <= 'z')) ||
+            if( ((*t >= 'a') && (*t <= 'z')) ||
                 ((*t >= '0') && (*t <= '9')) ){
                 
                 bok = true;
