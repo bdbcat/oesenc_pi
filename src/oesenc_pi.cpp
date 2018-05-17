@@ -57,7 +57,11 @@
 #include "jsonreader.h"
 #include "dsa_utils.h"
 #include "sha1.h"
+
+#ifndef __OCPN__ANDROID__
 #include "ochartShop.h"
+#endif
+
 #include "version.h"
 
 #ifdef __WXOSX__
@@ -5252,7 +5256,7 @@ void androidHideBusyIcon()
 
 void oesenc_pi::OnSetupOptions( void )
 {
-#if 0
+#ifdef __OCPN__ANDROID__
     m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
     if( ! m_pOptionsPage )
     {
