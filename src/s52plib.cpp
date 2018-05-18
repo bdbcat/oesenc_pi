@@ -5393,13 +5393,10 @@ int s52plib::RenderLCPlugIn( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         }
     }
 
-
-    //  Allocate some storage for converted points
-    wxPoint *ptp = (wxPoint *) malloc( ( nls_max + 2 ) * sizeof(wxPoint) ); // + 2 allows for end nodes
-
-
     if( rzRules->obj->m_ls_list_legacy )
     {
+        //  Allocate some storage for converted points
+        wxPoint *ptp = (wxPoint *) malloc( ( nls_max + 2 ) * sizeof(wxPoint) ); // + 2 allows for end nodes
         float *ppt;
 
         VE_Element *pedge;
