@@ -163,6 +163,8 @@ extern bool processChartinfo(const wxString &oesenc_file);
 extern void showChartinfoDialog( void );
 extern void processUserKeyHint(const wxString &oesenc_file);
 
+static int g_plib_state_hash;
+
 // ----------------------------------------------------------------------------
 // Random Prototypes
 // ----------------------------------------------------------------------------
@@ -1318,10 +1320,13 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
         //for the case where depth(height) units change
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
-        ps52plib->FlushSymbolCaches();
         m_last_vp.bValid = 0;
         
         m_plib_state_hash = PI_GetPLIBStateHash();
+        if (m_plib_state_hash != g_plib_state_hash) {
+            ps52plib->FlushSymbolCaches();
+            g_plib_state_hash = m_plib_state_hash;
+        }
     }
     
     if( VPoint.view_scale_ppm != m_last_vp.view_scale_ppm ) {
@@ -1482,10 +1487,12 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
         ClearRenderedTextCache();                       // and reset the text renderer,
         ResetPointBBoxes( m_last_vp, VPoint );
         SetSafetyContour();
-        ps52plib->FlushSymbolCaches();
         
         m_plib_state_hash = PI_GetPLIBStateHash();
-
+        if (m_plib_state_hash != g_plib_state_hash) {
+            ps52plib->FlushSymbolCaches();
+            g_plib_state_hash = m_plib_state_hash;
+        }
     }
 
 
