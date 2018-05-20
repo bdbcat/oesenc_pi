@@ -8997,9 +8997,9 @@ S57Obj::~S57Obj()
             
             //PolyTriGroup *ppg_vbo = pPolyTessGeo->Get_PolyTriGroup_head();
             //TODO
-//             if (b_useVBO && ppg_vbo && auxParm0 > 0 && ppg_vbo->single_buffer && s_glDeleteBuffers) {
-//                 s_glDeleteBuffers(1, (GLuint *)&auxParm0);
-//             }
+            if (auxParm0 > 0 && s_glDeleteBuffers) {
+                s_glDeleteBuffers(1, (GLuint *)&auxParm0);
+            }
             #endif
             delete pPolyTessGeo;
         }
