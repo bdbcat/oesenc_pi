@@ -118,6 +118,8 @@ public:
     
    bool Post(wxInputStream& buffer, const wxString& szRemoteFile /*= wxEmptyString*/);
    bool Post(const char* buffer, size_t size, const wxString& szRemoteFile /*= wxEmptyString*/);
+   std::string GetResponseBody() const;
+   
 protected:
     void SetCurlHandleToDefaults(const wxString& relativeURL);
     
@@ -189,6 +191,18 @@ bool wxCurlHTTPNoZIP::Post(wxInputStream& buffer, const wxString& szRemoteFile /
     }
     
     return false;
+}
+
+std::string wxCurlHTTPNoZIP::GetResponseBody() const
+{
+#ifndef ARMHF
+    wxString s = wxString((const char *)m_szResponseBody, wxConvLibc);
+    return std::string(s.mb_str());
+    
+#else    
+    return std::string((const char *)m_szResponseBody);
+#endif
+    
 }
 
 // itemChart
@@ -720,7 +734,7 @@ wxString ProcessResponse(std::string body)
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
-                return _T("50");                              // undetermined error??
+                return _T("57");                              // undetermined error??
             }
             
             wxString rootName = wxString::FromUTF8( root->Value() );
