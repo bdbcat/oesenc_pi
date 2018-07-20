@@ -7346,8 +7346,8 @@ void eSENCChart::BuildLineVBO( void )
 //#ifdef BUILD_VBO    
 #ifdef ocpnUSE_GL
      
-    //if(!g_b_EnableVBO)
-      //  return;
+    if(!g_b_EnableVBO)
+        return;
     
     if(m_LineVBO_name == -1){
         
