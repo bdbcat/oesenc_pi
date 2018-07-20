@@ -1382,7 +1382,14 @@ void s52plib::FlushSymbolCaches( void )
     m_CARC_DL_hashmap.clear();
 #endif
 #endif
-
+    
+    for (int i = 0; i < TXF_CACHE; i++)
+    {
+        s_txf[i].key = NULL;
+        s_txf[i].cache.m_built = false;
+        
+    }
+    
 }
 
 void s52plib::DestroyPattRules( RuleHash *rh )
