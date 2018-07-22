@@ -252,6 +252,7 @@ public:
                              long style = wxOK|wxCENTRE,  
                              bool bFixedFont = false,
                              const wxPoint& pos = wxDefaultPosition);
+    ~OESENC_HTMLMessageDialog();
     
     void OnYes(wxCommandEvent& event);
     void OnNo(wxCommandEvent& event);
@@ -334,6 +335,10 @@ OESENC_HTMLMessageDialog::OESENC_HTMLMessageDialog( wxWindow *parent,
        if(timeout_sec > 0)
            m_timer.Start( timeout_sec * 1000, wxTIMER_ONE_SHOT );
        
+}
+
+OESENC_HTMLMessageDialog::~OESENC_HTMLMessageDialog()
+{
 }
 
 void OESENC_HTMLMessageDialog::OnYes(wxCommandEvent& WXUNUSED(event))
@@ -4948,7 +4953,7 @@ void showChartinfoDialog( void )
         //        int parent_font_width = sx;
         //         wxSize sz = wxSize(len_max * parent_font_width * 1.2, -1);
         
-        pinfoDlg = new OESENC_HTMLMessageDialog( GetOCPNCanvasWindow(), hdr, _("oeSENC_PI Message"), wxOK);
+        pinfoDlg = new OESENC_HTMLMessageDialog( NULL /*GetOCPNCanvasWindow()*/, hdr, _("oeSENC_PI Message"), wxOK);
         //        pinfoDlg->SetClientSize(sz);
         pinfoDlg->Centre();
         pinfoDlg->Show();
