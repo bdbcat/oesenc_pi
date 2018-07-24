@@ -1985,6 +1985,16 @@ shopPanel::~shopPanel()
 {
 }
 
+void shopPanel::RefreshSystemName()
+{
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
+    
+    m_staticTextSystemName->SetLabel(sn);
+}
+
+
 void shopPanel::SelectChart( oeSencChartPanel *chart )
 {
     if (m_ChartSelected == chart)

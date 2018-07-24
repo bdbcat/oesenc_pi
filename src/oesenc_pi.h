@@ -153,6 +153,7 @@ public:
     void OnShowFPRClick( wxCommandEvent &event );
     
     void ProcessChartManageResult(wxString result);
+    shopPanel           *m_shoppanel;
     
 private:
 //    wxString GetPermitDir();
@@ -177,7 +178,7 @@ private:
     wxButton            *m_buttonNewUP;
     wxButton            *m_buttonImportCells;
     wxButton            *m_buttonNewIP;
-
+    
     wxString            m_userpermit;
 
     wxString            m_last_enc_root_dir;
@@ -190,7 +191,6 @@ private:
     
     wxScrolledWindow    *m_pOptionsPage;
     oesencPanel         *m_oesencpanel;
-    shopPanel           *m_shoppanel;
     
 
 };
@@ -215,7 +215,9 @@ public:
     
     wxButton *m_buttonNewFPR;
     wxButton *m_buttonShowFPR;
+    wxButton *m_buttonClearSystemName;
     wxStaticText *m_fpr_text;
+    wxStaticText *m_nameTextBox;
     
     DECLARE_EVENT_TABLE()
     
@@ -236,6 +238,7 @@ public:
     void onTimerEvent(wxTimerEvent &event);
     void OnGetHWIDClick( wxCommandEvent &event );
     void OnManageShopClick( wxCommandEvent &event );
+    void OnClearSystemName( wxCommandEvent &event );
     
 private:
     void processArbResult( wxString result );

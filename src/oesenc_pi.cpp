@@ -610,7 +610,7 @@ oesenc_pi::oesenc_pi(void *ppimgr)
 
 
       gb_global_log = false;
-
+      m_shoppanel = NULL;
 }
 
 oesenc_pi::~oesenc_pi()
@@ -666,12 +666,9 @@ int oesenc_pi::Init(void)
                  WANTS_OVERLAY_CALLBACK   |
                  WANTS_OPENGL_OVERLAY_CALLBACK;
 
-#ifndef __OCPN__ANDROID__
-    flags |= WANTS_PREFERENCES;
-#endif
-
     flags |= INSTALLS_TOOLBOX_PAGE;             // for o-charts shop interface
-
+    flags |= WANTS_PREFERENCES;             
+    
     return flags;
     
 }
@@ -3475,6 +3472,26 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
 
+        // System Name
+        if(g_systemName.Length()){
+            wxString nameText = _T(" System Name: ") + g_systemName;
+            m_nameTextBox = new wxStaticText(this, wxID_ANY, nameText);
+            bSizer2->AddSpacer( 20 );
+            bSizer2->Add(m_nameTextBox, 1, wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL, 10 );
+        }
+        else
+            bSizer2->AddSpacer( 10 );
+        
+        m_buttonClearSystemName = new wxButton( this, wxID_ANY, _("Reset System Name"), wxDefaultPosition, wxDefaultSize, 0 );
+        
+        bSizer2->AddSpacer( 10 );
+        bSizer2->Add( m_buttonClearSystemName, 0, wxEXPAND, 50 );
+        
+        m_buttonClearSystemName->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearSystemName), NULL, g_event_handler );
+
+        if(!g_systemName.Length())
+            m_buttonClearSystemName->Disable();
+            
 #ifdef __WXMAC__
         m_buttonShowFPR = new wxButton( this, wxID_ANY, _("Show In Finder"), wxDefaultPosition, wxDefaultSize, 0 );
 #else
@@ -3489,11 +3506,12 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
 #ifdef __OCPN__ANDROID__
         m_buttonShowFPR->Hide();
+        m_buttonNewFPR->Hide();
 #endif
         
         m_sdbSizer1 = new wxStdDialogButtonSizer();
-//         m_sdbSizer1OK = new wxButton( this, wxID_OK );
-//         m_sdbSizer1->AddButton( m_sdbSizer1OK );
+         m_sdbSizer1OK = new wxButton( this, wxID_OK );
+         m_sdbSizer1->AddButton( m_sdbSizer1OK );
         m_sdbSizer1Cancel = new wxButton( this, wxID_CANCEL );
         m_sdbSizer1->AddButton( m_sdbSizer1Cancel );
         m_sdbSizer1->Realize();
@@ -3806,6 +3824,29 @@ void oesenc_pi_event_handler::OnShowFPRClick( wxCommandEvent &event )
 #ifdef __WXGTK__
     wxExecute( wxString::Format("xdg-open %s", wxFileName::FileName(g_fpr_file).GetPath()) );
 #endif
+}
+
+void oesenc_pi_event_handler::OnClearSystemName( wxCommandEvent &event )
+{
+    g_systemName.Clear();
+    if(g_prefs_dialog){
+        g_prefs_dialog->m_nameTextBox->SetLabel(_T(" "));
+        g_prefs_dialog->m_buttonClearSystemName->Disable();
+        
+        g_prefs_dialog->Refresh(true);
+    }
+    wxFileConfig *pConf = GetOCPNConfigObject();
+    if( pConf ) {
+        pConf->SetPath( _T("/PlugIns/oesenc") );
+        pConf->Write( _T("systemName"), g_systemName);
+    }
+    
+#ifndef __OCPN__ANDROID__    
+    if(m_parent->m_shoppanel){
+        m_parent->m_shoppanel->RefreshSystemName();
+    }
+#endif    
+        
 }
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
