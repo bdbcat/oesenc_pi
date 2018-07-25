@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-14 22:21-0400\n"
-"PO-Revision-Date: 2018-04-19 21:27-0400\n"
+"POT-Creation-Date: 2018-07-24 10:42-0400\n"
+"PO-Revision-Date: 2018-07-25 01:11\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Catalan\n"
 "Language: ca_ES\n"
@@ -16,83 +16,79 @@ msgstr ""
 "X-Crowdin-Language: ca\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
-#: src/eSENCChart.cpp:3297 src/eSENCChart.cpp:3301
-msgid "Building eSENC"
-msgstr "Construint eSENC"
-
-#: src/eSENCChart.cpp:6524
+#: src/eSENCChart.cpp:6387
 msgid "Sector angles are True Bearings from Seaward"
 msgstr "Angles de sector són Demores Vertaderes des de la Mar"
 
-#: src/oesenc_pi.cpp:285 src/oesenc_pi.cpp:427 src/oesenc_pi.cpp:2110
-#: src/oesenc_pi.cpp:2139 src/oesenc_pi.cpp:4451 src/oesenc_pi.cpp:4503
-#: src/oesenc_pi.cpp:4669 src/ochartShop.cpp:1399 src/ochartShop.cpp:1465
-#: src/ochartShop.cpp:1592 src/ochartShop.cpp:2704 src/ochartShop.cpp:2733
-#: src/ochartShop.cpp:2838 src/ochartShop.cpp:2863 src/ochartShop.cpp:3097
-#: src/ochartShop.cpp:3125
+#: src/oesenc_pi.cpp:292 src/oesenc_pi.cpp:438 src/oesenc_pi.cpp:2124
+#: src/oesenc_pi.cpp:2153 src/oesenc_pi.cpp:4536 src/oesenc_pi.cpp:4588
+#: src/oesenc_pi.cpp:4754 src/ochartShop.cpp:1589 src/ochartShop.cpp:1655
+#: src/ochartShop.cpp:1782 src/ochartShop.cpp:2836 src/ochartShop.cpp:2865
+#: src/ochartShop.cpp:2970 src/ochartShop.cpp:2995 src/ochartShop.cpp:3226
+#: src/ochartShop.cpp:3254
 msgid "Dialog"
 msgstr "Diàleg"
 
-#: src/oesenc_pi.cpp:711
+#: src/oesenc_pi.cpp:723
 msgid "oeSENC"
 msgstr "oeSENC"
 
-#: src/oesenc_pi.cpp:717
+#: src/oesenc_pi.cpp:729
 msgid "PlugIn for OpenCPN oeSENC charts"
 msgstr "Connector per a cartes oeSENC per OpenCPN"
 
-#: src/oesenc_pi.cpp:723
+#: src/oesenc_pi.cpp:735
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
 msgstr "Connector per OpenCPN\n"
 "Proporciona suport per cartes oeSENC.\n\n"
 
-#: src/oesenc_pi.cpp:929 src/oesenc_pi.cpp:3792
+#: src/oesenc_pi.cpp:941 src/oesenc_pi.cpp:3877
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
 msgstr "Per obtenir un UserKey, cal generar un arxiu identificador únic de sistema.\n"
 
-#: src/oesenc_pi.cpp:930 src/oesenc_pi.cpp:3793
+#: src/oesenc_pi.cpp:942 src/oesenc_pi.cpp:3878
 msgid "This file is also known as a\"fingerprint\" file.\n"
 msgstr "Aquest fitxer és també conegut com \"fingerprint\".\n"
 
-#: src/oesenc_pi.cpp:931 src/oesenc_pi.cpp:3794
+#: src/oesenc_pi.cpp:943 src/oesenc_pi.cpp:3879
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
 msgstr "El fitxer fingerprint conté informació per identificar aquest ordinador.\n\n"
 
-#: src/oesenc_pi.cpp:932 src/oesenc_pi.cpp:3795
+#: src/oesenc_pi.cpp:944 src/oesenc_pi.cpp:3880
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
 msgstr "Després de crear aquest fitxer, el necessitareu per a obtenir el UserKey a la botiga o-charts.org.\n\n"
 
-#: src/oesenc_pi.cpp:933 src/oesenc_pi.cpp:3796
+#: src/oesenc_pi.cpp:945 src/oesenc_pi.cpp:3881
 msgid "Proceed to create Fingerprint file?"
 msgstr "Posar a crear l'arxiu fingerprint?"
 
-#: src/oesenc_pi.cpp:935 src/oesenc_pi.cpp:3798 src/oesenc_pi.cpp:4854
-#: src/oesenc_pi.cpp:4934 src/ochartShop.cpp:799 src/ochartShop.cpp:1942
-#: src/ochartShop.cpp:1965 src/ochartShop.cpp:1995 src/ochartShop.cpp:2037
-#: src/ochartShop.cpp:2058 src/ochartShop.cpp:2088 src/ochartShop.cpp:2466
+#: src/oesenc_pi.cpp:947 src/oesenc_pi.cpp:3843 src/oesenc_pi.cpp:3883
+#: src/oesenc_pi.cpp:4939 src/oesenc_pi.cpp:5019 src/ochartShop.cpp:951
+#: src/ochartShop.cpp:2157 src/ochartShop.cpp:2170 src/ochartShop.cpp:2209
+#: src/ochartShop.cpp:2595
 msgid "oeSENC_PI Message"
 msgstr "Missatge oeSENC_PI"
 
-#: src/oesenc_pi.cpp:1384 src/oesenc_pi.h:212
+#: src/oesenc_pi.cpp:1396 src/oesenc_pi.h:212
 msgid "oeSENC_PI Preferences"
 msgstr "Preferències oeSENC_PI"
 
-#: src/oesenc_pi.cpp:2142
+#: src/oesenc_pi.cpp:2156
 msgid "OpenCPN oeSENC UserKey Required"
 msgstr "UserKey oeSENC per OpenCPN requerit"
 
-#: src/oesenc_pi.cpp:2160
+#: src/oesenc_pi.cpp:2174
 msgid "Enter UserKey"
 msgstr "Introduir UserKey"
 
-#: src/oesenc_pi.cpp:2179
+#: src/oesenc_pi.cpp:2193
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
 msgstr "Un UserKey oeSENC vàlid té el format alfanumèric: AAAA-BBBB-CCCC-DDDD-EEEE-FF \n\n"
 "El UserKey oeSENC es pot obtenir del vostre proveïdor de cartes."
 
-#: src/oesenc_pi.cpp:2185
+#: src/oesenc_pi.cpp:2199
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
@@ -102,7 +98,7 @@ msgstr "ERROR: El UserKey introduït no és vàlid per aquest conjunt de cartes 
 "Un UserKey oeSENC vàlid té el format alfanumèric: AAAA-BBBB-CCCC-DDDD-EEEE-FF.\n"
 "El UserKey oeSENC es pot obtenir del vostre proveïdor de cartes.\n\n"
 
-#: src/oesenc_pi.cpp:2193
+#: src/oesenc_pi.cpp:2207
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
@@ -112,456 +108,476 @@ msgstr "ERROR: El UserKey introduït no és vàlid per aquest conjunt de cartes 
 "Verifiqueu el UserKey i torneu-ho a obris OpenCPN. \n\n"
 "El UserKey oeSENC es pot obtenir del vostre proveïdor de cartes.\n\n"
 
-#: src/oesenc_pi.cpp:2204
+#: src/oesenc_pi.cpp:2218
 msgid "UserKey accepted.\n\n"
 msgstr "UserKey acceptat.\n\n"
 
-#: src/oesenc_pi.cpp:2241 src/ochartShop.cpp:2778 src/ochartShop.cpp:2910
-#: src/ochartShop.cpp:3178
+#: src/oesenc_pi.cpp:2255 src/ochartShop.cpp:2910 src/ochartShop.cpp:3042
+#: src/ochartShop.cpp:3307
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: src/oesenc_pi.cpp:2248 src/ochartShop.cpp:2783 src/ochartShop.cpp:2913
-#: src/ochartShop.cpp:3181
+#: src/oesenc_pi.cpp:2262 src/ochartShop.cpp:2915 src/ochartShop.cpp:3045
+#: src/ochartShop.cpp:3310
 msgid "OK"
 msgstr "Accepta"
 
-#: src/oesenc_pi.cpp:2939
+#: src/oesenc_pi.cpp:2953
 msgid "Checking oeserverd utility at "
 msgstr "Comprovació de l'aplicació oeserverd a "
 
-#: src/oesenc_pi.cpp:2947
+#: src/oesenc_pi.cpp:2961
 msgid "Cannot find the oserverd utility at \n"
 msgstr "No puc trobar l'aplicació oserverd a \n"
 
-#: src/oesenc_pi.cpp:2951 src/oesenc_pi.cpp:3059 src/oesenc_pi.cpp:3680
-#: src/oesenc_pi.cpp:3813 src/oesenc_pi.cpp:3819 src/oesenc_pi.cpp:3968
-#: src/oesenc_pi.cpp:3998 src/oesenc_pi.cpp:4011 src/ochartShop.cpp:457
-#: src/ochartShop.cpp:473 src/ochartShop.cpp:932 src/ochartShop.cpp:1210
-#: src/ochartShop.cpp:1902 src/ochartShop.cpp:1909 src/ochartShop.cpp:2006
-#: src/ochartShop.cpp:2096
+#: src/oesenc_pi.cpp:2965 src/oesenc_pi.cpp:3073 src/oesenc_pi.cpp:3729
+#: src/oesenc_pi.cpp:3898 src/oesenc_pi.cpp:3904 src/oesenc_pi.cpp:4053
+#: src/oesenc_pi.cpp:4083 src/oesenc_pi.cpp:4096 src/ochartShop.cpp:592
+#: src/ochartShop.cpp:608 src/ochartShop.cpp:1084 src/ochartShop.cpp:1339
+#: src/ochartShop.cpp:2117 src/ochartShop.cpp:2124 src/ochartShop.cpp:2220
 msgid "oeSENC_pi Message"
 msgstr "Missatge oeSENC_PI"
 
-#: src/oesenc_pi.cpp:3030 src/oesenc_pi.cpp:3054
+#: src/oesenc_pi.cpp:3044 src/oesenc_pi.cpp:3068
 msgid "oeserverd utility at \n"
 msgstr "aplicació oeserverd a \n"
 
-#: src/oesenc_pi.cpp:3034
+#: src/oesenc_pi.cpp:3048
 msgid " reports Unavailable.\n\n"
 msgstr " informes no disponibles.\n\n"
 
-#: src/oesenc_pi.cpp:3058
+#: src/oesenc_pi.cpp:3072
 msgid " could not be started.\n\n"
 msgstr " podria no ser iniciada.\n\n"
 
-#: src/oesenc_pi.cpp:3439
+#: src/oesenc_pi.cpp:3458
+msgid "Show EULA"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3465
 msgid "System Identification"
 msgstr "Identificació de sistema"
 
-#: src/oesenc_pi.cpp:3449
+#: src/oesenc_pi.cpp:3475
 msgid "Create System Identifier file..."
 msgstr "Crear l'arxiu identificador del sistema..."
 
-#: src/oesenc_pi.cpp:3457
+#: src/oesenc_pi.cpp:3484
 msgid "Show In Finder"
 msgstr "Mostrar al Buscador"
 
-#: src/oesenc_pi.cpp:3459
+#: src/oesenc_pi.cpp:3486
 msgid "Show on disk"
 msgstr "Mostra al disc"
 
-#: src/oesenc_pi.cpp:3680 src/oesenc_pi.cpp:3968
+#: src/oesenc_pi.cpp:3505
+msgid "Reset System Name"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3729 src/oesenc_pi.cpp:4053
 msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
 msgstr "Son necessaris privilegis d'administrador per copiar fpr.\n"
 " Torneu-ho a provar...."
 
-#: src/oesenc_pi.cpp:3807 src/oesenc_pi.cpp:3992
+#: src/oesenc_pi.cpp:3840
+msgid "System name RESET shall be performed only by request from o-charts technical support staff."
+msgstr ""
+
+#: src/oesenc_pi.cpp:3842
+msgid "Proceed to RESET?"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3892 src/oesenc_pi.cpp:4077
 msgid "Fingerprint file created.\n"
 msgstr "Arxiu fingerprint creat.\n"
 
-#: src/oesenc_pi.cpp:3811 src/oesenc_pi.cpp:3996
+#: src/oesenc_pi.cpp:3896 src/oesenc_pi.cpp:4081
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
 msgstr "\n\n"
 " L'arxiu fingerprint també es copia a l'escriptori."
 
-#: src/oesenc_pi.cpp:4593
+#: src/oesenc_pi.cpp:4678
 msgid "Could not open oesenc_pi EULA: "
 msgstr "No s'ha pogut obrir EULA oesenc_pi: "
 
-#: src/oesenc_pi.cpp:4666
+#: src/oesenc_pi.cpp:4751
 msgid "oeSENC PlugIn for OpenCPN"
 msgstr "Connector oeSENC per a OpenCPN"
 
-#: src/oesenc_pi.cpp:4729
+#: src/oesenc_pi.cpp:4814
 msgid "License"
 msgstr "Llicència"
 
-#: src/oesenc_pi.cpp:4754
+#: src/oesenc_pi.cpp:4839
 msgid "Accept"
 msgstr "Accepta"
 
-#: src/oesenc_pi.cpp:4759
+#: src/oesenc_pi.cpp:4844
 msgid "Reject"
 msgstr "Refusa"
 
-#: src/oesenc_pi.cpp:4800
+#: src/oesenc_pi.cpp:4885
 msgid "Available Chart sets:"
 msgstr "Cartes disponibles:"
 
-#: src/oesenc_pi.cpp:4869
+#: src/oesenc_pi.cpp:4954
 msgid "The following Chart sets are available:"
 msgstr "Les següents cartes estan disponibles:"
 
-#: src/oesenc_pi.cpp:4879
+#: src/oesenc_pi.cpp:4964
 msgid "Chart set"
 msgstr "Cartes"
 
-#: src/oesenc_pi.cpp:4883
+#: src/oesenc_pi.cpp:4968
 msgid "Version"
 msgstr "Versió"
 
-#: src/oesenc_pi.cpp:4887
+#: src/oesenc_pi.cpp:4972
 msgid "Valid until"
 msgstr "Vàlid fins"
 
-#: src/oesenc_pi.cpp:5243 src/oesenc_pi.cpp:5258
+#: src/oesenc_pi.cpp:5328 src/oesenc_pi.cpp:5343
 msgid "oeSENC Charts"
 msgstr "Cartes oeSENC"
 
-#: src/oesenc_pi.cpp:5290
+#: src/oesenc_pi.cpp:5375
 msgid "Add/Update oeSENC chartsets"
 msgstr "Afegeix/actualitza cartes oeSENC"
 
-#: src/oesenc_pi.cpp:5295
+#: src/oesenc_pi.cpp:5380
 msgid "Visit o-charts.org Website"
 msgstr "Visiteu la pàgina web o-charts.org"
 
-#: src/oesenc_pi.cpp:5296
+#: src/oesenc_pi.cpp:5381
 msgid "Here you may order new oeSENC chartsets."
 msgstr "Aquí podeu demanar noves cartes oeSENC."
 
-#: src/oesenc_pi.h:300
+#: src/oesenc_pi.h:305
 msgid "OpenCPN SENC UserKey Required"
 msgstr "UserKey SENC per OpenCPN requerit"
 
-#: src/oesenc_pi.h:428
+#: src/oesenc_pi.h:433
 msgid "oeSENC_PI Information"
 msgstr "Informació oeSENC_PI"
 
-#: src/s52plib.cpp:2314 src/s52plib.cpp:2339 src/s52plib.cpp:2447
-#: src/s52plib.cpp:2621 src/s52plib.cpp:2637
+#: src/s52plib.cpp:2338 src/s52plib.cpp:2363 src/s52plib.cpp:2471
+#: src/s52plib.cpp:2645 src/s52plib.cpp:2661
 msgid "ChartTexts"
 msgstr "TextosCartes"
 
-#: src/ochartShop.cpp:236
+#: src/ochartShop.cpp:363
 msgid "Available."
 msgstr "Disponible."
 
-#: src/ochartShop.cpp:240
+#: src/ochartShop.cpp:367
 msgid "Installed, Up-to-date."
 msgstr "Instal·lada, actualitzada."
 
-#: src/ochartShop.cpp:244
+#: src/ochartShop.cpp:371
 msgid "Installed, Update available."
 msgstr "Instal·lada, actualització disponible."
 
-#: src/ochartShop.cpp:249
+#: src/ochartShop.cpp:376
 msgid "Expired."
 msgstr "Caducada."
 
-#: src/ochartShop.cpp:253
+#: src/ochartShop.cpp:380
 msgid "Preparing your chartset."
 msgstr "Preparant les seves cartes."
 
-#: src/ochartShop.cpp:257
+#: src/ochartShop.cpp:384
 msgid "Ready for download."
 msgstr "Llest per descarregar."
 
-#: src/ochartShop.cpp:261
+#: src/ochartShop.cpp:388
 msgid "Please update Chart List."
 msgstr "Si us plau, actualitza el llistat de cartes."
 
-#: src/ochartShop.cpp:265
+#: src/ochartShop.cpp:392
 msgid "Ready for Download Request."
 msgstr "Preparat per a la sol·licitud de descàrrega."
 
-#: src/ochartShop.cpp:444
+#: src/ochartShop.cpp:579
 msgid "o-charts API error code: "
 msgstr "codi d'error API o-charts: "
 
-#: src/ochartShop.cpp:450
+#: src/ochartShop.cpp:585
 msgid "Invalid user/email name or password."
 msgstr "Nom d'usuari/correu o contrasenya no vàlids."
 
-#: src/ochartShop.cpp:453
+#: src/ochartShop.cpp:588
 msgid "Check your configuration and try again."
 msgstr "Comproveu la configuració i torneu-ho a provar."
 
-#: src/ochartShop.cpp:468
+#: src/ochartShop.cpp:603
 msgid "internet communications error code: "
 msgstr "codi d'error de comunicacions Internet: "
 
-#: src/ochartShop.cpp:472
+#: src/ochartShop.cpp:607
 msgid "Check your connection and try again."
 msgstr "Comproveu la vostra connexió i torneu-ho a provar."
 
-#: src/ochartShop.cpp:492
+#: src/ochartShop.cpp:627
 msgid "Invalid Login."
 msgstr "Inici de sessió no vàlid."
 
-#: src/ochartShop.cpp:789
+#: src/ochartShop.cpp:941
 msgid "This action will PERMANENTLY assign the chart:"
 msgstr "Aquesta acció li assignarà PERMANENTMENT la carta:"
 
-#: src/ochartShop.cpp:793
+#: src/ochartShop.cpp:945
 msgid "to this systemName:"
 msgstr "a aquest Nom de Sistema:"
 
-#: src/ochartShop.cpp:797
+#: src/ochartShop.cpp:949
 msgid "Proceed?"
 msgstr "Vols continuar?"
 
-#: src/ochartShop.cpp:1129 src/ochartShop.cpp:1201
+#: src/ochartShop.cpp:1256 src/ochartShop.cpp:1330
 msgid "Unzipping chart files..."
 msgstr "Descomprimint arxiu de cartes..."
 
-#: src/ochartShop.cpp:1180
+#: src/ochartShop.cpp:1309
 msgid "Choose chart install location."
 msgstr "Triar la ubicació d'instal·lació de la carta."
 
-#: src/ochartShop.cpp:1194
+#: src/ochartShop.cpp:1323
 msgid "Ready for unzipping chart files."
 msgstr "Llest per descomprimir arxius de cartes."
 
-#: src/ochartShop.cpp:1210
+#: src/ochartShop.cpp:1339
 msgid "Error extracting zip file"
 msgstr "Error en extreure el fitxer zip"
 
-#: src/ochartShop.cpp:1423
+#: src/ochartShop.cpp:1613
 msgid "Chart Edition:"
 msgstr "Edició de la carta:"
 
-#: src/ochartShop.cpp:1429
+#: src/ochartShop.cpp:1619
 msgid "Order Reference:"
 msgstr "Referència de la comanda:"
 
-#: src/ochartShop.cpp:1435
+#: src/ochartShop.cpp:1625
 msgid "Purchase date:"
 msgstr "Data de la compra:"
 
-#: src/ochartShop.cpp:1441
+#: src/ochartShop.cpp:1631
 msgid "Expiration date:"
 msgstr "Data de caducitat:"
 
-#: src/ochartShop.cpp:1447
+#: src/ochartShop.cpp:1637
 msgid "Status:"
 msgstr "Estat:"
 
-#: src/ochartShop.cpp:1498
+#: src/ochartShop.cpp:1688
 msgid "Chart Edition: "
 msgstr "Edició de la carta: "
 
-#: src/ochartShop.cpp:1502
+#: src/ochartShop.cpp:1692
 msgid "Order Reference: "
 msgstr "Referència de la comanda: "
 
-#: src/ochartShop.cpp:1509
+#: src/ochartShop.cpp:1699
 msgid "Purchase date: "
 msgstr "Data de la compra: "
 
-#: src/ochartShop.cpp:1513
+#: src/ochartShop.cpp:1703
 msgid "Expiration date: "
 msgstr "Data de caducitat: "
 
-#: src/ochartShop.cpp:1526
+#: src/ochartShop.cpp:1716
 msgid "Assigment 1"
 msgstr "Assignació 1"
 
-#: src/ochartShop.cpp:1530 src/ochartShop.cpp:1553
+#: src/ochartShop.cpp:1720 src/ochartShop.cpp:1743
 msgid "System: "
 msgstr "Sistema: "
 
-#: src/ochartShop.cpp:1534 src/ochartShop.cpp:1557
+#: src/ochartShop.cpp:1724 src/ochartShop.cpp:1747
 msgid "Installed edition: "
 msgstr "Edició instal·lada: "
 
-#: src/ochartShop.cpp:1542 src/ochartShop.cpp:1565
+#: src/ochartShop.cpp:1732 src/ochartShop.cpp:1755
 msgid "Status: "
 msgstr "Estat: "
 
-#: src/ochartShop.cpp:1549
+#: src/ochartShop.cpp:1739
 msgid "Assigment 2"
 msgstr "Assignació 2"
 
-#: src/ochartShop.cpp:1722
+#: src/ochartShop.cpp:1912
 msgid "My Charts"
 msgstr "Les Meves Cartes"
 
-#: src/ochartShop.cpp:1725
+#: src/ochartShop.cpp:1915
 msgid "Refresh Chart List"
 msgstr "Actualitza la llista de Cartes"
 
-#: src/ochartShop.cpp:1744
+#: src/ochartShop.cpp:1934
 msgid "Actions"
 msgstr "Accions"
 
-#: src/ochartShop.cpp:1750 src/ochartShop.cpp:1914 src/ochartShop.cpp:2619
-msgid "System Name:"
-msgstr "Nom de Sistema:"
-
-#: src/ochartShop.cpp:1761
-msgid "Status: Chart List Refresh required."
-msgstr "Estat: Actualització del llistat de cartes requerida."
-
-#: src/ochartShop.cpp:1782 src/ochartShop.cpp:2561
+#: src/ochartShop.cpp:1944 src/ochartShop.cpp:2690
 msgid "Install Selected Chart"
 msgstr "Instal·la les Cartes Seleccionades"
 
-#: src/ochartShop.cpp:1786
+#: src/ochartShop.cpp:1947
 msgid "Cancel Operation"
 msgstr "Cancel·lar l'operació"
 
-#: src/ochartShop.cpp:1879
+#: src/ochartShop.cpp:1956
+msgid "Status: Chart List Refresh required."
+msgstr "Estat: Actualització del llistat de cartes requerida."
+
+#: src/ochartShop.cpp:1962 src/ochartShop.cpp:1990 src/ochartShop.cpp:2129
+#: src/ochartShop.cpp:2752
+msgid "System Name:"
+msgstr "Nom de Sistema:"
+
+#: src/ochartShop.cpp:2064
 msgid "Contacting o-charts server..."
 msgstr "Contactant amb el servidor o-charts..."
 
-#: src/ochartShop.cpp:1890 src/ochartShop.cpp:2325
+#: src/ochartShop.cpp:2075 src/ochartShop.cpp:2090
+msgid "Status: Login error."
+msgstr ""
+
+#: src/ochartShop.cpp:2094 src/ochartShop.cpp:2105 src/ochartShop.cpp:2454
 msgid "Status: Communications error."
 msgstr "Estat: Error de comunicació."
 
-#: src/ochartShop.cpp:1901 src/ochartShop.cpp:1908
+#: src/ochartShop.cpp:2116 src/ochartShop.cpp:2123
 msgid "Invalid System Name"
 msgstr "Nom de Sistema no vàlid"
 
-#: src/ochartShop.cpp:1920 src/ochartShop.cpp:2003 src/ochartShop.cpp:2093
+#: src/ochartShop.cpp:2135 src/ochartShop.cpp:2217
 msgid "Status: Ready"
 msgstr "Estatus: Preparat"
 
-#: src/ochartShop.cpp:1942 src/ochartShop.cpp:2037
+#: src/ochartShop.cpp:2157
 msgid "Chart download cancelled."
 msgstr "Descàrrega de carta cancel·lada."
 
-#: src/ochartShop.cpp:1965 src/ochartShop.cpp:2058
+#: src/ochartShop.cpp:2170
 msgid "Chart download error, missing file."
 msgstr "Error en descarregar, arxiu desaparegut."
 
-#: src/ochartShop.cpp:1991 src/ochartShop.cpp:2084
+#: src/ochartShop.cpp:2205
 msgid "Chart download complete."
 msgstr "Descàrrega de carta finalitzada."
 
-#: src/ochartShop.cpp:1993 src/ochartShop.cpp:2086
+#: src/ochartShop.cpp:2207
 msgid "Proceed to install?"
 msgstr "Continuar amb la instal·lació?"
 
-#: src/ochartShop.cpp:1998
+#: src/ochartShop.cpp:2212
 msgid "Installing charts"
 msgstr "Instal·lant cartes"
 
-#: src/ochartShop.cpp:2006 src/ochartShop.cpp:2096
+#: src/ochartShop.cpp:2220
 msgid "Chart installation complete."
 msgstr "Instal·lació de carta finalitzada."
 
-#: src/ochartShop.cpp:2294
+#: src/ochartShop.cpp:2423
 msgid "Preparing your charts..."
 msgstr "Preparant les seves cartes..."
 
-#: src/ochartShop.cpp:2342
+#: src/ochartShop.cpp:2471
 msgid "Status: Downloading..."
 msgstr "Estatus: Descarregant..."
 
-#: src/ochartShop.cpp:2347
+#: src/ochartShop.cpp:2476
 msgid "Downloading..."
 msgstr "Descarregant..."
 
-#: src/ochartShop.cpp:2375 src/ochartShop.cpp:2417 src/ochartShop.cpp:2480
-#: src/ochartShop.cpp:3014
+#: src/ochartShop.cpp:2504 src/ochartShop.cpp:2546 src/ochartShop.cpp:2609
+#: src/ochartShop.cpp:3146
 msgid "Status: OK"
 msgstr "Estatus: OK"
 
-#: src/ochartShop.cpp:2457
+#: src/ochartShop.cpp:2586
 msgid "Your chart preparation is not complete."
 msgstr "La preparació de la carta no ha acabat."
 
-#: src/ochartShop.cpp:2459
+#: src/ochartShop.cpp:2588
 msgid "You may continue to wait, or return to this screen later to complete the download."
 msgstr "Podeu continuar esperant o tornar a aquesta pantalla després per completar la descàrrega."
 
-#: src/ochartShop.cpp:2461
+#: src/ochartShop.cpp:2590
 msgid "You will receive an email message when preparation for download is complete"
 msgstr "Rebràs un missatge de correu electrònic quan la carta estigui llesta per a descàrrega"
 
-#: src/ochartShop.cpp:2463
+#: src/ochartShop.cpp:2592
 msgid "Continue waiting?"
 msgstr "Continuar esperant?"
 
-#: src/ochartShop.cpp:2565
+#: src/ochartShop.cpp:2694
 msgid "Reinstall Selected Chart"
 msgstr "Reinstal·lar la Carta Seleccionada"
 
-#: src/ochartShop.cpp:2569
+#: src/ochartShop.cpp:2698
 msgid "Update Selected Chart"
 msgstr "Actualitza la Carta Seleccionada"
 
-#: src/ochartShop.cpp:2573 src/ochartShop.cpp:2577
+#: src/ochartShop.cpp:2702 src/ochartShop.cpp:2706
 msgid "Download Selected Chart"
 msgstr "Descarregar Carta Seleccionada"
 
-#: src/ochartShop.cpp:2736
+#: src/ochartShop.cpp:2868
 msgid "New OpenCPN oeSENC System Name"
 msgstr "Nou Nom de Sistema oeSENC"
 
-#: src/ochartShop.cpp:2753
+#: src/ochartShop.cpp:2885
 msgid "Enter New System Name"
 msgstr "Introduïu el Nou Nom de Sistema"
 
-#: src/ochartShop.cpp:2764
+#: src/ochartShop.cpp:2896
 msgid "A valid System Name is 3 to 15 characters in length."
 msgstr "El Nom de Sistema ha de tenir entre 3 i 15 caràcters de longitud."
 
-#: src/ochartShop.cpp:2767
+#: src/ochartShop.cpp:2899
 msgid "lower case letters and numbers only."
 msgstr "només números i lletres minúscules."
 
-#: src/ochartShop.cpp:2770
+#: src/ochartShop.cpp:2902
 msgid "No symbols or spaces are allowed."
 msgstr "No s'admeten símbols ni espais."
 
-#: src/ochartShop.cpp:2866
+#: src/ochartShop.cpp:2998
 msgid "Select OpenCPN/oeSENC System Name"
 msgstr "Seleccioneu el Nom de Sistema OpenCPN/oeSENC"
 
-#: src/ochartShop.cpp:2882
+#: src/ochartShop.cpp:3014
 msgid "Select your System Name from the following list, or "
 msgstr "Selecciona el teu Nom de sistema de la llista següent, o "
 
-#: src/ochartShop.cpp:2887
+#: src/ochartShop.cpp:3019
 msgid " create a new System Name for this computer."
 msgstr " crea un nou Nom de Sistema per aquest ordinador."
 
-#: src/ochartShop.cpp:2897
+#: src/ochartShop.cpp:3029
 msgid "new..."
 msgstr "nou..."
 
-#: src/ochartShop.cpp:2899
+#: src/ochartShop.cpp:3031
 msgid "System Names"
 msgstr "Noms de Sistema"
 
-#: src/ochartShop.cpp:3066
+#: src/ochartShop.cpp:3195
 msgid "Downloaded:  "
 msgstr "Descarregat:  "
 
-#: src/ochartShop.cpp:3144
+#: src/ochartShop.cpp:3273
 msgid "Login to o-charts.org"
 msgstr "Entra en o-charts.org"
 
-#: src/ochartShop.cpp:3161
+#: src/ochartShop.cpp:3290
 msgid "email address:"
 msgstr "adreça de correu:"
 
-#: src/ochartShop.cpp:3168
+#: src/ochartShop.cpp:3297
 msgid "Password:"
 msgstr "Contrasenya:"
 
