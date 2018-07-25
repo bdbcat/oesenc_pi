@@ -1391,6 +1391,9 @@ bool oesenc_pi::SaveConfig( void )
     return true;
 }
 
+#define ANDROID_DIALOG_BACKGROUND_COLOR    wxColour(_T("#7cb0e9"))
+#define ANDROID_DIALOG_BODY_COLOR         wxColour(192, 192, 192)
+
 void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
     wxString titleString =  _("oeSENC_PI Preferences");
@@ -1398,9 +1401,9 @@ void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
     g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
     g_prefs_dialog->Fit();
 //    g_prefs_dialog->SetSize(wxSize(300, -1));
-    wxColour cl;
-    GetGlobalColor(_T("DILG1"), &cl);
-    g_prefs_dialog->SetBackgroundColour(cl);
+    //wxColour cl;
+    //GetGlobalColor(_T("DILG1"), &cl);
+//    g_prefs_dialog->SetBackgroundColour(cl);
     
     
     g_prefs_dialog->Show();
@@ -3437,26 +3440,45 @@ wxString callActivityMethod_ss(const char *method, wxString parm)
 #endif
 
 
+
 BEGIN_EVENT_TABLE( oesencPrefsDialog, wxDialog )
 EVT_BUTTON( wxID_OK, oesencPrefsDialog::OnPrefsOkClick )
 END_EVENT_TABLE()
 
-oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style )
 {
+    wxDialog::Create( parent, id, title, pos, size, style );
+    
+#ifdef __OCPN__ANDROID__
+    SetBackgroundColour(ANDROID_DIALOG_BACKGROUND_COLOR);
+#endif    
     
         this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+    
+        wxBoxSizer* bSizerTop = new wxBoxSizer( wxVERTICAL );
         
-        wxBoxSizer* bSizer2;
-        bSizer2 = new wxBoxSizer( wxVERTICAL );
-
+        wxPanel *content = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBG_STYLE_ERASE );
+        bSizerTop->Add(content, 0, wxALL|wxEXPAND, WXC_FROM_DIP(10));
+        
+        wxBoxSizer* bSizer2 = new wxBoxSizer( wxVERTICAL );
+        content->SetSizer(bSizer2);
+        
         // Plugin Version
         wxString versionText = _T(" oeSENC Version: ") + g_versionString;
-        wxStaticText *versionTextBox = new wxStaticText(this, wxID_ANY, versionText);
-        bSizer2->Add(versionTextBox, 1, wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL, 10 );
-        
+        wxStaticText *versionTextBox = new wxStaticText(content, wxID_ANY, versionText);
+        bSizer2->Add(versionTextBox, 1, wxALL | wxALIGN_CENTER_HORIZONTAL, 20 );
+ 
+        //  Show EULA
+        m_buttonShowEULA = new wxButton( content, wxID_ANY, _("Show EULA"), wxDefaultPosition, wxDefaultSize, 0 );
+        bSizer2->AddSpacer( 10 );
+        bSizer2->Add( m_buttonShowEULA, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
+        m_buttonShowEULA->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowEULA), NULL, g_event_handler );
+        bSizer2->AddSpacer( 20 );
+
+#ifndef __OCPN__ANDROID__        
         //  FPR File Permit
-        wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
-        m_fpr_text = new wxStaticText(this, wxID_ANY, _T(" "));
+        wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( content, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
+        m_fpr_text = new wxStaticText(content, wxID_ANY, _T(" "));
         if(g_fpr_file.Len())
              m_fpr_text->SetLabel( wxFileName::FileName(g_fpr_file).GetFullName() );
         else
@@ -3465,63 +3487,62 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         sbSizerFPR->Add(m_fpr_text, wxEXPAND);
         bSizer2->Add(sbSizerFPR, 0, wxEXPAND, 50 );
 
-        m_buttonNewFPR = new wxButton( this, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
+        m_buttonNewFPR = new wxButton( content, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 20 );
-        bSizer2->Add( m_buttonNewFPR, 0, wxEXPAND, 50 );
+        bSizer2->Add( m_buttonNewFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
         
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
 
+            
+#ifdef __WXMAC__
+        m_buttonShowFPR = new wxButton( content, wxID_ANY, _("Show In Finder"), wxDefaultPosition, wxDefaultSize, 0 );
+#else
+        m_buttonShowFPR = new wxButton( content, wxID_ANY, _("Show on disk"), wxDefaultPosition, wxDefaultSize, 0 );
+#endif
+        bSizer2->AddSpacer( 20 );
+        bSizer2->Add( m_buttonShowFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
+
+        m_buttonShowFPR->Enable( g_fpr_file != wxEmptyString );
+
+        m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
+
+#endif        
         // System Name
         if(g_systemName.Length()){
             wxString nameText = _T(" System Name: ") + g_systemName;
-            m_nameTextBox = new wxStaticText(this, wxID_ANY, nameText);
+            m_nameTextBox = new wxStaticText(content, wxID_ANY, nameText);
             bSizer2->AddSpacer( 20 );
             bSizer2->Add(m_nameTextBox, 1, wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL, 10 );
         }
         else
             bSizer2->AddSpacer( 10 );
-        
-        m_buttonClearSystemName = new wxButton( this, wxID_ANY, _("Reset System Name"), wxDefaultPosition, wxDefaultSize, 0 );
+ 
+#ifndef __OCPN__ANDROID__        
+        m_buttonClearSystemName = new wxButton( content, wxID_ANY, _("Reset System Name"), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 10 );
-        bSizer2->Add( m_buttonClearSystemName, 0, wxEXPAND, 50 );
+        bSizer2->Add( m_buttonClearSystemName, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
         
         m_buttonClearSystemName->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearSystemName), NULL, g_event_handler );
-
+        
         if(!g_systemName.Length())
             m_buttonClearSystemName->Disable();
+#endif
             
-#ifdef __WXMAC__
-        m_buttonShowFPR = new wxButton( this, wxID_ANY, _("Show In Finder"), wxDefaultPosition, wxDefaultSize, 0 );
-#else
-        m_buttonShowFPR = new wxButton( this, wxID_ANY, _("Show on disk"), wxDefaultPosition, wxDefaultSize, 0 );
-#endif
-	bSizer2->AddSpacer( 20 );
-	bSizer2->Add( m_buttonShowFPR, 0, wxEXPAND, 50 );
-
-	m_buttonShowFPR->Enable( g_fpr_file != wxEmptyString );
-
-	m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
-        
-#ifdef __OCPN__ANDROID__
-        m_buttonShowFPR->Hide();
-        m_buttonNewFPR->Hide();
-#endif
-        
         m_sdbSizer1 = new wxStdDialogButtonSizer();
-         m_sdbSizer1OK = new wxButton( this, wxID_OK );
-         m_sdbSizer1->AddButton( m_sdbSizer1OK );
-        m_sdbSizer1Cancel = new wxButton( this, wxID_CANCEL );
+        m_sdbSizer1OK = new wxButton( content, wxID_OK );
+        m_sdbSizer1->AddButton( m_sdbSizer1OK );
+        m_sdbSizer1Cancel = new wxButton( content, wxID_CANCEL );
         m_sdbSizer1->AddButton( m_sdbSizer1Cancel );
         m_sdbSizer1->Realize();
         
-        bSizer2->Add( m_sdbSizer1, 0, wxBOTTOM|wxEXPAND|wxTOP, 5 );
+        bSizer2->Add( m_sdbSizer1, 0, wxBOTTOM|wxEXPAND|wxTOP, 20 );
         
         
-        this->SetSizer( bSizer2 );
+        this->SetSizer( bSizerTop );
         this->Layout();
-        bSizer2->Fit( this );
+        bSizerTop->Fit( this );
         
         this->Centre( wxBOTH );
 }
@@ -3828,6 +3849,14 @@ void oesenc_pi_event_handler::OnShowFPRClick( wxCommandEvent &event )
 
 void oesenc_pi_event_handler::OnClearSystemName( wxCommandEvent &event )
 {
+    wxString msg = _("System name RESET shall be performed only by request from o-charts technical support staff.");
+    msg += _T("\n\n");
+    msg += _("Proceed to RESET?");
+    int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
+    
+    if(ret != wxID_YES)
+        return;
+        
     g_systemName.Clear();
     if(g_prefs_dialog){
         g_prefs_dialog->m_nameTextBox->SetLabel(_T(" "));
@@ -3848,6 +3877,27 @@ void oesenc_pi_event_handler::OnClearSystemName( wxCommandEvent &event )
 #endif    
         
 }
+
+void oesenc_pi_event_handler::OnShowEULA( wxCommandEvent &event )
+{
+    ChartSetEULA *CSE;
+    
+    for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
+        CSE = g_EULAArray.Item(i);
+        wxString file = CSE->fileName;
+        file.Replace('!', wxFileName::GetPathSeparator());
+        
+        if(wxFileExists(file)){
+            oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), file );
+            pab->SetOKMode();
+            pab->ShowModal();
+            pab->Destroy();
+        
+            break;                      // once is enough
+        }
+    }
+}
+
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 {
@@ -4514,6 +4564,9 @@ bool oesenc_pi_about::Create( wxWindow* parent, wxWindowID id, const wxString& c
     wxFont *qFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
     SetFont( *qFont );
 
+    closeButton = NULL;
+    rejectButton = NULL;
+        
     //m_displaySize = g_Platform->getDisplaySize();
     CreateControls();
     Populate();
@@ -4523,6 +4576,14 @@ bool oesenc_pi_about::Create( wxWindow* parent, wxWindowID id, const wxString& c
     return TRUE;
 }
 
+void oesenc_pi_about::SetOKMode()
+{
+    if(closeButton)
+        closeButton->SetLabel(_T("OK"));
+    if(rejectButton)
+        rejectButton->Hide();
+}
+    
 #if 0
 void oesenc_pi_about::SetColorScheme( void )
 {
@@ -4819,7 +4880,7 @@ void oesenc_pi_about::CreateControls( void )
     closeButton->InheritAttributes();
     buttonBottomSizer->Add( closeButton, 0, wxEXPAND | wxALL, 5 );
 
-    wxButton* rejectButton = new wxButton( this, xID_CANCEL, _("Reject"), wxDefaultPosition, wxDefaultSize, 0 );
+    rejectButton = new wxButton( this, xID_CANCEL, _("Reject"), wxDefaultPosition, wxDefaultSize, 0 );
     rejectButton->InheritAttributes();
     buttonBottomSizer->Add( rejectButton, 0, wxEXPAND | wxALL, 5 );
     

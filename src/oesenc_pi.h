@@ -57,6 +57,20 @@
 #include <string>
 #include <map>
 
+#ifdef WXC_FROM_DIP
+#undef WXC_FROM_DIP
+#endif
+
+#ifdef __OCPN__ANDROID__
+#define WXC_FROM_DIP(x) x
+#else    
+#if wxVERSION_NUMBER >= 3100
+#define WXC_FROM_DIP(x) wxWindow::FromDIP(x, NULL)
+#else
+#define WXC_FROM_DIP(x) x
+#endif
+#endif    
+
 
 enum {
     ID_BUTTONCELLIMPORT,
@@ -218,6 +232,7 @@ public:
     wxButton *m_buttonClearSystemName;
     wxStaticText *m_fpr_text;
     wxStaticText *m_nameTextBox;
+    wxButton *m_buttonShowEULA;
     
     DECLARE_EVENT_TABLE()
     
@@ -239,6 +254,7 @@ public:
     void OnGetHWIDClick( wxCommandEvent &event );
     void OnManageShopClick( wxCommandEvent &event );
     void OnClearSystemName( wxCommandEvent &event );
+    void OnShowEULA( wxCommandEvent &event );
     
 private:
     void processArbResult( wxString result );
@@ -466,6 +482,7 @@ public:
                  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
     
     void RecalculateSize( void );
+    void SetOKMode();
     
 private:
     void CreateControls( void );
@@ -492,6 +509,7 @@ private:
     
     wxString m_fileName;
     wxButton* closeButton;
+    wxButton* rejectButton;
     
     //wxSize m_displaySize;
     
