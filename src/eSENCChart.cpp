@@ -946,7 +946,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
 
 wxString eSENCChart::GetFileSearchMask(void)
 {
-      return _T("*.oesenc");
+      return _T("*.oe*");
 }
 
 bool eSENCChart::GetChartExtent(ExtentPI *pext)
