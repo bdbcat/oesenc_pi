@@ -689,6 +689,8 @@ int doLogin()
         
         if(queryResult == _T("1"))
             g_loginKey = loginKey;
+        else
+            checkResult(queryResult, true);
         
         long dresult;
         if(queryResult.ToLong(&dresult)){
