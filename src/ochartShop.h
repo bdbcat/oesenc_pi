@@ -244,6 +244,7 @@ public:
     //wxButton* GetButtonDownload() { return m_buttonDownload; }
     wxButton* GetButtonInstall() { return m_buttonInstall; }
     wxButton* GetButtonUpdate() { return m_buttonUpdate; }
+    void RefreshSystemName();
     
     
     shopPanel(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(500,600), long style = wxTAB_TRAVERSAL);

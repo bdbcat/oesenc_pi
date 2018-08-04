@@ -689,6 +689,8 @@ int doLogin()
         
         if(queryResult == _T("1"))
             g_loginKey = loginKey;
+        else
+            checkResult(queryResult, true);
         
         long dresult;
         if(queryResult.ToLong(&dresult)){
@@ -1984,6 +1986,16 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 shopPanel::~shopPanel()
 {
 }
+
+void shopPanel::RefreshSystemName()
+{
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
+    
+    m_staticTextSystemName->SetLabel(sn);
+}
+
 
 void shopPanel::SelectChart( oeSencChartPanel *chart )
 {
