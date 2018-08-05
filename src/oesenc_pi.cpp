@@ -2902,10 +2902,14 @@ void init_S52Library(void)
     if( ps52plib->m_bOK ) {
         
         // Load up any S52 PLIB patch files found
+        const wxString sep = wxFileName::GetPathSeparator();
+#if API_VERSION >= 1016
+        wxString dataLocn = GetPluginDataDir("oesenc_pi");
+#else
         wxString dataLocn =*GetpSharedDataLocation() +
-        _T("plugins") + wxFileName::GetPathSeparator() +
-        _T("oesenc_pi") + wxFileName::GetPathSeparator() +
-        _T("data");
+            _T("plugins") + sep + _T("oesenc_pi");
+#endif
+        dataLocn += sep +_T("data");
         
         wxArrayString patchFiles;
         wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
@@ -4498,10 +4502,14 @@ bool CheckEULA( void )
     
     if(g_bEULA_OK && g_UserKey.Length())
         return true;
-       
-    wxString shareLocn =*GetpSharedDataLocation() +
-    _T("plugins") + wxFileName::GetPathSeparator() +
-    _T("oesenc_pi") + wxFileName::GetPathSeparator();
+    const wxString sep = wxFileName::GetPathSeparator();
+#if API_VERSION >= 1016
+     wxString shareLocn = GetPluginDataDir("oesenc_pi");
+#else
+     wxString shareLocn =*GetpSharedDataLocation() +
+         _T("plugins") + sep + _T("oesenc_pi");
+#endif
+    shareLocn += sep;
     
     oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow() );
     pab->ShowModal();
@@ -4784,10 +4792,14 @@ void oesenc_pi_about::Populate( void )
             bg.Red(), bg.Blue(), bg.Green(), fg.Red(), fg.Blue(), fg.Green() );
         
     pLicenseHTMLCtl->SetFonts( face, face, sizes );
- 
-    wxString shareLocn =*GetpSharedDataLocation() +
-    _T("plugins") + wxFileName::GetPathSeparator() +
-    _T("oesenc_pi") + wxFileName::GetPathSeparator();
+    const wxString sep = wxFileName::GetPathSeparator();
+#if API_VERSION >= 1016
+    wxString shareLocn = GetPluginDataDir("oesenc_pi");
+#else
+    wxString shareLocn = *GetpSharedDataLocation() +
+    _T("plugins") + sep + _T("oesenc_pi");
+#endif
+    shareLocn += sep;
     
     wxFileName fn(m_fileName);
     bool bhtml = fn.GetExt().Upper() == _T("HTML");

@@ -52,6 +52,10 @@
 #define     MY_API_VERSION_MINOR    11
 
 #include "ocpn_plugin.h"
+#ifndef API_VERSION
+#define API_VERSION 1000 * API_VERSION_MAJOR + API_VERSION_MINOR
+#endif
+
 
 #include <algorithm>          // for std::sort
 #include <string>
@@ -573,6 +577,8 @@ protected:
     {
         #ifdef __WXMSW__
         wxLaunchDefaultBrowser( _T("file:///") + *GetpSharedDataLocation() + _T("plugins/chartdldr_pi/data/doc/index.html") );
+        #elif defined(FLATPAK)
+        wxLaunchDefaultBrowser( _T("file://") + GetPluginDataDir("chartdldr_pi") + _T("/data/doc/index.html") );
         #else
         wxLaunchDefaultBrowser( _T("file://") + *GetpSharedDataLocation() + _T("plugins/chartdldr_pi/data/doc/index.html") );
         #endif
