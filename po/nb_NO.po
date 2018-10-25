@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-10 22:35-0500\n"
-"PO-Revision-Date: 2018-03-11 10:38-0400\n"
+"POT-Creation-Date: 2018-07-24 10:42-0400\n"
+"PO-Revision-Date: 2018-07-29 00:38\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Norwegian Bokmal\n"
 "Language: nb_NO\n"
@@ -16,82 +16,79 @@ msgstr ""
 "X-Crowdin-Language: nb\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
-#: src/eSENCChart.cpp:3297 src/eSENCChart.cpp:3301
-msgid "Building eSENC"
-msgstr "Bygger eSENC"
-
-#: src/eSENCChart.cpp:6524
+#: src/eSENCChart.cpp:6387
 msgid "Sector angles are True Bearings from Seaward"
 msgstr "Sektorvinkler er virkelige retninger sett fra sjøsiden"
 
-#: src/oesenc_pi.cpp:283 src/oesenc_pi.cpp:425 src/oesenc_pi.cpp:2112
-#: src/oesenc_pi.cpp:2141 src/oesenc_pi.cpp:4453 src/oesenc_pi.cpp:4505
-#: src/oesenc_pi.cpp:4671 src/ochartShop.cpp:1304 src/ochartShop.cpp:1368
-#: src/ochartShop.cpp:1495 src/ochartShop.cpp:2384 src/ochartShop.cpp:2413
-#: src/ochartShop.cpp:2518 src/ochartShop.cpp:2543 src/ochartShop.cpp:2768
-#: src/ochartShop.cpp:2796
+#: src/oesenc_pi.cpp:292 src/oesenc_pi.cpp:438 src/oesenc_pi.cpp:2124
+#: src/oesenc_pi.cpp:2153 src/oesenc_pi.cpp:4536 src/oesenc_pi.cpp:4588
+#: src/oesenc_pi.cpp:4754 src/ochartShop.cpp:1589 src/ochartShop.cpp:1655
+#: src/ochartShop.cpp:1782 src/ochartShop.cpp:2836 src/ochartShop.cpp:2865
+#: src/ochartShop.cpp:2970 src/ochartShop.cpp:2995 src/ochartShop.cpp:3226
+#: src/ochartShop.cpp:3254
 msgid "Dialog"
 msgstr "Dialog"
 
-#: src/oesenc_pi.cpp:713
+#: src/oesenc_pi.cpp:723
 msgid "oeSENC"
 msgstr "oeSENC"
 
-#: src/oesenc_pi.cpp:719
+#: src/oesenc_pi.cpp:729
 msgid "PlugIn for OpenCPN oeSENC charts"
 msgstr "Utvidelse for OpenCPN oeSENC karter"
 
-#: src/oesenc_pi.cpp:725
+#: src/oesenc_pi.cpp:735
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
 msgstr "Utvidelse for OpenCPN\n"
 "Tilfører støtte for oeSENC karter.\n\n"
 
-#: src/oesenc_pi.cpp:931 src/oesenc_pi.cpp:3794
+#: src/oesenc_pi.cpp:941 src/oesenc_pi.cpp:3877
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
 msgstr "For å skaffe en bruker nøkkel, må du generere en unik System Identifikasjons Fil.\n"
 
-#: src/oesenc_pi.cpp:932 src/oesenc_pi.cpp:3795
+#: src/oesenc_pi.cpp:942 src/oesenc_pi.cpp:3878
 msgid "This file is also known as a\"fingerprint\" file.\n"
 msgstr "Denne filen er også kjent som en \"fingeravtrykks\" fil.\n"
 
-#: src/oesenc_pi.cpp:933 src/oesenc_pi.cpp:3796
+#: src/oesenc_pi.cpp:943 src/oesenc_pi.cpp:3879
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
 msgstr "Fingeravtrykksfilen inneholder informasjon som unikt identifiserer denne datamaskinen.\n\n"
 
-#: src/oesenc_pi.cpp:934 src/oesenc_pi.cpp:3797
+#: src/oesenc_pi.cpp:944 src/oesenc_pi.cpp:3880
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
 msgstr "Etter opprettelsen av denne filen, gå til nettbutikken o-charts.org for å skaffe deg en egen bruker nøkkel (User Key).\n\n"
 
-#: src/oesenc_pi.cpp:935 src/oesenc_pi.cpp:3798
+#: src/oesenc_pi.cpp:945 src/oesenc_pi.cpp:3881
 msgid "Proceed to create Fingerprint file?"
 msgstr "Fortsette for å opprette en fingeravtrykks fil?"
 
-#: src/oesenc_pi.cpp:937 src/oesenc_pi.cpp:3800 src/oesenc_pi.cpp:4856
-#: src/oesenc_pi.cpp:4936 src/ochartShop.cpp:754 src/ochartShop.cpp:1763
-#: src/ochartShop.cpp:1783 src/ochartShop.cpp:1812 src/ochartShop.cpp:2170
+#: src/oesenc_pi.cpp:947 src/oesenc_pi.cpp:3843 src/oesenc_pi.cpp:3883
+#: src/oesenc_pi.cpp:4939 src/oesenc_pi.cpp:5019 src/ochartShop.cpp:951
+#: src/ochartShop.cpp:2157 src/ochartShop.cpp:2170 src/ochartShop.cpp:2209
+#: src/ochartShop.cpp:2595
 msgid "oeSENC_PI Message"
 msgstr "oeSENC_PI Melding"
 
-#: src/oesenc_pi.cpp:1386 src/oesenc_pi.h:212
+#: src/oesenc_pi.cpp:1396 src/oesenc_pi.h:212
 msgid "oeSENC_PI Preferences"
 msgstr "oeSENC_PI innstillinger"
 
-#: src/oesenc_pi.cpp:2144
+#: src/oesenc_pi.cpp:2156
 msgid "OpenCPN oeSENC UserKey Required"
 msgstr "OpenCPN oeSENC brukernøkkel (User Key) er påkrevd"
 
-#: src/oesenc_pi.cpp:2162
+#: src/oesenc_pi.cpp:2174
 msgid "Enter UserKey"
 msgstr "Skriv inn brukernøkkel"
 
-#: src/oesenc_pi.cpp:2181
+#: src/oesenc_pi.cpp:2193
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
 msgstr "En gyldig oeSENC brukernøkkel har et alfanumerisk format: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Din oeSENC brukernøkkel kan skaffes fra din kartleverandør."
 
-#: src/oesenc_pi.cpp:2187
+#: src/oesenc_pi.cpp:2199
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
@@ -101,7 +98,7 @@ msgstr "FEIL: Brukernøkkelen som ble skrevet inn er ikke gyldig for dette oeSEN
 "En gyldig oeSENC brukernøkkel har et alfanumerisk format: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Din oeSENC brukernøkkel kan skaffes fra din kart leverandør.\n\n"
 
-#: src/oesenc_pi.cpp:2195
+#: src/oesenc_pi.cpp:2207
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
@@ -111,428 +108,476 @@ msgstr "FEIL: Brukernøkkelen som ble skrevet inn er ikke gyldig for dette karts
 "Vennligst kontroller din brukernøkkel og start OpenCPN på nytt.\n\n"
 "Din oeSENC brukernøkkel kan skaffes fra din kart leverandør.\n\n"
 
-#: src/oesenc_pi.cpp:2206
+#: src/oesenc_pi.cpp:2218
 msgid "UserKey accepted.\n\n"
 msgstr "Brukernøkkel akseptert.\n\n"
 
-#: src/oesenc_pi.cpp:2243 src/ochartShop.cpp:2458 src/ochartShop.cpp:2590
-#: src/ochartShop.cpp:2850
+#: src/oesenc_pi.cpp:2255 src/ochartShop.cpp:2910 src/ochartShop.cpp:3042
+#: src/ochartShop.cpp:3307
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: src/oesenc_pi.cpp:2250 src/ochartShop.cpp:2463 src/ochartShop.cpp:2594
-#: src/ochartShop.cpp:2855
+#: src/oesenc_pi.cpp:2262 src/ochartShop.cpp:2915 src/ochartShop.cpp:3045
+#: src/ochartShop.cpp:3310
 msgid "OK"
 msgstr "OK"
 
-#: src/oesenc_pi.cpp:2941
+#: src/oesenc_pi.cpp:2953
 msgid "Checking oeserverd utility at "
 msgstr "Sjekker verktøyet oeserverd ved "
 
-#: src/oesenc_pi.cpp:2949
+#: src/oesenc_pi.cpp:2961
 msgid "Cannot find the oserverd utility at \n"
 msgstr "Kan ikke finne oeserverd ved\n"
 
-#: src/oesenc_pi.cpp:2953 src/oesenc_pi.cpp:3061 src/oesenc_pi.cpp:3682
-#: src/oesenc_pi.cpp:3815 src/oesenc_pi.cpp:3821 src/oesenc_pi.cpp:3970
-#: src/oesenc_pi.cpp:4000 src/oesenc_pi.cpp:4013 src/ochartShop.cpp:478
-#: src/ochartShop.cpp:494 src/ochartShop.cpp:879 src/ochartShop.cpp:1149
-#: src/ochartShop.cpp:1820
+#: src/oesenc_pi.cpp:2965 src/oesenc_pi.cpp:3073 src/oesenc_pi.cpp:3729
+#: src/oesenc_pi.cpp:3898 src/oesenc_pi.cpp:3904 src/oesenc_pi.cpp:4053
+#: src/oesenc_pi.cpp:4083 src/oesenc_pi.cpp:4096 src/ochartShop.cpp:592
+#: src/ochartShop.cpp:608 src/ochartShop.cpp:1084 src/ochartShop.cpp:1339
+#: src/ochartShop.cpp:2117 src/ochartShop.cpp:2124 src/ochartShop.cpp:2220
 msgid "oeSENC_pi Message"
 msgstr "oeSENC_pi melding"
 
-#: src/oesenc_pi.cpp:3032 src/oesenc_pi.cpp:3056
+#: src/oesenc_pi.cpp:3044 src/oesenc_pi.cpp:3068
 msgid "oeserverd utility at \n"
 msgstr "oeserverd verktøy ved\n"
 
-#: src/oesenc_pi.cpp:3036
+#: src/oesenc_pi.cpp:3048
 msgid " reports Unavailable.\n\n"
 msgstr " rapporter er ikke tilgjengelig.\n\n"
 
-#: src/oesenc_pi.cpp:3060
+#: src/oesenc_pi.cpp:3072
 msgid " could not be started.\n\n"
 msgstr " kunne ikke startes.\n\n"
 
-#: src/oesenc_pi.cpp:3441
+#: src/oesenc_pi.cpp:3458
+msgid "Show EULA"
+msgstr "Vis EULA"
+
+#: src/oesenc_pi.cpp:3465
 msgid "System Identification"
 msgstr "System identifikasjon"
 
-#: src/oesenc_pi.cpp:3451
+#: src/oesenc_pi.cpp:3475
 msgid "Create System Identifier file..."
 msgstr "Opprett en system identifikasjons fil..."
 
-#: src/oesenc_pi.cpp:3459
+#: src/oesenc_pi.cpp:3484
 msgid "Show In Finder"
 msgstr "Vis i søker"
 
-#: src/oesenc_pi.cpp:3461
+#: src/oesenc_pi.cpp:3486
 msgid "Show on disk"
 msgstr "Vis på disk"
 
-#: src/oesenc_pi.cpp:3682 src/oesenc_pi.cpp:3970
+#: src/oesenc_pi.cpp:3505
+msgid "Reset System Name"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3729 src/oesenc_pi.cpp:4053
 msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
 msgstr "Administrator privilegier er påkrevd for å kopiere fpr.\n"
 "  Vennligst prøv på nytt...."
 
-#: src/oesenc_pi.cpp:3809 src/oesenc_pi.cpp:3994
+#: src/oesenc_pi.cpp:3840
+msgid "System name RESET shall be performed only by request from o-charts technical support staff."
+msgstr ""
+
+#: src/oesenc_pi.cpp:3842
+msgid "Proceed to RESET?"
+msgstr ""
+
+#: src/oesenc_pi.cpp:3892 src/oesenc_pi.cpp:4077
 msgid "Fingerprint file created.\n"
 msgstr "Fingeravtrykk fil ble opprettet.\n"
 
-#: src/oesenc_pi.cpp:3813 src/oesenc_pi.cpp:3998
+#: src/oesenc_pi.cpp:3896 src/oesenc_pi.cpp:4081
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
 msgstr "\n\n"
 "Fingeravtrykk fil ble også kopiert til skrivebordet."
 
-#: src/oesenc_pi.cpp:4595
+#: src/oesenc_pi.cpp:4678
 msgid "Could not open oesenc_pi EULA: "
 msgstr "Kunne ikke åpne oesenc_pi EULA: "
 
-#: src/oesenc_pi.cpp:4668
+#: src/oesenc_pi.cpp:4751
 msgid "oeSENC PlugIn for OpenCPN"
 msgstr "oeSENC utvidelse for OpenCPN"
 
-#: src/oesenc_pi.cpp:4731
+#: src/oesenc_pi.cpp:4814
 msgid "License"
 msgstr "Lisens"
 
-#: src/oesenc_pi.cpp:4756
+#: src/oesenc_pi.cpp:4839
 msgid "Accept"
 msgstr "Godta"
 
-#: src/oesenc_pi.cpp:4761
+#: src/oesenc_pi.cpp:4844
 msgid "Reject"
 msgstr "Avvis"
 
-#: src/oesenc_pi.cpp:4802
+#: src/oesenc_pi.cpp:4885
 msgid "Available Chart sets:"
 msgstr "Tilgjengelige kartsett:"
 
-#: src/oesenc_pi.cpp:4871
+#: src/oesenc_pi.cpp:4954
 msgid "The following Chart sets are available:"
 msgstr "Følgende kartsett er tilgjengelige:"
 
-#: src/oesenc_pi.cpp:4881
+#: src/oesenc_pi.cpp:4964
 msgid "Chart set"
 msgstr "Kartsett"
 
-#: src/oesenc_pi.cpp:4885
+#: src/oesenc_pi.cpp:4968
 msgid "Version"
 msgstr "Versjon"
 
-#: src/oesenc_pi.cpp:4889
+#: src/oesenc_pi.cpp:4972
 msgid "Valid until"
 msgstr "Gyldig til"
 
-#: src/oesenc_pi.cpp:5245 src/oesenc_pi.cpp:5260
-msgid "oesenc Charts"
-msgstr "oesenc Kart"
+#: src/oesenc_pi.cpp:5328 src/oesenc_pi.cpp:5343
+msgid "oeSENC Charts"
+msgstr "oeSENC Karter"
 
-#: src/oesenc_pi.cpp:5292
-msgid "Add/Update oesenc chartsets"
-msgstr "Legg til/oppdater oesenc kartsett"
+#: src/oesenc_pi.cpp:5375
+msgid "Add/Update oeSENC chartsets"
+msgstr "Legg til/oppdater oeSENC kartsett"
 
-#: src/oesenc_pi.cpp:5297
+#: src/oesenc_pi.cpp:5380
 msgid "Visit o-charts.org Website"
 msgstr "Besøk nettsiden o-charts.org"
 
-#: src/oesenc_pi.cpp:5298
-msgid "Here you may order new oesenc chartsets."
-msgstr "Her kan du bestille nye oesenc kartsett."
+#: src/oesenc_pi.cpp:5381
+msgid "Here you may order new oeSENC chartsets."
+msgstr "Her kan du bestille nye oeSENC kartsett."
 
-#: src/oesenc_pi.h:300
+#: src/oesenc_pi.h:305
 msgid "OpenCPN SENC UserKey Required"
 msgstr "OpenCPN SENC BrukerNøkkel er påkrevd"
 
-#: src/oesenc_pi.h:428
+#: src/oesenc_pi.h:433
 msgid "oeSENC_PI Information"
 msgstr "oeSENC_PI Informasjon"
 
-#: src/s52plib.cpp:2314 src/s52plib.cpp:2339 src/s52plib.cpp:2447
-#: src/s52plib.cpp:2621 src/s52plib.cpp:2637
+#: src/s52plib.cpp:2338 src/s52plib.cpp:2363 src/s52plib.cpp:2471
+#: src/s52plib.cpp:2645 src/s52plib.cpp:2661
 msgid "ChartTexts"
 msgstr "Karttekster"
 
-#: src/ochartShop.cpp:145
-msgid "Please update Chart List."
-msgstr ""
+#: src/ochartShop.cpp:363
+msgid "Available."
+msgstr "Tilgjengelig."
 
-#: src/ochartShop.cpp:152 src/ochartShop.cpp:159 src/ochartShop.cpp:167
-msgid "Available for Installation."
-msgstr ""
-
-#: src/ochartShop.cpp:176 src/ochartShop.cpp:184
+#: src/ochartShop.cpp:367
 msgid "Installed, Up-to-date."
-msgstr ""
+msgstr "Installert, oppdatert."
 
-#: src/ochartShop.cpp:195 src/ochartShop.cpp:204
+#: src/ochartShop.cpp:371
 msgid "Installed, Update available."
-msgstr ""
+msgstr "Installert, oppdatering tilgjengelig."
 
-#: src/ochartShop.cpp:215 src/ochartShop.cpp:222 src/ochartShop.cpp:229
-#: src/ochartShop.cpp:234
+#: src/ochartShop.cpp:376
 msgid "Expired."
-msgstr ""
+msgstr "Utdatert."
 
-#: src/ochartShop.cpp:404
-msgid "Invalid Login."
-msgstr ""
+#: src/ochartShop.cpp:380
+msgid "Preparing your chartset."
+msgstr "Forbereder ditt kartsett."
 
-#: src/ochartShop.cpp:473
+#: src/ochartShop.cpp:384
+msgid "Ready for download."
+msgstr "Klar til nedlasting."
+
+#: src/ochartShop.cpp:388
+msgid "Please update Chart List."
+msgstr "Vennligst oppdater kartlisten."
+
+#: src/ochartShop.cpp:392
+msgid "Ready for Download Request."
+msgstr "Klar for nedlastings forespørsel."
+
+#: src/ochartShop.cpp:579
 msgid "o-charts API error code: "
-msgstr ""
+msgstr "o-charts API feilkode: "
 
-#: src/ochartShop.cpp:477
+#: src/ochartShop.cpp:585
+msgid "Invalid user/email name or password."
+msgstr "Ugyldig brukernavn eller passord."
+
+#: src/ochartShop.cpp:588
 msgid "Check your configuration and try again."
-msgstr ""
+msgstr "Kontroller konfigurasjonen og forsøk på ny."
 
-#: src/ochartShop.cpp:489
+#: src/ochartShop.cpp:603
 msgid "internet communications error code: "
-msgstr ""
+msgstr "feilkode for internett kommunikasjon: "
 
-#: src/ochartShop.cpp:493
+#: src/ochartShop.cpp:607
 msgid "Check your connection and try again."
-msgstr ""
+msgstr "Sjekk din forbindelse og prøv på nytt."
 
-#: src/ochartShop.cpp:744
+#: src/ochartShop.cpp:627
+msgid "Invalid Login."
+msgstr "Ugyldig innlogging."
+
+#: src/ochartShop.cpp:941
 msgid "This action will PERMANENTLY assign the chart:"
-msgstr ""
+msgstr "Dette vil PERMANENT tilordne dette kartet til din enhet:"
 
-#: src/ochartShop.cpp:748
+#: src/ochartShop.cpp:945
 msgid "to this systemName:"
-msgstr ""
+msgstr "til dette systemNavn:"
 
-#: src/ochartShop.cpp:752
+#: src/ochartShop.cpp:949
 msgid "Proceed?"
-msgstr ""
+msgstr "Fortsett?"
 
-#: src/ochartShop.cpp:1072 src/ochartShop.cpp:1140
+#: src/ochartShop.cpp:1256 src/ochartShop.cpp:1330
 msgid "Unzipping chart files..."
-msgstr ""
+msgstr "Pakker ut kartfiler..."
 
-#: src/ochartShop.cpp:1119
+#: src/ochartShop.cpp:1309
 msgid "Choose chart install location."
-msgstr ""
+msgstr "Velg installasjons sted for kart."
 
-#: src/ochartShop.cpp:1133
+#: src/ochartShop.cpp:1323
 msgid "Ready for unzipping chart files."
-msgstr ""
+msgstr "Klar for utpakking av kartfiler."
 
-#: src/ochartShop.cpp:1149
+#: src/ochartShop.cpp:1339
 msgid "Error extracting zip file"
-msgstr ""
-
-#: src/ochartShop.cpp:1328
-msgid "Chart Edition:"
-msgstr ""
-
-#: src/ochartShop.cpp:1334
-msgid "Order Reference:"
-msgstr ""
-
-#: src/ochartShop.cpp:1340
-msgid "Purchase date:"
-msgstr ""
-
-#: src/ochartShop.cpp:1346
-msgid "Expiration date:"
-msgstr ""
-
-#: src/ochartShop.cpp:1352
-msgid "Status:"
-msgstr ""
-
-#: src/ochartShop.cpp:1401
-msgid "Chart Edition: "
-msgstr ""
-
-#: src/ochartShop.cpp:1405
-msgid "Order Reference: "
-msgstr ""
-
-#: src/ochartShop.cpp:1412
-msgid "Purchase date: "
-msgstr ""
-
-#: src/ochartShop.cpp:1416
-msgid "Expiration date: "
-msgstr ""
-
-#: src/ochartShop.cpp:1429
-msgid "Assigment 1"
-msgstr ""
-
-#: src/ochartShop.cpp:1433 src/ochartShop.cpp:1456
-msgid "System: "
-msgstr ""
-
-#: src/ochartShop.cpp:1437 src/ochartShop.cpp:1460
-msgid "Installed edition: "
-msgstr ""
-
-#: src/ochartShop.cpp:1445 src/ochartShop.cpp:1468
-msgid "Status: "
-msgstr ""
-
-#: src/ochartShop.cpp:1452
-msgid "Assigment 2"
-msgstr ""
-
-#: src/ochartShop.cpp:1539
-msgid "My Charts"
-msgstr ""
-
-#: src/ochartShop.cpp:1561
-msgid "Actions"
-msgstr ""
-
-#: src/ochartShop.cpp:1567 src/ochartShop.cpp:1737 src/ochartShop.cpp:2319
-msgid "System Name:"
-msgstr ""
-
-#: src/ochartShop.cpp:1578
-msgid "Status: Chart List Update required."
-msgstr ""
-
-#: src/ochartShop.cpp:1604 src/ochartShop.cpp:2268
-msgid "Install Selected Chart"
-msgstr ""
-
-#: src/ochartShop.cpp:1607
-msgid "Assign"
-msgstr ""
+msgstr "Feil ved utpakking av zip-fil"
 
 #: src/ochartShop.cpp:1613
-msgid "Download"
-msgstr ""
+msgid "Chart Edition:"
+msgstr "Kartutgivelse:"
 
 #: src/ochartShop.cpp:1619
-msgid "Update Chart List"
-msgstr ""
+msgid "Order Reference:"
+msgstr "Ordre referanse:"
 
-#: src/ochartShop.cpp:1624
+#: src/ochartShop.cpp:1625
+msgid "Purchase date:"
+msgstr "Kjøpsdato:"
+
+#: src/ochartShop.cpp:1631
+msgid "Expiration date:"
+msgstr "Utløpsdato:"
+
+#: src/ochartShop.cpp:1637
+msgid "Status:"
+msgstr "Status:"
+
+#: src/ochartShop.cpp:1688
+msgid "Chart Edition: "
+msgstr "Kartutgivelse: "
+
+#: src/ochartShop.cpp:1692
+msgid "Order Reference: "
+msgstr "Ordre referanse: "
+
+#: src/ochartShop.cpp:1699
+msgid "Purchase date: "
+msgstr "Kjøpsdato: "
+
+#: src/ochartShop.cpp:1703
+msgid "Expiration date: "
+msgstr "Utløpsdato: "
+
+#: src/ochartShop.cpp:1716
+msgid "Assigment 1"
+msgstr "Tilordning 1"
+
+#: src/ochartShop.cpp:1720 src/ochartShop.cpp:1743
+msgid "System: "
+msgstr "System: "
+
+#: src/ochartShop.cpp:1724 src/ochartShop.cpp:1747
+msgid "Installed edition: "
+msgstr "Installert utgivelse: "
+
+#: src/ochartShop.cpp:1732 src/ochartShop.cpp:1755
+msgid "Status: "
+msgstr "Status: "
+
+#: src/ochartShop.cpp:1739
+msgid "Assigment 2"
+msgstr "Tilordning 2"
+
+#: src/ochartShop.cpp:1912
+msgid "My Charts"
+msgstr "Mine karter"
+
+#: src/ochartShop.cpp:1915
+msgid "Refresh Chart List"
+msgstr "Oppfrisk kartliste"
+
+#: src/ochartShop.cpp:1934
+msgid "Actions"
+msgstr "Handlinger"
+
+#: src/ochartShop.cpp:1944 src/ochartShop.cpp:2690
+msgid "Install Selected Chart"
+msgstr "Installer valgte kart"
+
+#: src/ochartShop.cpp:1947
 msgid "Cancel Operation"
-msgstr ""
+msgstr "Avbryt operasjon"
 
-#: src/ochartShop.cpp:1715
+#: src/ochartShop.cpp:1956
+msgid "Status: Chart List Refresh required."
+msgstr "Status: Vennligst oppfrisk kartlisten."
+
+#: src/ochartShop.cpp:1962 src/ochartShop.cpp:1990 src/ochartShop.cpp:2129
+#: src/ochartShop.cpp:2752
+msgid "System Name:"
+msgstr "Systemnavn:"
+
+#: src/ochartShop.cpp:2064
 msgid "Contacting o-charts server..."
+msgstr "Kontakter o-charts server..."
+
+#: src/ochartShop.cpp:2075 src/ochartShop.cpp:2090
+msgid "Status: Login error."
 msgstr ""
 
-#: src/ochartShop.cpp:1726 src/ochartShop.cpp:2042 src/ochartShop.cpp:2112
+#: src/ochartShop.cpp:2094 src/ochartShop.cpp:2105 src/ochartShop.cpp:2454
 msgid "Status: Communications error."
-msgstr ""
+msgstr "Status: Kommunikasjonsfeil."
 
-#: src/ochartShop.cpp:1743 src/ochartShop.cpp:1817
+#: src/ochartShop.cpp:2116 src/ochartShop.cpp:2123
+msgid "Invalid System Name"
+msgstr "Ugyldig systemnavn"
+
+#: src/ochartShop.cpp:2135 src/ochartShop.cpp:2217
 msgid "Status: Ready"
-msgstr ""
+msgstr "Status: Klar"
 
-#: src/ochartShop.cpp:1763
+#: src/ochartShop.cpp:2157
 msgid "Chart download cancelled."
-msgstr ""
+msgstr "Nedlasting av kart avbrutt."
 
-#: src/ochartShop.cpp:1783
+#: src/ochartShop.cpp:2170
 msgid "Chart download error, missing file."
-msgstr ""
+msgstr "Kart-nedlasting feil, filen mangler."
 
-#: src/ochartShop.cpp:1808
+#: src/ochartShop.cpp:2205
 msgid "Chart download complete."
-msgstr ""
+msgstr "Nedlasting av kart er fullført."
 
-#: src/ochartShop.cpp:1810
+#: src/ochartShop.cpp:2207
 msgid "Proceed to install?"
-msgstr ""
+msgstr "Fortsette til installasjon?"
 
-#: src/ochartShop.cpp:1820
+#: src/ochartShop.cpp:2212
+msgid "Installing charts"
+msgstr "Installerer kart"
+
+#: src/ochartShop.cpp:2220
 msgid "Chart installation complete."
-msgstr ""
+msgstr "Installasjon av kart er fullført."
 
-#: src/ochartShop.cpp:2011
+#: src/ochartShop.cpp:2423
 msgid "Preparing your charts..."
-msgstr ""
+msgstr "Klargjør dine kart..."
 
-#: src/ochartShop.cpp:2059
+#: src/ochartShop.cpp:2471
 msgid "Status: Downloading..."
-msgstr ""
+msgstr "Status: Laster ned..."
 
-#: src/ochartShop.cpp:2089 src/ochartShop.cpp:2122 src/ochartShop.cpp:2184
-#: src/ochartShop.cpp:2691
+#: src/ochartShop.cpp:2476
+msgid "Downloading..."
+msgstr "Laster ned..."
+
+#: src/ochartShop.cpp:2504 src/ochartShop.cpp:2546 src/ochartShop.cpp:2609
+#: src/ochartShop.cpp:3146
 msgid "Status: OK"
-msgstr ""
+msgstr "Status: OK"
 
-#: src/ochartShop.cpp:2163
+#: src/ochartShop.cpp:2586
 msgid "Your chart preparation is not complete."
-msgstr ""
+msgstr "Klargjøring av dine kart er ikke fullført enda."
 
-#: src/ochartShop.cpp:2165
+#: src/ochartShop.cpp:2588
 msgid "You may continue to wait, or return to this screen later to complete the download."
-msgstr ""
+msgstr "Du kan fremdeles vente, eller gå tilbake til dette vinduet senere for å fullføre nedlastingen."
 
-#: src/ochartShop.cpp:2167
+#: src/ochartShop.cpp:2590
+msgid "You will receive an email message when preparation for download is complete"
+msgstr "Du vil motta en epost når klargjøringen for nedlasting er fullført"
+
+#: src/ochartShop.cpp:2592
 msgid "Continue waiting?"
-msgstr ""
+msgstr "Fortsett å vente?"
 
-#: src/ochartShop.cpp:2272
+#: src/ochartShop.cpp:2694
 msgid "Reinstall Selected Chart"
-msgstr ""
+msgstr "Installere valgte kart på nytt"
 
-#: src/ochartShop.cpp:2276
+#: src/ochartShop.cpp:2698
 msgid "Update Selected Chart"
-msgstr ""
+msgstr "Oppdater valgte kart"
 
-#: src/ochartShop.cpp:2416
+#: src/ochartShop.cpp:2702 src/ochartShop.cpp:2706
+msgid "Download Selected Chart"
+msgstr "Last ned valgte kart"
+
+#: src/ochartShop.cpp:2868
 msgid "New OpenCPN oeSENC System Name"
-msgstr ""
+msgstr "Nytt OpenCPN oeSENC systemnavn"
 
-#: src/ochartShop.cpp:2433
+#: src/ochartShop.cpp:2885
 msgid "Enter New System Name"
-msgstr ""
+msgstr "Skriv inn nytt systemnavn"
 
-#: src/ochartShop.cpp:2444
+#: src/ochartShop.cpp:2896
 msgid "A valid System Name is 3 to 15 characters in length."
-msgstr ""
+msgstr "Et gyldig systemnavn er 3 til 15 tegn langt."
 
-#: src/ochartShop.cpp:2447
+#: src/ochartShop.cpp:2899
 msgid "lower case letters and numbers only."
-msgstr ""
+msgstr "kun små bokstaver og tall."
 
-#: src/ochartShop.cpp:2450
+#: src/ochartShop.cpp:2902
 msgid "No symbols or spaces are allowed."
-msgstr ""
+msgstr "Symboler eller mellomrom er ikke tillatt."
 
-#: src/ochartShop.cpp:2546
+#: src/ochartShop.cpp:2998
 msgid "Select OpenCPN/oeSENC System Name"
-msgstr ""
+msgstr "Velg OpenCPN/oeSENC systemnavn"
 
-#: src/ochartShop.cpp:2562
+#: src/ochartShop.cpp:3014
 msgid "Select your System Name from the following list, or "
-msgstr ""
+msgstr "Velg ditt systemnavn fra følgende liste, eller "
 
-#: src/ochartShop.cpp:2567
+#: src/ochartShop.cpp:3019
 msgid " create a new System Name for this computer."
-msgstr ""
+msgstr " opprett et nytt systemnavn for denne enheten."
 
-#: src/ochartShop.cpp:2577
+#: src/ochartShop.cpp:3029
 msgid "new..."
-msgstr ""
+msgstr "ny..."
 
-#: src/ochartShop.cpp:2579
+#: src/ochartShop.cpp:3031
 msgid "System Names"
-msgstr ""
+msgstr "Systemnavn"
 
-#: src/ochartShop.cpp:2740
+#: src/ochartShop.cpp:3195
 msgid "Downloaded:  "
-msgstr ""
+msgstr "Nedlastet:  "
 
-#: src/ochartShop.cpp:2815
+#: src/ochartShop.cpp:3273
 msgid "Login to o-charts.org"
-msgstr ""
+msgstr "Logg inn hos o-charts.org"
 
-#: src/ochartShop.cpp:2832
-msgid "User Name:"
-msgstr ""
+#: src/ochartShop.cpp:3290
+msgid "email address:"
+msgstr "epost adresse:"
 
-#: src/ochartShop.cpp:2839
+#: src/ochartShop.cpp:3297
 msgid "Password:"
-msgstr ""
+msgstr "Passord:"
 

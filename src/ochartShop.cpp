@@ -34,7 +34,7 @@
 #include <wx/fileconf.h>
 #include <wx/uri.h>
 #include "wx/tokenzr.h"
-
+#include <wx/dir.h>
 #include "ochartShop.h"
 #include "ocpn_plugin.h"
 #include "wxcurl/wx/curl/http.h"
@@ -72,11 +72,38 @@ wxCurlDownloadThread *g_curlDownloadThread;
 wxFFileOutputStream *downloadOutStream;
 bool g_chartListUpdatedOK;
 wxString g_statusOverride;
+wxString g_lastInstallDir;
 
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
 
 // Private class implementations
+
+size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcharbuf)
+{
+    size_t iRealSize = size * nmemb;
+    wxCharBuffer* pStr = (wxCharBuffer*) pcharbuf;
+    
+//     if(pStr)
+//     {
+//         wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8);
+//         *pStr = str.mb_str();
+//     }
+ 
+    if(pStr)
+    {
+#ifdef __WXMSW__        
+        wxString str1a = wxString(*pStr);
+        wxString str2 = wxString((const char*)ptr, wxConvUTF8, iRealSize);
+        *pStr = (str1a + str2).mb_str();
+#else        
+        wxString str = wxString(*pStr, wxConvUTF8) + wxString((const char*)ptr, wxConvUTF8, iRealSize);
+        *pStr = str.mb_str(wxConvUTF8);
+#endif        
+    }
+ 
+    return iRealSize;
+}
 
 class wxCurlHTTPNoZIP : public wxCurlHTTP
 {
@@ -89,8 +116,13 @@ public:
     
    ~wxCurlHTTPNoZIP();
     
+   bool Post(wxInputStream& buffer, const wxString& szRemoteFile /*= wxEmptyString*/);
+   bool Post(const char* buffer, size_t size, const wxString& szRemoteFile /*= wxEmptyString*/);
+   std::string GetResponseBody() const;
+   
 protected:
     void SetCurlHandleToDefaults(const wxString& relativeURL);
+    
 };
 
 wxCurlHTTPNoZIP::wxCurlHTTPNoZIP(const wxString& szURL /*= wxEmptyString*/, 
@@ -113,12 +145,65 @@ void wxCurlHTTPNoZIP::SetCurlHandleToDefaults(const wxString& relativeURL)
 {
     wxCurlBase::SetCurlHandleToDefaults(relativeURL);
     
+    SetOpt(CURLOPT_ENCODING, "identity");               // No encoding, plain ASCII
+    
     if(m_bUseCookies)
     {
         SetStringOpt(CURLOPT_COOKIEJAR, m_szCookieFile);
     }
 }
 
+bool wxCurlHTTPNoZIP::Post(const char* buffer, size_t size, const wxString& szRemoteFile /*= wxEmptyString*/)
+{
+    wxMemoryInputStream inStream(buffer, size);
+    
+    return Post(inStream, szRemoteFile);
+}
+
+bool wxCurlHTTPNoZIP::Post(wxInputStream& buffer, const wxString& szRemoteFile /*= wxEmptyString*/)
+{
+    curl_off_t iSize = 0;
+    
+    if(m_pCURL && buffer.IsOk())
+    {
+        SetCurlHandleToDefaults(szRemoteFile);
+        
+        SetHeaders();
+        iSize = buffer.GetSize();
+        
+        if(iSize == (~(ssize_t)0))      // wxCurlHTTP does not know how to upload unknown length streams.
+            return false;
+        
+        SetOpt(CURLOPT_POST, TRUE);
+        SetOpt(CURLOPT_POSTFIELDSIZE_LARGE, iSize);
+        SetStreamReadFunction(buffer);
+        
+        //  Use a private data write trap function to handle UTF8 content
+        //SetStringWriteFunction(m_szResponseBody);
+        SetOpt(CURLOPT_WRITEFUNCTION, wxcurl_string_write_UTF8);         // private function
+        SetOpt(CURLOPT_WRITEDATA, (void*)&m_szResponseBody);
+        
+        if(Perform())
+        {
+            ResetHeaders();
+            return IsResponseOk();
+        }
+    }
+    
+    return false;
+}
+
+std::string wxCurlHTTPNoZIP::GetResponseBody() const
+{
+#ifndef ARMHF
+    wxString s = wxString((const char *)m_szResponseBody, wxConvLibc);
+    return std::string(s.mb_str());
+    
+#else    
+    return std::string((const char *)m_szResponseBody);
+#endif
+    
+}
 
 // itemChart
 //------------------------------------------------------------------------------------------
@@ -134,21 +219,21 @@ itemChart::itemChart( wxString &order_ref, wxString &chartid, wxString &quantity
 
 
 
-void itemChart::setDownloadPath(int slot, wxString path) {
-    if (slot == 0)
-        fileDownloadPath0 = path;
-    else if (slot == 1)
-        fileDownloadPath1 = path;
-}
+// void itemChart::setDownloadPath(int slot, wxString path) {
+//     if (slot == 0)
+//         fileDownloadPath0 = path;
+//     else if (slot == 1)
+//         fileDownloadPath1 = path;
+// }
 
-wxString itemChart::getDownloadPath(int slot) {
-    if (slot == 0)
-        return fileDownloadPath0;
-    else if (slot == 1)
-        return fileDownloadPath1;
-    else
-        return _T("");
-}
+// wxString itemChart::getDownloadPath(int slot) {
+//     if (slot == 0)
+//         return fileDownloadPath0;
+//     else if (slot == 1)
+//         return fileDownloadPath1;
+//     else
+//         return _T("");
+// }
 
 bool itemChart::isChartsetAssignedToMe(wxString systemName){
     
@@ -241,17 +326,17 @@ int itemChart::getChartStatus()
         m_status = STAT_READY_DOWNLOAD;
         
         if(sysID0.IsSameAs(g_systemName)){
-            if(  (installLocation0.Length() > 0) && (fileDownloadPath0.Length() > 0) ){
+            if(  (installLocation0.Length() > 0) && (installedFileDownloadPath0.Length() > 0) ){
                 m_status = STAT_CURRENT;
-                if(!lastRequestEdition0.IsSameAs(currentChartEdition)){
+                if(!installedEdition0.IsSameAs(currentChartEdition)){
                     m_status = STAT_STALE;
                 }
             }
         }
         else if(sysID1.IsSameAs(g_systemName)){
-            if(  (installLocation1.Length() > 0) && (fileDownloadPath1.Length() > 0) ){
+            if(  (installLocation1.Length() > 0) && (installedFileDownloadPath1.Length() > 0) ){
                 m_status = STAT_CURRENT;
-                if(!lastRequestEdition1.IsSameAs(currentChartEdition)){
+                if(!installedEdition1.IsSameAs(currentChartEdition)){
                     m_status = STAT_STALE;
                 }
                 
@@ -397,9 +482,10 @@ void loadShopConfig()
         pConf->Read( _T("systemName"), &g_systemName);
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
+        pConf->Read( _T("lastInstllDir"), &g_lastInstallDir);
         
         pConf->Read( _T("ADMIN"), &g_admin);
-        
+                
         pConf->SetPath ( _T ( "/PlugIns/oesenc/charts" ) );
         wxString strk;
         wxString kval;
@@ -431,12 +517,16 @@ void loadShopConfig()
             wxString dl0 = tkz.GetNextToken();
             wxString install1 = tkz.GetNextToken();
             wxString dl1 = tkz.GetNextToken();
+            wxString ied0 = tkz.GetNextToken();
+            wxString ied1 = tkz.GetNextToken();
             
             pItem->chartName = name;
             if(pItem->installLocation0.IsEmpty())   pItem->installLocation0 = install0;
-            if(pItem->fileDownloadPath0.IsEmpty())  pItem->fileDownloadPath0 = dl0;
+            if(pItem->installedFileDownloadPath0.IsEmpty())  pItem->installedFileDownloadPath0 = dl0;
             if(pItem->installLocation1.IsEmpty())   pItem->installLocation1 = install1;
-            if(pItem->fileDownloadPath1.IsEmpty())  pItem->fileDownloadPath1 = dl1;
+            if(pItem->installedFileDownloadPath1.IsEmpty())  pItem->installedFileDownloadPath1 = dl1;
+            pItem->installedEdition0 = ied0;
+            pItem->installedEdition1 = ied1;
             
             bContk = pConf->GetNextEntry( strk, dummyval );
         }
@@ -453,6 +543,7 @@ void saveShopConfig()
       pConf->Write( _T("systemName"), g_systemName);
       pConf->Write( _T("loginUser"), g_loginUser);
       pConf->Write( _T("loginKey"), g_loginKey);
+      pConf->Write( _T("lastInstllDir"), g_lastInstallDir);
       
       pConf->DeleteGroup( _T("/PlugIns/oesenc/charts") );
       pConf->SetPath( _T("/PlugIns/oesenc/charts") );
@@ -462,9 +553,11 @@ void saveShopConfig()
           wxString key = chart->chartID + _T("-") + chart->quantityId + _T("-") + chart->orderRef;
           wxString val = chart->chartName + _T(";");
           val += chart->installLocation0 + _T(";");
-          val += chart->fileDownloadPath0 + _T(";");
+          val += chart->installedFileDownloadPath0 + _T(";");
           val += chart->installLocation1 + _T(";");
-          val += chart->fileDownloadPath1 + _T(";");
+          val += chart->installedFileDownloadPath1 + _T(";");
+          val += chart->installedEdition0 + _T(";");
+          val += chart->installedEdition1 + _T(";");
           pConf->Write( key, val );
       }
    }
@@ -526,14 +619,14 @@ int checkResponseCode(int iResponseCode)
         
 }
 
-bool doLogin()
+int doLogin()
 {
     oeSENCLogin login(g_shopPanel);
     login.ShowModal();
     if(!login.GetReturnCode() == 0){
         g_shopPanel->setStatusText( _("Invalid Login."));
         wxYield();
-        return false;
+        return 55;
     }
     
     g_loginUser = login.m_UserNameCtl->GetValue();
@@ -550,7 +643,7 @@ bool doLogin()
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&password=") + pass;
     
-    wxCurlHTTP post;
+    wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
     
@@ -561,6 +654,10 @@ bool doLogin()
     if(iResponseCode == 200){
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( post.GetResponseBody().c_str());
+        
+        wxString p = wxString(post.GetResponseBody().c_str(), wxConvUTF8);
+        wxLogMessage(_T("doLogin results:"));
+        wxLogMessage(p);
         
         wxString queryResult;
         wxString loginKey;
@@ -592,11 +689,19 @@ bool doLogin()
         
         if(queryResult == _T("1"))
             g_loginKey = loginKey;
+        else
+            checkResult(queryResult, true);
         
-        return (checkResult(queryResult) == 0);
+        long dresult;
+        if(queryResult.ToLong(&dresult)){
+            return dresult;
+        }
+        else{
+            return 53;
+        }
     }
     else
-        return false;
+        return 54;
     
 }
 
@@ -606,7 +711,7 @@ wxString ProcessResponse(std::string body)
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( body.c_str());
     
-        doc->Print();
+        //doc->Print();
         
         wxString queryResult;
         wxString chartOrder;
@@ -624,10 +729,14 @@ wxString ProcessResponse(std::string body)
         wxString chartLink;
         wxString chartSize;
         wxString chartThumbURL;
+
+//         wxString p = wxString(body.c_str(), wxConvUTF8);
+//         wxLogMessage(_T("ProcessResponse results:"));
+//         wxLogMessage(p);
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
-                return _T("50");                              // undetermined error??
+                return _T("57");                              // undetermined error??
             }
             
             wxString rootName = wxString::FromUTF8( root->Value() );
@@ -785,8 +894,6 @@ int getChartList( bool bShowErrorDialogs = true){
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    //post.SetFlags(post.GetFlags() | wxCURL_SEND_BEGINEND_EVENTS | wxCURL_SEND_PROGRESS_EVENTS);
-    //post.SetEvtHandler(g_CurlEventHandler);
     
     size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
     
@@ -797,6 +904,11 @@ int getChartList( bool bShowErrorDialogs = true){
     std::string a = post.GetDetailedErrorString();
     std::string b = post.GetErrorString();
     std::string c = post.GetResponseBody();
+    
+    //printf("%s", post.GetResponseBody().c_str());
+    
+    wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
     
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
@@ -864,7 +976,7 @@ int doAssign(itemChart *chart, int slot)
     loginParms += _T("&quantityId=") + chart->quantityId;
     loginParms += _T("&slot=") + sSlot;
     
-    wxCurlHTTP post;
+    wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
     
@@ -936,7 +1048,7 @@ int doUploadXFPR()
             loginParms += _T("&xfpr=") + stringFPR;
             loginParms += _T("&xfprName=") + fprName;
             
-            wxCurlHTTP post;
+            wxCurlHTTPNoZIP post;
             post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
             size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
             
@@ -1008,7 +1120,7 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     loginParms += _T("&quantityId=") + chart->quantityId;
     loginParms += _T("&slot=") + sSlot;
     
-    wxCurlHTTP post;
+    wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
     
@@ -1051,11 +1163,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     wxFileName fn(serverFilename);
     
     wxString downloadFile = g_PrivateDataDir + fn.GetFullName();
-    
-    if(slot == 0)                                       // persist the downloaded name
-        chart->fileDownloadPath0 = downloadFile;
-    else if(slot == 1)
-        chart->fileDownloadPath1 = downloadFile;
+    chart->downloadingFile = downloadFile;
     
     downloadOutStream = new wxFFileOutputStream(downloadFile);
     
@@ -1064,27 +1172,6 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     g_curlDownloadThread->SetOutputStream(downloadOutStream);
     g_curlDownloadThread->Download();
  
-#if 0    
-    wxCurlHTTP get;
-    get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    get.SetFlags(get.GetFlags() | wxCURL_SEND_BEGINEND_EVENTS | wxCURL_SEND_PROGRESS_EVENTS);
-    get.SetEvtHandler(g_CurlEventHandler);
-    
-    
-    bool getResult = get.Get(downloadFile, downloadURL);
-    
-    // get the response code of the server
-    int iResponseCode;
-    get.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-    
-    if(iResponseCode == 200){
-        wxString result = ProcessResponse(get.GetResponseBody());
-        
-        return checkResult(result);
-    }
-    else
-        return checkResponseCode(iResponseCode);
-#endif
 
     return 0;
 }
@@ -1218,6 +1305,8 @@ int doUnzip(itemChart *chart, int slot)
         wxString installLocn = g_PrivateDataDir;
         if(installDir.Length())
             installLocn = installDir;
+        else if(g_lastInstallDir.Length())
+            installLocn = g_lastInstallDir;
         
         wxDirDialog dirSelector( NULL, _("Choose chart install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
@@ -1275,12 +1364,73 @@ int doUnzip(itemChart *chart, int slot)
         AddChartDirectory( targetAddDir );
     }
     
+    //  Is this an update?
+    wxString lastInstalledZip;
+    bool b_update = false;
+    
+    if(slot == 0){
+        if(!chart->installedEdition0.IsSameAs(chart->lastRequestEdition0)){
+            b_update = true;
+            lastInstalledZip = chart->installedFileDownloadPath0;
+        }
+    }
+    else if(slot == 1){
+        if(!chart->installedEdition1.IsSameAs(chart->lastRequestEdition1)){
+            b_update = true;
+            lastInstalledZip = chart->installedFileDownloadPath1;
+        }
+    }
+    
+    if(b_update){
+        
+        // It would be nice here to remove the now obsolete chart dir from the OCPN core set.
+        //  Not possible with current API, 
+        //  So, best we can do is to rename it, so that it will disappear from the scanning.
+ 
+        wxString installParent;
+        if(slot == 0)
+            installParent = chart->installLocation0;
+        else if(slot == 1)
+            installParent = chart->installLocation1;
+ 
+        if(installParent.Len() && lastInstalledZip.Len()){
+            wxFileName fn(lastInstalledZip);
+            wxString lastInstall = installParent + wxFileName::GetPathSeparator() + fn.GetName();
+                
+            if(!lastInstall.IsSameAs(targetAddDir)){
+                if(::wxDirExists(lastInstall)){
+                    
+                    //const wxString obsDir = lastInstall + _T(".OBSOLETE");
+                    //bool success = ::wxRenameFile(lastInstall, obsDir);
+                    
+                    // Delete all the files in this directory
+                    wxArrayString files;
+                    wxDir::GetAllFiles(lastInstall, &files);
+                    for(unsigned int i = 0 ; i < files.GetCount() ; i++){
+                        ::wxRemoveFile(files[i]);
+                    }
+                    ::wxRmdir(lastInstall);
+                    
+                }
+            }
+        }
+    }
+    
+    // Update the config persistence
     if(slot == 0){
         chart->installLocation0 = chosenInstallDir;
+        chart->installedEdition0 = chart->lastRequestEdition0;
+        chart->installedFileDownloadPath0 = chart->fileDownloadPath0;
     }
     else if(slot == 1){
         chart->installLocation1 = chosenInstallDir;
+        chart->installedEdition1 = chart->lastRequestEdition1;
+        chart->installedFileDownloadPath1 = chart->fileDownloadPath1;
     }
+    
+    g_lastInstallDir = chosenInstallDir;
+    
+    ForceChartDBUpdate();
     
     saveShopConfig();
     
@@ -1766,7 +1916,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-    staticBoxSizerChartList->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+    staticBoxSizerChartList->Add(m_buttonUpdate, 1, wxBOTTOM | wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
     
     wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
     staticBoxSizerChartList->Add(cPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -1786,54 +1936,39 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     wxStaticBoxSizer* staticBoxSizerAction = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("Actions")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerAction, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    wxBoxSizer *boxSizerAction0 = new wxBoxSizer(wxHORIZONTAL);
-    staticBoxSizerAction->Add(boxSizerAction0, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_staticLine121 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
+    staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
-    wxString sn = _("System Name:");
-    sn += _T(" ");
-    sn += g_systemName;
+    ///Buttons
+    wxGridSizer* gridSizerActionButtons = new wxGridSizer(1, 2, 0, 0);
+    staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
     
-    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    boxSizerAction0->Add(m_staticTextSystemName, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    gridSizerActionButtons->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
+    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
+    gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+
     wxStaticLine* sLine1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
     staticBoxSizerAction->Add(sLine1, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-
     
+    
+    ///Status
     m_staticTextStatus = new wxStaticText(this, wxID_ANY, _("Status: Chart List Refresh required."), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     staticBoxSizerAction->Add(m_staticTextStatus, 0, wxALL|wxALIGN_LEFT, WXC_FROM_DIP(5));
 
     m_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
     staticBoxSizerAction->Add(m_ipGauge, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, WXC_FROM_DIP(5));
-    
-    wxFlexGridSizer* flexGridSizerActionStatus = new wxFlexGridSizer(0, 2, 0, 0);
-    flexGridSizerActionStatus->SetFlexibleDirection( wxBOTH );
-    flexGridSizerActionStatus->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-    flexGridSizerActionStatus->AddGrowableCol(0);
-    
-    staticBoxSizerAction->Add(flexGridSizerActionStatus, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    
-    m_staticLine121 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
-    staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    
-        
-        
-    wxGridSizer* flexGridSizer123ActionButtons = new wxGridSizer(1, 2, 0, 0);
-    staticBoxSizerAction->Add(flexGridSizer123ActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    flexGridSizer123ActionButtons->Add(m_buttonInstall, 1, wxALL, WXC_FROM_DIP(5));
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
     
-   
-    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
-     flexGridSizer123ActionButtons->Add(m_buttonCancelOp, 1, wxALL, WXC_FROM_DIP(5));
+    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    staticBoxSizerAction->Add(m_staticTextSystemName, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
-//     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Update Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-//     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-//     flexGridSizer123ActionButtons->Add(m_buttonUpdate, 1, wxALL | wxALIGN_RIGHT, WXC_FROM_DIP(5));
-
-   
+    
     SetName(wxT("shopPanel"));
     //SetSize(500,600);
     if (GetSizer()) {
@@ -1851,6 +1986,16 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 shopPanel::~shopPanel()
 {
 }
+
+void shopPanel::RefreshSystemName()
+{
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
+    
+    m_staticTextSystemName->SetLabel(sn);
+}
+
 
 void shopPanel::SelectChart( oeSencChartPanel *chart )
 {
@@ -1913,7 +2058,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     //  Do we need an initial login to get the persistent key?
     if(g_loginKey.Len() == 0){
-        if(!doLogin())
+        if(doLogin() != 1)
             return;
         saveShopConfig();
     }
@@ -1923,10 +2068,40 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
      wxYield();
 
     ::wxBeginBusyCursor();
-    int err_code = getChartList();
+    int err_code = getChartList( false );               // no error code dialog, we handle here
     ::wxEndBusyCursor();
+ 
+    // Could be a change in login_key, userName, or password.
+    // if so, force a full (no_key) login, and retry
+    if((err_code == 4) || (err_code == 5) || (err_code == 6)){
+        setStatusText( _("Status: Login error."));
+        m_ipGauge->Stop();
+        wxYield();
+        if(doLogin() != 1)      // if the second login attempt fails, return to GUI
+            return;
+        saveShopConfig();
+        
+        // Try to get the status one more time only.
+        ::wxBeginBusyCursor();
+        int err_code_2 = getChartList( false );               // no error code dialog, we handle here
+        ::wxEndBusyCursor();
+        
+        if(err_code_2 != 0){                  // Some error on second getlist() try, if so just return to GUI
+         
+            if((err_code_2 == 4) || (err_code_2 == 5) || (err_code_2 == 6))
+                setStatusText( _("Status: Login error."));
+            else{
+                wxString ec;
+                ec.Printf(_T(" { %d }"), err_code_2);
+                setStatusText( _("Status: Communications error.") + ec);
+            }
+            m_ipGauge->Stop();
+            wxYield();
+            return;
+        }
+    }
     
-    if(err_code != 0){                  // Some error
+    else if(err_code != 0){                  // Some other error
         wxString ec;
         ec.Printf(_T(" { %d }"), err_code);
         setStatusText( _("Status: Communications error.") + ec);
@@ -1973,7 +2148,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
     if(!chart)
         return;
     
-    // Might be chained through from download end event
+    // Chained through from download end event
         if(m_binstallChain){
             
             
@@ -1991,19 +2166,9 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             
             //We can check some data to be sure.
             
-            // Does the download destination file exist, and have the correct length?
-            wxString dlFile;
-            wxString dlSize;
-            if(m_activeSlot == 0){
-                dlFile = chart->fileDownloadPath0;
-                dlSize = chart->filedownloadSize0;
-            }
-            else if(m_activeSlot == 1){
-                dlFile = chart->fileDownloadPath1;
-                dlSize = chart->filedownloadSize1;
-            }
+            // Does the download destination file exist?
             
-            if(!::wxFileExists( dlFile )){
+            if(!::wxFileExists( chart->downloadingFile )){
                 OCPNMessageBox_PlugIn(NULL, _("Chart download error, missing file."), _("oeSENC_PI Message"), wxOK);
                 m_buttonInstall->Enable();
                 return;
@@ -2028,8 +2193,17 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
              }
              */      
             // So far, so good.
-            // Download exists, and is the correct length.
             
+            // Download exists
+
+            // Update the records
+            if(m_activeSlot == 0){
+                chart->fileDownloadPath0 = chart->downloadingFile;
+            }
+            else if(m_activeSlot == 1){
+                chart->fileDownloadPath1 = chart->downloadingFile;
+            }
+                
             wxString msg = _("Chart download complete.");
             msg +=_T("\n\n");
             msg += _("Proceed to install?");
@@ -2064,91 +2238,6 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     itemChart *chart = m_ChartSelected->m_pChart;
     if(!chart)
         return;
-#if 0    
-    // Might be chained through from download end event
-    if(m_binstallChain){
-        
-        if(!m_startedDownload){                 // catch unexpected end event
-            return;                             // ignore, and let the download proceed.
-        }
-        
-        m_binstallChain = false;
-        
-        if(m_bAbortingDownload){
-            m_bAbortingDownload = false;
-            OCPNMessageBox_PlugIn(NULL, _("Chart download cancelled."), _("oeSENC_PI Message"), wxOK);
-            m_buttonInstall->Enable();
-            return;
-        }
-        
-        //  Download is apparently done.
-        //We can check some data to be sure.
-        
-        // Does the download destination file exist, and have the correct length?
-        wxString dlFile;
-        wxString dlSize;
-        if(m_activeSlot == 0){
-            dlFile = chart->fileDownloadPath0;
-            dlSize = chart->filedownloadSize0;
-        }
-        else if(m_activeSlot == 1){
-            dlFile = chart->fileDownloadPath1;
-            dlSize = chart->filedownloadSize1;
-        }
-        
-        if(!::wxFileExists( dlFile )){
-            OCPNMessageBox_PlugIn(NULL, _("Chart download error, missing file."), _("oeSENC_PI Message"), wxOK);
-            m_buttonInstall->Enable();
-            return;
-        }
-
-/*        
-        long dlFileLength = 0;
-        
-        wxFile tFile(dlFile);
-        if(tFile.IsOpened())
-            dlFileLength = tFile.Length();
-        else
-            return;
-        
-        long testLength;
-        if(!dlSize.ToLong(&testLength))
-            return;
-        
-        if(testLength != dlFileLength){
-            OCPNMessageBox_PlugIn(NULL, _("Chart download error, wrong file length."), _("oeSENC_PI Message"), wxOK);
-            return;
-        }
-  */      
-        // So far, so good.
-        // Download exists, and is the correct length.
-        
-        wxString msg = _("Chart download complete.");
-        msg +=_T("\n\n");
-        msg += _("Proceed to install?");
-        msg += _T("\n\n");
-        int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
-        
-        if(ret == wxID_YES){
-            int rv = doUnzip(chart, m_activeSlot);
-            
-            setStatusText( _("Status: Ready"));
-            
-            if(0 == rv)
-                OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
-            
-            m_prepareChartSelectedID = chart->chartID;           // save a copy of the selected chart
-            m_prepareChartSelectedOrder = chart->orderRef;
-            m_prepareChartSelectedQty = chart->quantityId;
-            UpdateChartList();
-            SelectChartByID(m_prepareChartSelectedID, m_prepareChartSelectedOrder, m_prepareChartSelectedQty);
-            
-        }
-        
-        m_buttonInstall->Enable();
-        return;
-    }
-#endif
 
     // Is chart already in "download" state for me?
     int dlSlot = -1;
@@ -2335,7 +2424,7 @@ int shopPanel::doPrepareGUI()
     
     setStatusText( _("Preparing your charts..."));
     
-    m_prepareTimerCount = 0;
+    m_prepareTimerCount = 8;            // First status query happens in 2 seconds
     m_prepareProgress = 0;
     m_prepareTimeout = 60;
     
@@ -2510,7 +2599,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         if(ret == wxID_YES){
             m_prepareTimerCount = 0;
             m_prepareProgress = 0;
-            m_prepareTimeout = 15;
+            m_prepareTimeout = 60;
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
             
@@ -2619,6 +2708,10 @@ void shopPanel::UpdateActionControls()
         m_buttonInstall->SetLabel(_("Download Selected Chart"));
         m_buttonInstall->Show();
     }
+    else if(chart->getChartStatus() == STAT_PREPARING){
+        m_buttonInstall->Hide();
+    }
+    
     
 }
 
@@ -2695,8 +2788,7 @@ wxString shopPanel::doGetNewSystemName( )
         char *t = (char *)s;
         for(unsigned int i = 0; i < strlen(s); i++, t++){
             bool bok = false;
-            if( ((*t >= 'A') && (*t <= 'Z')) ||
-                ((*t >= 'a') && (*t <= 'z')) ||
+            if( ((*t >= 'a') && (*t <= 'z')) ||
                 ((*t >= '0') && (*t <= '9')) ){
                 
                 bok = true;
@@ -2798,19 +2890,19 @@ END_EVENT_TABLE()
      itemBoxSizer2->Add( itemStaticBoxSizer4, 0, wxEXPAND | wxALL, 5 );
      
      wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _T(""), wxDefaultPosition, wxDefaultSize, 0 );
-     itemStaticBoxSizer4->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemStaticBoxSizer4->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 5 );
      
      m_SystemNameCtl = new wxTextCtrl( itemDialog1, ID_GETIP_IP, _T(""), wxDefaultPosition, wxSize( ref_len * 10, -1 ), 0 );
      itemStaticBoxSizer4->Add( m_SystemNameCtl, 0,  wxALIGN_CENTER | wxLEFT | wxRIGHT | wxBOTTOM , 5 );
      
      wxStaticText *itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,  _("A valid System Name is 3 to 15 characters in length."));
-     itemBoxSizer2->Add( itemStaticTextLegend, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemBoxSizer2->Add( itemStaticTextLegend, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
 
      wxStaticText *itemStaticTextLegend1 = new wxStaticText( itemDialog1, wxID_STATIC,  _("lower case letters and numbers only."));
-     itemBoxSizer2->Add( itemStaticTextLegend1, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemBoxSizer2->Add( itemStaticTextLegend1, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
      
      wxStaticText *itemStaticTextLegend2 = new wxStaticText( itemDialog1, wxID_STATIC,  _("No symbols or spaces are allowed."));
-     itemBoxSizer2->Add( itemStaticTextLegend2, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemBoxSizer2->Add( itemStaticTextLegend2, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
      
      
      wxBoxSizer* itemBoxSizer16 = new wxBoxSizer( wxHORIZONTAL );
@@ -2924,12 +3016,12 @@ END_EVENT_TABLE()
      wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _("Select your System Name from the following list, or "),
                                                        wxDefaultPosition, wxDefaultSize, 0 );
      
-     itemBoxSizer2->Add( itemStaticText5, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemBoxSizer2->Add( itemStaticText5, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
  
      wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, wxID_STATIC, _(" create a new System Name for this computer."),
                                                        wxDefaultPosition, wxDefaultSize, 0 );
                                                        
-     itemBoxSizer2->Add( itemStaticText6, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+     itemBoxSizer2->Add( itemStaticText6, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
                                                        
      
      wxArrayString system_names;
@@ -2940,7 +3032,7 @@ END_EVENT_TABLE()
      
      m_rbSystemNames = new wxRadioBox(this, wxID_ANY, _("System Names"), wxDefaultPosition, wxDefaultSize, system_names, 0, wxRA_SPECIFY_ROWS);
      
-     itemBoxSizer2->Add( m_rbSystemNames, 0, wxALIGN_CENTER | wxALL | wxADJUST_MINSIZE, 25 );
+     itemBoxSizer2->Add( m_rbSystemNames, 0, wxALIGN_CENTER | wxALL, 25 );
 
      wxStaticLine* itemStaticLine = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
      itemBoxSizer2->Add( itemStaticLine, 0, wxEXPAND|wxALL, 0 );
@@ -3069,10 +3161,7 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
         if(g_shopPanel->GetSelectedChart()){
             itemChart *chart = g_shopPanel->GetSelectedChart()->m_pChart;
             if(chart){
-                if(g_shopPanel->m_activeSlot == 0)
-                    chart->fileDownloadPath0.Clear();
-                else if(g_shopPanel->m_activeSlot == 1)
-                    chart->fileDownloadPath1.Clear();
+                chart->downloadingFile.Clear();
             }
         }
     }
@@ -3201,14 +3290,14 @@ void oeSENCLogin::CreateControls(  )
     itemStaticBoxSizer4->Add(flexGridSizerActionStatus, 1, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
     wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _("email address:"), wxDefaultPosition, wxDefaultSize, 0 );
-    flexGridSizerActionStatus->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+    flexGridSizerActionStatus->Add( itemStaticText5, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 5 );
     
     m_UserNameCtl = new wxTextCtrl( itemDialog1, ID_GETIP_IP, _T(""), wxDefaultPosition, wxSize( ref_len * 10, -1 ), 0 );
     flexGridSizerActionStatus->Add( m_UserNameCtl, 0,  wxALIGN_CENTER | wxLEFT | wxRIGHT | wxBOTTOM , 5 );
     
  
     wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, wxID_STATIC, _("Password:"), wxDefaultPosition, wxDefaultSize, 0 );
-    flexGridSizerActionStatus->Add( itemStaticText6, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP | wxADJUST_MINSIZE, 5 );
+    flexGridSizerActionStatus->Add( itemStaticText6, 0, wxALIGN_LEFT | wxLEFT | wxRIGHT | wxTOP, 5 );
     
     m_PasswordCtl = new wxTextCtrl( itemDialog1, ID_GETIP_IP, _T(""), wxDefaultPosition, wxSize( ref_len * 10, -1 ), 0 );
     flexGridSizerActionStatus->Add( m_PasswordCtl, 0,  wxALIGN_CENTER | wxLEFT | wxRIGHT | wxBOTTOM , 5 );

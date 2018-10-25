@@ -62,6 +62,8 @@ public:
     void RenderString( const wxString &string, int x=0, int y=0 );
     bool IsBuilt(){ return m_built; }
     void SetColor(wxColor &color){ m_color = color;}
+
+    bool m_built;
     
 private:
     void GetTextExtent( const char *string, int *width, int *height);
@@ -76,7 +78,6 @@ private:
     int tex_w, tex_h;
     int m_maxglyphw;
     int m_maxglyphh;
-    bool m_built;
     
     float m_dx;
     float m_dy;

@@ -57,7 +57,7 @@ TexFont::~TexFont( )
 void TexFont::Build( wxFont &font, bool blur )
 {
     /* avoid rebuilding if the parameters are the same */
-     if(font == m_font && blur == m_blur)
+     if(font == m_font && blur == m_blur && m_built)
          return;
     
     m_font = font;

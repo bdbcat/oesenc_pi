@@ -57,6 +57,20 @@
 #include <string>
 #include <map>
 
+#ifdef WXC_FROM_DIP
+#undef WXC_FROM_DIP
+#endif
+
+#ifdef __OCPN__ANDROID__
+#define WXC_FROM_DIP(x) x
+#else    
+#if wxVERSION_NUMBER >= 3100
+#define WXC_FROM_DIP(x) wxWindow::FromDIP(x, NULL)
+#else
+#define WXC_FROM_DIP(x) x
+#endif
+#endif    
+
 
 enum {
     ID_BUTTONCELLIMPORT,
@@ -153,6 +167,7 @@ public:
     void OnShowFPRClick( wxCommandEvent &event );
     
     void ProcessChartManageResult(wxString result);
+    shopPanel           *m_shoppanel;
     
 private:
 //    wxString GetPermitDir();
@@ -177,7 +192,7 @@ private:
     wxButton            *m_buttonNewUP;
     wxButton            *m_buttonImportCells;
     wxButton            *m_buttonNewIP;
-
+    
     wxString            m_userpermit;
 
     wxString            m_last_enc_root_dir;
@@ -190,7 +205,6 @@ private:
     
     wxScrolledWindow    *m_pOptionsPage;
     oesencPanel         *m_oesencpanel;
-    shopPanel           *m_shoppanel;
     
 
 };
@@ -215,7 +229,10 @@ public:
     
     wxButton *m_buttonNewFPR;
     wxButton *m_buttonShowFPR;
+    wxButton *m_buttonClearSystemName;
     wxStaticText *m_fpr_text;
+    wxStaticText *m_nameTextBox;
+    wxButton *m_buttonShowEULA;
     
     DECLARE_EVENT_TABLE()
     
@@ -236,6 +253,8 @@ public:
     void onTimerEvent(wxTimerEvent &event);
     void OnGetHWIDClick( wxCommandEvent &event );
     void OnManageShopClick( wxCommandEvent &event );
+    void OnClearSystemName( wxCommandEvent &event );
+    void OnShowEULA( wxCommandEvent &event );
     
 private:
     void processArbResult( wxString result );
@@ -463,6 +482,7 @@ public:
                  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX );
     
     void RecalculateSize( void );
+    void SetOKMode();
     
 private:
     void CreateControls( void );
@@ -489,6 +509,7 @@ private:
     
     wxString m_fileName;
     wxButton* closeButton;
+    wxButton* rejectButton;
     
     //wxSize m_displaySize;
     

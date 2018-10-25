@@ -103,27 +103,33 @@ public:
     wxString statusID0;
     wxString fileDownloadURL0;      //  https://.....
     wxString filedownloadSize0;
-    wxString installLocation0;
     wxString fileDownloadPath0;     // Where the file was downloaded
-    wxString fileZipRoot0;
     wxString lastRequestEdition0;
-        
+    wxString fileDownloadName0;     // The short name "charts.zip"
+    wxString installedFileDownloadPath0;        // The zip file that is currently installed
+    wxString installLocation0;
+    wxString installedEdition0;
+    
     wxString sysID1;
     wxString statusID1;
     wxString fileDownloadURL1;      //  https://.....
     wxString filedownloadSize1;
-    wxString installLocation1;
     wxString fileDownloadPath1;     // Where the file was downloaded
-    wxString fileZipRoot1;
     wxString lastRequestEdition1;
-    wxString fileDownloadName;     // The short name "charts.zip"
-        
+    wxString fileDownloadName1;     // The short name "charts.zip"
+    wxString installedFileDownloadPath1;
+    wxString installLocation1;
+    wxString installedEdition1;
+    
     bool m_downloading;
+    wxString downloadingFile;
+    
     long downloadReference;
     bool m_bEnabled;
     wxImage m_ChartImage;
     wxBitmap m_bm;
     
+    wxString lastInstall;          // For updates, the full path of installed chartset
     int m_status;
         
 };
@@ -238,6 +244,7 @@ public:
     //wxButton* GetButtonDownload() { return m_buttonDownload; }
     wxButton* GetButtonInstall() { return m_buttonInstall; }
     wxButton* GetButtonUpdate() { return m_buttonUpdate; }
+    void RefreshSystemName();
     
     
     shopPanel(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(500,600), long style = wxTAB_TRAVERSAL);

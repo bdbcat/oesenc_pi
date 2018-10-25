@@ -419,7 +419,7 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_bExtendLightSectors = true;
 
     m_lightsOff = false;
-    m_anchorOn = false;
+    m_anchorOn = true;
 
     GenerateStateHash();
 
@@ -1382,7 +1382,14 @@ void s52plib::FlushSymbolCaches( void )
     m_CARC_DL_hashmap.clear();
 #endif
 #endif
-
+    
+    for (int i = 0; i < TXF_CACHE; i++)
+    {
+        s_txf[i].key = NULL;
+        s_txf[i].cache.m_built = false;
+        
+    }
+    
 }
 
 void s52plib::DestroyPattRules( RuleHash *rh )
@@ -2052,22 +2059,23 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 
             //    Render the texture
             if( ptext->texobj ) {
-                //  Adjust the y position to account for the convention that S52 text is drawn
-                //  with the lower left corner at the specified point, instead of the wx convention
-                //  using upper right corner
                 int yadjust = 0;
                 int xadjust = 0;
-
-                yadjust =  -ptext->rendered_char_height;
-
-
+                
+                //  Adjust the y position to account for the convention that S52 text is drawn
+                //  with the lower left corner at the specified point, instead of the wx convention
+                //  using upper left corner.
+                //  Also, allow for full text height in the bitmap/texture, not the estimated "rendered" height.
+                
+                yadjust =  -ptext->rendered_char_height * 10 / 8;
+                
                 //  Add in the offsets, specified in units of nominal font height
                 yadjust += ptext->yoffs * ( ptext->rendered_char_height );
                 //  X offset specified in units of average char width
                 xadjust += ptext->xoffs * ptext->avgCharWidth;
-
+                
                 // adjust for text justification
-                int w = ptext->avgCharWidth * ptext->frmtd.Length();
+                int w = ptext->text_width;
                 switch ( ptext->hjust){
                     case '1':               // centered
                     xadjust -= w/2;
@@ -2092,35 +2100,23 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                         break;
                 }
 
-//                 if(fabs(vp->rotation) > 0.01){
-//                     float c = cosf(-vp->rotation );
-//                     float s = sinf(-vp->rotation );
-//                     float x = xadjust;
-//                     float y = yadjust;
-//                     xadjust =  x*c - y*s;
-//                     yadjust =  x*s + y*c;
-// 
-//                 }
 
                 int xp = x;
                 int yp = y;
-
+                
                 if(fabs(vp->rotation) > 0.01){
-                    float cx = vp->pix_width/2.;
-                    float cy = vp->pix_height/2.;
-                    float c = cosf(vp->rotation );
-                    float s = sinf(vp->rotation );
-                    float xn = x - cx;
-                    float yn = y - cy;
-                    xp =  xn*c - yn*s + cx;
-                    yp =  xn*s + yn*c + cy;
+                    float c = cosf(-vp->rotation );
+                    float s = sinf(-vp->rotation );
+                    float x = xadjust;
+                    float y = yadjust;
+                    xp +=  x*c - y*s;
+                    yp +=  x*s + y*c;
+                }
+                else{
+                    xp+= xadjust;
+                    yp+= yadjust;
                 }
                 
-                
-                
-                xp+= xadjust;
-                yp+= yadjust;
-
 
                 pRectDrawn->SetX( xp );
                 pRectDrawn->SetY( yp );
@@ -2180,16 +2176,76 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
 #else
                     glEnable( GL_BLEND );
                     glEnable( GL_TEXTURE_2D );
-
                     
-                    /* undo previous rotation to make text level */
-                    //glRotatef(vp->rotation*180/PI, 0, 0, -1);
+                    float uv[8];
+                    float coords[8];
                     
-                    //f_cache->RenderString(ptext->frmtd, xp, yp);
+                    // Note swizzle of points to allow TRIANGLE_STRIP drawing
+                    //normal uv
+                    uv[0] = 0; uv[1] = 0; uv[2] = 1; uv[3] = 0;
+                    uv[6] = 1; uv[7] = 1; uv[4] = 0; uv[5] = 1;
+                    
+                    //w *= scale_factor;
+                    //h *= scale_factor;
+                    
+                    // pixels
+                    coords[0] = 0; coords[1] = 0; coords[2] = ptext->RGBA_width; coords[3] = 0;
+                    coords[6] = ptext->RGBA_width; coords[7] = ptext->RGBA_height; coords[4] = 0; coords[5] = ptext->RGBA_height;
+                    
+                    glUseProgram( S52texture_2D_shader_program );
+                    
+                    // Get pointers to the attributes in the program.
+                    GLint mPosAttrib = glGetAttribLocation( S52texture_2D_shader_program, "position" );
+                    GLint mUvAttrib  = glGetAttribLocation( S52texture_2D_shader_program, "aUV" );
+                    
+                    // Select the active texture unit.
+                    glActiveTexture( GL_TEXTURE0 );
+                    
+                    // Bind our texture to the texturing target.
+                    glBindTexture( GL_TEXTURE_2D, ptext->texobj );
+                    
+                    // Set up the texture sampler to texture unit 0
+                    GLint texUni = glGetUniformLocation( S52texture_2D_shader_program, "uTex" );
+                    glUniform1i( texUni, 0 );
+                    
+                    // Disable VBO's (vertex buffer objects) for attributes.
+                    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+                    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+                    
+                    // Set the attribute mPosAttrib with the vertices in the screen coordinates...
+                    glVertexAttribPointer( mPosAttrib, 2, GL_FLOAT, GL_FALSE, 0, coords );
+                    // ... and enable it.
+                    glEnableVertexAttribArray( mPosAttrib );
+                    
+                    // Set the attribute mUvAttrib with the vertices in the GL coordinates...
+                    glVertexAttribPointer( mUvAttrib, 2, GL_FLOAT, GL_FALSE, 0, uv );
+                    // ... and enable it.
+                    glEnableVertexAttribArray( mUvAttrib );
+                    
+                    // Rotate
+                    mat4x4 I, Q;
+                    mat4x4_identity(I);
+                    
+                    mat4x4_translate_in_place(I, x, y, 0);
+                    mat4x4_rotate_Z(Q, I, -vp->rotation);
+                    mat4x4_translate_in_place(Q, xadjust, yadjust, 0);
+                    
+                    
+                    GLint matloc = glGetUniformLocation(S52texture_2D_shader_program,"TransformMatrix");
+                    glUniformMatrix4fv( matloc, 1, GL_FALSE, (const GLfloat*)Q);
+                    
+                    // Perform the actual drawing.
+                    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                    
+                    // Restore the per-object transform to Identity Matrix
+                    mat4x4 IM;
+                    mat4x4_identity(IM);
+                    GLint matlocf = glGetUniformLocation(S52texture_2D_shader_program,"TransformMatrix");
+                    glUniformMatrix4fv( matlocf, 1, GL_FALSE, (const GLfloat*)IM);
                     
                     glDisable( GL_TEXTURE_2D );
                     glDisable( GL_BLEND );
-#endif
+                    #endif
                     
 
                 } // bdraw
@@ -2268,19 +2324,10 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     break;
             }
 
-//             if(fabs(vp->rotation) > 0.01){
-//                 float c = cosf(-vp->rotation );
-//                 float s = sinf(-vp->rotation );
-//                 float x = xadjust;
-//                 float y = yadjust;
-//                 xadjust =  x*c - y*s;
-//                 yadjust =  x*s + y*c;
-// 
-//             }
-
             int xp = x;
             int yp = y;
-
+            
+#ifdef USE_ANDROID_GLES2
             if(fabs(vp->rotation) > 0.01){
                 float cx = vp->pix_width/2.;
                 float cy = vp->pix_height/2.;
@@ -2292,11 +2339,21 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 yp =  xn*s + yn*c + cy;
             }
             
-            
+#else
+            if(fabs(vp->rotation) > 0.01){
+                float c = cosf(-vp->rotation );
+                float s = sinf(-vp->rotation );
+                float x = xadjust;
+                float y = yadjust;
+                xadjust =  x*c - y*s;
+                yadjust =  x*s + y*c;
+            }
+#endif            
 
             xp+= xadjust;
             yp+= yadjust;
 
+            
             pRectDrawn->SetX( xp );
             pRectDrawn->SetY( yp );
             pRectDrawn->SetWidth( w );
@@ -2727,12 +2784,14 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
 
     float xscale = 1.0;
+    
+#ifdef __OCPN__ANDROID__    
     //  Set the onscreen size of the symbol
     //  Compensate for various display resolutions
     //  Develop empirically, making a flare light about 6 mm long
     double pix_factor = GetPPMM() / 6.0;
     xscale *= pix_factor;
-    
+#endif    
 
     if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6))
         || (!strncmp(rzRules->obj->FeatureName, "DWRTPT", 6))
@@ -2983,6 +3042,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     scale_factor *=  g_ChartScaleFactorExp;
     scale_factor *= g_scaminScale;
 
+#ifdef __OCPN__ANDROID__    
     //  Set the onscreen size of the symbol
     //  Compensate for various display resolutions
     //  Develop empirically, making a buoy about 4 mm tall
@@ -2999,7 +3059,6 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     double pix_factor = targetHeight / boyHeight;
     
     
-    
     //qDebug() << "scaleing" << m_display_size_mm  << targetHeight0 << targetHeight << GetPPMM() << boyHeight << pix_factor;
     
     // for Hubert, and my moto 
@@ -3013,6 +3072,8 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     
     
     scale_factor *= pix_factor;
+#endif
+    
     
     if(g_oz_vector_scale && vp->b_quilt){
         double sfactor = vp->ref_scale/vp->chart_scale;
@@ -5838,9 +5899,13 @@ int s52plib::RenderMPS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         while( rules ){
 
             //  Render a raster or vector symbol, as specified by LUP rules
-            if( rules->razRule->definition.SYDF == 'V' )
-                RenderHPGL( rzRules, rules->razRule, r, vp, angle );
-
+            if( rules->razRule->definition.SYDF == 'V' ){
+                // On OpenGL, arrange to render the drying height "underline" symbol as un-rotated.
+                double dryAngle = 0;
+                if( !m_pdc && !strncmp(rules->razRule->name.SYNM, "SOUNDSA1", 8))
+                    dryAngle = -vp->rotation * 180./PI;
+                RenderHPGL( rzRules, rules->razRule, r, vp, dryAngle );
+            }
             else if( rules->razRule->definition.SYDF == 'R' )
                 RenderRasterSymbol( rzRules, rules->razRule, r, vp, angle );
 
@@ -6711,7 +6776,7 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 //      if(rzRules->obj->Index != 1103)
 //          return 0; //int yyp = 0;
 
-//        if(!strncmp(rzRules->obj->FeatureName, "berths", 6))
+//        if(!strncmp(rzRules->obj->FeatureName, "ACHARE", 6))
 //            int yyp = 0;
 
     if( !ObjectRenderCheckRules( rzRules, vp, true ) )
@@ -7029,6 +7094,12 @@ int s52plib::SetLineFeaturePriority( ObjRazRules *rzRules, int npriority )
 
 int s52plib::PrioritizeLineFeature( ObjRazRules *rzRules, int npriority )
 {
+    if(!rzRules->obj->m_ls_list){
+        wxString msg = wxString(rzRules->obj->FeatureName, wxConvUTF8);
+        wxLogMessage(_T("Missing ls_list on FEATURE: ") + msg);
+    }
+        
+        
     if(rzRules->obj->m_ls_list){
 
         VE_Element *pedge;
@@ -10660,35 +10731,45 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
                 RemoveObjNoshow("LIGHTS");
             }
 
-            // Handle Anchor area toggle
-            bool bAnchor = m_anchorOn;
-
             const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
             unsigned int num = sizeof(categories) / sizeof(categories[0]);
+            
+            // Handle Anchor area toggle
+            if( (m_nDisplayCategory == OTHER) || (m_nDisplayCategory == MARINERS_STANDARD) ){
+                
+                bool bAnchor = m_anchorOn;
 
-            if(!bAnchor){
-                for( unsigned int c = 0; c < num; c++ ) {
-                    AddObjNoshow(categories[c]);
+
+                if(!bAnchor){
+                    for( unsigned int c = 0; c < num; c++ ) {
+                        AddObjNoshow(categories[c]);
+                    }
+                }
+                else{
+                    for( unsigned int c = 0; c < num; c++ ) {
+                        RemoveObjNoshow(categories[c]);
+                    }
+
+                    unsigned int cnt = 0;
+                    for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+                        OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
+                        for( unsigned int c = 0; c < num; c++ ) {
+                            if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
+                                pOLE->nViz = 1;         // force on
+                                cnt++;
+                                break;
+                            }
+                        }
+                        if( cnt == num ) break;
+                    }
                 }
             }
-            else{
+            else{                               // if not category OTHER or MarinerStandard, then anchor-related features are always shown.
                 for( unsigned int c = 0; c < num; c++ ) {
                     RemoveObjNoshow(categories[c]);
                 }
-
-                unsigned int cnt = 0;
-                for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
-                    OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
-                    for( unsigned int c = 0; c < num; c++ ) {
-                        if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
-                            pOLE->nViz = 1;         // force on
-                            cnt++;
-                            break;
-                        }
-                    }
-                    if( cnt == num ) break;
-                }
             }
+            
         }
 
         m_myConfig = PI_GetPLIBStateHash();
