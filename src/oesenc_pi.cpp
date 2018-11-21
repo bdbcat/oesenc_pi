@@ -1401,8 +1401,13 @@ bool oesenc_pi::SaveConfig( void )
 void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
     wxString titleString =  _("oeSENC_PI Preferences");
-    
-    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+
+    long style = wxDEFAULT_DIALOG_STYLE;
+#ifdef __WXOSX__
+        style |= wxSTAY_ON_TOP;
+#endif
+
+    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, style );
     g_prefs_dialog->Fit();
 //    g_prefs_dialog->SetSize(wxSize(300, -1));
     //wxColour cl;
