@@ -173,6 +173,8 @@ wxString g_versionString;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
+bool                            g_GLOptionsSet;
+
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
 float g_ChartScaleFactorExp;
@@ -844,6 +846,8 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         if(ps52plib)
             ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
+        
+        g_GLOptionsSet = true;
     }
         
 }
@@ -2715,70 +2719,73 @@ void initLibraries(void)
     
     // OpenGL variables
     
-    char *p = (char *) glGetString( GL_EXTENSIONS );
-    if( NULL == p )
-        pi_bopengl = false;
-    else
-        pi_bopengl = true;
-    
- 
-    char *str = (char *) glGetString( GL_RENDERER );
-    if (str == NULL)
-        wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
-
-    char render_string[80];
-    wxString renderer;
-    if(str){
-        strncpy( render_string, str, 79 );
-        renderer = wxString( render_string, wxConvUTF8 );
-    }
-    
-    GetglEntryPoints();
-    
-    ///g_b_EnableVBO = false;
-    g_GLMinCartographicLineWidth = 1.0;
-    g_GLMinSymbolLineWidth = 1.0;
-    
-    //  Set the minimum line width
-    glGetError();       // Clear errors
+    if(g_GLOptionsSet){
+        char *p = (char *) glGetString( GL_EXTENSIONS );
+        if( NULL == p )
+            pi_bopengl = false;
+        else
+            pi_bopengl = true;
         
-    GLint parms[2];
-    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
-    if(glGetError())
-        glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
-    if(!glGetError()){
-        g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
-        g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
-    }
     
-    wxString lwmsg;
-    lwmsg.Printf(_T("oeSENC_PI:  OpenGL-> Minimum cartographic line width: %4.1f"), g_GLMinCartographicLineWidth);
-    wxLogMessage(lwmsg);
-    
-    //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
-    //    This is most evident on rendered symbols which have horizontal or vertical line segments
-    //    Detect this case, and adjust the render parameters.
-    
-    if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
-        GLfloat parf;
-        glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
-        
-        g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
-    }
-    
-    
-    
-    
-    if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    else if( QueryExtension( "GL_OES_texture_npot" ) )
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
-        g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+        char *str = (char *) glGetString( GL_RENDERER );
+        if (str == NULL)
+            wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
 
-    #ifdef __OCPN__ANDROID__
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    #endif
+        char render_string[80];
+        wxString renderer;
+        if(str){
+            strncpy( render_string, str, 79 );
+            renderer = wxString( render_string, wxConvUTF8 );
+        }
+        
+        GetglEntryPoints();
+        
+        ///g_b_EnableVBO = false;
+        g_GLMinCartographicLineWidth = 1.0;
+        g_GLMinSymbolLineWidth = 1.0;
+        
+        //  Set the minimum line width
+        glGetError();       // Clear errors
+            
+        GLint parms[2];
+        glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
+        if(glGetError())
+            glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
+        if(!glGetError()){
+            g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
+            g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
+        }
+        
+        wxString lwmsg;
+        lwmsg.Printf(_T("oeSENC_PI:  OpenGL-> Minimum cartographic line width: %4.1f"), g_GLMinCartographicLineWidth);
+        wxLogMessage(lwmsg);
+        
+        //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
+        //    This is most evident on rendered symbols which have horizontal or vertical line segments
+        //    Detect this case, and adjust the render parameters.
+        
+        if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
+            GLfloat parf;
+            glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
+            
+            g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
+        }
+        
+        
+        
+        
+        if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        else if( QueryExtension( "GL_OES_texture_npot" ) )
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
+            g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+
+        #ifdef __OCPN__ANDROID__
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        #endif
+    }
+    
         
     //  Class Registrar Manager
     
