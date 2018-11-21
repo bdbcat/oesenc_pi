@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-07-24 10:42-0400\n"
-"PO-Revision-Date: 2018-07-25 01:12\n"
+"PO-Revision-Date: 2018-11-21 00:35\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Finnish\n"
 "Language: fi_FI\n"
@@ -44,11 +44,11 @@ msgstr "OpenCPN karttalisäosa tukee oeSENC karttoja.\n\n"
 
 #: src/oesenc_pi.cpp:941 src/oesenc_pi.cpp:3877
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
-msgstr "Saadaksesi käyttäjäavaimen sinun on luotava yksilöllinen järjestelmän tunnistustiedosto.\n"
+msgstr "Saadaksesi käyttäjäavaimen (User Key) sinun on luotava yksilöllinen järjestelmän tunnistetiedosto.\n"
 
 #: src/oesenc_pi.cpp:942 src/oesenc_pi.cpp:3878
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr "Tämä tiedosto tunnetaan myös \"sormenjälki\" tiedostona.\n"
+msgstr "Tämä tiedosto tunnetaan myös \"sormenjälki\" tiedostona (Fingerprint file).\n"
 
 #: src/oesenc_pi.cpp:943 src/oesenc_pi.cpp:3879
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
@@ -56,7 +56,7 @@ msgstr "Sormenjälkitiedosto sisältää tämän tietokoneen yksilöintitiedot.\
 
 #: src/oesenc_pi.cpp:944 src/oesenc_pi.cpp:3880
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr "Kun olet luonut tämän tiedoston, tarvitset sitä käyttäjäavaimen muodostamiseen o-charts.org kaupassa.\n\n"
+msgstr "Kun olet luonut tämän tiedoston, tarvitset sitä käyttäjäavaimen (User Key) muodostamiseen o-charts.org kaupassa.\n\n"
 
 #: src/oesenc_pi.cpp:945 src/oesenc_pi.cpp:3881
 msgid "Proceed to create Fingerprint file?"
@@ -157,7 +157,7 @@ msgstr "Järjestelmän tunnistus"
 
 #: src/oesenc_pi.cpp:3475
 msgid "Create System Identifier file..."
-msgstr "Luo järjestelmätunnistetiedosto..."
+msgstr "Luo järjestelmän tunnistetiedosto..."
 
 #: src/oesenc_pi.cpp:3484
 msgid "Show In Finder"
@@ -252,7 +252,7 @@ msgstr "Täältä voit tilata uusia oeSENC karttasarjoja."
 
 #: src/oesenc_pi.h:305
 msgid "OpenCPN SENC UserKey Required"
-msgstr "Tarvitaan OpenCPN oeSENC käyttäjäavain"
+msgstr "Tarvitaan OpenCPN oeSENC käyttäjäavain (User Key)"
 
 #: src/oesenc_pi.h:433
 msgid "oeSENC_PI Information"
@@ -285,7 +285,7 @@ msgstr "Valmistellaan karttasarjojasi."
 
 #: src/ochartShop.cpp:384
 msgid "Ready for download."
-msgstr "Valmiina lataamaan."
+msgstr "Ladattavissa."
 
 #: src/ochartShop.cpp:388
 msgid "Please update Chart List."
