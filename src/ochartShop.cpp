@@ -1022,7 +1022,7 @@ int doUploadXFPR()
             wxString stringFPR;
             wxFileInputStream stream(fpr_file);
             while(stream.IsOk() && !stream.Eof() ){
-                char c = stream.GetC();
+                unsigned char c = stream.GetC();
                 if(!stream.Eof()){
                     wxString sc;
                     sc.Printf(_T("%02X"), c);
