@@ -776,12 +776,17 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
             ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
             ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            ps52plib->SetShowLdisText( root[_T("OpenCPN S52PLIB ShowLightDescription")].AsBool() );
+            ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
+            //ps52plib->SetQuality( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool() );
             
             int icat;
             if( root[_T("OpenCPN S52PLIB DisplayCategory")].AsInt(icat) ){
                 _DisCat dcat = (_DisCat)icat;
                 ps52plib->SetDisplayCategory( dcat );
             }
+            
+            ps52plib->SetOCPNVersion( g_coreVersionMajor, g_coreVersionMinor, g_coreVersionPatch);
         }
         
         if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
