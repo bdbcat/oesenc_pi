@@ -230,6 +230,7 @@ public:
     wxButton *m_buttonNewFPR;
     wxButton *m_buttonShowFPR;
     wxButton *m_buttonClearSystemName;
+    wxButton *m_buttonClearCreds;
     wxStaticText *m_fpr_text;
     wxStaticText *m_nameTextBox;
     wxButton *m_buttonShowEULA;
@@ -255,6 +256,7 @@ public:
     void OnManageShopClick( wxCommandEvent &event );
     void OnClearSystemName( wxCommandEvent &event );
     void OnShowEULA( wxCommandEvent &event );
+    void OnClearCredentials( wxCommandEvent &event );
     
 private:
     void processArbResult( wxString result );

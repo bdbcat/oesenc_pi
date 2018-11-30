@@ -772,12 +772,12 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         // Capture the S52PLIB configuration
         if(ps52plib){
-            ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
-            ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
-            ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
-            ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
-            ps52plib->SetShowLdisText( root[_T("OpenCPN S52PLIB ShowLightDescription")].AsBool() );
-            ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowText")].IsBool())             ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowSoundings")].IsBool())        ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowAnchorConditions")].IsBool()) ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowLights")].IsBool())           ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowLightDescription")].IsBool()) ps52plib->SetShowLdisText( root[_T("OpenCPN S52PLIB ShowLightDescription")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowATONLabel")].IsBool())        ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
             //ps52plib->SetQuality( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool() );
             
             int icat;
@@ -3545,6 +3545,15 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         if(!g_systemName.Length())
             m_buttonClearSystemName->Disable();
+        
+        m_buttonClearCreds = new wxButton( content, wxID_ANY, _("Reset o-charts credentials"), wxDefaultPosition, wxDefaultSize, 0 );
+        
+        bSizer2->AddSpacer( 10 );
+        bSizer2->Add( m_buttonClearCreds, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
+        
+        m_buttonClearCreds->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearCredentials), NULL, g_event_handler );
+        
+        
 #endif
             
         m_sdbSizer1 = new wxStdDialogButtonSizer();
@@ -3914,6 +3923,18 @@ void oesenc_pi_event_handler::OnShowEULA( wxCommandEvent &event )
         }
     }
 }
+
+extern void saveShopConfig();
+
+void oesenc_pi_event_handler::OnClearCredentials( wxCommandEvent &event )
+{
+    g_loginKey.Clear();
+    saveShopConfig();
+    
+    OCPNMessageBox_PlugIn(NULL, _("Credential Reset Successful"), _("oeSENC_pi Message"), wxOK);
+ 
+}
+
 
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
