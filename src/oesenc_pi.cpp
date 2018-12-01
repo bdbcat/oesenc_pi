@@ -173,6 +173,8 @@ wxString g_versionString;
 
 std::map<std::string, ChartInfoItem *> info_hash;
 
+bool                            g_GLOptionsSet;
+
 double g_overzoom_emphasis_base;
 bool g_oz_vector_scale;
 float g_ChartScaleFactorExp;
@@ -770,16 +772,21 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         // Capture the S52PLIB configuration
         if(ps52plib){
-            ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
-            ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
-            ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
-            ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowText")].IsBool())             ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowSoundings")].IsBool())        ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowAnchorConditions")].IsBool()) ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowLights")].IsBool())           ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowLightDescription")].IsBool()) ps52plib->SetShowLdisText( root[_T("OpenCPN S52PLIB ShowLightDescription")].AsBool() );
+            if(root[_T("OpenCPN S52PLIB ShowATONLabel")].IsBool())        ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
+            //ps52plib->SetQuality( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool() );
             
             int icat;
             if( root[_T("OpenCPN S52PLIB DisplayCategory")].AsInt(icat) ){
                 _DisCat dcat = (_DisCat)icat;
                 ps52plib->SetDisplayCategory( dcat );
             }
+            
+            ps52plib->SetOCPNVersion( g_coreVersionMajor, g_coreVersionMinor, g_coreVersionPatch);
         }
         
         if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
@@ -844,6 +851,8 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         if(ps52plib)
             ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
+        
+        g_GLOptionsSet = true;
     }
         
 }
@@ -1397,8 +1406,13 @@ bool oesenc_pi::SaveConfig( void )
 void oesenc_pi::ShowPreferencesDialog( wxWindow* parent )
 {
     wxString titleString =  _("oeSENC_PI Preferences");
-    
-    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
+
+    long style = wxDEFAULT_DIALOG_STYLE;
+#ifdef __WXOSX__
+        style |= wxSTAY_ON_TOP;
+#endif
+
+    g_prefs_dialog = new oesencPrefsDialog( parent, wxID_ANY, titleString, wxPoint( 20, 20), wxDefaultSize, style );
     g_prefs_dialog->Fit();
 //    g_prefs_dialog->SetSize(wxSize(300, -1));
     //wxColour cl;
@@ -2715,70 +2729,73 @@ void initLibraries(void)
     
     // OpenGL variables
     
-    char *p = (char *) glGetString( GL_EXTENSIONS );
-    if( NULL == p )
-        pi_bopengl = false;
-    else
-        pi_bopengl = true;
-    
- 
-    char *str = (char *) glGetString( GL_RENDERER );
-    if (str == NULL)
-        wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
-
-    char render_string[80];
-    wxString renderer;
-    if(str){
-        strncpy( render_string, str, 79 );
-        renderer = wxString( render_string, wxConvUTF8 );
-    }
-    
-    GetglEntryPoints();
-    
-    ///g_b_EnableVBO = false;
-    g_GLMinCartographicLineWidth = 1.0;
-    g_GLMinSymbolLineWidth = 1.0;
-    
-    //  Set the minimum line width
-    glGetError();       // Clear errors
+    if(g_GLOptionsSet){
+        char *p = (char *) glGetString( GL_EXTENSIONS );
+        if( NULL == p )
+            pi_bopengl = false;
+        else
+            pi_bopengl = true;
         
-    GLint parms[2];
-    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
-    if(glGetError())
-        glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
-    if(!glGetError()){
-        g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
-        g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
-    }
     
-    wxString lwmsg;
-    lwmsg.Printf(_T("oeSENC_PI:  OpenGL-> Minimum cartographic line width: %4.1f"), g_GLMinCartographicLineWidth);
-    wxLogMessage(lwmsg);
-    
-    //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
-    //    This is most evident on rendered symbols which have horizontal or vertical line segments
-    //    Detect this case, and adjust the render parameters.
-    
-    if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
-        GLfloat parf;
-        glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
-        
-        g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
-    }
-    
-    
-    
-    
-    if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    else if( QueryExtension( "GL_OES_texture_npot" ) )
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
-        g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+        char *str = (char *) glGetString( GL_RENDERER );
+        if (str == NULL)
+            wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
 
-    #ifdef __OCPN__ANDROID__
-        g_texture_rectangle_format = GL_TEXTURE_2D;
-    #endif
+        char render_string[80];
+        wxString renderer;
+        if(str){
+            strncpy( render_string, str, 79 );
+            renderer = wxString( render_string, wxConvUTF8 );
+        }
+        
+        GetglEntryPoints();
+        
+        ///g_b_EnableVBO = false;
+        g_GLMinCartographicLineWidth = 1.0;
+        g_GLMinSymbolLineWidth = 1.0;
+        
+        //  Set the minimum line width
+        glGetError();       // Clear errors
+            
+        GLint parms[2];
+        glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parms[0] );
+        if(glGetError())
+            glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
+        if(!glGetError()){
+            g_GLMinSymbolLineWidth = wxMax(parms[0], 1);
+            g_GLMinCartographicLineWidth = wxMax(parms[0], 1);
+        }
+        
+        wxString lwmsg;
+        lwmsg.Printf(_T("oeSENC_PI:  OpenGL-> Minimum cartographic line width: %4.1f"), g_GLMinCartographicLineWidth);
+        wxLogMessage(lwmsg);
+        
+        //    Some GL renderers do a poor job of Anti-aliasing very narrow line widths.
+        //    This is most evident on rendered symbols which have horizontal or vertical line segments
+        //    Detect this case, and adjust the render parameters.
+        
+        if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
+            GLfloat parf;
+            glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
+            
+            g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
+        }
+        
+        
+        
+        
+        if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        else if( QueryExtension( "GL_OES_texture_npot" ) )
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
+            g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+
+        #ifdef __OCPN__ANDROID__
+            g_texture_rectangle_format = GL_TEXTURE_2D;
+        #endif
+    }
+    
         
     //  Class Registrar Manager
     
@@ -3528,6 +3545,15 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         if(!g_systemName.Length())
             m_buttonClearSystemName->Disable();
+        
+        m_buttonClearCreds = new wxButton( content, wxID_ANY, _("Reset o-charts credentials"), wxDefaultPosition, wxDefaultSize, 0 );
+        
+        bSizer2->AddSpacer( 10 );
+        bSizer2->Add( m_buttonClearCreds, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
+        
+        m_buttonClearCreds->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearCredentials), NULL, g_event_handler );
+        
+        
 #endif
             
         m_sdbSizer1 = new wxStdDialogButtonSizer();
@@ -3897,6 +3923,18 @@ void oesenc_pi_event_handler::OnShowEULA( wxCommandEvent &event )
         }
     }
 }
+
+extern void saveShopConfig();
+
+void oesenc_pi_event_handler::OnClearCredentials( wxCommandEvent &event )
+{
+    g_loginKey.Clear();
+    saveShopConfig();
+    
+    OCPNMessageBox_PlugIn(NULL, _("Credential Reset Successful"), _("oeSENC_pi Message"), wxOK);
+ 
+}
+
 
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )

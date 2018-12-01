@@ -2546,13 +2546,25 @@ bool s52plib::TextRenderCheck( ObjRazRules *rzRules )
 {
     if( !m_bShowS57Text ) return false;
 
-    //    This logic:  if Aton text is off, but "light description" is on, then show light description anyway
-    if( ( rzRules->obj->bIsAton ) && ( !m_bShowAtonText ) ) {
-        if( !strncmp( rzRules->obj->FeatureName, "LIGHTS", 6 ) ) {
-            if( !m_bShowLdisText ) return false;
-        } else
-            return false;
+    if(rzRules->obj->bIsAton ){
+
+       if( !strncmp( rzRules->obj->FeatureName, "LIGHTS", 6 ) ) {
+           if( !m_bShowLdisText )
+               return false;
+       }
+       else{
+           if( !m_bShowAtonText )
+               return false;
+       }
     }
+
+    //    This logic:  if Aton text is off, but "light description" is on, then show light description anyway
+//    if( ( rzRules->obj->bIsAton ) && ( !m_bShowAtonText ) ) {
+//        if( !strncmp( rzRules->obj->FeatureName, "LIGHTS", 6 ) ) {
+//            if( !m_bShowLdisText ) return false;
+//        } else
+//            return false;
+//    }
 
     // Declutter LIGHTS descriptions
     if( ( rzRules->obj->bIsAton ) && ( !strncmp( rzRules->obj->FeatureName, "LIGHTS", 6 ) ) ){
@@ -10705,14 +10717,16 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
 
         //  If a modern (> OCPN 4.4) version of the core is active,
         //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.
-        if( (m_coreVersionMajor >= 4) && (m_coreVersionMinor >= 5) ){
+        if( ((m_coreVersionMajor == 4) && (m_coreVersionMinor >= 5)) || m_coreVersionMajor > 4 ){
 
             // First, we capture some temporary values that were set by messaging, but would be overwritten by config read
             bool bTextOn = m_bShowS57Text;
             bool bSoundingsOn = m_bShowSoundg;
             enum _DisCat old = m_nDisplayCategory;
 
-            PLIB_LoadS57Config();
+            // Retain compatibility with O4.8.x
+            if( (m_coreVersionMajor == 4) && (m_coreVersionMinor < 9))
+                PLIB_LoadS57Config();
 
             //  And then reset the temp values that were overwritten by config load
             m_bShowS57Text = bTextOn;
