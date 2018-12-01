@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-24 10:42-0400\n"
-"PO-Revision-Date: 2018-11-21 00:35\n"
+"POT-Creation-Date: 2018-11-29 21:07-0500\n"
+"PO-Revision-Date: 2018-12-01 03:20\n"
 "Last-Translator: nohal <pavel@kalian.cz>\n"
 "Language-Team: Finnish\n"
 "Language: fi_FI\n"
@@ -20,246 +20,256 @@ msgstr ""
 msgid "Sector angles are True Bearings from Seaward"
 msgstr "Sektorikulmat ovat tosisuuntia merikohteesta"
 
-#: src/oesenc_pi.cpp:292 src/oesenc_pi.cpp:438 src/oesenc_pi.cpp:2124
-#: src/oesenc_pi.cpp:2153 src/oesenc_pi.cpp:4536 src/oesenc_pi.cpp:4588
-#: src/oesenc_pi.cpp:4754 src/ochartShop.cpp:1589 src/ochartShop.cpp:1655
-#: src/ochartShop.cpp:1782 src/ochartShop.cpp:2836 src/ochartShop.cpp:2865
-#: src/ochartShop.cpp:2970 src/ochartShop.cpp:2995 src/ochartShop.cpp:3226
-#: src/ochartShop.cpp:3254
+#: src/oesenc_pi.cpp:294 src/oesenc_pi.cpp:440 src/oesenc_pi.cpp:2141
+#: src/oesenc_pi.cpp:2170 src/oesenc_pi.cpp:4602 src/oesenc_pi.cpp:4665
+#: src/oesenc_pi.cpp:4831 src/ochartShop.cpp:1591 src/ochartShop.cpp:1657
+#: src/ochartShop.cpp:1784 src/ochartShop.cpp:2838 src/ochartShop.cpp:2867
+#: src/ochartShop.cpp:2972 src/ochartShop.cpp:2997 src/ochartShop.cpp:3228
+#: src/ochartShop.cpp:3256
 msgid "Dialog"
 msgstr "Dialogi"
 
-#: src/oesenc_pi.cpp:723
+#: src/oesenc_pi.cpp:725
 msgid "oeSENC"
 msgstr "oeSENC"
 
-#: src/oesenc_pi.cpp:729
+#: src/oesenc_pi.cpp:731
 msgid "PlugIn for OpenCPN oeSENC charts"
-msgstr "OpenCPN oeSENC karttalisäosa"
+msgstr "Lisäosa OpenCPN:ään oeSENC-kartoille"
 
-#: src/oesenc_pi.cpp:735
+#: src/oesenc_pi.cpp:737
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
-msgstr "OpenCPN karttalisäosa tukee oeSENC karttoja.\n\n"
+msgstr "Lisäosa OpenCPN:ään\n"
+"Lisäosa tarjoaa tuen oeSENC-kartoille.\n\n"
 
-#: src/oesenc_pi.cpp:941 src/oesenc_pi.cpp:3877
+#: src/oesenc_pi.cpp:950 src/oesenc_pi.cpp:3943
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
 msgstr "Saadaksesi käyttäjäavaimen (User Key) sinun on luotava yksilöllinen järjestelmän tunnistetiedosto.\n"
 
-#: src/oesenc_pi.cpp:942 src/oesenc_pi.cpp:3878
+#: src/oesenc_pi.cpp:951 src/oesenc_pi.cpp:3944
 msgid "This file is also known as a\"fingerprint\" file.\n"
-msgstr "Tämä tiedosto tunnetaan myös \"sormenjälki\" tiedostona (Fingerprint file).\n"
+msgstr "Tämä tiedosto tunnetaan myös \"sormenjälkitiedostona\" (Fingerprint file).\n"
 
-#: src/oesenc_pi.cpp:943 src/oesenc_pi.cpp:3879
+#: src/oesenc_pi.cpp:952 src/oesenc_pi.cpp:3945
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
 msgstr "Sormenjälkitiedosto sisältää tämän tietokoneen yksilöintitiedot.\n\n"
 
-#: src/oesenc_pi.cpp:944 src/oesenc_pi.cpp:3880
+#: src/oesenc_pi.cpp:953 src/oesenc_pi.cpp:3946
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
-msgstr "Kun olet luonut tämän tiedoston, tarvitset sitä käyttäjäavaimen (User Key) muodostamiseen o-charts.org kaupassa.\n\n"
+msgstr "Kun olet luonut tämän tiedoston, tarvitset sitä käyttäjäavaimen (User Key) muodostamiseen o-charts.org-kaupassa.\n\n"
 
-#: src/oesenc_pi.cpp:945 src/oesenc_pi.cpp:3881
+#: src/oesenc_pi.cpp:954 src/oesenc_pi.cpp:3947
 msgid "Proceed to create Fingerprint file?"
 msgstr "Luodaanko sormenjälkitiedosto?"
 
-#: src/oesenc_pi.cpp:947 src/oesenc_pi.cpp:3843 src/oesenc_pi.cpp:3883
-#: src/oesenc_pi.cpp:4939 src/oesenc_pi.cpp:5019 src/ochartShop.cpp:951
-#: src/ochartShop.cpp:2157 src/ochartShop.cpp:2170 src/ochartShop.cpp:2209
-#: src/ochartShop.cpp:2595
+#: src/oesenc_pi.cpp:956 src/oesenc_pi.cpp:3881 src/oesenc_pi.cpp:3949
+#: src/oesenc_pi.cpp:5016 src/oesenc_pi.cpp:5096 src/ochartShop.cpp:953
+#: src/ochartShop.cpp:2159 src/ochartShop.cpp:2172 src/ochartShop.cpp:2211
+#: src/ochartShop.cpp:2597
 msgid "oeSENC_PI Message"
-msgstr "oeSENC_PI viesti"
+msgstr "oeSENC_PI-viesti"
 
-#: src/oesenc_pi.cpp:1396 src/oesenc_pi.h:212
+#: src/oesenc_pi.cpp:1408 src/oesenc_pi.h:226
 msgid "oeSENC_PI Preferences"
-msgstr "oeSENC_PI asetukset"
+msgstr "oeSENC_PI-asetukset"
 
-#: src/oesenc_pi.cpp:2156
+#: src/oesenc_pi.cpp:2173
 msgid "OpenCPN oeSENC UserKey Required"
-msgstr "Tarvitaan OpenCPN oeSENC käyttäjäavain"
+msgstr "Tarvitaan OpenCPN oeSENC-käyttäjäavain"
 
-#: src/oesenc_pi.cpp:2174
+#: src/oesenc_pi.cpp:2191
 msgid "Enter UserKey"
 msgstr "Kirjoita käyttäjäavain"
 
-#: src/oesenc_pi.cpp:2193
+#: src/oesenc_pi.cpp:2210
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
-msgstr "Kelvollinen oeSENC käyttäjäavain on aakkosnumeerista muotoa: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
-"Saat oeSENC käyttäjäavaimen karttojen toimittajaltasi."
+msgstr "Kelvollinen oeSENC-käyttäjäavain on aakkosnumeerista muotoa: AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
+"Saat oeSENC-käyttäjäavaimen karttojen toimittajaltasi."
 
-#: src/oesenc_pi.cpp:2199
+#: src/oesenc_pi.cpp:2216
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr "Virhe: Annettu käyttäjäavain ei kelpaa tähän oeSENC karttasarjaan. Tarkista oma käyttäjäavaimesi ja yritä uudelleen.\n\n"
-"Kelvollinen oeSENC käyttäjäavain on aakkosnumeerista muotoa: AAAA-BBBB-CCCC-DDDD-EEEE-FF Saat oeSENC käyttäjäavaimen karttojen toimittajaltasi.\n\n"
+msgstr "Virhe: Annettu käyttäjäavain ei kelpaa tähän oeSENC-karttasarjaan. Tarkista oma käyttäjäavaimesi ja yritä uudelleen.\n\n"
+"Kelvollinen oeSENC-käyttäjäavain on aakkosnumeerista muotoa: AAAA-BBBB-CCCC-DDDD-EEEE-FF Saat oeSENC-käyttäjäavaimen karttojen toimittajaltasi.\n\n"
 
-#: src/oesenc_pi.cpp:2207
+#: src/oesenc_pi.cpp:2224
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider.\n\n"
-msgstr "Virhe: Annettu käyttäjäavain ei kelpaa tähän oeSENC karttasarjaan.\n\n"
-"oeSENC kartat poistetaan käytöstä tämän istunnon ajaksi.\n"
+msgstr "Virhe: Annettu käyttäjäavain ei kelpaa tähän oeSENC-karttasarjaan.\n\n"
+"oeSENC-kartat poistetaan käytöstä tämän istunnon ajaksi.\n"
 "Tarkista käyttäjäavaimesi ja käynnistä OpenCPN uudelleen.\n\n"
-"Saat oeSENC käyttäjäavaimen karttojen toimittajaltasi.\n\n"
+"Saat oeSENC-käyttäjäavaimen karttojen toimittajaltasi.\n\n"
 
-#: src/oesenc_pi.cpp:2218
+#: src/oesenc_pi.cpp:2235
 msgid "UserKey accepted.\n\n"
 msgstr "Käyttäjäavain hyväksyttiin.\n\n"
 
-#: src/oesenc_pi.cpp:2255 src/ochartShop.cpp:2910 src/ochartShop.cpp:3042
-#: src/ochartShop.cpp:3307
+#: src/oesenc_pi.cpp:2272 src/ochartShop.cpp:2912 src/ochartShop.cpp:3044
+#: src/ochartShop.cpp:3309
 msgid "Cancel"
 msgstr "Peruuta"
 
-#: src/oesenc_pi.cpp:2262 src/ochartShop.cpp:2915 src/ochartShop.cpp:3045
-#: src/ochartShop.cpp:3310
+#: src/oesenc_pi.cpp:2279 src/ochartShop.cpp:2917 src/ochartShop.cpp:3047
+#: src/ochartShop.cpp:3312
 msgid "OK"
 msgstr "OK"
 
-#: src/oesenc_pi.cpp:2953
+#: src/oesenc_pi.cpp:2973
 msgid "Checking oeserverd utility at "
-msgstr "Tarkistetaan oeserverd apuohjelmaa "
+msgstr "Tarkistetaan oeserverd-apuohjelmaa "
 
-#: src/oesenc_pi.cpp:2961
+#: src/oesenc_pi.cpp:2981
 msgid "Cannot find the oserverd utility at \n"
-msgstr "oeserverd apuohjelmaa ei löydy\n"
+msgstr "oeserverd-apuohjelmaa ei löydy\n"
 
-#: src/oesenc_pi.cpp:2965 src/oesenc_pi.cpp:3073 src/oesenc_pi.cpp:3729
-#: src/oesenc_pi.cpp:3898 src/oesenc_pi.cpp:3904 src/oesenc_pi.cpp:4053
-#: src/oesenc_pi.cpp:4083 src/oesenc_pi.cpp:4096 src/ochartShop.cpp:592
-#: src/ochartShop.cpp:608 src/ochartShop.cpp:1084 src/ochartShop.cpp:1339
-#: src/ochartShop.cpp:2117 src/ochartShop.cpp:2124 src/ochartShop.cpp:2220
+#: src/oesenc_pi.cpp:2985 src/oesenc_pi.cpp:3093 src/oesenc_pi.cpp:3767
+#: src/oesenc_pi.cpp:3934 src/oesenc_pi.cpp:3964 src/oesenc_pi.cpp:3970
+#: src/oesenc_pi.cpp:4119 src/oesenc_pi.cpp:4149 src/oesenc_pi.cpp:4162
+#: src/ochartShop.cpp:592 src/ochartShop.cpp:608 src/ochartShop.cpp:1086
+#: src/ochartShop.cpp:1341 src/ochartShop.cpp:2119 src/ochartShop.cpp:2126
+#: src/ochartShop.cpp:2222
 msgid "oeSENC_pi Message"
-msgstr "oeSENC_pi viesti"
+msgstr "oeSENC_pi-viesti"
 
-#: src/oesenc_pi.cpp:3044 src/oesenc_pi.cpp:3068
+#: src/oesenc_pi.cpp:3064 src/oesenc_pi.cpp:3088
 msgid "oeserverd utility at \n"
-msgstr "oeserverd apuohjelma\n"
+msgstr "oeserverd-apuohjelma\n"
 
-#: src/oesenc_pi.cpp:3048
+#: src/oesenc_pi.cpp:3068
 msgid " reports Unavailable.\n\n"
 msgstr " raportteja ei ole käytettävissä.\n\n"
 
-#: src/oesenc_pi.cpp:3072
+#: src/oesenc_pi.cpp:3092
 msgid " could not be started.\n\n"
 msgstr " ei voitu käynnistää.\n\n"
 
-#: src/oesenc_pi.cpp:3458
+#: src/oesenc_pi.cpp:3489
 msgid "Show EULA"
 msgstr "Näytä loppukäyttäjän lisenssisopimus (EULA)"
 
-#: src/oesenc_pi.cpp:3465
+#: src/oesenc_pi.cpp:3497
 msgid "System Identification"
 msgstr "Järjestelmän tunnistus"
 
-#: src/oesenc_pi.cpp:3475
+#: src/oesenc_pi.cpp:3507
 msgid "Create System Identifier file..."
 msgstr "Luo järjestelmän tunnistetiedosto..."
 
-#: src/oesenc_pi.cpp:3484
+#: src/oesenc_pi.cpp:3516
 msgid "Show In Finder"
 msgstr "Näytä Finderissa"
 
-#: src/oesenc_pi.cpp:3486
+#: src/oesenc_pi.cpp:3518
 msgid "Show on disk"
 msgstr "Näytä levyllä"
 
-#: src/oesenc_pi.cpp:3505
+#: src/oesenc_pi.cpp:3539
 msgid "Reset System Name"
 msgstr "Tyhjennä järjestelmänimi"
 
-#: src/oesenc_pi.cpp:3729 src/oesenc_pi.cpp:4053
+#: src/oesenc_pi.cpp:3549
+msgid "Reset o-charts credentials"
+msgstr "Tyhjennä o-charts-kirjautumistiedot"
+
+#: src/oesenc_pi.cpp:3767 src/oesenc_pi.cpp:4119
 msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
 msgstr "Fpr kopiointiin tarvitaan järjestelmänvalvojan oikeudet.   Yritä uudelleen...."
 
-#: src/oesenc_pi.cpp:3840
+#: src/oesenc_pi.cpp:3878
 msgid "System name RESET shall be performed only by request from o-charts technical support staff."
-msgstr "Systeeminimen tyhjennys tulee suorittaa ainoastaan o-charts teknisen tuen pyynnöstä."
+msgstr "Systeeminimen tyhjennys tulee suorittaa ainoastaan o-charts:n teknisen tuen pyynnöstä."
 
-#: src/oesenc_pi.cpp:3842
+#: src/oesenc_pi.cpp:3880
 msgid "Proceed to RESET?"
 msgstr "Suoritetaanko systeeminimen tyhjennys?"
 
-#: src/oesenc_pi.cpp:3892 src/oesenc_pi.cpp:4077
+#: src/oesenc_pi.cpp:3934
+msgid "Credential Reset Successful"
+msgstr "Kirjautumistietojen tyhjennys onnistui"
+
+#: src/oesenc_pi.cpp:3958 src/oesenc_pi.cpp:4143
 msgid "Fingerprint file created.\n"
 msgstr "Sormenjälkitiedosto luotu.\n"
 
-#: src/oesenc_pi.cpp:3896 src/oesenc_pi.cpp:4081
+#: src/oesenc_pi.cpp:3962 src/oesenc_pi.cpp:4147
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
 msgstr "\n\n"
 "Sormenjälkitiedosto tiedosto kopioidaan myös työpöydälle."
 
-#: src/oesenc_pi.cpp:4678
+#: src/oesenc_pi.cpp:4755
 msgid "Could not open oesenc_pi EULA: "
-msgstr "Oesenc_pi käyttöoikeussopimusta ei voitu avata: "
+msgstr "oeSENC_pi-käyttöoikeussopimusta ei voitu avata: "
 
-#: src/oesenc_pi.cpp:4751
+#: src/oesenc_pi.cpp:4828
 msgid "oeSENC PlugIn for OpenCPN"
-msgstr "oeSENC lisäosa OpenCPN:ään"
+msgstr "oeSENC-lisäosa OpenCPN:ään"
 
-#: src/oesenc_pi.cpp:4814
+#: src/oesenc_pi.cpp:4891
 msgid "License"
 msgstr "Lisenssi"
 
-#: src/oesenc_pi.cpp:4839
+#: src/oesenc_pi.cpp:4916
 msgid "Accept"
 msgstr "Hyväksy"
 
-#: src/oesenc_pi.cpp:4844
+#: src/oesenc_pi.cpp:4921
 msgid "Reject"
 msgstr "Hylkää"
 
-#: src/oesenc_pi.cpp:4885
+#: src/oesenc_pi.cpp:4962
 msgid "Available Chart sets:"
 msgstr "Saatavissa olevat karttasarjat:"
 
-#: src/oesenc_pi.cpp:4954
+#: src/oesenc_pi.cpp:5031
 msgid "The following Chart sets are available:"
 msgstr "Seuraavat karttasarjat ovat saatavana:"
 
-#: src/oesenc_pi.cpp:4964
+#: src/oesenc_pi.cpp:5041
 msgid "Chart set"
 msgstr "Karttasarja"
 
-#: src/oesenc_pi.cpp:4968
+#: src/oesenc_pi.cpp:5045
 msgid "Version"
 msgstr "Versio"
 
-#: src/oesenc_pi.cpp:4972
+#: src/oesenc_pi.cpp:5049
 msgid "Valid until"
 msgstr "Voimassa"
 
-#: src/oesenc_pi.cpp:5328 src/oesenc_pi.cpp:5343
+#: src/oesenc_pi.cpp:5405 src/oesenc_pi.cpp:5420
 msgid "oeSENC Charts"
-msgstr "oeSENC kartat"
+msgstr "oeSENC-kartat"
 
-#: src/oesenc_pi.cpp:5375
+#: src/oesenc_pi.cpp:5452
 msgid "Add/Update oeSENC chartsets"
-msgstr "Lisää/päivitä oeSENC karttasarjat"
+msgstr "Lisää/päivitä oeSENC-karttasarjat"
 
-#: src/oesenc_pi.cpp:5380
+#: src/oesenc_pi.cpp:5457
 msgid "Visit o-charts.org Website"
-msgstr "Käy o-charts.org sivustolla"
+msgstr "Käy o-charts.org-sivustolla"
 
-#: src/oesenc_pi.cpp:5381
+#: src/oesenc_pi.cpp:5458
 msgid "Here you may order new oeSENC chartsets."
-msgstr "Täältä voit tilata uusia oeSENC karttasarjoja."
+msgstr "Täältä voit tilata uusia oeSENC-karttasarjoja."
 
-#: src/oesenc_pi.h:305
+#: src/oesenc_pi.h:321
 msgid "OpenCPN SENC UserKey Required"
-msgstr "Tarvitaan OpenCPN oeSENC käyttäjäavain (User Key)"
+msgstr "Tarvitaan OpenCPN oeSENC-käyttäjäavain (User Key)"
 
-#: src/oesenc_pi.h:433
+#: src/oesenc_pi.h:449
 msgid "oeSENC_PI Information"
-msgstr "oeSENC_PI tiedot"
+msgstr "oeSENC_PI-tiedot"
 
-#: src/s52plib.cpp:2338 src/s52plib.cpp:2363 src/s52plib.cpp:2471
-#: src/s52plib.cpp:2645 src/s52plib.cpp:2661
+#: src/s52plib.cpp:2371 src/s52plib.cpp:2396 src/s52plib.cpp:2504
+#: src/s52plib.cpp:2690 src/s52plib.cpp:2706
 msgid "ChartTexts"
 msgstr "Karttatekstit"
 
@@ -319,261 +329,261 @@ msgstr "Tarkista yhteytesi ja kokeile uudelleen."
 msgid "Invalid Login."
 msgstr "Virheellinen kirjautuminen."
 
-#: src/ochartShop.cpp:941
+#: src/ochartShop.cpp:943
 msgid "This action will PERMANENTLY assign the chart:"
 msgstr "Tämä toiminto liittää PYSYVÄSTI tämän kartan:"
 
-#: src/ochartShop.cpp:945
+#: src/ochartShop.cpp:947
 msgid "to this systemName:"
 msgstr "tähän järjestelmänimeen:"
 
-#: src/ochartShop.cpp:949
+#: src/ochartShop.cpp:951
 msgid "Proceed?"
 msgstr "Jatka?"
 
-#: src/ochartShop.cpp:1256 src/ochartShop.cpp:1330
+#: src/ochartShop.cpp:1258 src/ochartShop.cpp:1332
 msgid "Unzipping chart files..."
 msgstr "Puretaan karttatiedostoja..."
 
-#: src/ochartShop.cpp:1309
+#: src/ochartShop.cpp:1311
 msgid "Choose chart install location."
 msgstr "Valitse karttojen asennushakemisto."
 
-#: src/ochartShop.cpp:1323
+#: src/ochartShop.cpp:1325
 msgid "Ready for unzipping chart files."
 msgstr "Valmiina purkamaan karttatiedostot."
 
-#: src/ochartShop.cpp:1339
+#: src/ochartShop.cpp:1341
 msgid "Error extracting zip file"
 msgstr "Virhe ziptiedoston avauksessa"
 
-#: src/ochartShop.cpp:1613
+#: src/ochartShop.cpp:1615
 msgid "Chart Edition:"
 msgstr "Karttapainos:"
 
-#: src/ochartShop.cpp:1619
+#: src/ochartShop.cpp:1621
 msgid "Order Reference:"
 msgstr "Tilauksen viite:"
 
-#: src/ochartShop.cpp:1625
+#: src/ochartShop.cpp:1627
 msgid "Purchase date:"
 msgstr "Hankintapäivä:"
 
-#: src/ochartShop.cpp:1631
+#: src/ochartShop.cpp:1633
 msgid "Expiration date:"
 msgstr "Viimeinen käyttöpäivä:"
 
-#: src/ochartShop.cpp:1637
+#: src/ochartShop.cpp:1639
 msgid "Status:"
 msgstr "Tila:"
 
-#: src/ochartShop.cpp:1688
+#: src/ochartShop.cpp:1690
 msgid "Chart Edition: "
 msgstr "Karttapainos: "
 
-#: src/ochartShop.cpp:1692
+#: src/ochartShop.cpp:1694
 msgid "Order Reference: "
 msgstr "Tilauksen viite: "
 
-#: src/ochartShop.cpp:1699
+#: src/ochartShop.cpp:1701
 msgid "Purchase date: "
 msgstr "Hankintapäivä: "
 
-#: src/ochartShop.cpp:1703
+#: src/ochartShop.cpp:1705
 msgid "Expiration date: "
 msgstr "Viimeinen käyttöpäivä: "
 
-#: src/ochartShop.cpp:1716
+#: src/ochartShop.cpp:1718
 msgid "Assigment 1"
 msgstr "Toimeksianto 1"
 
-#: src/ochartShop.cpp:1720 src/ochartShop.cpp:1743
+#: src/ochartShop.cpp:1722 src/ochartShop.cpp:1745
 msgid "System: "
 msgstr "Järjestelmä: "
 
-#: src/ochartShop.cpp:1724 src/ochartShop.cpp:1747
+#: src/ochartShop.cpp:1726 src/ochartShop.cpp:1749
 msgid "Installed edition: "
 msgstr "Asennettu painos: "
 
-#: src/ochartShop.cpp:1732 src/ochartShop.cpp:1755
+#: src/ochartShop.cpp:1734 src/ochartShop.cpp:1757
 msgid "Status: "
 msgstr "Tila: "
 
-#: src/ochartShop.cpp:1739
+#: src/ochartShop.cpp:1741
 msgid "Assigment 2"
 msgstr "Toimeksianto 2"
 
-#: src/ochartShop.cpp:1912
+#: src/ochartShop.cpp:1914
 msgid "My Charts"
 msgstr "Minun karttasarjani"
 
-#: src/ochartShop.cpp:1915
+#: src/ochartShop.cpp:1917
 msgid "Refresh Chart List"
 msgstr "Päivitä luettelo"
 
-#: src/ochartShop.cpp:1934
+#: src/ochartShop.cpp:1936
 msgid "Actions"
 msgstr "Toiminnot"
 
-#: src/ochartShop.cpp:1944 src/ochartShop.cpp:2690
+#: src/ochartShop.cpp:1946 src/ochartShop.cpp:2692
 msgid "Install Selected Chart"
 msgstr "Asenna valittu karttasarja"
 
-#: src/ochartShop.cpp:1947
+#: src/ochartShop.cpp:1949
 msgid "Cancel Operation"
 msgstr "Peruuta operaatio"
 
-#: src/ochartShop.cpp:1956
+#: src/ochartShop.cpp:1958
 msgid "Status: Chart List Refresh required."
 msgstr "Tila: Suositellaan karttasarjaluettelon päivitystä."
 
-#: src/ochartShop.cpp:1962 src/ochartShop.cpp:1990 src/ochartShop.cpp:2129
-#: src/ochartShop.cpp:2752
+#: src/ochartShop.cpp:1964 src/ochartShop.cpp:1992 src/ochartShop.cpp:2131
+#: src/ochartShop.cpp:2754
 msgid "System Name:"
 msgstr "Järjestelmänimi:"
 
-#: src/ochartShop.cpp:2064
+#: src/ochartShop.cpp:2066
 msgid "Contacting o-charts server..."
-msgstr "Yhdistetään o-charts palvelimeen..."
+msgstr "Yhdistetään o-charts-palvelimeen..."
 
-#: src/ochartShop.cpp:2075 src/ochartShop.cpp:2090
+#: src/ochartShop.cpp:2077 src/ochartShop.cpp:2092
 msgid "Status: Login error."
 msgstr "Tila: Kirjautumisvirhe."
 
-#: src/ochartShop.cpp:2094 src/ochartShop.cpp:2105 src/ochartShop.cpp:2454
+#: src/ochartShop.cpp:2096 src/ochartShop.cpp:2107 src/ochartShop.cpp:2456
 msgid "Status: Communications error."
 msgstr "Tila: Yhteysvirhe."
 
-#: src/ochartShop.cpp:2116 src/ochartShop.cpp:2123
+#: src/ochartShop.cpp:2118 src/ochartShop.cpp:2125
 msgid "Invalid System Name"
 msgstr "Virheellinen järjestelmänimi"
 
-#: src/ochartShop.cpp:2135 src/ochartShop.cpp:2217
+#: src/ochartShop.cpp:2137 src/ochartShop.cpp:2219
 msgid "Status: Ready"
 msgstr "Tila: valmis"
 
-#: src/ochartShop.cpp:2157
+#: src/ochartShop.cpp:2159
 msgid "Chart download cancelled."
 msgstr "Lataus peruttu."
 
-#: src/ochartShop.cpp:2170
+#: src/ochartShop.cpp:2172
 msgid "Chart download error, missing file."
 msgstr "Kartan latausvirhe, tiedosto puuttuu."
 
-#: src/ochartShop.cpp:2205
+#: src/ochartShop.cpp:2207
 msgid "Chart download complete."
 msgstr "Karttasarjojen lataus on valmis."
 
-#: src/ochartShop.cpp:2207
+#: src/ochartShop.cpp:2209
 msgid "Proceed to install?"
 msgstr "Jatkatko asennusta?"
 
-#: src/ochartShop.cpp:2212
+#: src/ochartShop.cpp:2214
 msgid "Installing charts"
 msgstr "Asennetaan kartat"
 
-#: src/ochartShop.cpp:2220
+#: src/ochartShop.cpp:2222
 msgid "Chart installation complete."
 msgstr "Karttasarjojen asennus on valmis."
 
-#: src/ochartShop.cpp:2423
+#: src/ochartShop.cpp:2425
 msgid "Preparing your charts..."
 msgstr "Valmistellaan karttasarjojasi..."
 
-#: src/ochartShop.cpp:2471
+#: src/ochartShop.cpp:2473
 msgid "Status: Downloading..."
 msgstr "Tila: Ladataan..."
 
-#: src/ochartShop.cpp:2476
+#: src/ochartShop.cpp:2478
 msgid "Downloading..."
 msgstr "Ladataan..."
 
-#: src/ochartShop.cpp:2504 src/ochartShop.cpp:2546 src/ochartShop.cpp:2609
-#: src/ochartShop.cpp:3146
+#: src/ochartShop.cpp:2506 src/ochartShop.cpp:2548 src/ochartShop.cpp:2611
+#: src/ochartShop.cpp:3148
 msgid "Status: OK"
 msgstr "Tila: OK"
 
-#: src/ochartShop.cpp:2586
+#: src/ochartShop.cpp:2588
 msgid "Your chart preparation is not complete."
 msgstr "Karttasarjojesi valmistelu ei ole valmis."
 
-#: src/ochartShop.cpp:2588
+#: src/ochartShop.cpp:2590
 msgid "You may continue to wait, or return to this screen later to complete the download."
 msgstr "Voit jatkaa odottamista, tai palata tähän näyttöön myöhemmin täydentääksesi latauksen."
 
-#: src/ochartShop.cpp:2590
+#: src/ochartShop.cpp:2592
 msgid "You will receive an email message when preparation for download is complete"
 msgstr "Saat sähköpostiviestin, kun latauksen valmistelut on suoritettu"
 
-#: src/ochartShop.cpp:2592
+#: src/ochartShop.cpp:2594
 msgid "Continue waiting?"
 msgstr "Jatka odottamista?"
 
-#: src/ochartShop.cpp:2694
+#: src/ochartShop.cpp:2696
 msgid "Reinstall Selected Chart"
 msgstr "Asenna valittu karttasarja uudelleen"
 
-#: src/ochartShop.cpp:2698
+#: src/ochartShop.cpp:2700
 msgid "Update Selected Chart"
 msgstr "Päivitä valittu karttasarja"
 
-#: src/ochartShop.cpp:2702 src/ochartShop.cpp:2706
+#: src/ochartShop.cpp:2704 src/ochartShop.cpp:2708
 msgid "Download Selected Chart"
 msgstr "Lataa valitut kartat"
 
-#: src/ochartShop.cpp:2868
+#: src/ochartShop.cpp:2870
 msgid "New OpenCPN oeSENC System Name"
-msgstr "Uusi OpenCPN oeSENC järjestelmänimi"
+msgstr "Uusi OpenCPN oeSENC-järjestelmänimi"
 
-#: src/ochartShop.cpp:2885
+#: src/ochartShop.cpp:2887
 msgid "Enter New System Name"
 msgstr "Kirjoita uusi järjestelmänimi"
 
-#: src/ochartShop.cpp:2896
+#: src/ochartShop.cpp:2898
 msgid "A valid System Name is 3 to 15 characters in length."
 msgstr "Kelvollinen järjestelmänimi on 3-15 merkkiä pitkä."
 
-#: src/ochartShop.cpp:2899
+#: src/ochartShop.cpp:2901
 msgid "lower case letters and numbers only."
 msgstr "vain pienet kirjaimet ja numerot."
 
-#: src/ochartShop.cpp:2902
+#: src/ochartShop.cpp:2904
 msgid "No symbols or spaces are allowed."
-msgstr "Symboolit tai välit eivät ole sallittuja."
+msgstr "Symbolit tai välit eivät ole sallittuja."
 
-#: src/ochartShop.cpp:2998
+#: src/ochartShop.cpp:3000
 msgid "Select OpenCPN/oeSENC System Name"
-msgstr "Valitse OpenCPN/oeSENC järjestelmänimi"
+msgstr "Valitse OpenCPN oeSENC-järjestelmänimi"
 
-#: src/ochartShop.cpp:3014
+#: src/ochartShop.cpp:3016
 msgid "Select your System Name from the following list, or "
 msgstr "Valitse järjestelmänimi seuraavasta luettelosta, tai "
 
-#: src/ochartShop.cpp:3019
+#: src/ochartShop.cpp:3021
 msgid " create a new System Name for this computer."
 msgstr " luo uusi järjestelmänimi tälle tietokoneelle."
 
-#: src/ochartShop.cpp:3029
+#: src/ochartShop.cpp:3031
 msgid "new..."
 msgstr "uusi..."
 
-#: src/ochartShop.cpp:3031
+#: src/ochartShop.cpp:3033
 msgid "System Names"
 msgstr "Järjestelmänimet"
 
-#: src/ochartShop.cpp:3195
+#: src/ochartShop.cpp:3197
 msgid "Downloaded:  "
 msgstr "Ladatut:  "
 
-#: src/ochartShop.cpp:3273
+#: src/ochartShop.cpp:3275
 msgid "Login to o-charts.org"
 msgstr "Kirjaudu o-charts.orgiin"
 
-#: src/ochartShop.cpp:3290
+#: src/ochartShop.cpp:3292
 msgid "email address:"
 msgstr "sähköpostiosoite:"
 
-#: src/ochartShop.cpp:3297
+#: src/ochartShop.cpp:3299
 msgid "Password:"
 msgstr "Salasana:"
 
