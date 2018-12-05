@@ -6791,7 +6791,7 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 //      if(rzRules->obj->Index != 1103)
 //          return 0; //int yyp = 0;
 
-//        if(!strncmp(rzRules->obj->FeatureName, "ACHARE", 6))
+//        if(!strncmp(rzRules->obj->FeatureName, "BUAARE", 6))
 //            int yyp = 0;
 
     if( !ObjectRenderCheckRules( rzRules, vp, true ) )
@@ -10645,6 +10645,17 @@ void s52plib::PLIB_LoadS57Config()
     read_int = wxMin(read_int, 2);
     m_nDepthUnitDisplay = read_int;
 
+}
+
+
+void s52plib::PLIB_LoadS57ObjectConfig()
+{
+    //    Get a pointer to the opencpn configuration object
+    wxFileConfig *pconfig = GetOCPNConfigObject();
+
+    int read_int;
+    double dval;
+
     //    S57 Object Class Visibility
 
     OBJLElement *pOLE;
@@ -10692,7 +10703,6 @@ void s52plib::PLIB_LoadS57Config()
 
 
 
-
 //    Do all those things necessary to prepare for a new rendering
 void s52plib::PrepareForRender( void )
 {
@@ -10732,6 +10742,9 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
             if( (m_coreVersionMajor == 4) && (m_coreVersionMinor < 9))
                 PLIB_LoadS57Config();
 
+            // Pick up any changes in Mariner's Standard object list
+            PLIB_LoadS57ObjectConfig();
+            
             //  And then reset the temp values that were overwritten by config load
             m_bShowS57Text = bTextOn;
             m_bShowSoundg = bSoundingsOn;

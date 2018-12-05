@@ -282,7 +282,8 @@ private:
     bool S52_flush_Plib();
     
     void PLIB_LoadS57Config();
-    
+    void PLIB_LoadS57ObjectConfig();
+
     bool PreloadOBJLFromCSV(const wxString &csv_file);
 
     int DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp );
