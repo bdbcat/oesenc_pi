@@ -4172,9 +4172,10 @@ PolyTessGeo *Osenc::BuildPolyTessGeoF16(_OSENC_AreaGeometryExt_Record_Payload *r
     
     if(n_TriPrim)
         pPTG->Set_OK( true );
-    else
+    else {
+        delete ppg;
         pPTG->Set_OK( false );                  // mark for deferred tesselation
-        
+    }
     return pPTG;
 }
 
