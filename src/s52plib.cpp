@@ -3600,13 +3600,13 @@ int s52plib::RenderSY( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         GetPointPixSingle( rzRules, rzRules->obj->y, rzRules->obj->x, &r, vp );
 
          //  Render a raster or vector symbol, as specified by LUP rules
-        if( rules->razRule->definition.SYDF == 'V' )
+        if( rules->razRule->definition.SYDF == 'V' ){
             RenderHPGL( rzRules, rules->razRule, r, vp, angle );
-
-        else
-            if( rules->razRule->definition.SYDF == 'R' ) RenderRasterSymbol( rzRules,
-                    rules->razRule, r, vp, angle );
-
+        }
+        else{
+            if( rules->razRule->definition.SYDF == 'R' )
+                RenderRasterSymbol( rzRules, rules->razRule, r, vp, angle );
+        }
     }
 
     return 0;
@@ -6791,8 +6791,8 @@ int s52plib::DoRenderObject( wxDC *pdcin, ObjRazRules *rzRules, ViewPort *vp )
 //      if(rzRules->obj->Index != 1103)
 //          return 0; //int yyp = 0;
 
-//        if(!strncmp(rzRules->obj->FeatureName, "BUAARE", 6))
-//            int yyp = 0;
+//        if(strncmp(rzRules->obj->FeatureName, "M_NSYS", 6))
+//            return 0;
 
     if( !ObjectRenderCheckRules( rzRules, vp, true ) )
         return 0;
@@ -10378,12 +10378,12 @@ bool s52plib::ObjectRenderCheckCat( ObjRazRules *rzRules, ViewPort *vp )
                     return false;
         }
     }
-
-#ifdef __OCPN__ANDROID__    
-    // We want to filter out M_NSYS objects on Android, as they are of limited use on a phone/tablet
-    if( !strncmp( rzRules->LUP->OBCL, "M_", 2 ) )
-        if( !m_bShowMeta ) return false;
-#endif        
+    else{
+    // We want to filter out M_NSYS objects everywhere except "OTHER" category
+        if( !strncmp( rzRules->LUP->OBCL, "M_", 2 ) )
+            if( !m_bShowMeta )
+                return false;
+    }
         
     if( m_nDisplayCategory == MARINERS_STANDARD ) {
         if( -1 == rzRules->obj->iOBJL ) UpdateOBJLArray( rzRules->obj );
@@ -11383,6 +11383,7 @@ void RenderFromHPGL::RotatePoint( wxPoint& point, wxPoint origin, double angle )
 
 bool RenderFromHPGL::Render( char *str, char *col, wxPoint &r, wxPoint &pivot, wxPoint origin, float scale, double rot_angle, bool bSymbol )
 {
+    //return true;
 #ifdef ocpnUSE_GL
     if( renderToOpenGl )
         glGetFloatv(GL_CURRENT_COLOR,m_currentColor);
