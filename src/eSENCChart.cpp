@@ -6140,29 +6140,25 @@ const char *MyCSVGetField( const char * pszFilename, const char * pszKeyFieldNam
     return ( papszRecord[iTargetField] );
 }
 
-int CompareLights( PI_S57Light** l1ptr, PI_S57Light** l2ptr )
+static bool CompareLights( const PI_S57Light* l1, const PI_S57Light* l2 )
 {
-    PI_S57Light l1 = *(PI_S57Light*) *l1ptr;
-    PI_S57Light l2 = *(PI_S57Light*) *l2ptr;
-    
-    int positionDiff = l1.position.Cmp( l2.position );
-    if( positionDiff != 0 ) return positionDiff;
-    
-    double angle1, angle2;
-    int attrIndex1 = l1.attributeNames.Index( _T("SECTR1") );
-    int attrIndex2 = l2.attributeNames.Index( _T("SECTR1") );
-    
+    int positionDiff = l1->position.Cmp( l2->position );
+    if( positionDiff != 0 ) return true;
+
+
+    int attrIndex1 = l1->attributeNames.Index( _T("SECTR1") );
+    int attrIndex2 = l2->attributeNames.Index( _T("SECTR1") );
+
     // This should put Lights without sectors last in the list.
-    if( attrIndex1 == wxNOT_FOUND && attrIndex2 == wxNOT_FOUND ) return 0;
-    if( attrIndex1 != wxNOT_FOUND && attrIndex2 == wxNOT_FOUND ) return -1;
-    if( attrIndex1 == wxNOT_FOUND && attrIndex2 != wxNOT_FOUND ) return 1;
-    
-    l1.attributeValues.Item( attrIndex1 ).ToDouble( &angle1 );
-    l2.attributeValues.Item( attrIndex2 ).ToDouble( &angle2 );
-    
-    if( angle1 == angle2 ) return 0;
-    if( angle1 > angle2 ) return 1;
-    return -1;
+    if( attrIndex1 == wxNOT_FOUND && attrIndex2 == wxNOT_FOUND ) return false;
+    if( attrIndex1 != wxNOT_FOUND && attrIndex2 == wxNOT_FOUND ) return true;
+    if( attrIndex1 == wxNOT_FOUND && attrIndex2 != wxNOT_FOUND ) return false;
+
+    double angle1, angle2;
+    l1->attributeValues.Item( attrIndex1 ).ToDouble( &angle1 );
+    l2->attributeValues.Item( attrIndex2 ).ToDouble( &angle2 );
+
+    return angle1 < angle2;
 }
 
 static const char *type2str( int type)
@@ -6202,7 +6198,7 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
     wxString objText;
     wxString lightsHtml;
     wxString positionString;
-    ArrayOfLights lights;
+    std::vector<PI_S57Light*> lights;
     PI_S57Light* curLight = NULL;
     
     for( ListOfPI_S57Obj::Node *node = obj_list->GetLast(); node; node = node->GetPrevious() ) {
@@ -6284,7 +6280,7 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                     curLight = new PI_S57Light;
                     curLight->position = positionString;
                     curLight->hasSectors = false;
-                    lights.Add( curLight );
+                    lights.push_back( curLight );
                 }
                 
             }
@@ -6395,24 +6391,26 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
     } // Object for loop
 
 #if 1    
-    if( lights.Count() > 0 ) {
+    if( !lights.empty()  ) {
         
         // For lights we now have all the info gathered but no HTML output yet, now
         // run through the data and build a merged table for all lights.
         
-        lights.Sort( ( CMPFUNC_wxObjArrayArrayOfLights )( &CompareLights ) );
+        std::sort(lights.begin(), lights.end(), CompareLights);
         
         wxString lastPos;
         
-        for( unsigned int curLightNo = 0; curLightNo < lights.Count(); curLightNo++ ) {
-            PI_S57Light thisLight = /*(S57Light*)*/ lights.Item( curLightNo );
+        for(auto const& it: lights) {
+            PI_S57Light thisLight = *it;
             int attrIndex;
             
             if( thisLight.position != lastPos ) {
                 
                 lastPos = thisLight.position;
                 
-                if( curLightNo > 0 ) lightsHtml << _T("</table>\n<hr noshade>\n");
+                if( it != *lights.begin() )
+                    lightsHtml << _T("</table>\n<hr noshade>\n");
+                curLight++;
                 
                 lightsHtml << _T("<b>Light</b> <font size=-2>(LIGHTS)</font><br>");
                 lightsHtml << _T("<font size=-2>") << thisLight.position << _T("</font><br>\n");
@@ -6525,7 +6523,7 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
         lightsHtml << _T("</table><hr noshade>\n");
         ret_val = lightsHtml << ret_val;
         
-        lights.Clear();
+        lights.clear();
     }
 #endif    
     return ret_val;
