@@ -1920,7 +1920,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     
     //    Render the lines and points
     for( i = 0; i < PRIO_NUM; ++i ) {
-        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
+        if( ps52plib->m_nBoundaryStyle == SYMBOLIZED_BOUNDARIES )
             top = razRules[i][4]; // Area Symbolized Boundaries
         else
             top = razRules[i][3];           // Area Plain Boundaries
@@ -1945,10 +1945,8 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
         }
     }
     
-    //qDebug() << "PI RenderTimeD3" << sw.GetTime();
-        
     for( i = 0; i < PRIO_NUM; ++i ) {
-        if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
+        if( ps52plib->m_nSymbolStyle == SIMPLIFIED )
             top = razRules[i][0];       //SIMPLIFIED Points
         else
             top = razRules[i][1];           //Paper Chart Points Points
