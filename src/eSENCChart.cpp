@@ -664,6 +664,20 @@ eSENCChart::~eSENCChart()
       free(m_line_vertex_buffer);
 }
 
+static void free_mps(mps_container *mps)
+{
+    if ( mps == 0)
+        return;
+    if( ps52plib && mps->cs_rules ){
+        for(unsigned int i=0 ; i < mps->cs_rules->GetCount() ; i++){
+            Rules *rule_chain_top = mps->cs_rules->Item(i);
+            ps52plib->DestroyRulesChain( rule_chain_top );
+        }
+        delete mps->cs_rules;
+    }
+    free( mps );
+}
+
 void eSENCChart::FreeObjectsAndRules()
 {
     //      Delete the created ObjRazRules, including the S57Objs
@@ -1906,7 +1920,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     
     //    Render the lines and points
     for( i = 0; i < PRIO_NUM; ++i ) {
-        if( PI_GetPLIBBoundaryStyle() == SYMBOLIZED_BOUNDARIES )
+        if( ps52plib->m_nBoundaryStyle == SYMBOLIZED_BOUNDARIES )
             top = razRules[i][4]; // Area Symbolized Boundaries
         else
             top = razRules[i][3];           // Area Plain Boundaries
@@ -1931,10 +1945,8 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
         }
     }
     
-    //qDebug() << "PI RenderTimeD3" << sw.GetTime();
-        
     for( i = 0; i < PRIO_NUM; ++i ) {
-        if( PI_GetPLIBSymbolStyle() == SIMPLIFIED )
+        if( ps52plib->m_nSymbolStyle == SIMPLIFIED )
             top = razRules[i][0];       //SIMPLIFIED Points
         else
             top = razRules[i][1];           //Paper Chart Points Points
@@ -2241,6 +2253,8 @@ void eSENCChart::UpdateLUPs( eSENCChart *pOwner )
             top = razRules[i][j];
             while( top != NULL ) {
                 top->obj->bCS_Added = 0;
+                free_mps( top->mps );                           // Clear any cached MPS rules, etc.
+                top->mps = 0;
                 if (top->LUP)
                     top->obj->m_DisplayCat = top->LUP->DISC;
                 
@@ -2248,7 +2262,8 @@ void eSENCChart::UpdateLUPs( eSENCChart *pOwner )
                 top = nxx;
             }
         }
-        
+
+
         //  Traverse this priority level again,
         //  clearing any object CS rules and flags of any child list,
         //  so that the next render operation will re-evaluate the CS
@@ -2260,7 +2275,9 @@ void eSENCChart::UpdateLUPs( eSENCChart *pOwner )
                     ObjRazRules *ctop = top->child;
                     while( NULL != ctop ) {
                         ctop->obj->bCS_Added = 0;
-                        if (ctop->LUP)
+                        free_mps( top->mps );                   // Clear any cached MPS rules, etc.
+                        top->mps = 0;
+                       if (ctop->LUP)
                             ctop->obj->m_DisplayCat = ctop->LUP->DISC;
                         ctop = ctop->next;
                     }
