@@ -780,18 +780,16 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
             if(root[_T("OpenCPN S52PLIB ShowATONLabel")].IsBool())        ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
             if(root[_T("OpenCPN S52PLIB ShowQualityOfData")].IsBool())    ps52plib->SetQualityOfData( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool() );
             
-            if(root[_T("OpenCPN S52PLIB MetaDisplay")].IsBool())    ps52plib->m_bShowMeta = root[_T("OpenCPN S52PLIB MetaDisplay")].AsBool();
+            if(root[_T("OpenCPN S52PLIB MetaDisplay")].IsBool())           ps52plib->m_bShowMeta = root[_T("OpenCPN S52PLIB MetaDisplay")].AsBool();
+            if(root[_T("OpenCPN S52PLIB DeclutterText")].IsBool())         ps52plib->m_bDeClutterText = root[_T("OpenCPN S52PLIB DeclutterText")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowNationalText")].IsBool())      ps52plib->m_bShowNationalTexts = root[_T("OpenCPN S52PLIB ShowNationalText")].AsBool();
+            if(root[_T("OpenCPN S52PLIB UseSCAMIN")].IsBool())             ps52plib->m_bUseSCAMIN = root[_T("OpenCPN S52PLIB UseSCAMIN")].AsBool();
+            if(root[_T("OpenCPN S52PLIB ShowImportantTextOnly")].IsBool()) ps52plib->m_bShowS57ImportantTextOnly = root[_T("OpenCPN S52PLIB ShowImportantTextOnly")].AsBool();
         
-/*            
-        ///v[_T("OpenCPN S52PLIB MetaDisplay")] = ps52plib->m_bShowMeta;
-        v[_T("OpenCPN S52PLIB DeclutterText")] = ps52plib->m_bDeClutterText;
-        v[_T("OpenCPN S52PLIB ShowNationalText")] = ps52plib->m_bShowNationalTexts;
-        v[_T("OpenCPN S52PLIB ShowImpartantTextOnly")] = ps52plib->m_bShowS57ImportantTextOnly;
-        v[_T("OpenCPN S52PLIB UseSCAMIN")] = ps52plib->m_bUseSCAMIN;
-        v[_T("OpenCPN S52PLIB SymbolStyle")] = ps52plib->m_nSymbolStyle;
-        v[_T("OpenCPN S52PLIB BoundaryStyle")] = ps52plib->m_nBoundaryStyle;
-        v[_T("OpenCPN S52PLIB ColorShades")] = S52_getMarinerParam( S52_MAR_TWO_SHADES );
-*/
+            if(root[_T("OpenCPN S52PLIB SymbolStyle")].IsInt())           ps52plib->m_nSymbolStyle = (LUPname)root[_T("OpenCPN S52PLIB SymbolStyle")].AsInt();
+            if(root[_T("OpenCPN S52PLIB BoundaryStyle")].IsInt())         ps52plib->m_nBoundaryStyle = (LUPname)root[_T("OpenCPN S52PLIB BoundaryStyle")].AsInt();
+            if(root[_T("OpenCPN S52PLIB ColorShades")].IsDouble())        S52_setMarinerParam( S52_MAR_TWO_SHADES, root[_T("OpenCPN S52PLIB ColorShades")].AsDouble());
+
             int icat;
             if( root[_T("OpenCPN S52PLIB DisplayCategory")].AsInt(icat) ){
                 _DisCat dcat = (_DisCat)icat;
