@@ -187,7 +187,7 @@ public:
     void SetLightsOff(bool val){ m_lightsOff = val; }
     bool GetLightsOff(){ return m_lightsOff; }
     
-    void SetAnchorOn(bool val){ m_anchorOn = val; }
+    void SetAnchorOn(bool val);
     bool GetAnchorOn();
     
     void SetQualityOfData(bool val);
@@ -205,12 +205,17 @@ public:
     void SetDisplayCategory( enum _DisCat cat );
     DisCat GetDisplayCategory(){ return m_nDisplayCategory; }
     
+        void SetGLPolygonSmoothing( bool bset ){ m_GLPolygonSmoothing = bset;}
+    bool GetGLPolygonSmoothing( ){ return m_GLPolygonSmoothing; }
+    void SetGLLineSmoothing( bool bset ){ m_GLLineSmoothing = bset;}
+    bool GetGLLineSmoothing( ){ return m_GLLineSmoothing; }
+
     wxArrayOfLUPrec* SelectLUPARRAY( LUPname TNAM );
     LUPArrayContainer *SelectLUPArrayContainer( LUPname TNAM );
         
     void DestroyPatternRuleNode( Rule *pR );
     void DestroyRuleNode( Rule *pR );
-    void DestroyRulesChain( Rules *top );
+    static void DestroyRulesChain( Rules *top );
     
     //    For OpenGL
     int RenderObjectToGL( const wxGLContext &glcc, ObjRazRules *rzRules, ViewPort *vp );
@@ -443,7 +448,9 @@ private:
     bool m_useFBO;
     bool m_useVBO;
     int  m_TextureFormat;
-    
+    bool m_GLLineSmoothing;
+    bool m_GLPolygonSmoothing;
+
     float *workBuf;
     size_t workBufSize;
     
