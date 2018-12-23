@@ -191,6 +191,7 @@ void TexFont::Delete( )
         glDeleteTextures(1, &texobj);
         texobj = 0;
     }
+    m_built = false;
 }
 
 void TexFont::GetTextExtent(const char *string, int *width, int *height)
