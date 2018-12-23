@@ -3874,10 +3874,31 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Validate Hashmaps OK"));
         }
         
-        //  Set up the chart context
+//         //  Set up the chart context
+//         m_this_chart_context = (chart_context *)calloc( sizeof(chart_context), 1);
+//         m_this_chart_context->chart = this;
+//         
+//         //  Loop and populate all the objects
+//         for( int i = 0; i < PRIO_NUM; ++i ) {
+//             for( int j = 0; j < LUPNAME_NUM; j++ ) {
+//                 ObjRazRules *top = razRules[i][j];
+//                 while( top != NULL ) {
+//                     S57Obj *obj = top->obj;
+//                     obj->m_chart_context = m_this_chart_context;
+//                     top = top->next;
+//                 }
+//             }
+//         }
+
+        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start AssembleLineGeometry"));
+                                         
+        AssembleLineGeometry();
+        
+            //  Set up the chart context
         m_this_chart_context = (chart_context *)calloc( sizeof(chart_context), 1);
         m_this_chart_context->chart = this;
-        
+        m_this_chart_context->vertex_buffer = GetLineVertexBuffer();
+
         //  Loop and populate all the objects
         for( int i = 0; i < PRIO_NUM; ++i ) {
             for( int j = 0; j < LUPNAME_NUM; j++ ) {
@@ -3890,9 +3911,6 @@ int eSENCChart::BuildRAZFromSENCFile( const wxString& FullPath, wxString& userKe
             }
         }
 
-        if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  Start AssembleLineGeometry"));
-                                         
-        AssembleLineGeometry();
  
         if(g_debugLevel) wxLogMessage(_T("BuildRAZFromSENCFile:  AssembleLineGeometry OK"));
                                          
