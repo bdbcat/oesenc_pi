@@ -232,6 +232,9 @@ public:
     void ClearNoshow(void);
     void SaveObjNoshow() { m_saved_noshow = m_noshow_array; };
     void RestoreObjNoshow() { m_noshow_array = m_saved_noshow; };
+
+    void PLIB_LoadS57ObjectConfig();
+    void PLIB_LoadS57GlobalConfig();
     
     //Todo accessors
     LUPname m_nSymbolStyle;
@@ -287,8 +290,6 @@ private:
     bool S52_flush_Plib();
     
     void PLIB_LoadS57Config();
-    void PLIB_LoadS57ObjectConfig();
-    void PLIB_LoadS57GlobalConfig();
 
     bool PreloadOBJLFromCSV(const wxString &csv_file);
 
