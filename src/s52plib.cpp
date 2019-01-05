@@ -10467,6 +10467,7 @@ void s52plib::SetDisplayCategory(enum _DisCat cat)
     
     if(old != cat){
         ClearNoshow();
+        SetQualityOfData(m_qualityOfDataOn);
     }
     GenerateStateHash();
 }
@@ -10594,20 +10595,8 @@ void s52plib::PLIB_LoadS57GlobalConfig()
     
     pconfig->SetPath( _T ( "/Settings/GlobalState" ) );
     
-//    pconfig->Read( _T ( "bShowS57Text" ), &read_int, 0 );
-//    SetShowS57Text( !( read_int == 0 ) );
-    
     pconfig->Read( _T ( "bShowS57ImportantTextOnly" ), &read_int, 0 );
     SetShowS57ImportantTextOnly( !( read_int == 0 ) );
-    
-//    pconfig->Read( _T ( "bShowLightDescription" ), &read_int, 0 );
-//    SetShowLdisText( !( read_int == 0 ) );
-    
-//    pconfig->Read( _T ( "bExtendLightSectors" ), &read_int, 0 );
-//    SetExtendLightSectors( !( read_int == 0 ) );
-    
-//    pconfig->Read( _T ( "nDisplayCategory" ), &read_int, (enum _DisCat) STANDARD );
-//    SetDisplayCategory((enum _DisCat) read_int );
     
     pconfig->Read( _T ( "nSymbolStyle" ), &read_int, (enum _LUPname) PAPER_CHART );
     m_nSymbolStyle = (LUPname) read_int;
@@ -10615,17 +10604,11 @@ void s52plib::PLIB_LoadS57GlobalConfig()
     pconfig->Read( _T ( "nBoundaryStyle" ), &read_int, PLAIN_BOUNDARIES );
     m_nBoundaryStyle = (LUPname) read_int;
     
-//    pconfig->Read( _T ( "bShowSoundg" ), &read_int, 1 );
-//    m_bShowSoundg = !( read_int == 0 );
-    
     pconfig->Read( _T ( "bShowMeta" ), &read_int, 0 );
     m_bShowMeta = !( read_int == 0 );
     
     pconfig->Read( _T ( "bUseSCAMIN" ), &read_int, 1 );
     m_bUseSCAMIN = !( read_int == 0 );
-    
-//    pconfig->Read( _T ( "bShowAtonText" ), &read_int, 1 );
-//    m_bShowAtonText = !( read_int == 0 );
     
     pconfig->Read( _T ( "bDeClutterText" ), &read_int, 0 );
     m_bDeClutterText = !( read_int == 0 );
@@ -10736,77 +10719,77 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
     //  This additional step is only necessary for Plugin chart rendering, as core directly sets
     //  options and updates State Hash as needed.
 
-    int core_config = PI_GetPLIBStateHash();
-    if(core_config != m_myConfig){
-        
-        g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
-        
-        //  If a modern (> OCPN 4.4) version of the core is active,
-        //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.
-        if( ((m_coreVersionMajor == 4) && (m_coreVersionMinor >= 5)) || m_coreVersionMajor > 4 ){
-            
-            // Retain compatibility with O4.8.x
-            if( (m_coreVersionMajor == 4) && (m_coreVersionMinor < 9)){
-             // First, we capture some temporary values that were set by messaging, but would be overwritten by config read
-             bool bTextOn = m_bShowS57Text;
-             bool bSoundingsOn = m_bShowSoundg;
-             enum _DisCat old = m_nDisplayCategory;
-             
-             PLIB_LoadS57Config();
-             
-             //  And then reset the temp values that were overwritten by config load
-             m_bShowS57Text = bTextOn;
-             m_bShowSoundg = bSoundingsOn;
-             m_nDisplayCategory = old;
-            }
-            else
-                PLIB_LoadS57GlobalConfig();
-            
-            
-            // Pick up any changes in Mariner's Standard object list
-            PLIB_LoadS57ObjectConfig();
+    if( (m_coreVersionMajor == 4) && (m_coreVersionMinor < 9)){
 
-            // Detect and manage "LIGHTS" toggle
-             bool bshow_lights = !m_lightsOff;
-             if(!bshow_lights)                     // On, going off
-                 AddObjNoshow("LIGHTS");
-             else{                                   // Off, going on
-                 RemoveObjNoshow("LIGHTS");
-             }
-
-            const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
-            unsigned int num = sizeof(categories) / sizeof(categories[0]);
+        int core_config = PI_GetPLIBStateHash();
+        if(core_config != m_myConfig){
             
-            // Handle Anchor area toggle
-            if( (m_nDisplayCategory == OTHER) || (m_nDisplayCategory == MARINERS_STANDARD) ){
-                bool bAnchor = m_anchorOn;
+            g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
+            
+            //  If a modern (> OCPN 4.4) version of the core is active,
+            //  we may rely upon having been updated on S52PLIB state by means of PlugIn messaging scheme.
+            // Some config items, such as UserStandard display list, must be recovered from the config file, however
+            if( ((m_coreVersionMajor == 4) && (m_coreVersionMinor >= 5)) ){
+                
+                // Retain compatibility with O4.8.x
+                // First, we capture some temporary values that were set by messaging, but would be overwritten by config read
+                bool bTextOn = m_bShowS57Text;
+                bool bSoundingsOn = m_bShowSoundg;
+                enum _DisCat old = m_nDisplayCategory;
+                
+                PLIB_LoadS57Config();
+                
+                //  And then reset the temp values that were overwritten by config load
+                m_bShowS57Text = bTextOn;
+                m_bShowSoundg = bSoundingsOn;
+                m_nDisplayCategory = old;
                 
                 
-                if(!bAnchor){
-                    for( unsigned int c = 0; c < num; c++ )
-                        AddObjNoshow(categories[c]);
-                    }
-                else{
-                    for( unsigned int c = 0; c < num; c++ )
-                    RemoveObjNoshow(categories[c]);
+                // Pick up any changes in Mariner's Standard object list
+                PLIB_LoadS57ObjectConfig();
 
-                    //  Force the USER STANDARD object list anchor detail items ON
-                    unsigned int cnt = 0;
-                for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
-                    OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
-                        for( unsigned int c = 0; c < num; c++ ) {
-                            if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
-                                pOLE->nViz = 1;         // force on
-                                cnt++;
-                                break;
-                            }
+                // Detect and manage "LIGHTS" toggle
+                bool bshow_lights = !m_lightsOff;
+                if(!bshow_lights)                     // On, going off
+                    AddObjNoshow("LIGHTS");
+                else{                                   // Off, going on
+                    RemoveObjNoshow("LIGHTS");
+                }
+
+                const char * categories[] = { "ACHBRT", "ACHARE", "CBLSUB", "PIPARE", "PIPSOL", "TUNNEL", "SBDARE" };
+                unsigned int num = sizeof(categories) / sizeof(categories[0]);
+                
+                // Handle Anchor area toggle
+                if( (m_nDisplayCategory == OTHER) || (m_nDisplayCategory == MARINERS_STANDARD) ){
+                    bool bAnchor = m_anchorOn;
+                    
+                    
+                    if(!bAnchor){
+                        for( unsigned int c = 0; c < num; c++ )
+                            AddObjNoshow(categories[c]);
                         }
-                        if( cnt == num ) break;
+                    else{
+                        for( unsigned int c = 0; c < num; c++ )
+                        RemoveObjNoshow(categories[c]);
+
+                        //  Force the USER STANDARD object list anchor detail items ON
+                        unsigned int cnt = 0;
+                    for( unsigned int iPtr = 0; iPtr < pOBJLArray->GetCount(); iPtr++ ) {
+                        OBJLElement *pOLE = (OBJLElement *) ( pOBJLArray->Item( iPtr ) );
+                            for( unsigned int c = 0; c < num; c++ ) {
+                                if( !strncmp( pOLE->OBJLName, categories[c], 6 ) ) {
+                                    pOLE->nViz = 1;         // force on
+                                    cnt++;
+                                    break;
+                                }
+                            }
+                            if( cnt == num ) break;
+                        }
                     }
                 }
             }
+            m_myConfig = PI_GetPLIBStateHash();
         }
-        m_myConfig = PI_GetPLIBStateHash();
     }
 
 #endif          //BUILDING_PLUGIN

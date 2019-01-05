@@ -772,10 +772,21 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         
         // Capture the S52PLIB configuration
         if(ps52plib){
+            
+            //  We may need a reconfig of global settings
+            // If so, do it first, then overide some values per-canvas.
+            if(root[_T("OpenCPN S52PLIB GlobalReconfig")].IsBool()){
+                bool needReconfig = root[_T("OpenCPN S52PLIB GlobalReconfig")].AsBool();
+                if(needReconfig){
+                    ps52plib->PLIB_LoadS57GlobalConfig();
+                    ps52plib->PLIB_LoadS57ObjectConfig();
+                }
+            }
+
+            // Per canvas values can be overriden here.
             if(root[_T("OpenCPN S52PLIB ShowText")].IsBool())             ps52plib->m_bShowS57Text = root[_T("OpenCPN S52PLIB ShowText")].AsBool();
             if(root[_T("OpenCPN S52PLIB ShowSoundings")].IsBool())        ps52plib->m_bShowSoundg = root[_T("OpenCPN S52PLIB ShowSoundings")].AsBool();
             if(root[_T("OpenCPN S52PLIB ShowAnchorConditions")].IsBool()) ps52plib->SetAnchorOn( root[_T("OpenCPN S52PLIB ShowAnchorConditions")].AsBool() );
-            if(root[_T("OpenCPN S52PLIB ShowLights")].IsBool())           ps52plib->SetLightsOff( !root[_T("OpenCPN S52PLIB ShowLights")].AsBool() );
             if(root[_T("OpenCPN S52PLIB ShowLightDescription")].IsBool()) ps52plib->SetShowLdisText( root[_T("OpenCPN S52PLIB ShowLightDescription")].AsBool() );
             if(root[_T("OpenCPN S52PLIB ShowATONLabel")].IsBool())        ps52plib->SetShowAtonText( root[_T("OpenCPN S52PLIB ShowATONLabel")].AsBool() );
             if(root[_T("OpenCPN S52PLIB ShowQualityOfData")].IsBool())    ps52plib->SetQualityOfData( root[_T("OpenCPN S52PLIB ShowQualityOfData")].AsBool() );
@@ -796,8 +807,23 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 ps52plib->SetDisplayCategory( dcat );
             }
             
+                            // Detect and manage "LIGHTS" toggle
+            if(root[_T("OpenCPN S52PLIB ShowLights")].IsBool()){
+                bool bNewVal = root[_T("OpenCPN S52PLIB ShowLights")].AsBool();
+                if(bNewVal != !ps52plib->GetLightsOff()){
+                    ps52plib->SetLightsOff( !bNewVal );
+                    if(!bNewVal)                     // On, going off
+                        ps52plib->AddObjNoshow("LIGHTS");
+                    else                                   // Off, going on
+                        ps52plib->RemoveObjNoshow("LIGHTS");
+                    }
+            }
+            
+
+            
             ps52plib->SetOCPNVersion( g_coreVersionMajor, g_coreVersionMinor, g_coreVersionPatch);
-        }
+            
+         }
         
         if(root[_T("OpenCPN Zoom Mod Vector")].IsInt())
             g_chart_zoom_modifier_vector = root[_T("OpenCPN Zoom Mod Vector")].AsInt();
