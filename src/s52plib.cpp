@@ -69,6 +69,8 @@ extern int g_chart_zoom_modifier_vector;
 
 float g_scaminScale;
 
+OE_ChartSymbols *g_oeChartSymbols;
+
 extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
 extern PFNGLBINDBUFFERPROC                 s_glBindBuffer;
 extern PFNGLBUFFERDATAPROC                 s_glBufferData;
@@ -379,7 +381,8 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_txf_ready = false;
     m_txf = NULL;
 
-    ChartSymbols::InitializeGlobals();
+    g_oeChartSymbols = new OE_ChartSymbols();
+    g_oeChartSymbols->InitializeGlobals();
 
     m_bOK = !( S52_load_Plib( PLib, b_forceLegacy ) == 0 );
 
@@ -474,7 +477,7 @@ s52plib::~s52plib()
     delete[] ledge;
     delete[] redge;
 
-    ChartSymbols::DeleteGlobals();
+    g_oeChartSymbols->DeleteGlobals();
 
     delete HPGL;
 }
@@ -1174,9 +1177,8 @@ int s52plib::S52_load_Plib( const wxString& PLib, bool b_forceLegacy )
         } else
             return 0;
     } else {
-        ChartSymbols chartSymbols;
         useLegacyRaster = false;
-        if( !chartSymbols.LoadConfigFile( this, PLib ) ) {
+        if( !g_oeChartSymbols->LoadConfigFile( this, PLib ) ) {
             RazdsParser parser;
             useLegacyRaster = true;
             if( parser.LoadFile( this, PLib ) ) {
@@ -1297,7 +1299,7 @@ void s52plib::DestroyRules( RuleHash *rh )
 
 void s52plib::FlushSymbolCaches( void )
 {
-    if( !useLegacyRaster ) ChartSymbols::LoadRasterFileForColorTable( m_colortable_index, true );
+    g_oeChartSymbols->LoadRasterFileForColorTable( m_colortable_index, false );
 
     RuleHash *rh = _symb_sym;
 
@@ -1306,11 +1308,11 @@ void s52plib::FlushSymbolCaches( void )
     RuleHash::iterator it;
     Rule *pR;
 
+
     for( it = ( *rh ).begin(); it != ( *rh ).end(); ++it ) {
         pR = it->second;
         if( pR ) ClearRulesCache( pR );
     }
-
     //    Flush any pattern definitions
     rh = _patt_sym;
 
@@ -1339,7 +1341,7 @@ void s52plib::FlushSymbolCaches( void )
     m_CARC_DL_hashmap.clear();
 #endif
 #endif
-    
+
     // Flush all texFonts
     TexFont *f_cache = 0;
     unsigned int i;
@@ -1482,11 +1484,11 @@ void s52plib::SetPLIBColorScheme( wxString scheme )
     if( ( GetMajorVersion() == 3 ) && ( GetMinorVersion() == 2 ) ) {
         if( scheme.IsSameAs( _T ( "DAY" ) ) ) str_find = _T ( "DAY_BRIGHT" );
     }
-    m_colortable_index = ChartSymbols::FindColorTable( scheme );
+    m_colortable_index = g_oeChartSymbols->FindColorTable( scheme );
 
-//    if( !useLegacyRaster ) ChartSymbols::LoadRasterFileForColorTable( m_colortable_index );
+    g_oeChartSymbols->LoadRasterFileForColorTable( m_colortable_index );
 
-    if( !useLegacyRaster ) ChartSymbols::SetColorTableIndex( m_colortable_index );
+    g_oeChartSymbols->SetColorTableIndex( m_colortable_index );
     
     m_ColorScheme = scheme;
 }
@@ -1494,14 +1496,14 @@ void s52plib::SetPLIBColorScheme( wxString scheme )
 S52color* s52plib::getColor( const char *colorName )
 {
     S52color* c;
-    c = ChartSymbols::GetColor( colorName, m_colortable_index );
+    c = g_oeChartSymbols->GetColor( colorName, m_colortable_index );
     return c;
 }
 
 wxColour s52plib::getwxColour( const wxString &colorName )
 {
     wxColor c;
-    c = ChartSymbols::GetwxColor( colorName, m_colortable_index );
+    c = g_oeChartSymbols->GetwxColor( colorName, m_colortable_index );
     return c;
 }
 
@@ -3026,7 +3028,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     {
         // get the symbol size
         wxRect trect;
-        ChartSymbols::GetGLTextureRect( trect, prule->name.SYNM );
+        g_oeChartSymbols->GetGLTextureRect( trect, prule->name.SYNM );
         
         int scale_dim = wxMax(trect.width, trect.height);
         
@@ -3051,7 +3053,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     unsigned int texture = 0;
     wxRect texrect;
     if(!m_pdc) {
-      texture = ChartSymbols::GetGLTextureRect(texrect, prule->name.SYNM);
+      texture = g_oeChartSymbols->GetGLTextureRect(texrect, prule->name.SYNM);
       if(texture) {
           prule->parm2 = texrect.width * scale_factor;
           prule->parm3 = texrect.height * scale_factor;
@@ -3075,7 +3077,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         // If the requested scaled symbol size is not the same as is currently cached, 
         // we have to dump the cache
         wxRect trect;
-        ChartSymbols::GetGLTextureRect( trect, prule->name.SYNM );
+        g_oeChartSymbols->GetGLTextureRect( trect, prule->name.SYNM );
         if(prule->parm2 != trect.width * scale_factor)
             b_dump_cache = true;
         
@@ -3085,7 +3087,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         //Instantiate the symbol if necessary
         if( ( prule->pixelPtr == NULL ) || ( prule->parm1 != m_colortable_index ) || b_dump_cache ) {
             Image = useLegacyRaster ?
-                RuleXBMToImage( prule ) : ChartSymbols::GetImage( prule->name.SYNM );
+                RuleXBMToImage( prule ) : g_oeChartSymbols->GetImage( prule->name.SYNM );
 
             // delete any old private data
             ClearRulesCache( prule );
@@ -3253,7 +3255,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 #ifndef USE_ANDROID_GLES2
             glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             if(g_texture_rectangle_format == GL_TEXTURE_2D) {
-                wxSize size = ChartSymbols::GLTextureSize();
+                wxSize size = g_oeChartSymbols->GLTextureSize();
                 tx1 /= size.x, tx2 /= size.x;
                 ty1 /= size.y, ty2 /= size.y;
             }
@@ -3313,7 +3315,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
             if(g_texture_rectangle_format == GL_TEXTURE_2D) {
                     
                 // Normalize the sybmol texture coordinates against the next higher POT size
-                wxSize size = ChartSymbols::GLTextureSize();
+                wxSize size = g_oeChartSymbols->GLTextureSize();
 #if 0
                                 int i=1;
                                 while(i < size.x) i <<= 1;
@@ -3445,7 +3447,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
                 wxImage im_back = b1.ConvertToImage();
 
                 //    Get the scaled symbol as a wxImage
-                wxImage im_sym = ChartSymbols::GetImage( prule->name.SYNM );
+                wxImage im_sym = g_oeChartSymbols->GetImage( prule->name.SYNM );
                 im_sym.Rescale(b_width, b_height, wxIMAGE_QUALITY_HIGH);
 
                 wxImage im_result( b_width, b_height );
@@ -9735,7 +9737,7 @@ render_canvas_parms* s52plib::CreatePatternBufferSpec( ObjRazRules *rzRules, Rul
     //      Create a wxImage of the pattern drawn on an "unused_color" field
     if( prule->definition.SYDF == 'R' ) {
         Image = useLegacyRaster ?
-        RuleXBMToImage( prule ) : ChartSymbols::GetImage( prule->name.PANM );
+        RuleXBMToImage( prule ) : g_oeChartSymbols->GetImage( prule->name.PANM );
     }
     
     else          // Vector

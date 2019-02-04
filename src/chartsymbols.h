@@ -99,28 +99,30 @@ public:
 	wxString HPGL;
 };
 
+WX_DECLARE_STRING_HASH_MAP( wxRect, symbolGraphicsHashMap );
 
-class ChartSymbols
+
+class OE_ChartSymbols
 {
 public:
-	ChartSymbols(void);
-	~ChartSymbols(void);
+	OE_ChartSymbols(void);
+	~OE_ChartSymbols(void);
         bool LoadConfigFile(s52plib* plibArg, const wxString & path);
         bool PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName);
         
-	static void InitializeGlobals( void );
-	static void DeleteGlobals( void );
-	static int LoadRasterFileForColorTable( int tableNo, bool flush=false );
-	static wxArrayPtrVoid * GetColorTables();
-	static int FindColorTable(const wxString & tableName);
-	static S52color* GetColor( const char *colorName, int fromTable );
-	static wxColor GetwxColor( const wxString &colorName, int fromTable );
-	static wxColor GetwxColor( const char *colorName, int fromTable );
-	static wxString HashKey( const char* symbolName );
-	static wxImage GetImage( const char* symbolName );
-        static unsigned int GetGLTextureRect( wxRect &rect, const char* symbolName );
-        static wxSize GLTextureSize();
-        static void SetColorTableIndex( int index );
+	void InitializeGlobals( void );
+	void DeleteGlobals( void );
+	int LoadRasterFileForColorTable( int tableNo, bool flush=false );
+	wxArrayPtrVoid * GetColorTables();
+	int FindColorTable(const wxString & tableName);
+	S52color* GetColor( const char *colorName, int fromTable );
+	wxColor GetwxColor( const wxString &colorName, int fromTable );
+	wxColor GetwxColor( const char *colorName, int fromTable );
+	wxString HashKey( const char* symbolName );
+	wxImage GetImage( const char* symbolName );
+        unsigned int GetGLTextureRect( wxRect &rect, const char* symbolName );
+        wxSize GLTextureSize();
+        void SetColorTableIndex( int index );
 private:
       void ProcessVectorTag( TiXmlElement* subNodes, SymbolSizeInfo_t &vectorSize );
       void ProcessColorTables( TiXmlElement* colortableodes );
@@ -134,5 +136,14 @@ private:
 	void BuildSymbol( ChartSymbol &symol );
 
         s52plib* plib;
+        
+        wxArrayPtrVoid* oe_pi_colorTables;
+        unsigned int oe_rasterSymbolsTexture;
+        wxSize oe_rasterSymbolsTextureSize;
+        wxBitmap oe_rasterSymbols;
+        int oe_rasterSymbolsLoadedColorMapNumber;
+        int oe_ColorTableIndex;
+        symbolGraphicsHashMap* oe_pi_symbolGraphicLocations;
+
 };
 

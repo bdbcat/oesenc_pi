@@ -2883,8 +2883,9 @@ void initLibraries(void)
         wxArrayString patchFiles;
         wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
         for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
-            ChartSymbols chartSymbols;
-            chartSymbols.PatchConfigFile( ps52plib, patchFiles.Item(i));
+            extern OE_ChartSymbols *g_oeChartSymbols;
+
+            g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
         }
             
             
