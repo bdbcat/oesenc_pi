@@ -167,7 +167,7 @@ public:
     void AdjustTextList( int dx, int dy, int screenw, int screenh );
     void ClearTextList( void );
     int SetLineFeaturePriority( ObjRazRules *rzRules, int npriority );
-    void FlushSymbolCaches();
+    void FlushSymbolCaches( bool bFlushRaster = false );
 
     //    For DC's
     int RenderObjectToDC( wxDC *pdc, ObjRazRules *rzRules, ViewPort *vp );

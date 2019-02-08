@@ -104,6 +104,9 @@ void androidHideBusyIcon();
 bool testSENCServer();
 bool validate_SENC_server(void);
 
+void init_S52Library();
+void init_GLLibrary();
+
 #include <wx/arrimpl.cpp> 
 WX_DEFINE_OBJARRAY(EULAArray);
 
@@ -184,13 +187,14 @@ double g_display_size_mm;
 float g_GLMinCartographicLineWidth;
 bool  g_b_EnableVBO;
 float g_GLMinSymbolLineWidth;
-GLenum g_texture_rectangle_format;
+GLenum g_oe_texture_rectangle_format;
 bool pi_bopengl;
 
 bool g_b_useStencil;
 bool g_b_useStencilAP;
 bool g_b_useScissorTest;
 bool g_b_useFBO;
+bool g_GLSetupOK;
 
 oesencPrefsDialog               *g_prefs_dialog;
 
@@ -214,6 +218,7 @@ wxString                        g_loginKey;
 
 bool shutdown_SENC_server( void );
 bool ShowAlwaysEULAs();
+extern OE_ChartSymbols          *g_oeChartSymbols;
 
 #ifdef __OCPN__ANDROID__
 extern JavaVM *java_vm;         // found in androidUtil.cpp, accidentally exported....
@@ -670,6 +675,8 @@ int oesenc_pi::Init(void)
 
     flags |= INSTALLS_TOOLBOX_PAGE;             // for o-charts shop interface
     flags |= WANTS_PREFERENCES;             
+
+    init_S52Library();
     
     return flags;
     
@@ -873,22 +880,26 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
         //float g_GLMinCartographicLineWidth;
         // is global ...bool  g_b_EnableVBO;
         //float g_GLMinSymbolLineWidth;
-        GLenum g_texture_rectangle_format;
+        //GLenum g_texture_rectangle_format;
         //bool pi_bopengl;
         
         // Capture the OpenCPN OpenGL config, and inform the PLIB
-        g_b_EnableVBO = root[_T("useVBO")].AsBool();
-        g_texture_rectangle_format = root[_T("TextureRectangleFormat")].AsInt();
+        if( root[_T("setupComplete")].AsBool() )
+        {
+            g_b_EnableVBO = root[_T("useVBO")].AsBool();
+            g_oe_texture_rectangle_format = root[_T("TextureRectangleFormat")].AsInt();
 
-        g_b_useStencil = root[_T("useStencil")].AsBool();
-        g_b_useStencilAP = root[_T("useStencilAP")].AsBool();
-        g_b_useScissorTest = root[_T("useScissorTest")].AsBool();
-        g_b_useFBO = root[_T("useFBO")].AsBool();
+            g_b_useStencil = root[_T("useStencil")].AsBool();
+            g_b_useStencilAP = root[_T("useStencilAP")].AsBool();
+            g_b_useScissorTest = root[_T("useScissorTest")].AsBool();
+            g_b_useFBO = root[_T("useFBO")].AsBool();
         
-        if(ps52plib)
-            ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
-        
-        g_GLOptionsSet = true;
+            g_GLOptionsSet = true;
+            
+            init_GLLibrary();                                  // once
+            g_oeChartSymbols->ResetRasterTextureCache();
+ 
+        }
     }
         
 }
@@ -2756,16 +2767,94 @@ static void GetglEntryPoints( void )
     
 }
 
-void initLibraries(void)
+void init_S52Library(void)
 {
     // General variables
     g_overzoom_emphasis_base = 0;
     g_oz_vector_scale = false;
     g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
     
+    //  Class Registrar Manager
+    
+    if( pi_poRegistrarMgr == NULL ) {
+        wxString csv_dir = *GetpSharedDataLocation();
+        csv_dir += _T("s57data");
+        
+        pi_poRegistrarMgr = new s57RegistrarMgr( csv_dir, NULL );
+    }
+
+    g_csv_locn = *GetpSharedDataLocation();
+    g_csv_locn += _T("s57data");
+    
+    //  S52 Plib
+    if(ps52plib) // already loaded?
+        return;
+
+    wxString plib_data = *GetpSharedDataLocation();
+    plib_data += _T("s57data/"); //TODO use sep
+    
+    ps52plib = new s52plib( plib_data, false );
+
+
+    if( ps52plib->m_bOK ) {
+        
+        // Load up any S52 PLIB patch files found
+        wxString dataLocn =*GetpSharedDataLocation() +
+        _T("plugins") + wxFileName::GetPathSeparator() +
+        _T("oesenc_pi") + wxFileName::GetPathSeparator() +
+        _T("data");
+        
+        wxArrayString patchFiles;
+        wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
+        for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
+
+            g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
+        }
+
+            //    Preset some object class visibilites for "Mariner's Standard" display category
+            //  They may be overridden in LoadS57Config
+        for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
+            OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
+            if( !strncmp( pOLE->OBJLName, "DEPARE", 6 ) ) pOLE->nViz = 1;
+            if( !strncmp( pOLE->OBJLName, "LNDARE", 6 ) ) pOLE->nViz = 1;
+            if( !strncmp( pOLE->OBJLName, "COALNE", 6 ) ) pOLE->nViz = 1;
+        }
+
+        LoadS57Config();
+        ps52plib->m_myConfig = PI_GetPLIBStateHash();
+        
+        ps52plib->SetPLIBColorScheme( GLOBAL_COLOR_SCHEME_RGB );
+        
+        wxWindow *cc1 = GetOCPNCanvasWindow();
+        if(cc1){
+            
+            if(!g_display_size_mm)
+                g_display_size_mm = wxGetDisplaySizeMM().GetWidth();
+            
+            int display_size_mm = wxMax(g_display_size_mm, 200);
+            
+            int sx, sy;
+            wxDisplaySize( &sx, &sy );
+            double max_physical = wxMax(sx, sy);
+            
+            double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
+            ps52plib->SetPPMM( pix_per_mm );
+            
+        }
+    } else {
+        wxLogMessage( _T("   S52PLIB Initialization failed, oesenc_pi disabling Vector charts.") );
+        delete ps52plib;
+        ps52plib = NULL;
+    }
+}
+
+
+void init_GLLibrary(void)
+{
+   
     // OpenGL variables
     
-    if(g_GLOptionsSet){
+    if(g_GLOptionsSet && !g_GLSetupOK){
         char *p = (char *) glGetString( GL_EXTENSIONS );
         if( NULL == p )
             pi_bopengl = false;
@@ -2777,6 +2866,8 @@ void initLibraries(void)
         if (str == NULL)
             wxLogMessage(_T("oeSENC_pi failed to initialize OpenGL"));
 
+        GetglEntryPoints();
+
         char render_string[80];
         wxString renderer;
         if(str){
@@ -2784,9 +2875,6 @@ void initLibraries(void)
             renderer = wxString( render_string, wxConvUTF8 );
         }
         
-        GetglEntryPoints();
-        
-        ///g_b_EnableVBO = false;
         g_GLMinCartographicLineWidth = 1.0;
         g_GLMinSymbolLineWidth = 1.0;
         
@@ -2817,122 +2905,13 @@ void initLibraries(void)
             g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
         }
         
-        
-        
-        
-        if( QueryExtension( "GL_ARB_texture_non_power_of_two" ) )
-            g_texture_rectangle_format = GL_TEXTURE_2D;
-        else if( QueryExtension( "GL_OES_texture_npot" ) )
-            g_texture_rectangle_format = GL_TEXTURE_2D;
-        else if( QueryExtension( "GL_ARB_texture_rectangle" ) )
-            g_texture_rectangle_format = GL_TEXTURE_RECTANGLE_ARB;
+         
+        //  Setup device dependent OpenGL options as communicated from core by JSON message
+        ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_oe_texture_rectangle_format);
 
-        #ifdef __OCPN__ANDROID__
-            g_texture_rectangle_format = GL_TEXTURE_2D;
-        #endif
+        pi_bopengl = true;
+        g_GLSetupOK = true;
     }
-    
-        
-    //  Class Registrar Manager
-    
-    if( pi_poRegistrarMgr == NULL ) {
-        wxString csv_dir = *GetpSharedDataLocation();
-        csv_dir += _T("s57data");
-        
-        pi_poRegistrarMgr = new s57RegistrarMgr( csv_dir, NULL );
-    }
-
-    g_csv_locn = *GetpSharedDataLocation();
-    g_csv_locn += _T("s57data");
-    
-    //  S52 Plib
-    if(ps52plib) // already loaded?
-        return;
-
-//      Set up a useable CPL library error handler for S57 stuff
-    ///TODO???CPLSetErrorHandler( MyCPLErrorHandler );
-
-//      If the config file contains an entry for PresentationLibraryData, use it.
-//      Otherwise, default to conditionally set spot under g_pcsv_locn
-    wxString plib_data;
-    bool b_force_legacy = false;
-
-//     if( g_UserPresLibData.IsEmpty() ) {
-//         plib_data = g_csv_locn;
-//         appendOSDirSlash( &plib_data );
-//         plib_data.Append( _T("S52RAZDS.RLE") );
-//     } else {
-//         plib_data = g_UserPresLibData;
-//         b_force_legacy = true;
-//     }
-
-    plib_data = *GetpSharedDataLocation();
-    plib_data += _T("s57data/"); //TODO use sep
-    
-    ps52plib = new s52plib( plib_data, b_force_legacy );
-
-
-    if( ps52plib->m_bOK ) {
-        
-        // Load up any S52 PLIB patch files found
-        wxString dataLocn =*GetpSharedDataLocation() +
-        _T("plugins") + wxFileName::GetPathSeparator() +
-        _T("oesenc_pi") + wxFileName::GetPathSeparator() +
-        _T("data");
-        
-        wxArrayString patchFiles;
-        wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
-        for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
-            extern OE_ChartSymbols *g_oeChartSymbols;
-
-            g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
-        }
-            
-            
-        
-//         wxLogMessage( _T("Using s57data in ") + g_csv_locn );
-//         m_pRegistrarMan = new s57RegistrarMgr( g_csv_locn, g_Platform->GetLogFilePtr() );
-
-
-            //    Preset some object class visibilites for "Mariner's Standard" disply category
-            //  They may be overridden in LoadS57Config
-        for( unsigned int iPtr = 0; iPtr < ps52plib->pOBJLArray->GetCount(); iPtr++ ) {
-            OBJLElement *pOLE = (OBJLElement *) ( ps52plib->pOBJLArray->Item( iPtr ) );
-            if( !strncmp( pOLE->OBJLName, "DEPARE", 6 ) ) pOLE->nViz = 1;
-            if( !strncmp( pOLE->OBJLName, "LNDARE", 6 ) ) pOLE->nViz = 1;
-            if( !strncmp( pOLE->OBJLName, "COALNE", 6 ) ) pOLE->nViz = 1;
-        }
-
-        LoadS57Config();
-        ps52plib->m_myConfig = PI_GetPLIBStateHash();
-        
-        ps52plib->SetPLIBColorScheme( GLOBAL_COLOR_SCHEME_RGB );
-        
-        wxWindow *cc1 = GetOCPNCanvasWindow();
-        if(cc1){
-            
-            if(!g_display_size_mm)
-                g_display_size_mm = wxGetDisplaySizeMM().GetWidth();
-            
-            int display_size_mm = wxMax(g_display_size_mm, 200);
-            
-            int sx, sy;
-            wxDisplaySize( &sx, &sy );
-            double max_physical = wxMax(sx, sy);
-            
-            double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
-            ps52plib->SetPPMM( pix_per_mm );
-            
-            //  Setup device dependent OpenGL options as communicated from core by JSON message
-            ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_texture_rectangle_format);
-            
-        }
-    } else {
-        wxLogMessage( _T("   S52PLIB Initialization failed, oesenc_pi disabling Vector charts.") );
-        delete ps52plib;
-        ps52plib = NULL;
-    }
-        
 }
 
 

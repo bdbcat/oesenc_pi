@@ -123,6 +123,8 @@ public:
         unsigned int GetGLTextureRect( wxRect &rect, const char* symbolName );
         wxSize GLTextureSize();
         void SetColorTableIndex( int index );
+        void ResetRasterTextureCache();
+
 private:
       void ProcessVectorTag( TiXmlElement* subNodes, SymbolSizeInfo_t &vectorSize );
       void ProcessColorTables( TiXmlElement* colortableodes );

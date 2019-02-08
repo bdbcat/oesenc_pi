@@ -41,7 +41,7 @@ extern bool pi_bopengl;
 
 
 #ifdef ocpnUSE_GL
-extern GLenum       g_texture_rectangle_format;
+extern GLenum       g_oe_texture_rectangle_format;
 #endif
 
 //--------------------------------------------------------------------------------------
@@ -881,14 +881,23 @@ void OE_ChartSymbols::SetColorTableIndex( int index )
 }
 
 
+void OE_ChartSymbols::ResetRasterTextureCache()
+{
+    oe_rasterSymbolsTexture = 0;               // This will leak one texture
+                                                // but we cannot just delete it, since it might have been erroeously created
+                                                // while there was no valid GLcontext.
+                                                
+    LoadRasterFileForColorTable(oe_ColorTableIndex, true);
+}
+    
 int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
 {
     if( tableNo == oe_rasterSymbolsLoadedColorMapNumber && !flush ){
         if( pi_bopengl) {
-            if(oe_rasterSymbolsTexture)
+            if(oe_rasterSymbolsTexture > 0)
                 return true;
 #ifdef ocpnUSE_GL            
-            else if( !g_texture_rectangle_format && oe_rasterSymbols.IsOk()) 
+            else if( !g_oe_texture_rectangle_format && oe_rasterSymbols.IsOk()) 
                 return true;
 #endif            
         }
@@ -905,7 +914,7 @@ int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
     if( rasterFileImg.LoadFile( filename, wxBITMAP_TYPE_PNG ) ) {
 #ifdef ocpnUSE_GL
         /* for opengl mode, load the symbols into a texture */
-        if( pi_bopengl && g_texture_rectangle_format) {
+        if( pi_bopengl && g_oe_texture_rectangle_format) {
 
             int w = rasterFileImg.GetWidth();
             int h = rasterFileImg.GetHeight();
@@ -927,28 +936,34 @@ int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
                         e[off * 4 + 3] = a[off];
                     }
             }
+            
+            glEnable(GL_TEXTURE_2D);
 
-            if(!oe_rasterSymbolsTexture)
+
+            if(oe_rasterSymbolsTexture == 0)
             {
-                glDeleteTextures(1, &oe_rasterSymbolsTexture);
+                if(oe_rasterSymbolsTexture)
+                    glDeleteTextures(1, &oe_rasterSymbolsTexture);
                 glGenTextures(1, &oe_rasterSymbolsTexture);
+                wxString msg;
+                msg.Printf(_T("oeSENC_PI RasterSymbols texture: %d"), oe_rasterSymbolsTexture);
+                wxLogMessage(msg);
             }
 
-            glBindTexture(g_texture_rectangle_format, oe_rasterSymbolsTexture);
-            glTexParameteri(g_texture_rectangle_format, GL_TEXTURE_BASE_LEVEL, 0);
-            glTexParameteri(g_texture_rectangle_format, GL_TEXTURE_MAX_LEVEL, 0);
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+            glBindTexture(g_oe_texture_rectangle_format, oe_rasterSymbolsTexture);
+            glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_BASE_LEVEL, 0);
+            glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_MAX_LEVEL, 0);
+             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
             /* unfortunately this texture looks terrible with compression */
-            GLuint format = GL_RGBA;
-            glTexImage2D(g_texture_rectangle_format, 0, format, w, h,
+            glTexImage2D(g_oe_texture_rectangle_format, 0, GL_RGBA, w, h,
                          0, GL_RGBA, GL_UNSIGNED_BYTE, e);
 
-//             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-//             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-//             glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-//             glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+//              glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+//              glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+//              glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//              glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
             oe_rasterSymbolsTextureSize = wxSize(w, h);
 

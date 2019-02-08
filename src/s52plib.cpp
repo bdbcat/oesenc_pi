@@ -1297,9 +1297,9 @@ void s52plib::DestroyRules( RuleHash *rh )
     delete rh;
 }
 
-void s52plib::FlushSymbolCaches( void )
+void s52plib::FlushSymbolCaches( bool bFlushRaster )
 {
-    g_oeChartSymbols->LoadRasterFileForColorTable( m_colortable_index, false );
+    g_oeChartSymbols->LoadRasterFileForColorTable( m_colortable_index, bFlushRaster );
 
     RuleHash *rh = _symb_sym;
 
@@ -2063,7 +2063,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     int draw_width = ptext->text_width;
                     int draw_height = ptext->text_height;
                     
-                    extern GLenum       g_texture_rectangle_format;
+                    extern GLenum       g_oe_texture_rectangle_format;
                     
                     glEnable( GL_BLEND );
                     glEnable( GL_TEXTURE_2D );
@@ -2082,7 +2082,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     float tx1 = 0, tx2 = draw_width;
                     float ty1 = 0, ty2 = draw_height;
                     
-                    if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+                    if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                         
                         tx1 /= ptext->RGBA_width, tx2 /= ptext->RGBA_width;
                         ty1 /= ptext->RGBA_height, ty2 /= ptext->RGBA_height;
@@ -2100,7 +2100,7 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     
                     glPopMatrix();
                     
-                    glDisable( g_texture_rectangle_format );
+                    glDisable( g_oe_texture_rectangle_format );
                     glDisable( GL_BLEND );
 #else
                     glEnable( GL_BLEND );
@@ -3241,10 +3241,10 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         glEnable( GL_BLEND );
         
         if(texture) {
-            extern GLenum       g_texture_rectangle_format;
+            extern GLenum       g_oe_texture_rectangle_format;
 
-            glEnable(g_texture_rectangle_format);
-            glBindTexture(g_texture_rectangle_format, texture);
+            glEnable(g_oe_texture_rectangle_format);
+            glBindTexture(g_oe_texture_rectangle_format, texture);
 
             int w = texrect.width, h = texrect.height;
             
@@ -3254,7 +3254,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 
 #ifndef USE_ANDROID_GLES2
             glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                 wxSize size = g_oeChartSymbols->GLTextureSize();
                 tx1 /= size.x, tx2 /= size.x;
                 ty1 /= size.y, ty2 /= size.y;
@@ -3312,7 +3312,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 #else
                 
                     
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                     
                 // Normalize the sybmol texture coordinates against the next higher POT size
                 wxSize size = g_oeChartSymbols->GLTextureSize();
@@ -3401,7 +3401,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 
 
 #endif          // GLES2
-            glDisable(g_texture_rectangle_format);
+            glDisable(g_oe_texture_rectangle_format);
         } else { /* this is only for legacy mode, or systems without NPOT textures */
             float cr = cosf( vp->rotation );
             float sr = sinf( vp->rotation );
