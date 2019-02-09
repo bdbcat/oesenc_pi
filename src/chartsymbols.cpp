@@ -41,7 +41,7 @@ extern bool pi_bopengl;
 
 
 #ifdef ocpnUSE_GL
-extern GLenum       g_texture_rectangle_format;
+extern GLenum       g_oe_texture_rectangle_format;
 #endif
 
 //--------------------------------------------------------------------------------------
@@ -50,17 +50,10 @@ extern GLenum       g_texture_rectangle_format;
 // needs some methods from ChartSymbol. So s52plib only calls static methods in
 // order to resolve circular include file dependencies.
 
-wxArrayPtrVoid* pi_colorTables;
-unsigned int rasterSymbolsTexture;
-wxSize rasterSymbolsTextureSize;
-wxBitmap rasterSymbols;
-int rasterSymbolsLoadedColorMapNumber;
+
 wxString configFileDirectory;
-int ColorTableIndex;
 
-WX_DECLARE_STRING_HASH_MAP( wxRect, symbolGraphicsHashMap );
 
-symbolGraphicsHashMap* pi_symbolGraphicLocations;
 
 //  Some refined HPGL vector rendering strings allowing direct OpenGL rendering without pre-tesselation
 
@@ -72,40 +65,41 @@ SPA;SW1;PU2096,1950;PD1944,1950;PD2245,1500;PD2553,1950;PD2401,1950;PD2401,2546;
 
 //--------------------------------------------------------------------------------------
 
-ChartSymbols::ChartSymbols( void )
+OE_ChartSymbols::OE_ChartSymbols( void )
 {
 }
 
-ChartSymbols::~ChartSymbols( void )
+OE_ChartSymbols::~OE_ChartSymbols( void )
 {
 }
 
-void ChartSymbols::InitializeGlobals( void )
+void OE_ChartSymbols::InitializeGlobals( void )
 {
-    if( !pi_colorTables ) pi_colorTables = new wxArrayPtrVoid;
-    if( !pi_symbolGraphicLocations ) pi_symbolGraphicLocations = new symbolGraphicsHashMap;
-    rasterSymbolsLoadedColorMapNumber = -1;
-    ColorTableIndex = 0;
+    oe_pi_colorTables = new wxArrayPtrVoid;
+    oe_pi_symbolGraphicLocations = new symbolGraphicsHashMap;
+    oe_rasterSymbolsLoadedColorMapNumber = -1;
+    oe_ColorTableIndex = 0;
+    oe_rasterSymbolsTexture = 0;
 }
 
-void ChartSymbols::DeleteGlobals( void )
+void OE_ChartSymbols::DeleteGlobals( void )
 {
 
-    ( *pi_symbolGraphicLocations ).clear();
-    delete pi_symbolGraphicLocations;
-    pi_symbolGraphicLocations = NULL;
+    ( *oe_pi_symbolGraphicLocations ).clear();
+    delete oe_pi_symbolGraphicLocations;
+    oe_pi_symbolGraphicLocations = NULL;
 
-    for( unsigned int i = 0; i < pi_colorTables->GetCount(); i++ ) {
-        colTable *ct = (colTable *) pi_colorTables->Item( i );
+    for( unsigned int i = 0; i < oe_pi_colorTables->GetCount(); i++ ) {
+        colTable *ct = (colTable *) oe_pi_colorTables->Item( i );
         delete ct->tableName;
         ct->colors.clear();
         ct->wxColors.clear();
         delete ct;
     }
 
-    pi_colorTables->Clear();
-    delete pi_colorTables;
-    pi_colorTables = NULL;
+    oe_pi_colorTables->Clear();
+    delete oe_pi_colorTables;
+    oe_pi_colorTables = NULL;
 }
 
 #define TGET_INT_PROPERTY_VALUE( node, name, target )  \
@@ -113,7 +107,7 @@ void ChartSymbols::DeleteGlobals( void )
       propVal.ToLong( &numVal, 0 ); \
       target = numVal;
 
-void ChartSymbols::ProcessColorTables( TiXmlElement* colortableNodes )
+void OE_ChartSymbols::ProcessColorTables( TiXmlElement* colortableNodes )
 {
 
     for( TiXmlNode *childNode = colortableNodes->FirstChild(); childNode;
@@ -152,12 +146,12 @@ void ChartSymbols::ProcessColorTables( TiXmlElement* colortableNodes )
             next: colorNode = colorNode->NextSiblingElement();
         }
 
-        pi_colorTables->Add( (void *) colortable );
+        oe_pi_colorTables->Add( (void *) colortable );
 
     }
 }
 
-void ChartSymbols::ProcessLookups( TiXmlElement* lookupNodes )
+void OE_ChartSymbols::ProcessLookups( TiXmlElement* lookupNodes )
 {
     Lookup lookup;
     wxString propVal;
@@ -270,7 +264,7 @@ void ChartSymbols::ProcessLookups( TiXmlElement* lookupNodes )
     }
 }
 
-void ChartSymbols::BuildLookup( Lookup &lookup )
+void OE_ChartSymbols::BuildLookup( Lookup &lookup )
 {
 
     LUPrec *LUP = (LUPrec*) calloc( 1, sizeof(LUPrec) );
@@ -312,7 +306,7 @@ void ChartSymbols::BuildLookup( Lookup &lookup )
     pLUPARRAYtyped->Add( LUP );
 }
 
-void ChartSymbols::ProcessVectorTag( TiXmlElement* vectorNode, SymbolSizeInfo_t &vectorSize )
+void OE_ChartSymbols::ProcessVectorTag( TiXmlElement* vectorNode, SymbolSizeInfo_t &vectorSize )
 {
     wxString propVal;
     long numVal;
@@ -343,7 +337,7 @@ void ChartSymbols::ProcessVectorTag( TiXmlElement* vectorNode, SymbolSizeInfo_t 
     }
 }
 
-void ChartSymbols::ProcessLinestyles( TiXmlElement* linestyleNodes )
+void OE_ChartSymbols::ProcessLinestyles( TiXmlElement* linestyleNodes )
 {
 
     LineStyle lineStyle;
@@ -388,7 +382,7 @@ void ChartSymbols::ProcessLinestyles( TiXmlElement* linestyleNodes )
     }
 }
 
-void ChartSymbols::BuildLineStyle( LineStyle &lineStyle )
+void OE_ChartSymbols::BuildLineStyle( LineStyle &lineStyle )
 {
     Rule *lnstmp = NULL;
     Rule *lnst = (Rule*) calloc( 1, sizeof(Rule) );
@@ -423,7 +417,7 @@ void ChartSymbols::BuildLineStyle( LineStyle &lineStyle )
         if( lnst->name.LINM != lnstmp->name.LINM ) ( *plib->_line_sym )[lineStyle.name] = lnst;
 }
 
-void ChartSymbols::ProcessPatterns( TiXmlElement* patternNodes )
+void OE_ChartSymbols::ProcessPatterns( TiXmlElement* patternNodes )
 {
 
     OCPNPattern pattern;
@@ -526,7 +520,7 @@ void ChartSymbols::ProcessPatterns( TiXmlElement* patternNodes )
 
 }
 
-void ChartSymbols::BuildPattern( OCPNPattern &pattern )
+void OE_ChartSymbols::BuildPattern( OCPNPattern &pattern )
 {
     Rule *pattmp = NULL;
 
@@ -569,7 +563,7 @@ void ChartSymbols::BuildPattern( OCPNPattern &pattern )
     patt->pos.patt.bnbox_y.SBXR = patternSize.origin.y;
 
     wxRect graphicsLocation( pattern.bitmapSize.graphics, pattern.bitmapSize.size );
-    ( *pi_symbolGraphicLocations )[pattern.name] = graphicsLocation;
+    ( *oe_pi_symbolGraphicLocations )[pattern.name] = graphicsLocation;
 
     // check if key already there
 
@@ -587,7 +581,7 @@ void ChartSymbols::BuildPattern( OCPNPattern &pattern )
     }
 }
 
-void ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
+void OE_ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
 {
 
     ChartSymbol symbol;
@@ -708,7 +702,7 @@ void ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
 
 }
 
-void ChartSymbols::BuildSymbol( ChartSymbol& symbol )
+void OE_ChartSymbols::BuildSymbol( ChartSymbol& symbol )
 {
 
     Rule *symb = (Rule*) calloc( 1, sizeof(Rule) );
@@ -753,7 +747,7 @@ void ChartSymbols::BuildSymbol( ChartSymbol& symbol )
     symb->pos.symb.bnbox_y.SBXR = symbolSize.origin.y;
 
     wxRect graphicsLocation( symbol.bitmapSize.graphics, symbol.bitmapSize.size );
-    ( *pi_symbolGraphicLocations )[symbol.name] = graphicsLocation;
+    ( *oe_pi_symbolGraphicLocations )[symbol.name] = graphicsLocation;
 
     // Already something here with same key? Then free its strings, otherwise they leak.
     Rule* symbtmp = ( *plib->_symb_sym )[symbol.name];
@@ -767,7 +761,7 @@ void ChartSymbols::BuildSymbol( ChartSymbol& symbol )
 
 }
 
-bool ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePath)
+bool OE_ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePath)
 {
     TiXmlDocument doc;
 
@@ -830,7 +824,7 @@ bool ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePath)
     return true;
 }
 
-bool ChartSymbols::PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName)
+bool OE_ChartSymbols::PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName)
 {
     TiXmlDocument doc;
     
@@ -880,31 +874,38 @@ bool ChartSymbols::PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFil
 }
 
 
-void ChartSymbols::SetColorTableIndex( int index )
+void OE_ChartSymbols::SetColorTableIndex( int index )
 {
-    ColorTableIndex = index;
-    LoadRasterFileForColorTable(ColorTableIndex);
+    oe_ColorTableIndex = index;
+    LoadRasterFileForColorTable(oe_ColorTableIndex);
 }
 
 
-int ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
+void OE_ChartSymbols::ResetRasterTextureCache()
 {
-
-    if( tableNo == rasterSymbolsLoadedColorMapNumber && !flush ){
+    oe_rasterSymbolsTexture = 0;               // This will leak one texture
+                                                // but we cannot just delete it, since it might have been erroeously created
+                                                // while there was no valid GLcontext.
+                                                
+    LoadRasterFileForColorTable(oe_ColorTableIndex, true);
+}
+    
+int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
+{
+    if( tableNo == oe_rasterSymbolsLoadedColorMapNumber && !flush ){
         if( pi_bopengl) {
-            if(rasterSymbolsTexture)
+            if(oe_rasterSymbolsTexture > 0)
                 return true;
 #ifdef ocpnUSE_GL            
-            else if( !g_texture_rectangle_format && rasterSymbols.IsOk()) 
+            else if( !g_oe_texture_rectangle_format && oe_rasterSymbols.IsOk()) 
                 return true;
 #endif            
         }
-        if( rasterSymbols.IsOk())
+        if( oe_rasterSymbols.IsOk())
             return true;
     }
         
-    
-    colTable* coltab = (colTable *) pi_colorTables->Item( tableNo );
+    colTable* coltab = (colTable *) oe_pi_colorTables->Item( tableNo );
 
     wxString filename = configFileDirectory + wxFileName::GetPathSeparator()
             + coltab->rasterFileName;
@@ -913,7 +914,7 @@ int ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
     if( rasterFileImg.LoadFile( filename, wxBITMAP_TYPE_PNG ) ) {
 #ifdef ocpnUSE_GL
         /* for opengl mode, load the symbols into a texture */
-        if( pi_bopengl && g_texture_rectangle_format) {
+        if( pi_bopengl && g_oe_texture_rectangle_format) {
 
             int w = rasterFileImg.GetWidth();
             int h = rasterFileImg.GetHeight();
@@ -935,31 +936,46 @@ int ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
                         e[off * 4 + 3] = a[off];
                     }
             }
-            if(!rasterSymbolsTexture)
-                glGenTextures(1, &rasterSymbolsTexture);
+            
+            glEnable(GL_TEXTURE_2D);
 
-            glBindTexture(g_texture_rectangle_format, rasterSymbolsTexture);
+
+            if(oe_rasterSymbolsTexture == 0)
+            {
+                if(oe_rasterSymbolsTexture)
+                    glDeleteTextures(1, &oe_rasterSymbolsTexture);
+                glGenTextures(1, &oe_rasterSymbolsTexture);
+                wxString msg;
+                msg.Printf(_T("oeSENC_PI RasterSymbols texture: %d"), oe_rasterSymbolsTexture);
+                wxLogMessage(msg);
+            }
+
+            glBindTexture(g_oe_texture_rectangle_format, oe_rasterSymbolsTexture);
+            glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_BASE_LEVEL, 0);
+            glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_MAX_LEVEL, 0);
+             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
             /* unfortunately this texture looks terrible with compression */
-            GLuint format = GL_RGBA;
-            glTexImage2D(g_texture_rectangle_format, 0, format, w, h,
+            glTexImage2D(g_oe_texture_rectangle_format, 0, GL_RGBA, w, h,
                          0, GL_RGBA, GL_UNSIGNED_BYTE, e);
 
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-            glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-            glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+//              glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+//              glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+//              glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+//              glTexParameteri( g_texture_rectangle_format, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-            rasterSymbolsTextureSize = wxSize(w, h);
+            oe_rasterSymbolsTextureSize = wxSize(w, h);
 
+            glDisable(GL_TEXTURE_2D);
             free(e);
         } 
 #endif
         {
-            rasterSymbols = wxBitmap( rasterFileImg, -1/*32*/);
+            oe_rasterSymbols = wxBitmap( rasterFileImg, -1/*32*/);
         }
 
-        rasterSymbolsLoadedColorMapNumber = tableNo;
+        oe_rasterSymbolsLoadedColorMapNumber = tableNo;
         return true;
     }
 
@@ -970,37 +986,37 @@ int ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
 }
 
 // Convenience method for old s52plib code.
-wxArrayPtrVoid* ChartSymbols::GetColorTables()
+wxArrayPtrVoid* OE_ChartSymbols::GetColorTables()
 {
-    return pi_colorTables;
+    return oe_pi_colorTables;
 }
 
-S52color* ChartSymbols::GetColor( const char *colorName, int fromTable )
+S52color* OE_ChartSymbols::GetColor( const char *colorName, int fromTable )
 {
     colTable *colortable;
     wxString key( colorName, wxConvUTF8, 5 );
-    colortable = (colTable *)pi_colorTables->Item( fromTable );
+    colortable = (colTable *)oe_pi_colorTables->Item( fromTable );
     return &( colortable->colors[key] );
 }
 
-wxColor ChartSymbols::GetwxColor( const wxString &colorName, int fromTable )
+wxColor OE_ChartSymbols::GetwxColor( const wxString &colorName, int fromTable )
 {
     colTable *colortable;
-    colortable = (colTable *) pi_colorTables->Item( fromTable );
+    colortable = (colTable *) oe_pi_colorTables->Item( fromTable );
     wxColor c = colortable->wxColors[colorName];
     return c;
 }
 
-wxColor ChartSymbols::GetwxColor( const char *colorName, int fromTable )
+wxColor OE_ChartSymbols::GetwxColor( const char *colorName, int fromTable )
 {
     wxString key( colorName, wxConvUTF8, 5 );
     return GetwxColor( key, fromTable );
 }
 
-int ChartSymbols::FindColorTable(const wxString & tableName)
+int OE_ChartSymbols::FindColorTable(const wxString & tableName)
 {
-    for( unsigned int i = 0; i < pi_colorTables->GetCount(); i++ ) {
-        colTable *ct = (colTable *) pi_colorTables->Item( i );
+    for( unsigned int i = 0; i < oe_pi_colorTables->GetCount(); i++ ) {
+        colTable *ct = (colTable *) oe_pi_colorTables->Item( i );
         if( tableName.IsSameAs( *ct->tableName ) ) {
             return i;
         }
@@ -1008,7 +1024,7 @@ int ChartSymbols::FindColorTable(const wxString & tableName)
     return 0;
 }
 
-wxString ChartSymbols::HashKey( const char* symbolName )
+wxString OE_ChartSymbols::HashKey( const char* symbolName )
 {
     char key[9];
     key[8] = 0;
@@ -1016,24 +1032,24 @@ wxString ChartSymbols::HashKey( const char* symbolName )
     return wxString( key, wxConvUTF8 );
 }
 
-wxImage ChartSymbols::GetImage( const char* symbolName )
+wxImage OE_ChartSymbols::GetImage( const char* symbolName )
 {
-    wxRect bmArea = ( *pi_symbolGraphicLocations )[HashKey( symbolName )];
-    if(rasterSymbols.IsOk()){
-        wxBitmap bitmap = rasterSymbols.GetSubBitmap( bmArea );
+    wxRect bmArea = ( *oe_pi_symbolGraphicLocations )[HashKey( symbolName )];
+    if(oe_rasterSymbols.IsOk()){
+        wxBitmap bitmap = oe_rasterSymbols.GetSubBitmap( bmArea );
         return bitmap.ConvertToImage();
     }
     else
         return wxImage(1,1);
 }
 
-unsigned int ChartSymbols::GetGLTextureRect( wxRect &rect, const char* symbolName )
+unsigned int OE_ChartSymbols::GetGLTextureRect( wxRect &rect, const char* symbolName )
 {
-    rect = ( *pi_symbolGraphicLocations )[HashKey( symbolName )];
-    return rasterSymbolsTexture;
+    rect = ( *oe_pi_symbolGraphicLocations )[HashKey( symbolName )];
+    return oe_rasterSymbolsTexture;
 }
 
-wxSize ChartSymbols::GLTextureSize()
+wxSize OE_ChartSymbols::GLTextureSize()
 {
-    return rasterSymbolsTextureSize;
+    return oe_rasterSymbolsTextureSize;
 }

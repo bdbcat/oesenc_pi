@@ -42,7 +42,7 @@
 
 RazdsParser::RazdsParser()
 {
-    ColorTableArray = ChartSymbols::GetColorTables();
+    //ColorTableArray = OE_ChartSymbols::GetColorTables();
     pBuf = buffer;
 }
 

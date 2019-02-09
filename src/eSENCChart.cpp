@@ -153,8 +153,8 @@ extern PFNGLDELETEBUFFERSPROC              s_glDeleteBuffers;
 #endif
 
 extern bool              g_b_EnableVBO;
+extern bool              g_GLOptionsSet;
 
-extern void initLibraries(void);
 extern bool validate_SENC_server( void );
 //extern wxString GetUserKey( int legendID, bool bforceNew);
 extern bool validateUserKey( wxString sencFileName);
@@ -942,8 +942,6 @@ int eSENCChart::Init( const wxString& name, int init_flags )
 
         showChartinfoDialog();
         
-        initLibraries();
-        
         m_SENCFileName = name;
         ret_val = PostInit( init_flags, global_color_scheme );
     }
@@ -1460,6 +1458,9 @@ wxBitmap &eSENCChart::RenderRegionView(const PlugIn_ViewPort& VPoint, const wxRe
 int eSENCChart::RenderRegionViewOnGLNoText( const wxGLContext &glc, const PlugIn_ViewPort& VPoint,
                                       const wxRegion &Region, bool b_use_stencil )
 {
+    if(!g_GLOptionsSet)
+        return 0;
+
     bool b_text = ps52plib->GetShowS57Text();
     ps52plib->SetShowS57Text( false );
     
@@ -1478,6 +1479,9 @@ int eSENCChart::RenderRegionViewOnGL( const wxGLContext &glc, const PlugIn_ViewP
 
 #ifdef ocpnUSE_GL
  
+    if(!g_GLOptionsSet)
+        return 0;
+    
     //OCPNStopWatch sw;
  
     m_cvp = CreateCompatibleViewport( VPoint );
@@ -6425,17 +6429,36 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
             
             lightsHtml << _T("<tr>");
             lightsHtml << _T("<td><font size=-1>");
-            
+
+            wxString colorStr;
             attrIndex = thisLight.attributeNames.Index( _T("COLOUR") );
             if( attrIndex != wxNOT_FOUND ) {
                 wxString color = thisLight.attributeValues.Item( attrIndex );
-                if( color == _T("red(3)") ) lightsHtml
-                    << _T("<table border=0><tr><td bgcolor=red>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
-                if( color == _T("green(4)") ) lightsHtml
-                    << _T("<table border=0><tr><td bgcolor=green>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
-                if( color == _T("white(1)") ) lightsHtml
-                    << _T("<table border=0><tr><td bgcolor=yellow>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                if( color == _T("red (3)") )
+                    colorStr = _T("<table border=0><tr><td bgcolor=red>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                if( color == _T("green (4)") )
+                    colorStr = _T("<table border=0><tr><td bgcolor=green>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                if( color == _T("white (1)") )
+                    colorStr = _T("<table border=0><tr><td bgcolor=yellow>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
             }
+
+            int visIndex = thisLight.attributeNames.Index( _T("LITVIS") );
+            if(visIndex != wxNOT_FOUND){
+                wxString vis = thisLight.attributeValues.Item( visIndex );
+                if(vis.Contains( _T("8"))){
+                    if( attrIndex != wxNOT_FOUND ) {
+                        wxString color = thisLight.attributeValues.Item( attrIndex );
+                        if( color == _T("red (3)") )
+                            colorStr = _T("<table border=0><tr><td bgcolor=DarkRed>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                        if( color == _T("green (4)") )
+                            colorStr = _T("<table border=0><tr><td bgcolor=DarkGreen>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                        if( color == _T("white (1)") )
+                            colorStr = _T("<table border=0><tr><td bgcolor=GoldenRod>&nbsp;&nbsp;&nbsp;</td></tr></table> ");
+                    }
+                }
+            }
+            
+            lightsHtml << colorStr;
             
             lightsHtml << _T("</font></td><td><font size=-1><nobr><b>");
             
@@ -7245,6 +7268,9 @@ void eSENCChart::BuildLineVBO( void )
     if(!g_b_EnableVBO)
         return;
     
+    if(!g_GLOptionsSet)
+        return;
+        
     if(m_LineVBO_name == -1){
         
         //      Create the VBO
