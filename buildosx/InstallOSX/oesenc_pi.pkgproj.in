@@ -908,7 +908,7 @@
 				</dict>
 			</array>
                         <key>NAME</key>
-                        <string>${VERBOSE_NAME}-Plugin_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
+                        <string>${VERBOSE_NAME}-Plugin-${OCPN_MIN_VERSION}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
                         <key>REFERENCE_FOLDER_PATH</key>
                         <string>.</string>
 
