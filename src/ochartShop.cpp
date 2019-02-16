@@ -1001,7 +1001,7 @@ int doAssign(itemChart *chart, int slot)
         return checkResponseCode(iResponseCode);
 }
 
-extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK);
+extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
 
 int doUploadXFPR()
 {
@@ -1009,7 +1009,7 @@ int doUploadXFPR()
     
     // Generate the FPR file
     bool b_copyOK = false;
-    wxString fpr_file = getFPR( false, b_copyOK);              // No copy needed
+    wxString fpr_file = getFPR( false, b_copyOK, false);              // No copy needed
     
     fpr_file = fpr_file.Trim(false);            // Trim leading spaces...
     

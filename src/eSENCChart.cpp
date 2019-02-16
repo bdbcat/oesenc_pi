@@ -9247,7 +9247,6 @@ bool isPointInObjectBoundary( double east, double north, S57Obj *obj )
                     
                     ppt += 2;
                     
-                    int x0, y0, x1, y1;
                     for(int ip=0 ; ip < nPoints - 1 ; ip++){
 
                         

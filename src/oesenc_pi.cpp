@@ -659,6 +659,14 @@ int oesenc_pi::Init(void)
     g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
     g_serverProc = 0;
 #endif
+ 
+#ifndef __WXMSW__
+    // Set environment variable to find the required sglock dongle library
+    wxFileName libraryPath = fn_exe;
+    libraryPath.RemoveLastDir();
+    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
+    wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
+#endif
     
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
@@ -2434,9 +2442,52 @@ bool validateUserKey( wxString sencFileName)
                 return true;
             }
             
-            wxLogMessage(_T("validateUserKey E2.5"));
+            wxLogMessage(_T("validateUserKey E2.5, extracting userKey from Chartinfo.txt"));
+
+            //  On a hard signature error, we try to extract a userKey from the chartinfo file, if present
             
-            //  On a hard signature error, we try once more, allowing user to enter a new key
+               // get the Chartinfo as a wxTextFile
+            wxFileName fn(sencFileName);
+            wxString infoFile = fn.GetPath(  wxPATH_GET_VOLUME + wxPATH_GET_SEPARATOR );
+            infoFile += _T("Chartinfo.txt");
+            wxString new_userKey;
+            
+            if(wxFileExists(infoFile)){
+                wxTextFile info_file( infoFile );
+                if( info_file.Open() ){
+                    wxString line = info_file.GetFirstLine();
+        
+                    while( !info_file.Eof() ){
+                        if(line.StartsWith( _T("UserKey:" ) ) ) {
+                            wxString content = line.AfterFirst(':').Trim().Trim(false);
+                            new_userKey = content;
+                                                 
+                            break;
+                        }
+            
+                        line = info_file.GetNextLine();
+                    }
+                }
+            }
+            
+            if(new_userKey.Len() && (!new_userKey.IsSameAs(g_UserKey))){
+                wxLogMessage(_T("Switching userKey to: ") + new_userKey);
+                g_UserKey = new_userKey;
+            }
+                
+            
+            validate_SENC_server();             // reset the server
+ 
+            senc.setKey(g_UserKey);             // key from the chartinfo file
+            int retCode_retry21 = senc.ingestHeader( sencFileName );
+            if(retCode_retry21 == SENC_NO_ERROR){
+                wxLogMessage(_T("OK using ChartInfo userKey."));
+                return true;
+            }
+
+            wxLogMessage(_T("validateUserKey E2.6"));
+
+            //  No other choice here but to ask the user to enter a new key
             wxString key = GetUserKey( LEGEND_SECOND, true );
             
             if(key.Upper() == _T("INVALID")){
@@ -3522,10 +3573,17 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
 
         m_buttonNewFPR = new wxButton( content, wxID_ANY, _("Create System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
         
-        bSizer2->AddSpacer( 20 );
+        bSizer2->AddSpacer( 5 );
         bSizer2->Add( m_buttonNewFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
         
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
+
+        m_buttonNewDFPR = new wxButton( content, wxID_ANY, _("Create SGLock System Identifier file..."), wxDefaultPosition, wxDefaultSize, 0 );
+        
+        bSizer2->AddSpacer( 5 );
+        bSizer2->Add( m_buttonNewDFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
+        
+        m_buttonNewDFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewDFPRClick), NULL, g_event_handler );
 
             
 #ifdef __WXMAC__
@@ -3635,7 +3693,7 @@ void androidGetDeviceName()
 }
 #endif
 
-wxString getFPR( bool bCopyToDesktop, bool &bCopyOK)
+wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
 {
             
             wxString msg1;
@@ -3655,7 +3713,10 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK)
                 fpr_dir += wxFileName::GetPathSeparator();
             
             wxString cmd = g_sencutil_bin;
-            cmd += _T(" -g ");                  // Make fingerprint
+            if(bSGLock)
+                cmd += _T(" -k ");                  // Make SGLock fingerprint
+            else
+                cmd += _T(" -g ");                  // Make fingerprint
             
 #ifndef __WXMSW__
             cmd += _T("\"");
@@ -3688,6 +3749,7 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK)
             bool berr = false;
             for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
                 wxString line = ret_array[i];
+                wxLogMessage(line);
                 if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
                     berr = true;
                     break;
@@ -3951,24 +4013,23 @@ void oesenc_pi_event_handler::OnClearCredentials( wxCommandEvent &event )
  
 }
 
-
-
-void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
+void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
 {
 #ifndef __OCPN__ANDROID__    
-    wxString msg = _("To obtain a User Key, you must generate a unique System Identifier File.\n");
+    wxString msg = _("To obtain a chart set, you must generate a Unique System Identifier File.\n");
     msg += _("This file is also known as a\"fingerprint\" file.\n");
-    msg += _("The fingerprint file contains information to uniquely identifiy this computer.\n\n");
-    msg += _("After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n");
+    msg += _("The fingerprint file contains information related to a connected USB key dongle.\n\n");
+    msg += _("After creating this file, you will need it to obtain your chart sets at the o-charts.org shop.\n\n");
     msg += _("Proceed to create Fingerprint file?");
-    
+
+
     int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
     
     if(ret == wxID_YES){
         wxString msg1;
         
         bool b_copyOK = false;
-        wxString fpr_file = getFPR( true , b_copyOK);
+        wxString fpr_file = getFPR( true , b_copyOK, true);
         
         if(fpr_file.Len()){
             msg1 += _("Fingerprint file created.\n");
@@ -3988,201 +4049,49 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         
         g_fpr_file = fpr_file;
         
-#if 0        
-       
-        wxString msg1;
-        wxString fpr_file;
-        wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
-        
-        #ifdef __WXMSW__
-        
-        //  On XP, we simply use the root directory, since any other directory may be hidden
-        int major, minor;
-        ::wxGetOsVersion( &major, &minor );
-        if( (major == 5) && (minor == 1) )
-            fpr_dir = _T("C:\\");
-        #endif        
-            
-            if( fpr_dir.Last() != wxFileName::GetPathSeparator() )
-                fpr_dir += wxFileName::GetPathSeparator();
-            
-            wxString cmd = g_sencutil_bin;
-            cmd += _T(" -g ");                  // Make fingerprint
-
-#ifndef __WXMSW__
-            cmd += _T("\"");
-            cmd += fpr_dir;
-            
-            //cmd += _T("my fpr/");             // testing
-            
-//            wxString tst_cedilla = wxString::Format(_T("my fpr copy %cCedilla/"), 0x00E7);       // testing French cedilla
-//            cmd += tst_cedilla;            // testing
-            
-            cmd += _T("\"");
-#else
-            cmd += wxString('\"'); 
-            cmd += fpr_dir;
-            
-//            cmd += _T("my fpr\\");            // testing spaces in path
-            
-//            wxString tst_cedilla = wxString::Format(_T("my%c\\"), 0x00E7);       // testing French cedilla
-//            cmd += tst_cedilla;            // testing
-#endif            
-            wxLogMessage(_T("Create FPR command: ") + cmd);
-            
-            ::wxBeginBusyCursor();
-            
-            wxArrayString ret_array;      
-            wxExecute(cmd, ret_array, ret_array );
-            
-            ::wxEndBusyCursor();
-            
-            bool berr = false;
-            for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
-                wxString line = ret_array[i];
-                if(line.Upper().Find(_T("ERROR")) != wxNOT_FOUND){
-                    berr = true;
-                    break;
-                }
-                if(line.Upper().Find(_T("FPR")) != wxNOT_FOUND){
-                    fpr_file = line.AfterFirst(':');
-                }
-                
-            }
-            
-            bool berror = false;
-             
-            if(!berr && fpr_file.Length()){
-
-                bool bcopy = false;
-                wxString sdesktop_path;
-                
-#ifdef __WXMSW__
-                TCHAR desktop_path[MAX_PATH*2] = { 0 };
-                bool bpathGood = false;
-                HRESULT  hr;
-                HANDLE ProcToken = NULL;
-                OpenProcessToken( GetCurrentProcess(), TOKEN_READ, &ProcToken );
-                
-                hr = SHGetFolderPath( NULL,  CSIDL_DESKTOPDIRECTORY, ProcToken, 0, desktop_path);
-                if (SUCCEEDED(hr))    
-                    bpathGood = true;
-                
-                CloseHandle( ProcToken );
-                
-//                wchar_t *desktop_path = 0;
-//                bool bpathGood = false;
-                
-//               if( (major == 5) && (minor == 1) ){             //XP
-//                    if(S_OK == SHGetFolderPath( (HWND)0,  CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, desktop_path))
-//                        bpathGood = true;
-                    
-                    
-//                 }
-//                 else{
-//                     if(S_OK == SHGetKnownFolderPath( FOLDERID_Desktop, 0, 0, &desktop_path))
-//                         bpathGood = true;
-//                 }
-                
-                
-                if(bpathGood){
-                    
-                    char str[128];
-                    wcstombs(str, desktop_path, 128);
-                    wxString desktop_fpr(str, wxConvAuto());
-                    
-                    sdesktop_path = desktop_fpr;
-                    if( desktop_fpr.Last() != wxFileName::GetPathSeparator() )
-                         desktop_fpr += wxFileName::GetPathSeparator();
-
-                    wxFileName fn(fpr_file);
-                    wxString desktop_fpr_file = desktop_fpr + fn.GetFullName();
-                    
-                    
-                    wxString exe = _T("xcopy");
-                    wxString parms = fpr_file.Trim() + _T(" ") + wxString('\"') + desktop_fpr + wxString('\"');
-                    wxLogMessage(_T("FPR copy command: ") + exe + _T(" ") + parms);
-                    
-                    const wchar_t *wexe = exe.wc_str(wxConvUTF8);
-                    const wchar_t *wparms = parms.wc_str(wxConvUTF8);
-                    
-                    if( (major == 5) && (minor == 1) ){             //XP
-                        // For some reason, this does not work...
-                        //8:43:13 PM: Error: Failed to copy the file 'C:\oc01W_1481247791.fpr' to '"C:\Documents and Settings\dsr\Desktop\oc01W_1481247791.fpr"'
-                        //                (error 123: the filename, directory name, or volume label syntax is incorrect.)
-                        //8:43:15 PM: oesenc fpr file created as: C:\oc01W_1481247791.fpr
-                        
-                        bcopy = wxCopyFile(fpr_file.Trim(false), _T("\"") + desktop_fpr_file + _T("\""));
-                    }
-                    else{
-                        ::wxBeginBusyCursor();
-                        
-                        // Launch oeserverd as admin
-                        SHELLEXECUTEINFO sei = { sizeof(sei) };
-                        sei.lpVerb = L"runas";
-                        sei.lpFile = wexe;
-                        sei.hwnd = NULL;
-                        sei.lpParameters = wparms;
-                        sei.nShow = SW_SHOWMINIMIZED;
-                        sei.fMask = SEE_MASK_NOASYNC;
-                        
-                        if (!ShellExecuteEx(&sei))
-                        {
-                            DWORD dwError = GetLastError();
-                            if (dwError == ERROR_CANCELLED)
-                            {
-                                // The user refused to allow privileges elevation.
-                                OCPNMessageBox_PlugIn(NULL, _("Administrator priveleges are required to copy fpr.\n  Please try again...."), _("oeSENC_pi Message"), wxOK);
-                                berror = true;
-                            }
-                        }
-                        else
-                            bcopy = true;
-                        
-                        ::wxEndBusyCursor();
-                        
-                    }  
-                }
-#endif            
-#ifdef __WXOSX__
-                wxFileName fn(fpr_file);
-                wxString desktop_fpr_path = ::wxGetHomeDir() + wxFileName::GetPathSeparator() +
-                                _T("Desktop") + wxFileName::GetPathSeparator() + fn.GetFullName();
-                
-                bcopy =  ::wxCopyFile(fpr_file.Trim(false), desktop_fpr_path);
-                sdesktop_path = desktop_fpr_path;
-                msg1 += _T("\n\n OSX ");
-#endif
-
-                
-                {
-                    msg1 += _("Fingerprint file created.\n");
-                    msg1 += fpr_file;
-
-                    if(bcopy)
-                        msg1 += _("\n\n Fingerprint file is also copied to desktop.");
-                    
-                    OCPNMessageBox_PlugIn(NULL, msg1, _("oeSENC_pi Message"), wxOK);
-                }
-                
-                wxLogMessage(_T("oeSENC fpr file created as: ") + fpr_file);
-                if(bcopy)
-                    wxLogMessage(_T("oeSENC fpr file created in desktop folder: ") + sdesktop_path);
-            }
-            else{
-                wxLogMessage(_T("oesenc_pi: oeserverd results:"));
-                for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
-                    wxString line = ret_array[i];
-                    wxLogMessage( line );
-                }
-                OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
-                
-                berror = true;
-            }
-#endif            
-           
     }           // yes
-#else
+#endif
+}
+
+
+
+void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
+{
+#ifndef __OCPN__ANDROID__    
+    wxString msg = _("To obtain a chart set, you must generate a Unique System Identifier File.\n");
+    msg += _("This file is also known as a\"fingerprint\" file.\n");
+    msg += _("The fingerprint file contains information to uniquely identify this computer.\n\n");
+    msg += _("After creating this file, you will need it to obtain your chart sets at the o-charts.org shop.\n\n");
+    msg += _("Proceed to create Fingerprint file?");
+
+    int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
+    
+    if(ret == wxID_YES){
+        wxString msg1;
+        
+        bool b_copyOK = false;
+        wxString fpr_file = getFPR( true , b_copyOK, false);
+        
+        if(fpr_file.Len()){
+            msg1 += _("Fingerprint file created.\n");
+            msg1 += fpr_file;
+            
+            if(b_copyOK)
+                msg1 += _("\n\n Fingerprint file is also copied to desktop.");
+            
+            OCPNMessageBox_PlugIn(NULL, msg1, _("oeSENC_pi Message"), wxOK);
+            
+            m_parent->Set_FPR();
+            
+        }
+        else{
+            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
+        }
+        
+        g_fpr_file = fpr_file;
+        
+    }           // yes
+#else                   // Android
 
         // Get XFPR from the oeserverda helper utility.
         //  The target binary executable
