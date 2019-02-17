@@ -196,7 +196,7 @@
 														<key>GID</key>
 														<integer>80</integer>
 														<key>PATH</key>
-														<string>plugins</string>
+														<string>Plugins</string>
 														<key>PATH_TYPE</key>
 														<integer>0</integer>
 														<key>PERMISSIONS</key>
@@ -908,7 +908,7 @@
 				</dict>
 			</array>
                         <key>NAME</key>
-                        <string>${VERBOSE_NAME}-Plugin_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
+                        <string>${VERBOSE_NAME}-Plugin-${OCPN_MIN_VERSION}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}</string>
                         <key>REFERENCE_FOLDER_PATH</key>
                         <string>.</string>
 

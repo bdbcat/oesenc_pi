@@ -269,7 +269,7 @@ public:
     void UpdateChartList();
     void OnGetNewSystemName( wxCommandEvent& event );
     void OnChangeSystemName( wxCommandEvent& event );
-    void doSystemNameWizard();
+    bool doSystemNameWizard();
     wxString doGetNewSystemName( );
     void UpdateActionControls();
     void setStatusText( const wxString &text ){ m_staticTextStatus->SetLabel( text );  m_staticTextStatus->Refresh(); }

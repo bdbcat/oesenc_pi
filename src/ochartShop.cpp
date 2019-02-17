@@ -59,6 +59,7 @@ int g_timeout_secs = 5;
 
 wxArrayString g_systemNameChoiceArray;
 wxArrayString g_systemNameServerArray;
+wxArrayString g_systemNameDisabledArray;
 
 extern int g_admin;
 extern wxString g_systemName;
@@ -733,6 +734,7 @@ wxString ProcessResponse(std::string body)
 //         wxString p = wxString(body.c_str(), wxConvUTF8);
 //         wxLogMessage(_T("ProcessResponse results:"));
 //         wxLogMessage(p);
+
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
@@ -759,6 +761,14 @@ wxString ProcessResponse(std::string body)
                         if(g_systemNameServerArray.Index(sName) == wxNOT_FOUND)
                             g_systemNameServerArray.Add(sName);
                         
+                }
+                
+                else if(!strcmp(child->Value(), "disabledSystemName")){
+                    TiXmlNode *childsystemNameDisabled = child->FirstChild();
+                    wxString sName =  wxString::FromUTF8(childsystemNameDisabled->Value());
+                    if(g_systemNameDisabledArray.Index(sName) == wxNOT_FOUND)
+                        g_systemNameDisabledArray.Add(sName);
+                    
                 }
                 
                 else if(!strcmp(child->Value(), "chart")){
@@ -1001,7 +1011,7 @@ int doAssign(itemChart *chart, int slot)
         return checkResponseCode(iResponseCode);
 }
 
-extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK);
+extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
 
 int doUploadXFPR()
 {
@@ -1009,7 +1019,7 @@ int doUploadXFPR()
     
     // Generate the FPR file
     bool b_copyOK = false;
-    wxString fpr_file = getFPR( false, b_copyOK);              // No copy needed
+    wxString fpr_file = getFPR( false, b_copyOK, false);              // No copy needed
     
     fpr_file = fpr_file.Trim(false);            // Trim leading spaces...
     
@@ -2112,19 +2122,29 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     g_chartListUpdatedOK = true;
     
     if(!g_systemName.Len()){
-        doSystemNameWizard();
+        bool sname_ok = false;
+        int itry = 0;
+        while(!sname_ok && itry < 4){
+            bool bcont = doSystemNameWizard();
         
-        if(!g_systemName.Len()){
-            wxString msg = _("Invalid System Name");
-            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
-            
-            // Give one more chance...
-            doSystemNameWizard();
+            if( !bcont )                // user "Cancel"
+                break;
             
             if(!g_systemName.Len()){
                 wxString msg = _("Invalid System Name");
                 OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+                itry++;
             }
+            
+            else if(g_systemNameDisabledArray.Index(g_systemName) != wxNOT_FOUND){
+                wxString msg = _("This System Name has been disabled\nPlease choose another SystemName");
+                OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+                itry++;
+            }
+            else{
+                sname_ok = true;
+            }
+                
         }
     }
     
@@ -2716,7 +2736,7 @@ void shopPanel::UpdateActionControls()
 }
 
     
-void shopPanel::doSystemNameWizard(  )
+bool shopPanel::doSystemNameWizard(  )
 {
     // Make sure the system name array is current
     
@@ -2750,6 +2770,8 @@ void shopPanel::doSystemNameWizard(  )
         if(sName.Len())
             g_systemName = sName;
     }
+    else 
+        return false;
     
     wxString sn = _("System Name:");
     sn += _T(" ");
@@ -2758,6 +2780,8 @@ void shopPanel::doSystemNameWizard(  )
     m_staticTextSystemName->Refresh();
     
     saveShopConfig();
+    
+    return true;
 }
 
 wxString shopPanel::doGetNewSystemName( )
@@ -3026,7 +3050,10 @@ END_EVENT_TABLE()
      
      wxArrayString system_names;
      for(unsigned int i=0 ; i < g_systemNameChoiceArray.GetCount() ; i++){
-         system_names.Add(g_systemNameChoiceArray.Item(i));
+         wxString candidate = g_systemNameChoiceArray.Item(i);
+         wxString disabled = g_systemNameDisabledArray.Item(0);
+         if(g_systemNameDisabledArray.Index(candidate) == wxNOT_FOUND)
+            system_names.Add(candidate);
      }
      system_names.Add(_("new..."));
      

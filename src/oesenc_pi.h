@@ -227,7 +227,7 @@ public:
     ~oesencPrefsDialog();
     void OnPrefsOkClick(wxCommandEvent& event);
     
-    wxButton *m_buttonNewFPR;
+    wxButton *m_buttonNewFPR, *m_buttonNewDFPR;
     wxButton *m_buttonShowFPR;
     wxButton *m_buttonClearSystemName;
     wxButton *m_buttonClearCreds;
@@ -250,6 +250,7 @@ public:
     ~oesenc_pi_event_handler();
     
     void OnNewFPRClick( wxCommandEvent &event );
+    void OnNewDFPRClick( wxCommandEvent &event );
     void OnShowFPRClick( wxCommandEvent &event );
     void onTimerEvent(wxTimerEvent &event);
     void OnGetHWIDClick( wxCommandEvent &event );
