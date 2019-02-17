@@ -3760,6 +3760,13 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
                 }
                 
             }
+            if(!berr){
+                if(fpr_file.IsEmpty()){                 // Probably dongle not present
+                    fpr_file = _T("DONGLE_NOT_PRESENT");
+                    return fpr_file;
+                }
+            }
+            
             
             bool berror = false;
             
@@ -4031,6 +4038,12 @@ void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
         
         bool b_copyOK = false;
         wxString fpr_file = getFPR( true , b_copyOK, true);
+        
+        // Check for missing dongle...
+        if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT"))){
+            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n USB key dongle not detected."), _("oeSENC_pi Message"), wxOK);
+            return;
+        }
         
         if(fpr_file.Len()){
             msg1 += _("Fingerprint file created.\n");
