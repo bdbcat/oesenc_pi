@@ -3051,7 +3051,6 @@ END_EVENT_TABLE()
      wxArrayString system_names;
      for(unsigned int i=0 ; i < g_systemNameChoiceArray.GetCount() ; i++){
          wxString candidate = g_systemNameChoiceArray.Item(i);
-         wxString disabled = g_systemNameDisabledArray.Item(0);
          if(g_systemNameDisabledArray.Index(candidate) == wxNOT_FOUND)
             system_names.Add(candidate);
      }
