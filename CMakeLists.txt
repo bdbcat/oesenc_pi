@@ -449,9 +449,12 @@ INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
       DESTINATION "oesenc_pi/oesenc_pi" )
 
-  # We also need to copy the helper utility to the binary build directory so that the PACKAGES scripts will find it.
+  # We also need to copy the helper utility and required dylibs to the binary build directory so that the PACKAGES scripts will find it.
 configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/oeserverd
             ${CMAKE_CURRENT_BINARY_DIR}/oeserverd COPYONLY)
+
+configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/libsglmac-2.29.0.0.dylib.x86_64
+            ${CMAKE_CURRENT_BINARY_DIR}/libsglmac-2.29.0.0.dylib.x86_64 COPYONLY)
 
 configure_file(${PROJECT_SOURCE_DIR}/src/rrc_eula_ChartSetsForOpenCPN.txt
             ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
@@ -460,7 +463,9 @@ configure_file(${PROJECT_SOURCE_DIR}/src/rrc_eula_ChartSetsForOpenCPN.txt
 ENDIF(APPLE)
 
 
+IF(NOT WIN32)
 SET(CPACK_SET_DESTDIR ON)
+ENDIF(NOT WIN32)
 
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")
 

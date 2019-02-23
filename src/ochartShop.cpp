@@ -75,8 +75,14 @@ bool g_chartListUpdatedOK;
 wxString g_statusOverride;
 wxString g_lastInstallDir;
 
+unsigned int g_dongleSN;
+wxString g_dongleName;
+
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
+
+bool IsDongleAvailable();
+unsigned int GetDongleSN();
 
 // Private class implementations
 
@@ -758,8 +764,8 @@ wxString ProcessResponse(std::string body)
                         g_systemNameChoiceArray.Add(sName);
                     
                     //  Maintain a separate list of systemNames known to the server
-                        if(g_systemNameServerArray.Index(sName) == wxNOT_FOUND)
-                            g_systemNameServerArray.Add(sName);
+                    if(g_systemNameServerArray.Index(sName) == wxNOT_FOUND)
+                        g_systemNameServerArray.Add(sName);
                         
                 }
                 
@@ -1019,7 +1025,13 @@ int doUploadXFPR()
     
     // Generate the FPR file
     bool b_copyOK = false;
-    wxString fpr_file = getFPR( false, b_copyOK, false);              // No copy needed
+    
+    // is this a dongle upload?
+    bool bDongle = false;
+    if(g_systemName.Index(_T("Dongle")) != wxNOT_FOUND){
+        bDongle = true;
+    }
+    wxString fpr_file = getFPR( false, b_copyOK, bDongle);              // No copy needed
     
     fpr_file = fpr_file.Trim(false);            // Trim leading spaces...
     
@@ -1054,9 +1066,16 @@ int doUploadXFPR()
             loginParms += _T("taskId=xfpr");
             loginParms += _T("&username=") + g_loginUser;
             loginParms += _T("&key=") + g_loginKey;
-            loginParms += _T("&systemName=") + g_systemName;
+
+            if(!bDongle)
+                loginParms += _T("&systemName=") + g_systemName;
+            else
+                loginParms += _T("&systemName=") + g_dongleName;
+                
             loginParms += _T("&xfpr=") + stringFPR;
             loginParms += _T("&xfprName=") + fprName;
+            
+            wxLogMessage(loginParms);
             
             wxCurlHTTPNoZIP post;
             post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
@@ -1085,15 +1104,21 @@ int doUploadXFPR()
                 return checkResponseCode(iResponseCode);
             
         }
+        else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT")))
+            err = _("  {USB Dongle not found.}");
+            
         else
-            err = _T("  {fpr file not found.}");
+            err = _("  {fpr file not found.}");
     }
     else{
-        err = _T("  {fpr file not created.}");
+        err = _("  {fpr file not created.}");
     }
     
     if(err.Len()){
-        OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file.\n") + err, _("oeSENC_pi Message"), wxOK);
+        wxString msg = _("ERROR Creating Fingerprint file") + _T("\n");
+        msg += _("Check OpenCPN log file.") + _T("\n"); 
+        msg += err;
+        OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
         return 1;
     }
         
@@ -2066,6 +2091,15 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
 {
     loadShopConfig();
     
+    // Check the dongle
+    if(IsDongleAvailable()){
+        g_dongleSN = GetDongleSN();
+        char sName[20];
+        snprintf(sName, 19, "sgl%08X", g_dongleSN);
+
+        g_dongleName = wxString(sName);
+    }
+    
     //  Do we need an initial login to get the persistent key?
     if(g_loginKey.Len() == 0){
         if(doLogin() != 1)
@@ -2127,8 +2161,10 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         while(!sname_ok && itry < 4){
             bool bcont = doSystemNameWizard();
         
-            if( !bcont )                // user "Cancel"
+            if( !bcont ){                // user "Cancel"
+                g_systemName.Clear();
                 break;
+            }
             
             if(!g_systemName.Len()){
                 wxString msg = _("Invalid System Name");
@@ -2763,9 +2799,19 @@ bool shopPanel::doSystemNameWizard(  )
     if(ret == 0){               // OK
         wxString sName = dlg.getRBSelection();
         if(g_systemNameChoiceArray.Index(sName) == wxNOT_FOUND){
-            sName = doGetNewSystemName();
-            if(sName.Len())
-                g_systemNameChoiceArray.Insert(sName, 0);
+            // Is it the dongle selected?
+            if(sName.Index(_T("Dongle")) != wxNOT_FOUND){
+                wxString ssName = sName.Mid(0, 11);
+                g_systemNameChoiceArray.Insert(ssName, 0);
+                sName = ssName;
+            }
+            else{    
+                sName = doGetNewSystemName();
+                if(sName.Len())
+                    g_systemNameChoiceArray.Insert(sName, 0);
+                else
+                    return false;
+            }
         }
         if(sName.Len())
             g_systemName = sName;
@@ -2813,6 +2859,7 @@ wxString shopPanel::doGetNewSystemName( )
         for(unsigned int i = 0; i < strlen(s); i++, t++){
             bool bok = false;
             if( ((*t >= 'a') && (*t <= 'z')) ||
+                ((*t >= 'A') && (*t <= 'Z')) ||
                 ((*t >= '0') && (*t <= '9')) ){
                 
                 bok = true;
@@ -2922,8 +2969,8 @@ END_EVENT_TABLE()
      wxStaticText *itemStaticTextLegend = new wxStaticText( itemDialog1, wxID_STATIC,  _("A valid System Name is 3 to 15 characters in length."));
      itemBoxSizer2->Add( itemStaticTextLegend, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
 
-     wxStaticText *itemStaticTextLegend1 = new wxStaticText( itemDialog1, wxID_STATIC,  _("lower case letters and numbers only."));
-     itemBoxSizer2->Add( itemStaticTextLegend1, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
+//      wxStaticText *itemStaticTextLegend1 = new wxStaticText( itemDialog1, wxID_STATIC,  _("lower case letters and numbers only."));
+//      itemBoxSizer2->Add( itemStaticTextLegend1, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
      
      wxStaticText *itemStaticTextLegend2 = new wxStaticText( itemDialog1, wxID_STATIC,  _("No symbols or spaces are allowed."));
      itemBoxSizer2->Add( itemStaticTextLegend2, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
@@ -3048,12 +3095,28 @@ END_EVENT_TABLE()
      itemBoxSizer2->Add( itemStaticText6, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP, 5 );
                                                        
      
+     bool bDongleAdded = false;
      wxArrayString system_names;
      for(unsigned int i=0 ; i < g_systemNameChoiceArray.GetCount() ; i++){
          wxString candidate = g_systemNameChoiceArray.Item(i);
-         if(g_systemNameDisabledArray.Index(candidate) == wxNOT_FOUND)
+         if(candidate.StartsWith("sgl")){
+             if(g_systemNameDisabledArray.Index(candidate) == wxNOT_FOUND){
+                system_names.Add(candidate + _T(" (") + _("USB Key Dongle") + _T(")"));
+                bDongleAdded = true;
+             }
+         }
+
+         else if(g_systemNameDisabledArray.Index(candidate) == wxNOT_FOUND)
             system_names.Add(candidate);
      }
+     
+  
+     // Add USB dongle if present, and not already added
+     
+     if(!bDongleAdded && IsDongleAvailable()){
+        system_names.Add( g_dongleName  + _T(" (") + _("USB Key Dongle") + _T(")"));
+     }
+         
      system_names.Add(_("new..."));
      
      m_rbSystemNames = new wxRadioBox(this, wxID_ANY, _("System Names"), wxDefaultPosition, wxDefaultSize, system_names, 0, wxRA_SPECIFY_ROWS);
