@@ -107,6 +107,8 @@ bool validate_SENC_server(void);
 void init_S52Library();
 void init_GLLibrary();
 
+bool IsDongleAvailable();
+
 #include <wx/arrimpl.cpp> 
 WX_DEFINE_OBJARRAY(EULAArray);
 
@@ -659,17 +661,31 @@ int oesenc_pi::Init(void)
     g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
     g_serverProc = 0;
 #endif
- 
-#ifndef __WXMSW__
+
+    // Set environment variable for some platforms to find the required sglock dongle library
+
+#if !defined(__WXMSW__) && !defined(__WXMAC__)
     // Set environment variable to find the required sglock dongle library
     wxFileName libraryPath = fn_exe;
     libraryPath.RemoveLastDir();
     wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
     wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
 #endif
-    
+
+#ifdef __WXMAC__
+    // Set environment variable to find the required sglock dongle library
+    wxString libDir = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("PlugIns/oesenc_pi" _T("\""));
+    wxSetEnv(_T("DYLD_LIBRARY_PATH"), libDir ); 
+    wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);
+#endif
+
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
+    if(IsDongleAvailable())
+        wxLogMessage(_T("Dongle OK"));
+    else
+        wxLogMessage(_T("Dongle NOT FOUND"));
+        
     g_benable_screenlog = g_buser_enable_screenlog;
     
     g_ChartInfoArray.Clear();
@@ -3694,6 +3710,45 @@ void androidGetDeviceName()
 }
 #endif
 
+bool IsDongleAvailable()
+{
+    wxString cmd = g_sencutil_bin;
+    cmd += _T(" -s ");                  // Available?
+
+    wxArrayString ret_array;      
+    wxExecute(cmd, ret_array, ret_array );
+            
+    for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
+        wxString line = ret_array[i];
+        wxLogMessage(line);
+        if(line.IsSameAs(_T("1")))
+            return true;
+    }
+    
+    return false;
+}
+
+unsigned int GetDongleSN()
+{
+    unsigned int rv = 0;
+    
+    wxString cmd = g_sencutil_bin;
+    cmd += _T(" -t ");                  // SN
+
+    wxArrayString ret_array;      
+    wxExecute(cmd, ret_array, ret_array );
+            
+    for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
+        wxString line = ret_array[i];
+        long sn;
+        line.ToLong(&sn, 10);
+        rv = sn;
+    }
+    
+    return rv;
+}
+    
+    
 wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
 {
             
