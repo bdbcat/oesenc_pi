@@ -2306,7 +2306,7 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
                                                       _("UserKey accepted.\n\n"),
                                                       wxDefaultPosition, wxDefaultSize, 0);
              break;
-                                                      
+
          default:
              break;
      }
@@ -2411,6 +2411,20 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
      }
  }
  
+void ShowGenericErrorMessage()
+{
+        wxString msg = 
+_("This chart cannot be loaded due to any of the following reasons:\n\n\
+- You have made important hardware changes on your computer.\n\
+- Your OS system has been updated and your license has been suspended.\n\
+- This chart set was encrypted for another system.\n\
+- This chart set was encrypted for a USB key dongle, but dongle is not detected.\n\
+- There are corrupted files due to errors during download or unzip.\n\n\
+Please contact info@o-charts.org if the problem persists.\n");
+
+    OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
+}
+
  
 bool validateUserKey( wxString sencFileName)
 {
@@ -2503,6 +2517,10 @@ bool validateUserKey( wxString sencFileName)
 
             wxLogMessage(_T("validateUserKey E2.6"));
 
+            ShowGenericErrorMessage();
+            return false;
+#if 0            
+
             //  No other choice here but to ask the user to enter a new key
             wxString key = GetUserKey( LEGEND_SECOND, true );
             
@@ -2527,13 +2545,14 @@ bool validateUserKey( wxString sencFileName)
                     GetUserKey( LEGEND_FOURTH, true );                  // Inform the user
                 g_UserKey = key;
             }
+#endif
         }
     }
     else{
         wxLogMessage(_T("validateUserKey E4"));
         
-        if(!b_Set)
-            GetUserKey( LEGEND_FOURTH, true );                  // Inform the user
+//         if(!b_Set)
+//             GetUserKey( LEGEND_FOURTH, true );                  // Inform the user
     }
     return true;
 }
