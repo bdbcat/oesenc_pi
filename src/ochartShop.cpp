@@ -2098,6 +2098,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         snprintf(sName, 19, "sgl%08X", g_dongleSN);
 
         g_dongleName = wxString(sName);
+        g_systemName = g_dongleName;
     }
     
     //  Do we need an initial login to get the persistent key?
