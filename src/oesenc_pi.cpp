@@ -843,10 +843,10 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 bool bNewVal = root[_T("OpenCPN S52PLIB ShowLights")].AsBool();
                 if(bNewVal != !ps52plib->GetLightsOff()){
                     ps52plib->SetLightsOff( !bNewVal );
-                    if(!bNewVal)                     // On, going off
-                        ps52plib->AddObjNoshow("LIGHTS");
-                    else                                   // Off, going on
-                        ps52plib->RemoveObjNoshow("LIGHTS");
+//                     if(!bNewVal)                     // On, going off
+//                         ps52plib->AddObjNoshow("LIGHTS");
+//                     else                                   // Off, going on
+//                         ps52plib->RemoveObjNoshow("LIGHTS");
                     }
             }
             

@@ -10355,6 +10355,10 @@ bool s52plib::ObjectRenderCheckCat( ObjRazRules *rzRules, ViewPort *vp )
 //  Soundings override
     if( !strncmp( rzRules->LUP->OBCL, "SOUNDG", 6 ) )
         b_catfilter = m_bShowSoundg;
+
+//  Lights override
+    if( !strncmp( rzRules->LUP->OBCL, "LIGHTS", 6 ) )
+        b_catfilter = !m_lightsOff;
     
     if( b_catfilter ) {
         b_visible = true;
