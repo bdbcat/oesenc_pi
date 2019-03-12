@@ -80,6 +80,8 @@ public:
     bool isChartsetAssignedToMe(wxString systemName);
     bool isChartsetExpired();
     bool isChartsetDontShow();
+    bool isChartsetShow();
+    bool isChartsetAssignedToDongle();
     
 public:    
     wxString getOrderRef() { return orderRef;}
@@ -256,7 +258,6 @@ public:
     oeSencChartPanel *GetSelectedChart(){ return m_ChartSelected; }
     
     void OnButtonUpdate( wxCommandEvent& event );
-    void OnButtonAssign( wxCommandEvent& event );
     void OnButtonDownload( wxCommandEvent& event );
     void OnButtonCancelOp( wxCommandEvent& event );
     void OnButtonInstall( wxCommandEvent& event );
