@@ -218,6 +218,8 @@ wxString                        g_systemName;
 wxString                        g_loginUser;
 wxString                        g_loginKey;
 
+bool                            g_GenericMessageShown;
+
 bool shutdown_SENC_server( void );
 bool ShowAlwaysEULAs();
 extern OE_ChartSymbols          *g_oeChartSymbols;
@@ -562,7 +564,8 @@ oesenc_pi::oesenc_pi(void *ppimgr)
       wxString vs;
       vs.Printf(_T("%d.%d.%d"), PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_PATCH);
       g_versionString = vs;
-    
+      g_GenericMessageShown =false;
+      
       // Create the PlugIn icons
       m_pplugin_icon = new wxBitmap(default_pi);
 
@@ -2413,16 +2416,21 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
  
 void ShowGenericErrorMessage()
 {
-        wxString msg = 
+    if(g_GenericMessageShown)
+        return;
+        
+    wxString msg = 
 _("This chart cannot be loaded due to any of the following reasons:\n\n\
 - You have made important hardware changes on your computer.\n\
-- Your OS system has been updated and your license has been suspended.\n\
+- Your OS has been updated and your license has been suspended.\n\
 - This chart set was encrypted for another system.\n\
 - This chart set was encrypted for a USB key dongle, but dongle is not detected.\n\
 - There are corrupted files due to errors during download or unzip.\n\n\
 Please contact info@o-charts.org if the problem persists.\n");
 
     OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
+    
+    g_GenericMessageShown = true;
 }
 
  

@@ -260,11 +260,13 @@ bool itemChart::isChartsetAssignedToMe(wxString systemName){
 
 bool itemChart::isChartsetFullyAssigned() {
     
-    bool bFull = false;
-    if (!statusID0.IsSameAs("unassigned") && !statusID1.IsSameAs("unassigned")) {
-        bFull = true;
-    }
-    return bFull;
+    if (statusID0.IsSameAs("unassigned") || !statusID0.Len())
+        return false;
+    
+    if (statusID1.IsSameAs("unassigned") || !statusID1.Len())
+        return false;
+    
+    return true;
 }
 
 bool itemChart::isChartsetExpired() {
@@ -274,6 +276,20 @@ bool itemChart::isChartsetExpired() {
         bExp = true;
     }
     return bExp;
+}
+
+bool itemChart::isChartsetAssignedToDongle() {
+    
+    long tl;
+    if (sysID0.StartsWith("sgl")){
+        if(sysID0.ToLong(&tl, 16))
+            return true;
+    }
+    if (sysID1.StartsWith("sgl")){
+        if(sysID1.ToLong(&tl, 16))
+            return true;
+    }
+    return false;
 }
 
 bool itemChart::isChartsetDontShow()
@@ -288,6 +304,20 @@ bool itemChart::isChartsetDontShow()
         return false;
 }
     
+bool itemChart::isChartsetShow()
+{
+    if(isChartsetAssignedToMe(g_systemName))
+        return true;
+    
+    if(!isChartsetFullyAssigned())
+        return true;
+
+    if(isChartsetAssignedToDongle())
+        return true;
+
+    return false;
+}
+
     
 //  Current status can be one of:
 /*
@@ -310,14 +340,19 @@ int itemChart::getChartStatus()
     }
     
     if(!isChartsetAssignedToMe( g_systemName )){
-        m_status = STAT_PURCHASED;
-        return m_status;
+        if(!g_dongleName.Len()){
+            m_status = STAT_PURCHASED;
+            return m_status;
+        }
     }
     
     // We know that chart is assigned to me, so one of the sysIDx fields will match
     wxString cStat = statusID0;
-    if(sysID1.IsSameAs(g_systemName))
+    int slot = 0;
+    if(sysID1.IsSameAs(g_systemName) || sysID1.IsSameAs(g_dongleName)){
         cStat = statusID1;
+        slot = 1;
+    }
         
     if(cStat.IsSameAs(_T("requestable"))){
         m_status = STAT_REQUESTABLE;
@@ -332,7 +367,7 @@ int itemChart::getChartStatus()
     if(cStat.IsSameAs(_T("download"))){
         m_status = STAT_READY_DOWNLOAD;
         
-        if(sysID0.IsSameAs(g_systemName)){
+        if(slot == 0){
             if(  (installLocation0.Length() > 0) && (installedFileDownloadPath0.Length() > 0) ){
                 m_status = STAT_CURRENT;
                 if(!installedEdition0.IsSameAs(currentChartEdition)){
@@ -340,7 +375,7 @@ int itemChart::getChartStatus()
                 }
             }
         }
-        else if(sysID1.IsSameAs(g_systemName)){
+        else if(slot == 1){
             if(  (installLocation1.Length() > 0) && (installedFileDownloadPath1.Length() > 0) ){
                 m_status = STAT_CURRENT;
                 if(!installedEdition1.IsSameAs(currentChartEdition)){
@@ -954,7 +989,7 @@ int getChartList( bool bShowErrorDialogs = true){
 </chart>
 #endif
 
-int doAssign(itemChart *chart, int slot)
+int doAssign(itemChart *chart, int slot, wxString systemName)
 {
     wxString msg = _("This action will PERMANENTLY assign the chart:");
     msg += _T("\n        ");
@@ -962,7 +997,11 @@ int doAssign(itemChart *chart, int slot)
     msg += _T("\n\n");
     msg += _("to this systemName:");
     msg += _T("\n        ");
-    msg += g_systemName;
+    msg += systemName;
+    if(systemName.StartsWith("sgl")){
+        msg += _T(" (") + _("USB Key Dongle") + _T(")");
+    }
+    
     msg += _T("\n\n");
     msg += _("Proceed?");
     
@@ -986,7 +1025,7 @@ int doAssign(itemChart *chart, int slot)
     loginParms += _T("taskId=assign");
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
-    loginParms += _T("&systemName=") + g_systemName;
+    loginParms += _T("&systemName=") + systemName;
     loginParms += _T("&chartid=") + chart->chartID;
     loginParms += _T("&order=") + chart->orderRef;
     loginParms += _T("&quantityId=") + chart->quantityId;
@@ -1028,7 +1067,7 @@ int doUploadXFPR()
     
     // is this a dongle upload?
     bool bDongle = false;
-    if(g_systemName.Index(_T("Dongle")) != wxNOT_FOUND){
+    if(g_systemName.Index(_T("Dongle")) >= 0){
         bDongle = true;
     }
     wxString fpr_file = getFPR( false, b_copyOK, bDongle);              // No copy needed
@@ -2092,13 +2131,13 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     loadShopConfig();
     
     // Check the dongle
+    g_dongleName.Clear();
     if(IsDongleAvailable()){
         g_dongleSN = GetDongleSN();
         char sName[20];
         snprintf(sName, 19, "sgl%08X", g_dongleSN);
 
         g_dongleName = wxString(sName);
-        g_systemName = g_dongleName;
     }
     
     //  Do we need an initial login to get the persistent key?
@@ -2156,7 +2195,14 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     }
     g_chartListUpdatedOK = true;
     
-    if(!g_systemName.Len()){
+    bool bNeedSystemName = false;
+    
+    // User reset system name, and removed dongle
+    if(!g_systemName.Len() && !g_dongleName.Len())
+        bNeedSystemName = true;
+    
+    
+    if(bNeedSystemName ){
         bool sname_ok = false;
         int itry = 0;
         while(!sname_ok && itry < 4){
@@ -2289,6 +2335,16 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
 
 void shopPanel::OnButtonInstall( wxCommandEvent& event )
 {
+        // Check the dongle
+    g_dongleName.Clear();
+    if(IsDongleAvailable()){
+        g_dongleSN = GetDongleSN();
+        char sName[20];
+        snprintf(sName, 19, "sgl%08X", g_dongleSN);
+
+        g_dongleName = wxString(sName);
+    }
+
     m_buttonInstall->Disable();
     m_buttonCancelOp->Show();
     
@@ -2299,11 +2355,11 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     // Is chart already in "download" state for me?
     int dlSlot = -1;
     if(chart->statusID0.IsSameAs(_T("download"))){
-        if(chart->sysID0.IsSameAs(g_systemName))
+        if(chart->sysID0.IsSameAs(g_systemName) || chart->sysID0.IsSameAs(g_dongleName))
             dlSlot = 0;
     }
     if(chart->statusID1.IsSameAs(_T("download"))){
-        if(chart->sysID1.IsSameAs(g_systemName))
+        if(chart->sysID1.IsSameAs(g_systemName) || chart->sysID1.IsSameAs(g_dongleName))
             dlSlot = 1;
     }
     
@@ -2326,14 +2382,16 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     int slot = -1;
     bool bNeedAssign = false;
     
-            //  Check if I am already assigned to this chart
+    
+    
+    //  Check if I am already assigned to this chart
     if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if(chart->sysID0.IsSameAs(g_systemName))
-                slot = 0;
+        if( chart->sysID0.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID0.IsSameAs(g_dongleName)))
+            slot = 0;
     }
     if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if(chart->sysID1.IsSameAs(g_systemName))
-                slot = 1;
+        if( chart->sysID1.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID1.IsSameAs(g_dongleName)))
+            slot = 1;
     }
         
     if(slot < 0){                       // need assigment
@@ -2350,7 +2408,11 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         
     int assignResult;
     if(bNeedAssign){
-        assignResult = doAssign(chart, slot);
+        if(g_dongleName.Len())
+            assignResult = doAssign(chart, slot, g_dongleName);
+        else
+            assignResult = doAssign(chart, slot, g_systemName);
+            
         if(assignResult != 0){
             m_buttonInstall->Enable();
             return;
@@ -2393,46 +2455,6 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
 
     return;
     
-}
-
-
-void shopPanel::OnButtonAssign( wxCommandEvent& event )
-{
-    // Is this systemName known to the server?
-    //   If not, need to upload XFPR first
-    if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
-        if( doUploadXFPR() != 0)
-            return;
-    }
-        
-    itemChart *chart = m_ChartSelected->m_pChart;
-    if(chart){
-        // Choose the first available slot
-        int slot = -1;
-        
-        if(chart->statusID0.IsSameAs(_T("unassigned"))){
-            slot = 0;
-        }
-        else if(chart->statusID1.IsSameAs(_T("unassigned"))){
-            slot = 1;
-        }
-        
-        //  Check if I am already assigned to this chart
-        if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if(chart->sysID0.IsSameAs(g_systemName))
-                slot = -1;
-        }
-        if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if(chart->sysID1.IsSameAs(g_systemName))
-                slot = -1;
-        }
-        
-        if(slot >= 0){
-            int assignResult = doAssign(chart, slot);
-        }
-        
-        UpdateActionControls();
-    }
 }
 
 
@@ -2700,7 +2722,7 @@ void shopPanel::UpdateChartList( )
     
     // Add new panels
     for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
-        if(!g_chartListUpdatedOK || !g_ChartArray.Item(i)->isChartsetDontShow()){
+        if(g_chartListUpdatedOK && g_ChartArray.Item(i)->isChartsetShow()){
             oeSencChartPanel *chartPanel = new oeSencChartPanel( m_scrollWinChartList, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
             chartPanel->SetSelected(false);
         
@@ -2801,7 +2823,7 @@ bool shopPanel::doSystemNameWizard(  )
         wxString sName = dlg.getRBSelection();
         if(g_systemNameChoiceArray.Index(sName) == wxNOT_FOUND){
             // Is it the dongle selected?
-            if(sName.Index(_T("Dongle")) != wxNOT_FOUND){
+            if(sName.Index(_T("Dongle")) >= 0){
                 wxString ssName = sName.Mid(0, 11);
                 g_systemNameChoiceArray.Insert(ssName, 0);
                 sName = ssName;
