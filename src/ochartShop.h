@@ -82,13 +82,15 @@ public:
     bool isChartsetDontShow();
     bool isChartsetShow();
     bool isChartsetAssignedToDongle();
-    
+    bool isSlotAssignedToDongle( int slot );
+
 public:    
     wxString getOrderRef() { return orderRef;}
     bool isEnabled(){ return m_bEnabled; }
     wxString getStatusString();
     int getChartStatus();
     wxBitmap& GetChartThumbnail(int size);
+    wxString getKeytypeString();
     
     //wxString ident;
     

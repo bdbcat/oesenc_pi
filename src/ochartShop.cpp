@@ -280,17 +280,30 @@ bool itemChart::isChartsetExpired() {
 
 bool itemChart::isChartsetAssignedToDongle() {
     
-    long tl;
-    if (sysID0.StartsWith("sgl")){
-        if(sysID0.Mid(4).ToLong(&tl, 16))
-            return true;
-    }
-    if (sysID1.StartsWith("sgl")){
-        if(sysID1.Mid(4).ToLong(&tl, 16))
-            return true;
-    }
+    if(isSlotAssignedToDongle(0))
+        return true;
+    if(isSlotAssignedToDongle(1))
+        return true;
     return false;
 }
+
+bool itemChart::isSlotAssignedToDongle( int slot ) {
+    long tl;
+    if( slot == 0 ){
+        if (sysID0.StartsWith("sgl")){
+            if(sysID0.Mid(4).ToLong(&tl, 16))
+                return true;
+        }
+    }
+    else{
+        if (sysID1.StartsWith("sgl")){
+            if(sysID1.Mid(4).ToLong(&tl, 16))
+                return true;
+        }
+    }
+    return false;
+}   
+    
 
 bool itemChart::isChartsetDontShow()
 {
@@ -357,9 +370,18 @@ int itemChart::getChartStatus()
     // We know that chart is assigned to me, so one of the sysIDx fields will match
     wxString cStat = statusID0;
     int slot = 0;
-    if(sysID1.IsSameAs(g_systemName) || sysID1.IsSameAs(g_dongleName)){
-        cStat = statusID1;
-        slot = 1;
+    if(isChartsetAssignedToDongle()){
+        if(isSlotAssignedToDongle( 1 )){
+            cStat = statusID1;
+            slot = 1;
+        }
+    }
+    
+    else{
+        if(sysID1.IsSameAs(g_systemName)){
+            cStat = statusID1;
+            slot = 1;
+        }
     }
         
     if(cStat.IsSameAs(_T("requestable"))){
@@ -449,6 +471,16 @@ wxString itemChart::getStatusString()
     return sret;
     
 
+}
+
+wxString itemChart::getKeytypeString(){
+ 
+    if(isChartsetAssignedToDongle())
+        return _("USB Dongle Key");
+    else if(isChartsetAssignedToMe(g_systemName))
+        return _("System Key");
+    else
+        return _T("");
 }
 
 wxBitmap& itemChart::GetChartThumbnail(int size)
@@ -1726,6 +1758,14 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
 
+        tx = m_pChart->getKeytypeString();
+        if(tx.Len()){
+            tx = _("Key type:");
+            dc.DrawText( tx, text_x, yPos);
+            tx = m_pChart->getKeytypeString();
+            dc.DrawText( tx, text_x_val, yPos);
+            yPos += yPitch;
+        }
 
 
 #if 0        
@@ -2377,13 +2417,23 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
 
     // Is chart already in "download" state for me?
     int dlSlot = -1;
-    if(chart->statusID0.IsSameAs(_T("download"))){
-        if(chart->sysID0.IsSameAs(g_systemName) || chart->sysID0.IsSameAs(g_dongleName))
+    if(chart->isChartsetAssignedToDongle()){
+        if(chart->isSlotAssignedToDongle( 0 ))
             dlSlot = 0;
-    }
-    if(chart->statusID1.IsSameAs(_T("download"))){
-        if(chart->sysID1.IsSameAs(g_systemName) || chart->sysID1.IsSameAs(g_dongleName))
+
+        else if(chart->isSlotAssignedToDongle( 1 ))
             dlSlot = 1;
+    }
+    
+    else{
+        if(chart->statusID0.IsSameAs(_T("download"))){
+            if(chart->sysID0.IsSameAs(g_systemName))
+                dlSlot = 0;
+        }
+        if(chart->statusID1.IsSameAs(_T("download"))){
+            if(chart->sysID1.IsSameAs(g_systemName))
+                dlSlot = 1;
+        }
     }
     
     if(dlSlot >= 0){
