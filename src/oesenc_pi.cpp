@@ -88,6 +88,10 @@
 #include <Shlobj.h>
 #endif
 
+#include <string>
+#include <map>
+#include <unordered_map>
+
 #ifdef __OCPN__ANDROID__
 #include <QtAndroidExtras/QAndroidJniObject>
 #include "qdebug.h"
@@ -177,6 +181,8 @@ int                             g_admin;
 wxString g_versionString;
 
 std::map<std::string, ChartInfoItem *> info_hash;
+
+std::unordered_map<std::string, int> chartFailCount;
 
 bool                            g_GLOptionsSet;
 
