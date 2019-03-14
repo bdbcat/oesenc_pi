@@ -282,11 +282,11 @@ bool itemChart::isChartsetAssignedToDongle() {
     
     long tl;
     if (sysID0.StartsWith("sgl")){
-        if(sysID0.ToLong(&tl, 16))
+        if(sysID0.Mid(4).ToLong(&tl, 16))
             return true;
     }
     if (sysID1.StartsWith("sgl")){
-        if(sysID1.ToLong(&tl, 16))
+        if(sysID1.Mid(4).ToLong(&tl, 16))
             return true;
     }
     return false;
@@ -341,8 +341,16 @@ int itemChart::getChartStatus()
     
     if(!isChartsetAssignedToMe( g_systemName )){
         if(!g_dongleName.Len()){
-            m_status = STAT_PURCHASED;
-            return m_status;
+            if(!isChartsetAssignedToDongle()){
+                m_status = STAT_PURCHASED;
+                return m_status;
+            }
+        }
+        else{
+            if(!isChartsetAssignedToDongle()){
+                m_status = STAT_PURCHASED;
+                return m_status;
+            }
         }
     }
     
@@ -1067,7 +1075,7 @@ int doUploadXFPR()
     
     // is this a dongle upload?
     bool bDongle = false;
-    if(g_systemName.Index(_T("Dongle")) >= 0){
+    if(g_systemName.Index(_T("Dongle")) != wxNOT_FOUND){
         bDongle = true;
     }
     wxString fpr_file = getFPR( false, b_copyOK, bDongle);              // No copy needed
@@ -2138,7 +2146,22 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         snprintf(sName, 19, "sgl%08X", g_dongleSN);
 
         g_dongleName = wxString(sName);
+        
+        wxString sn = _("System Name:");
+        sn += _T(" ");
+        sn += g_dongleName + _T(" (") + _("USB Key Dongle") + _T(")");
+        m_staticTextSystemName->SetLabel( sn );
+        m_staticTextSystemName->Refresh();
+ 
     }
+    else{
+        wxString sn = _("System Name:");
+        sn += _T(" ");
+        sn += g_systemName;
+        m_staticTextSystemName->SetLabel( sn );
+        m_staticTextSystemName->Refresh();
+    }
+ 
     
     //  Do we need an initial login to get the persistent key?
     if(g_loginKey.Len() == 0){
@@ -2231,11 +2254,11 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         }
     }
     
-    wxString sn = _("System Name:");
-    sn += _T(" ");
-    sn += g_systemName;
-    m_staticTextSystemName->SetLabel( sn );
-    m_staticTextSystemName->Refresh();
+//     wxString sn = _("System Name:");
+//     sn += _T(" ");
+//     sn += g_systemName;
+//     m_staticTextSystemName->SetLabel( sn );
+//     m_staticTextSystemName->Refresh();
     
     setStatusText( _("Status: Ready"));
     m_ipGauge->Stop();
@@ -2823,7 +2846,7 @@ bool shopPanel::doSystemNameWizard(  )
         wxString sName = dlg.getRBSelection();
         if(g_systemNameChoiceArray.Index(sName) == wxNOT_FOUND){
             // Is it the dongle selected?
-            if(sName.Index(_T("Dongle")) >= 0){
+            if(sName.Index(_T("Dongle")) != wxNOT_FOUND){
                 wxString ssName = sName.Mid(0, 11);
                 g_systemNameChoiceArray.Insert(ssName, 0);
                 sName = ssName;

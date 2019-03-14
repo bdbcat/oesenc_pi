@@ -108,7 +108,7 @@ extern int              g_debugLevel;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
 
-bool g_Disable;
+extern bool             g_GenericMessageShown;
 
 extern s57RegistrarMgr  *pi_poRegistrarMgr;
 
@@ -896,15 +896,15 @@ int eSENCChart::Init( const wxString& name, int init_flags )
 //    if(++nInit < 3)
 //        return PI_INIT_FAIL_NOERROR;
 
+    // Disabled due to missing dongle, or other reason
+    if(g_GenericMessageShown)
+        return PI_INIT_FAIL_REMOVE;
+        
     //  Basic existence check...
     if( !wxFileName::FileExists( name ) )
         return PI_INIT_FAIL_REMOVE;
 
     if(!processChartinfo( name )){
-        return PI_INIT_FAIL_REMOVE;
-    }
-    
-    if(g_Disable){
         return PI_INIT_FAIL_REMOVE;
     }
     
