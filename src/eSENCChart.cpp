@@ -37,6 +37,7 @@
 #include <algorithm>          // for std::sort
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "oesenc_pi.h"
 #include "eSENCChart.h"
@@ -82,6 +83,7 @@
 #endif
 
 extern bool GetDoubleAttr( S57Obj *obj, const char *AttrName, double &val );
+bool IsDongleAvailable();
 
 
 extern wxString         g_sencutil_bin;
@@ -107,8 +109,10 @@ extern int              global_color_scheme;
 extern int              g_debugLevel;
 
 int              s_PI_bInS57;         // Exclusion flag to prvent recursion in this class init call.
+bool                    g_LastFailDongleState;
 
 extern bool             g_GenericMessageShown;
+extern std::unordered_map<std::string, int> chartFailCount;
 
 extern s57RegistrarMgr  *pi_poRegistrarMgr;
 
@@ -559,7 +563,7 @@ eSENCChart::eSENCChart()
     m_last_vp.b_quilt = false;
     m_last_vp.pix_height = m_last_vp.pix_width = 0;
     m_last_vp.m_projection_type = PROJECTION_MERCATOR;
-
+    
 #if 0
       m_depth_unit_id = PI_DEPTH_UNIT_UNKNOWN;
 
@@ -890,16 +894,43 @@ wxString eSENCChart::Build_eHDR( const wxString& name000 )
 
 int nInit;
 
+wxString std2wx(std::string s){
+ wxString wx;
+ const char* my_string=s.c_str();
+ wxMBConvUTF8 *wxconv= new wxMBConvUTF8();
+ wx=wxString(wxconv->cMB2WC(my_string),wxConvUTF8);
+ delete wxconv;
+ // test if conversion works of not. In case it fails convert from Ascii
+ if(wx.length()==0)
+ wx=wxString(wxString::FromAscii(s.c_str()));
+ return wx;
+}
+
+std::string wx2std(wxString s){
+  std::string s2;
+  if(s.wxString::IsAscii()) {
+    s2=s.wxString::ToAscii();
+  } else {
+    const wxWX2MBbuf tmp_buf = wxConvCurrent->cWX2MB(s);
+    const char *tmp_str = (const char*) tmp_buf;
+    s2=std::string(tmp_str, strlen(tmp_str));
+  }
+  return s2;
+}
+
+
 
 int eSENCChart::Init( const wxString& name, int init_flags )
 {
-//    if(++nInit < 3)
-//        return PI_INIT_FAIL_NOERROR;
+    std::string sname = wx2std(name);
+    if(chartFailCount.find(sname) == chartFailCount.end()){
+        chartFailCount[sname] = 0;
+    }
 
-    // Disabled due to missing dongle, or other reason
-    if(g_GenericMessageShown)
+    if(chartFailCount[sname] > 2){
         return PI_INIT_FAIL_REMOVE;
-        
+    }
+            
     //  Basic existence check...
     if( !wxFileName::FileExists( name ) )
         return PI_INIT_FAIL_REMOVE;
@@ -928,7 +959,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
         processUserKeyHint(name);
     
     validate_SENC_server();
-
+       
     if( PI_HEADER_ONLY == init_flags ){
        
         m_SENCFileName = name;
@@ -948,9 +979,13 @@ int eSENCChart::Init( const wxString& name, int init_flags )
     
     // On any error, allow a new reload of UserKey from ChartInfo files
     // presumably coming from another directory.
-    if(ret_val != PI_INIT_OK)
+    if(ret_val != PI_INIT_OK){
         g_bUserKeyHintTaken = false;
-    
+        chartFailCount[sname] ++;
+    }
+    else
+        chartFailCount[sname] = 0;
+
     s_PI_bInS57--;
     return ret_val;
 }

@@ -373,7 +373,7 @@ protected:
       
       wxStringHashMap   m_TXTDSC_map;           // maps file names to content
       int               m_sencReadVersion;
-      
+
 };
 
 class PI_S57ObjX : public PI_S57Obj
