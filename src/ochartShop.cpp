@@ -2369,26 +2369,32 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             else if(m_activeSlot == 1){
                 chart->fileDownloadPath1 = chart->downloadingFile;
             }
-                
+             
             wxString msg = _("Chart download complete.");
             msg +=_T("\n\n");
             msg += _("Proceed to install?");
             msg += _T("\n\n");
-            int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
+            int ret = -1;
             
-            if(ret == wxID_YES){
-                g_statusOverride = _("Installing charts");
+            while(ret != wxID_YES){
+                ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
+            
+                if(ret == wxID_YES){
+                    g_statusOverride = _("Installing charts");
                 
-                int rv = doUnzip(chart, m_activeSlot);
+                    int rv = doUnzip(chart, m_activeSlot);
                 
-                g_statusOverride.Clear();
-                setStatusText( _("Status: Ready"));
+                    g_statusOverride.Clear();
+                    setStatusText( _("Status: Ready"));
                 
-                if(0 == rv)
-                    OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
+                    if(0 == rv)
+                        OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
                 
-                UpdateChartList();
-                
+                    UpdateChartList();
+                }
+                else if(ret == wxID_NO)
+                    break;
+
             }
             
             m_buttonInstall->Enable();
