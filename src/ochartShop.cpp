@@ -812,9 +812,9 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-//         wxString p = wxString(body.c_str(), wxConvUTF8);
-//         wxLogMessage(_T("ProcessResponse results:"));
-//         wxLogMessage(p);
+         wxString p = wxString(body.c_str(), wxConvUTF8);
+         wxLogMessage(_T("ProcessResponse results:"));
+         wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
@@ -1275,9 +1275,23 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     wxString b = uri.GetServer();
     
     wxFileName fn(serverFilename);
+    wxString fileTarget = fn.GetFullName();
     
-    wxString downloadFile = g_PrivateDataDir + fn.GetFullName();
+    wxString downloadFile = g_PrivateDataDir + fileTarget;
     chart->downloadingFile = downloadFile;
+    
+    wxLogMessage(_T("downloadURL0 ") + chart->fileDownloadURL0);
+    wxLogMessage(_T("downloadURL1 ") + chart->fileDownloadURL1);
+    wxLogMessage(_T("downloadURL: ") + downloadURL);
+    wxLogMessage(_T("serverFilename: ") + serverFilename);
+    wxLogMessage(_T("fileTarget: ") + fileTarget);
+    wxLogMessage(_T("downloadFile: ") + downloadFile);
+    
+    if(fileTarget.IsEmpty()){
+        wxLogMessage(_T("fileTarget is empty, download aborted"));
+        return 0;
+    }
+        
     
     downloadOutStream = new wxFFileOutputStream(downloadFile);
     
@@ -2424,11 +2438,17 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     // Is chart already in "download" state for me?
     int dlSlot = -1;
     if(chart->isChartsetAssignedToDongle()){
-        if(chart->isSlotAssignedToDongle( 0 ))
-            dlSlot = 0;
+        if(chart->isSlotAssignedToDongle( 0 )){
+            if(chart->statusID0.IsSameAs(_T("download"))){
+                dlSlot = 0;
+            }
+        }
 
-        else if(chart->isSlotAssignedToDongle( 1 ))
-            dlSlot = 1;
+        else if(chart->isSlotAssignedToDongle( 1 )){
+            if(chart->statusID0.IsSameAs(_T("download"))){
+                dlSlot = 1;
+            }
+        }            
     }
     
     else{
