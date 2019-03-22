@@ -2445,7 +2445,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         }
 
         else if(chart->isSlotAssignedToDongle( 1 )){
-            if(chart->statusID0.IsSameAs(_T("download"))){
+            if(chart->statusID1.IsSameAs(_T("download"))){
                 dlSlot = 1;
             }
         }            
