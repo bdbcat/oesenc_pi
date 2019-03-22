@@ -812,9 +812,9 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-         wxString p = wxString(body.c_str(), wxConvUTF8);
-         wxLogMessage(_T("ProcessResponse results:"));
-         wxLogMessage(p);
+        // wxString p = wxString(body.c_str(), wxConvUTF8);
+        // wxLogMessage(_T("ProcessResponse results:"));
+        // wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
@@ -1280,12 +1280,12 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     wxString downloadFile = g_PrivateDataDir + fileTarget;
     chart->downloadingFile = downloadFile;
     
-    wxLogMessage(_T("downloadURL0 ") + chart->fileDownloadURL0);
-    wxLogMessage(_T("downloadURL1 ") + chart->fileDownloadURL1);
-    wxLogMessage(_T("downloadURL: ") + downloadURL);
-    wxLogMessage(_T("serverFilename: ") + serverFilename);
-    wxLogMessage(_T("fileTarget: ") + fileTarget);
-    wxLogMessage(_T("downloadFile: ") + downloadFile);
+    //wxLogMessage(_T("downloadURL0 ") + chart->fileDownloadURL0);
+    //wxLogMessage(_T("downloadURL1 ") + chart->fileDownloadURL1);
+    //wxLogMessage(_T("downloadURL: ") + downloadURL);
+    //wxLogMessage(_T("serverFilename: ") + serverFilename);
+    //wxLogMessage(_T("fileTarget: ") + fileTarget);
+    //wxLogMessage(_T("downloadFile: ") + downloadFile);
     
     if(fileTarget.IsEmpty()){
         wxLogMessage(_T("fileTarget is empty, download aborted"));
