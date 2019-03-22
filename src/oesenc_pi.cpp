@@ -5102,7 +5102,12 @@ void showChartinfoDialog( void )
             hdr += _T("<td>") + token + _T("</td>");
             
             token = tkx.GetNextToken();         // expiry date
-            hdr += _T("<td><font color=#ff0000>") + token + _T("</font></td>");
+            wxDateTime exdate;
+            exdate.ParseDate(token);
+            wxTimeSpan diff = exdate - wxDateTime::Today();
+            // Expired? Red text
+            hdr += diff > 0 ? _T("<td>") + token + _T("</td>") :
+                              _T("<td><font color=#ff0000>") + token + _T("</font></td>");            
         }
         
         hdr += _T("</tr>");
