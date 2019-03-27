@@ -202,7 +202,7 @@ bool wxCurlHTTPNoZIP::Post(wxInputStream& buffer, const wxString& szRemoteFile /
 
 std::string wxCurlHTTPNoZIP::GetResponseBody() const
 {
-#ifndef ARMHF
+#ifndef OCPN_ARMHF
     wxString s = wxString((const char *)m_szResponseBody, wxConvLibc);
     return std::string(s.mb_str());
     
@@ -663,7 +663,8 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
                 msg1.Printf(_T("{%ld}\n\n"), dresult);
                 msg += msg1;
                 switch(dresult){
-                    case 3:
+                    case 4:
+                    case 5:
                         msg += _("Invalid user/email name or password.");
                         break;
                     default:    
