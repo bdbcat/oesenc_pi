@@ -3954,7 +3954,7 @@ PolyTessGeo *Osenc::BuildPolyTessGeo(_OSENC_AreaGeometry_Record_Payload *record,
         //  Read the triangle primitive bounding box as lat/lon
         double *pbb = (double *)pPayloadRun;
         
-        #ifdef ARMHF
+        #ifdef OCPN_ARMHF
         double abox[4];
         memcpy(&abox[0], pbb, 4 * sizeof(double));
         tp->minxt = abox[0];

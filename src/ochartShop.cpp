@@ -202,7 +202,7 @@ bool wxCurlHTTPNoZIP::Post(wxInputStream& buffer, const wxString& szRemoteFile /
 
 std::string wxCurlHTTPNoZIP::GetResponseBody() const
 {
-#ifndef ARMHF
+#ifndef OCPN_ARMHF
     wxString s = wxString((const char *)m_szResponseBody, wxConvLibc);
     return std::string(s.mb_str());
     
