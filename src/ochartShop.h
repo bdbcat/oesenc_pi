@@ -81,8 +81,9 @@ public:
     bool isChartsetExpired();
     bool isChartsetDontShow();
     bool isChartsetShow();
-    bool isChartsetAssignedToDongle();
-    bool isSlotAssignedToDongle( int slot );
+    bool isChartsetAssignedToAnyDongle();
+    bool isSlotAssignedToAnyDongle( int slot );
+    bool isSlotAssignedToMyDongle( int slot );
 
 public:    
     wxString getOrderRef() { return orderRef;}

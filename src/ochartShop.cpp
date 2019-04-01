@@ -278,16 +278,16 @@ bool itemChart::isChartsetExpired() {
     return bExp;
 }
 
-bool itemChart::isChartsetAssignedToDongle() {
+bool itemChart::isChartsetAssignedToAnyDongle() {
     
-    if(isSlotAssignedToDongle(0))
+    if(isSlotAssignedToAnyDongle(0))
         return true;
-    if(isSlotAssignedToDongle(1))
+    if(isSlotAssignedToAnyDongle(1))
         return true;
     return false;
 }
 
-bool itemChart::isSlotAssignedToDongle( int slot ) {
+bool itemChart::isSlotAssignedToAnyDongle( int slot ) {
     long tl;
     if( slot == 0 ){
         if (sysID0.StartsWith("sgl")){
@@ -299,6 +299,27 @@ bool itemChart::isSlotAssignedToDongle( int slot ) {
         if (sysID1.StartsWith("sgl")){
             if(sysID1.Mid(4).ToLong(&tl, 16))
                 return true;
+        }
+    }
+    return false;
+}   
+    
+bool itemChart::isSlotAssignedToMyDongle( int slot ) {
+    long tl;
+    if( slot == 0 ){
+        if (sysID0.StartsWith("sgl")){
+            if(sysID0.Mid(4).ToLong(&tl, 16)){
+                if(tl == g_dongleSN)
+                    return true;
+            }
+        }
+    }
+    else{
+        if (sysID1.StartsWith("sgl")){
+            if(sysID1.Mid(4).ToLong(&tl, 16)){
+                if(tl == g_dongleSN)
+                    return true;
+            }
         }
     }
     return false;
@@ -325,7 +346,7 @@ bool itemChart::isChartsetShow()
     if(!isChartsetFullyAssigned())
         return true;
 
-    if(isChartsetAssignedToDongle())
+    if(isChartsetAssignedToAnyDongle())
         return true;
 
     return false;
@@ -354,13 +375,13 @@ int itemChart::getChartStatus()
     
     if(!isChartsetAssignedToMe( g_systemName )){
         if(!g_dongleName.Len()){
-            if(!isChartsetAssignedToDongle()){
+            if(!isChartsetAssignedToAnyDongle()){
                 m_status = STAT_PURCHASED;
                 return m_status;
             }
         }
         else{
-            if(!isChartsetAssignedToDongle()){
+            if(!isChartsetAssignedToAnyDongle()){
                 m_status = STAT_PURCHASED;
                 return m_status;
             }
@@ -370,8 +391,8 @@ int itemChart::getChartStatus()
     // We know that chart is assigned to me, so one of the sysIDx fields will match
     wxString cStat = statusID0;
     int slot = 0;
-    if(isChartsetAssignedToDongle()){
-        if(isSlotAssignedToDongle( 1 )){
+    if(isChartsetAssignedToAnyDongle()){
+        if(isSlotAssignedToMyDongle( 1 )){
             cStat = statusID1;
             slot = 1;
         }
@@ -475,7 +496,7 @@ wxString itemChart::getStatusString()
 
 wxString itemChart::getKeytypeString(){
  
-    if(isChartsetAssignedToDongle())
+    if(isChartsetAssignedToAnyDongle())
         return _("USB Dongle Key");
     else if(isChartsetAssignedToMe(g_systemName))
         return _("System Key");
@@ -1099,18 +1120,13 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
 
 extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
 
-int doUploadXFPR()
+int doUploadXFPR(bool bDongle)
 {
     wxString err;
     
     // Generate the FPR file
     bool b_copyOK = false;
     
-    // is this a dongle upload?
-    bool bDongle = false;
-    if(g_systemName.Index(_T("Dongle")) != wxNOT_FOUND){
-        bDongle = true;
-    }
     wxString fpr_file = getFPR( false, b_copyOK, bDongle);              // No copy needed
     
     fpr_file = fpr_file.Trim(false);            // Trim leading spaces...
@@ -2438,14 +2454,14 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
 
     // Is chart already in "download" state for me?
     int dlSlot = -1;
-    if(chart->isChartsetAssignedToDongle()){
-        if(chart->isSlotAssignedToDongle( 0 )){
+    if(chart->isChartsetAssignedToAnyDongle()){
+        if(chart->isSlotAssignedToMyDongle( 0 )){
             if(chart->statusID0.IsSameAs(_T("download"))){
                 dlSlot = 0;
             }
         }
 
-        else if(chart->isSlotAssignedToDongle( 1 )){
+        else if(chart->isSlotAssignedToMyDongle( 1 )){
             if(chart->statusID1.IsSameAs(_T("download"))){
                 dlSlot = 1;
             }
@@ -2475,8 +2491,17 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     // Is this systemName known to the server?
     //   If not, need to upload XFPR first
     if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
-        if( doUploadXFPR() != 0)
-            return;
+        // Dongle active?
+        if(g_dongleName.Len()){
+            if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
+                if( doUploadXFPR( true ) != 0)
+                    return;
+            }
+        }
+        else{
+            if( doUploadXFPR( false ) != 0)
+                return;
+        }
     }
 
     int slot = -1;
@@ -2489,7 +2514,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         if( chart->sysID0.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID0.IsSameAs(g_dongleName)))
             slot = 0;
     }
-    if(chart->statusID1.IsSameAs(_T("requestable"))){
+    else if(chart->statusID1.IsSameAs(_T("requestable"))){
         if( chart->sysID1.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID1.IsSameAs(g_dongleName)))
             slot = 1;
     }

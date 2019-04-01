@@ -3163,7 +3163,7 @@ bool validate_SENC_server(void)
     // Check to see if the server function is available
     if(g_serverProc){
         bool bAvail = false;
-        int nLoop = 10;
+        int nLoop = 3;
         
         while(nLoop){
             Osenc_instream testAvail_One;
@@ -3185,7 +3185,7 @@ bool validate_SENC_server(void)
             //            OCPNMessageBox_PlugIn(NULL, msg, _("oesenc_pi Message"),  wxOK, -1, -1);
             wxLogMessage(_T("oesenc_pi: ") + msg);
             
-            g_sencutil_bin.Clear();
+            ///_sencutil_bin.Clear();
             return false;
             
         }
@@ -3748,15 +3748,25 @@ bool IsDongleAvailable()
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -s ");                  // Available?
 
-    wxArrayString ret_array;      
-    wxExecute(cmd, ret_array, ret_array );
+    wxArrayString ret_array, err_array;      
+    wxExecute(cmd, ret_array, err_array );
             
     for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
         wxString line = ret_array[i];
-        wxLogMessage(line);
         if(line.IsSameAs(_T("1")))
             return true;
+        if(line.IsSameAs(_T("0")))
+            return false;
     }
+
+    // Show error in log
+    wxLogMessage(_T("oeserverd execution error:"));
+    for(unsigned int i=0 ; i < err_array.GetCount() ; i++){
+        wxString line = err_array[i];
+        wxLogMessage(line);
+    }
+
+    g_sencutil_bin.Clear();
     
     return false;
 }
