@@ -66,6 +66,7 @@ extern wxString g_systemName;
 extern wxString g_loginKey;
 extern wxString g_loginUser;
 extern wxString g_PrivateDataDir;
+extern wxString g_debugShop;
 
 shopPanel *g_shopPanel;
 OESENC_CURL_EvtHandler *g_CurlEventHandler;
@@ -588,7 +589,8 @@ void loadShopConfig()
         pConf->Read( _T("lastInstllDir"), &g_lastInstallDir);
         
         pConf->Read( _T("ADMIN"), &g_admin);
-                
+        pConf->Read( _T("DEBUG_SHOP"), &g_debugShop);
+        
         pConf->SetPath ( _T ( "/PlugIns/oesenc/charts" ) );
         wxString strk;
         wxString kval;
@@ -746,6 +748,8 @@ int doLogin()
     loginParms += _T("taskId=login");
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&password=") + pass;
+    if(g_debugShop.Len())
+        loginParms += _T("&debug=") + g_debugShop;
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
@@ -1004,6 +1008,9 @@ int getChartList( bool bShowErrorDialogs = true){
     loginParms += _T("taskId=getlist");
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
+    if(g_debugShop.Len())
+        loginParms += _T("&debug=") + g_debugShop;
+
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
@@ -1087,6 +1094,9 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     loginParms += _T("taskId=assign");
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
+    if(g_debugShop.Len())
+        loginParms += _T("&debug=") + g_debugShop;
+
     loginParms += _T("&systemName=") + systemName;
     loginParms += _T("&chartid=") + chart->chartID;
     loginParms += _T("&order=") + chart->orderRef;
@@ -1162,6 +1172,8 @@ int doUploadXFPR(bool bDongle)
             loginParms += _T("taskId=xfpr");
             loginParms += _T("&username=") + g_loginUser;
             loginParms += _T("&key=") + g_loginKey;
+            if(g_debugShop.Len())
+                loginParms += _T("&debug=") + g_debugShop;
 
             if(!bDongle)
                 loginParms += _T("&systemName=") + g_systemName;
@@ -1245,6 +1257,9 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     loginParms += _T("taskId=request");
     loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
+    if(g_debugShop.Len())
+        loginParms += _T("&debug=") + g_debugShop;
+
     loginParms += _T("&assignedSystemName=") + aSysName;
     loginParms += _T("&chartid=") + chart->chartID;
     loginParms += _T("&order=") + chart->orderRef;
