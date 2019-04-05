@@ -2529,7 +2529,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         if( chart->sysID0.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID0.IsSameAs(g_dongleName)))
             slot = 0;
     }
-    else if(chart->statusID1.IsSameAs(_T("requestable"))){
+    if(chart->statusID1.IsSameAs(_T("requestable"))){
         if( chart->sysID1.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID1.IsSameAs(g_dongleName)))
             slot = 1;
     }
