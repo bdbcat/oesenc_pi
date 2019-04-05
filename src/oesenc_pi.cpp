@@ -178,6 +178,7 @@ wxArrayString                   g_EULAShaArray;
 wxString                        g_PrivateDataDir;
 
 int                             g_admin;
+wxString                        g_debugShop;
 wxString g_versionString;
 
 std::map<std::string, ChartInfoItem *> info_hash;
@@ -1351,6 +1352,7 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
         pConf->Read( _T("ADMIN"), &g_admin);
+        pConf->Read( _T("DEBUG_SHOP"), &g_debugShop);
         
         if( !wxFileExists(g_fpr_file) )
             g_fpr_file = wxEmptyString;
