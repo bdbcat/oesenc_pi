@@ -70,11 +70,6 @@ IF (NOT WIN32)
   # default
   SET (ARCH "i386")
   IF (UNIX AND NOT APPLE)
-    IF (PREFIX)
-        SET(CMAKE_INSTALL_PREFIX ${PREFIX})
-    ELSE (PREFIX )
-        SET(CMAKE_INSTALL_PREFIX "/usr")
-    ENDIF (PREFIX)
 
     MESSAGE (STATUS "*** Will install to ${CMAKE_INSTALL_PREFIX}  ***")
 
