@@ -232,6 +232,8 @@ SET(SRC_OESENC
             src/oesenc_pi.cpp
             src/eSENCChart.cpp
             src/eSENCChart.h
+            src/InstallDirs.cpp
+            src/InstallDirs.h
             src/Osenc.cpp
             src/Osenc.h
             src/mygeom.h

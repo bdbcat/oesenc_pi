@@ -52,6 +52,7 @@
 #include "s52utils.h"
 #include "Osenc.h"
 #include "chartsymbols.h"
+#include "InstallDirs.h"
 #include "json_defs.h"
 #include "jsonwriter.h"
 #include "jsonreader.h"

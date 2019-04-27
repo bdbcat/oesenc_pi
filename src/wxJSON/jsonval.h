@@ -27,7 +27,7 @@
     #include <wx/arrstr.h>
 #endif
 
-
+#include "InstallDirs.h"
 #include "json_defs.h"
 
 // forward declarations
