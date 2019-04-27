@@ -518,3 +518,10 @@ INCLUDE("cmake/PluginLocalization.cmake")
 INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
+
+set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+message(STATUS "Build target: ${PKG_TARGET}-${PKG_TARGET_VERSION}")
+configure_file(
+  ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml
+)
