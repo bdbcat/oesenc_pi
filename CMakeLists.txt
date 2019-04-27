@@ -25,6 +25,12 @@ SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "2")
 SET(VERSION_PATCH "0")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+
+SET(PKG_RELEASE "1")
+SET(PKG_API_VERSION "1.15")
+SET(PKG_AUTHOR "David S Register")
+SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
+
 SET(OCPN_MIN_VERSION "ov50")
 OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
  
@@ -510,4 +516,5 @@ SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")
 
 INCLUDE("cmake/PluginLocalization.cmake")
 INCLUDE("cmake/PluginInstall.cmake")
+INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
