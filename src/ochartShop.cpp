@@ -497,10 +497,17 @@ wxString itemChart::getStatusString()
 
 wxString itemChart::getKeytypeString(){
  
-    if(isChartsetAssignedToAnyDongle())
-        return _("USB Dongle Key");
+    if(isChartsetAssignedToAnyDongle()){
+        if(isSlotAssignedToAnyDongle( 0 ))
+            return _("USB Dongle Key") + _T("  [ ") + sysID0 +_T(" ]");
+        if(isSlotAssignedToAnyDongle( 1 ))
+            return _("USB Dongle Key") + _T("  [ ") + sysID1 +_T(" ]");
+        else
+         return _T("");
+    }
+        
     else if(isChartsetAssignedToMe(g_systemName))
-        return _("System Key");
+        return _("System Key") + _T("  [ ") + g_systemName +_T(" ]");
     else
         return _T("");
 }
@@ -2505,17 +2512,24 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     
     // Is this systemName known to the server?
     //   If not, need to upload XFPR first
-    if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
-        // Dongle active?
-        if(g_dongleName.Len()){
-            if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
-                if( doUploadXFPR( true ) != 0)
-                    return;
+    
+    // Prefer to use the dongle, if present
+    if(g_dongleName.Len()){
+        if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
+            if( doUploadXFPR( true ) != 0){
+                g_statusOverride.Clear();
+                setStatusText( _("Status: Dongle FRP upload error"));
+                return;
             }
         }
-        else{
-            if( doUploadXFPR( false ) != 0)
+    }
+    else{
+        if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
+            if( doUploadXFPR( false ) != 0){
+                g_statusOverride.Clear();
+                setStatusText( _("Status: Dongle FRP upload error"));
                 return;
+            }
         }
     }
 
@@ -2554,6 +2568,8 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
             assignResult = doAssign(chart, slot, g_systemName);
             
         if(assignResult != 0){
+            g_statusOverride.Clear();
+            setStatusText( _("Status: Assignment error"));
             m_buttonInstall->Enable();
             return;
         }
