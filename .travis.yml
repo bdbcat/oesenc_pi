@@ -1,0 +1,49 @@
+language: cpp
+matrix:
+  include:
+  - env:
+    - OCPN_TARGET=xenial
+    dist: xenial
+    compiler: gcc
+    script:
+    - "./ci/travis-build-debian.sh"
+  - env:
+    - OCPN_TARGET=mingw
+    services:
+    - docker
+    script:
+    - "./ci/travis-build-mingw.sh"
+  - env:
+    - OCPN_TARGET=flatpak
+    services:
+    - docker
+    script:
+    - "./ci/travis-build-flatpak.sh"
+  - env:
+    - OCPN_TARGET=fedora
+    services:
+    - docker
+    script:
+    - "./ci/travis-build-fedora.sh"
+  - env:
+    - OCPN_TARGET=osx
+    os: osx
+    compiler: clang
+    script:
+    - "./ci/travis-build-osx.sh"
+
+notifications:
+  email: false
+
+git:
+  depth: 10
+
+deploy:
+  provider: bintray
+  file: ci/bintray.js
+  user: leamas
+  skip_cleanup: true
+  on:
+      all_branches: true
+  key:
+    secure: KrahuY3Ot06FVssWU8hVXx5A85tCA8ntLSK+oH4JFcsK6rCyxiRNHxMyj4Z9u4o+0dQbvgBRJVjzSzbxD+80NOQbYjEOocKVE0QKfO4glw+Re2bbBy58FpHWViWaWOG/xbjZrG2gsv8BnbAF3Id0960GAvBIthu37UhAw4g2klZfESlc/arobxIjYM6TgfTwnpgVXBDP68Izbt5TvgM0lDwRQvtI7m+RnurAoxtONPQhXCBusD85LrhRAk/O9X1SBKNs59RIQirjHDDHKsAZVJcwGuTggNrL4R5gJL5dNffHfkrUVbGIKEzf8lv3MhPdWAG4u//pif6QgoPCbze2B/RGd4mFybh7Gkmqw4T4MdJj/QCC5qwFeCIfPNwbpW+8teV0gfTc8+lfhdi2AAucJwrbpieWUBdtwKfpK1YRbVpt/6NXU2McXQ0tmZlfDjvBHlyP0HieDS/5jvTtEggbv6xfBROi2SIqgy8ORlT2Y03P1p0Bn1Vs3vI7F4ziGMvhrxsUTZ8WDtrUM45Wa3GzBR/gbzO6VWKuhxnNtlXQeuajdhQIDYLXZZmYRpPGD/gvV/scjj30DPTT2GW/Qo0X7Eqza4Du6yEC/UrnBmsZherCM6EzN9x0RjWCzLW+tsegTJLYOTrAf0Uea+keGhLxqvfoIJu9jgo5qZe5I+2f2KA=
