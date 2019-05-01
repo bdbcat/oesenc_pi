@@ -673,14 +673,26 @@ int oesenc_pi::Init(void)
     g_serverProc = 0;
 #endif
 
-    // Set environment variable for some platforms to find the required sglock dongle library
+#ifdef __linux__
+    std::string path(find_in_path("oeserverd"));
+    if (path == "") {
+	wxLogWarning("Cannot locate oeserverd binary in $PATH");
+    }
+    else {
+        g_sencutil_bin = wxString(path.c_str());
+    }
+#endif
 
 #if !defined(__WXMSW__) && !defined(__WXMAC__)
-    // Set environment variable to find the required sglock dongle library
-    wxFileName libraryPath = fn_exe;
-    libraryPath.RemoveLastDir();
-    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
-    wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
+    // Set environment variable to find the required sglock dongle
+    // library, but don't touch LD_LIBRARY_PATH if already set.
+    if (!getenv("LD_LIBRARY_PATH")) {
+        wxFileName libraryPath = fn_exe;
+        libraryPath.RemoveLastDir();
+        wxString libDir = libraryPath.GetPath(
+            wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
+        wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
+    }
 #endif
 
 #ifdef __WXMAC__
