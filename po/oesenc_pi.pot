@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: oesenc_pi 2.9.1630\n"
+"Project-Id-Version: oesenc_pi 2.9.1709\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-08 12:32-0400\n"
+"POT-Creation-Date: 2019-05-08 12:38-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -424,15 +424,15 @@ msgid "Proceed?"
 msgstr ""
 
 #: src/ochartShop.cpp:1223
-msgid "  {USB Dongle not found.}"
+msgid "  [USB Dongle not found.]"
 msgstr ""
 
 #: src/ochartShop.cpp:1226
-msgid "  {fpr file not found.}"
+msgid "  [fpr file not found.]"
 msgstr ""
 
 #: src/ochartShop.cpp:1229
-msgid "  {fpr file not created.}"
+msgid "  [fpr file not created.]"
 msgstr ""
 
 #: src/ochartShop.cpp:1233
