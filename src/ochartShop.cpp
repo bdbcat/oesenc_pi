@@ -1220,13 +1220,13 @@ int doUploadXFPR(bool bDongle)
             
         }
         else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT")))
-            err = _("  {USB Dongle not found.}");
+            err = _("  [USB Dongle not found.]");
             
         else
-            err = _("  {fpr file not found.}");
+            err = _("  [fpr file not found.]");
     }
     else{
-        err = _("  {fpr file not created.}");
+        err = _("  [fpr file not created.]");
     }
     
     if(err.Len()){
@@ -2292,7 +2292,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
                 setStatusText( _("Status: Login error."));
             else{
                 wxString ec;
-                ec.Printf(_T(" { %d }"), err_code_2);
+                ec.Printf(_T(" [ %d ]"), err_code_2);
                 setStatusText( _("Status: Communications error.") + ec);
             }
             m_ipGauge->Stop();
@@ -2303,7 +2303,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     else if(err_code != 0){                  // Some other error
         wxString ec;
-        ec.Printf(_T(" { %d }"), err_code);
+        ec.Printf(_T(" [ %d ]"), err_code);
         setStatusText( _("Status: Communications error.") + ec);
         m_ipGauge->Stop();
         wxYield();
@@ -2322,36 +2322,47 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         bool sname_ok = false;
         int itry = 0;
         while(!sname_ok && itry < 4){
-            bool bcont = doSystemNameWizard();
+            bool bnew = false;
+            bool bcont = doSystemNameWizard( &bnew );
         
-            if( !bcont ){                // user "Cancel"
-                g_systemName.Clear();
-                break;
+            if( !bcont ){
+                if(g_systemName.IsSameAs(_T("CancelNameDialog"))){ // user "Cancel"
+                    g_systemName.Clear();
+                    break;
+                }
+                else{
+                    g_systemName.Clear();       // Invalid systemName
+                }                    
             }
             
             if(!g_systemName.Len()){
                 wxString msg = _("Invalid System Name");
-                OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+                msg += _T("\n") + _("A valid System Name is 3 to 15 characters in length.");
+                msg += _T("\n") + _("No symbols or spaces are allowed.");
+ 
+                OCPNMessageBox_PlugIn(GetOCPNCanvasWindow(), msg, _("oeSENC_pi Message"), wxOK);
                 itry++;
             }
             
-            else if(g_systemNameDisabledArray.Index(g_systemName) != wxNOT_FOUND){
-                wxString msg = _("This System Name has been disabled\nPlease choose another SystemName");
-                OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
-                itry++;
-            }
             else{
-                sname_ok = true;
+                if(g_systemNameDisabledArray.Index(g_systemName) != wxNOT_FOUND){
+                    wxString msg = g_systemName + _T("\n");
+                    msg += _("This System Name has been disabled\nPlease choose another SystemName");
+                    OCPNMessageBox_PlugIn(GetOCPNCanvasWindow(), msg, _("oeSENC_pi Message"), wxOK);
+                    itry++;
+                }
+                else if(bnew && (g_systemNameServerArray.Index(g_systemName) != wxNOT_FOUND)){
+                        wxString msg = g_systemName + _T("\n");
+                        msg += _("This System Name already exists.\nPlease choose another SystemName");
+                        OCPNMessageBox_PlugIn(GetOCPNCanvasWindow(), msg, _("oeSENC_pi Message"), wxOK);
+                        itry++;
+                }
+                else{
+                    sname_ok = true;
+                }
             }
-                
         }
     }
-    
-//     wxString sn = _("System Name:");
-//     sn += _T(" ");
-//     sn += g_systemName;
-//     m_staticTextSystemName->SetLabel( sn );
-//     m_staticTextSystemName->Refresh();
     
     setStatusText( _("Status: Ready"));
     m_ipGauge->Stop();
@@ -2518,7 +2529,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
             if( doUploadXFPR( true ) != 0){
                 g_statusOverride.Clear();
-                setStatusText( _("Status: Dongle FRP upload error"));
+                setStatusText( _("Status: Dongle FPR upload error"));
                 return;
             }
         }
@@ -2527,7 +2538,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
             if( doUploadXFPR( false ) != 0){
                 g_statusOverride.Clear();
-                setStatusText( _("Status: Dongle FRP upload error"));
+                setStatusText( _("Status: System FPR upload error"));
                 return;
             }
         }
@@ -2687,7 +2698,7 @@ int shopPanel::doPrepareGUI()
     int err_code = doPrepare(m_ChartSelected, m_activeSlot);
     if(err_code != 0){                  // Some error
             wxString ec;
-            ec.Printf(_T(" { %d }"), err_code);     
+            ec.Printf(_T(" [ %d ]"), err_code);     
             setStatusText( _("Status: Communications error.") + ec);
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
@@ -2768,7 +2779,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
          * Safe to ignore errors, since this is only a status loop that will time out eventually
         if(err_code != 0){                  // Some error
             wxString ec;
-            ec.Printf(_T(" { %d }"), err_code);     
+            ec.Printf(_T(" [ %d ]"), err_code);     
             setStatusText( _("Status: Communications error.") + ec);
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
@@ -2951,8 +2962,11 @@ void shopPanel::UpdateActionControls()
 }
 
     
-bool shopPanel::doSystemNameWizard(  )
+bool shopPanel::doSystemNameWizard( bool *bnew )
 {
+    if(bnew)
+        *bnew = false;
+    
     // Make sure the system name array is current
     
     if( g_systemName.Len() && (g_systemNameChoiceArray.Index(g_systemName) == wxNOT_FOUND))
@@ -2986,8 +3000,11 @@ bool shopPanel::doSystemNameWizard(  )
             }
             else{    
                 sName = doGetNewSystemName();
-                if(sName.Len())
+                if(sName.Len()){
                     g_systemNameChoiceArray.Insert(sName, 0);
+                    if(bnew)
+                        *bnew = true;
+                }
                 else
                     return false;
             }
@@ -2995,8 +3012,10 @@ bool shopPanel::doSystemNameWizard(  )
         if(sName.Len())
             g_systemName = sName;
     }
-    else 
+    else{
+        g_systemName = _T("CancelNameDialog");
         return false;
+    }
     
     wxString sn = _("System Name:");
     sn += _T(" ");
