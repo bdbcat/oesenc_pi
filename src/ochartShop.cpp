@@ -1220,13 +1220,13 @@ int doUploadXFPR(bool bDongle)
             
         }
         else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT")))
-            err = _("  {USB Dongle not found.}");
+            err = _("  [USB Dongle not found.]");
             
         else
-            err = _("  {fpr file not found.}");
+            err = _("  [fpr file not found.]");
     }
     else{
-        err = _("  {fpr file not created.}");
+        err = _("  [fpr file not created.]");
     }
     
     if(err.Len()){
@@ -2292,7 +2292,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
                 setStatusText( _("Status: Login error."));
             else{
                 wxString ec;
-                ec.Printf(_T(" { %d }"), err_code_2);
+                ec.Printf(_T(" [ %d ]"), err_code_2);
                 setStatusText( _("Status: Communications error.") + ec);
             }
             m_ipGauge->Stop();
@@ -2303,7 +2303,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     else if(err_code != 0){                  // Some other error
         wxString ec;
-        ec.Printf(_T(" { %d }"), err_code);
+        ec.Printf(_T(" [ %d ]"), err_code);
         setStatusText( _("Status: Communications error.") + ec);
         m_ipGauge->Stop();
         wxYield();
@@ -2698,7 +2698,7 @@ int shopPanel::doPrepareGUI()
     int err_code = doPrepare(m_ChartSelected, m_activeSlot);
     if(err_code != 0){                  // Some error
             wxString ec;
-            ec.Printf(_T(" { %d }"), err_code);     
+            ec.Printf(_T(" [ %d ]"), err_code);     
             setStatusText( _("Status: Communications error.") + ec);
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
@@ -2779,7 +2779,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
          * Safe to ignore errors, since this is only a status loop that will time out eventually
         if(err_code != 0){                  // Some error
             wxString ec;
-            ec.Printf(_T(" { %d }"), err_code);     
+            ec.Printf(_T(" [ %d ]"), err_code);     
             setStatusText( _("Status: Communications error.") + ec);
             if(m_ipGauge)
                 m_ipGauge->SetValue(0);
