@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-29 21:07-0500\n"
-"PO-Revision-Date: 2018-12-01 03:23\n"
-"Last-Translator: nohal <pavel@kalian.cz>\n"
+"POT-Creation-Date: 2019-05-08 12:38-0400\n"
+"PO-Revision-Date: 2019-05-11 16:48\n"
+"Last-Translator: Pavel Kalian (nohal)\n"
 "Language-Team: Swedish\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
@@ -16,80 +16,80 @@ msgstr ""
 "X-Crowdin-Language: sv-SE\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
 
-#: src/eSENCChart.cpp:6387
+#: src/eSENCChart.cpp:6459
 msgid "Sector angles are True Bearings from Seaward"
 msgstr "Sektorns vinklar är sann bäring från sjösidan"
 
-#: src/oesenc_pi.cpp:294 src/oesenc_pi.cpp:440 src/oesenc_pi.cpp:2141
-#: src/oesenc_pi.cpp:2170 src/oesenc_pi.cpp:4602 src/oesenc_pi.cpp:4665
-#: src/oesenc_pi.cpp:4831 src/ochartShop.cpp:1591 src/ochartShop.cpp:1657
-#: src/ochartShop.cpp:1784 src/ochartShop.cpp:2838 src/ochartShop.cpp:2867
-#: src/ochartShop.cpp:2972 src/ochartShop.cpp:2997 src/ochartShop.cpp:3228
-#: src/ochartShop.cpp:3256
+#: src/oesenc_pi.cpp:310 src/oesenc_pi.cpp:456 src/oesenc_pi.cpp:2223
+#: src/oesenc_pi.cpp:2252 src/oesenc_pi.cpp:4641 src/oesenc_pi.cpp:4704
+#: src/oesenc_pi.cpp:4870 src/ochartShop.cpp:1758 src/ochartShop.cpp:1832
+#: src/ochartShop.cpp:1959 src/ochartShop.cpp:3107 src/ochartShop.cpp:3136
+#: src/ochartShop.cpp:3241 src/ochartShop.cpp:3266 src/ochartShop.cpp:3515
+#: src/ochartShop.cpp:3543
 msgid "Dialog"
 msgstr "Dialog"
 
-#: src/oesenc_pi.cpp:725
+#: src/oesenc_pi.cpp:766
 msgid "oeSENC"
 msgstr "oeSENC"
 
-#: src/oesenc_pi.cpp:731
+#: src/oesenc_pi.cpp:772
 msgid "PlugIn for OpenCPN oeSENC charts"
 msgstr "PlugIn för oeSENC-sjökort till OpenCPN"
 
-#: src/oesenc_pi.cpp:737
+#: src/oesenc_pi.cpp:778
 msgid "PlugIn for OpenCPN\n"
 "Provides support of oeSENC charts.\n\n"
 msgstr "PlugIn för OpenCPN \n"
 "för att använda oeSENC sjökort.\n\n"
 
-#: src/oesenc_pi.cpp:950 src/oesenc_pi.cpp:3943
+#: src/oesenc_pi.cpp:1031
 msgid "To obtain a User Key, you must generate a unique System Identifier File.\n"
 msgstr "För att erhålla en användarnyckel, måste du generera en fil med ett unik System-ID.\n"
 
-#: src/oesenc_pi.cpp:951 src/oesenc_pi.cpp:3944
+#: src/oesenc_pi.cpp:1032 src/oesenc_pi.cpp:4128 src/oesenc_pi.cpp:4176
 msgid "This file is also known as a\"fingerprint\" file.\n"
 msgstr "Denna fil kallas också en identifieringsfil (fingerprint).\n"
 
-#: src/oesenc_pi.cpp:952 src/oesenc_pi.cpp:3945
+#: src/oesenc_pi.cpp:1033
 msgid "The fingerprint file contains information to uniquely identifiy this computer.\n\n"
 msgstr "Identifieringsfilen innehåller unik information för att identifiera datorn.\n\n"
 
-#: src/oesenc_pi.cpp:953 src/oesenc_pi.cpp:3946
+#: src/oesenc_pi.cpp:1034
 msgid "After creating this file, you will need it to obtain your User Key at the o-charts.org shop.\n\n"
 msgstr "När filen är skapad, kommer du att behöva den för få din användarlicens hos \n"
 "o-charts.org webshop.\n\n"
 
-#: src/oesenc_pi.cpp:954 src/oesenc_pi.cpp:3947
+#: src/oesenc_pi.cpp:1035 src/oesenc_pi.cpp:4131 src/oesenc_pi.cpp:4179
 msgid "Proceed to create Fingerprint file?"
 msgstr "Fortsätta för att skapa identifieringsfilen?"
 
-#: src/oesenc_pi.cpp:956 src/oesenc_pi.cpp:3881 src/oesenc_pi.cpp:3949
-#: src/oesenc_pi.cpp:5016 src/oesenc_pi.cpp:5096 src/ochartShop.cpp:953
-#: src/ochartShop.cpp:2159 src/ochartShop.cpp:2172 src/ochartShop.cpp:2211
-#: src/ochartShop.cpp:2597
+#: src/oesenc_pi.cpp:1037 src/oesenc_pi.cpp:4067 src/oesenc_pi.cpp:4134
+#: src/oesenc_pi.cpp:4181 src/oesenc_pi.cpp:5055 src/oesenc_pi.cpp:5140
+#: src/ochartShop.cpp:1084 src/ochartShop.cpp:2389 src/ochartShop.cpp:2402
+#: src/ochartShop.cpp:2444 src/ochartShop.cpp:2843
 msgid "oeSENC_PI Message"
 msgstr "oeSENC_PI meddelande"
 
-#: src/oesenc_pi.cpp:1408 src/oesenc_pi.h:226
+#: src/oesenc_pi.cpp:1490 src/oesenc_pi.h:226
 msgid "oeSENC_PI Preferences"
 msgstr "Inställningar för oeSENC_PI"
 
-#: src/oesenc_pi.cpp:2173
+#: src/oesenc_pi.cpp:2255
 msgid "OpenCPN oeSENC UserKey Required"
 msgstr "Det krävs en användarlicens för OpenCPN oeSENC"
 
-#: src/oesenc_pi.cpp:2191
+#: src/oesenc_pi.cpp:2273
 msgid "Enter UserKey"
 msgstr "Skriv in användarlicensen"
 
-#: src/oesenc_pi.cpp:2210
+#: src/oesenc_pi.cpp:2292
 msgid "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n\n"
 "Your oeSENC UserKey may be obtained from your chart provider."
 msgstr "En giltig oeSENC licensnyckel har formatet: AAAA-BBBB-CCCC-DDDD-EEEE-FF \n\n"
 "En oeSENC licensnyckel kan erhållas från din leverantör av sjökorten."
 
-#: src/oesenc_pi.cpp:2216
+#: src/oesenc_pi.cpp:2298
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n"
 "Please verify your UserKey and try again.\n\n"
 "A valid oeSENC UserKey has the alphanumeric format:  AAAA-BBBB-CCCC-DDDD-EEEE-FF\n"
@@ -99,7 +99,7 @@ msgstr "FEL: Den licensnyckel som angetts är inte giltigt för detta set av oeS
 "En giltig OESENC-nyckel har formatet: AAAA-BBBB-CCCC-DDDD-EEEE-FF \n"
 "oeSENC licensnyckel erhålls från din leverantör av sjökorten.\n\n"
 
-#: src/oesenc_pi.cpp:2224
+#: src/oesenc_pi.cpp:2306
 msgid "ERROR: The UserKey entered is not valid for this oeSENC chart set.\n\n"
 "oeSENC charts will be disabled for this session.\n"
 "Please verify your UserKey and restart OpenCPN.\n\n"
@@ -109,485 +109,579 @@ msgstr "FEL: Den licensnyckel som angetts är inte giltigt för detta set av oeS
 "Vänligen kontrollera din licensnyckel och starta om OpenCPN.\n\n"
 "oeSENC licensnyckel erhålls från din leverantör av sjökorten.\n\n"
 
-#: src/oesenc_pi.cpp:2235
+#: src/oesenc_pi.cpp:2317
 msgid "UserKey accepted.\n\n"
 msgstr "Användarlicensen är korrekt.\n\n"
 
-#: src/oesenc_pi.cpp:2272 src/ochartShop.cpp:2912 src/ochartShop.cpp:3044
-#: src/ochartShop.cpp:3309
+#: src/oesenc_pi.cpp:2354 src/ochartShop.cpp:3181 src/ochartShop.cpp:3331
+#: src/ochartShop.cpp:3596
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: src/oesenc_pi.cpp:2279 src/ochartShop.cpp:2917 src/ochartShop.cpp:3047
-#: src/ochartShop.cpp:3312
+#: src/oesenc_pi.cpp:2361 src/ochartShop.cpp:3186 src/ochartShop.cpp:3334
+#: src/ochartShop.cpp:3599
 msgid "OK"
 msgstr "OK"
 
-#: src/oesenc_pi.cpp:2973
-msgid "Checking oeserverd utility at "
-msgstr "Kontrollerar nyckelserver \"oeserverd\" på "
+#: src/oesenc_pi.cpp:2431
+msgid "This chart cannot be loaded due to any of the following reasons:\n\n"
+"- You have made important hardware changes on your computer.\n"
+"- Your OS has been updated and your license has been suspended.\n"
+"- This chart set was encrypted for another system.\n"
+"- This chart set was encrypted for a USB key dongle, but dongle is not detected.\n"
+"- There are corrupted files due to errors during download or unzip.\n\n"
+"Please contact info@o-charts.org if the problem persists.\n"
+msgstr "Ett sjökort kan inte laddas på grund av ett eller flera av följande anledningar:\n\n"
+"- Datorns hårdvara har ändrats väsentligt.\n"
+"- Datorns operativsystem har ändrats väsentligt så din oeSENC-licens har förfallit.\n"
+"- Sjökorten är krypterade för en annan dator.\n"
+"- Sjökorten är krypterade för en USB-dongle men den är inte korrekt ansluten.\n"
+"- Sjökortsfilerna är felaktiga. Kanske pga fel vid nedladdning eller uppackning. \n\n"
+"Vänligen kontakta info@o-charts.org om problemet kvarstår och inte kan rättas till.\n"
 
-#: src/oesenc_pi.cpp:2981
-msgid "Cannot find the oserverd utility at \n"
-msgstr "Kan inte hitta nyckelserver \"oserverd\" på\n"
-
-#: src/oesenc_pi.cpp:2985 src/oesenc_pi.cpp:3093 src/oesenc_pi.cpp:3767
-#: src/oesenc_pi.cpp:3934 src/oesenc_pi.cpp:3964 src/oesenc_pi.cpp:3970
-#: src/oesenc_pi.cpp:4119 src/oesenc_pi.cpp:4149 src/oesenc_pi.cpp:4162
-#: src/ochartShop.cpp:592 src/ochartShop.cpp:608 src/ochartShop.cpp:1086
-#: src/ochartShop.cpp:1341 src/ochartShop.cpp:2119 src/ochartShop.cpp:2126
-#: src/ochartShop.cpp:2222
+#: src/oesenc_pi.cpp:2439 src/oesenc_pi.cpp:3103 src/oesenc_pi.cpp:3211
+#: src/oesenc_pi.cpp:3953 src/oesenc_pi.cpp:4120 src/oesenc_pi.cpp:4144
+#: src/oesenc_pi.cpp:4155 src/oesenc_pi.cpp:4161 src/oesenc_pi.cpp:4196
+#: src/oesenc_pi.cpp:4202 src/ochartShop.cpp:705 src/ochartShop.cpp:721
+#: src/ochartShop.cpp:1236 src/ochartShop.cpp:1508 src/ochartShop.cpp:2343
+#: src/ochartShop.cpp:2351 src/ochartShop.cpp:2357 src/ochartShop.cpp:2455
 msgid "oeSENC_pi Message"
 msgstr "oeSENC_PI meddelande"
 
-#: src/oesenc_pi.cpp:3064 src/oesenc_pi.cpp:3088
+#: src/oesenc_pi.cpp:3091
+msgid "Checking oeserverd utility at "
+msgstr "Kontrollerar nyckelserver \"oeserverd\" på "
+
+#: src/oesenc_pi.cpp:3099
+msgid "Cannot find the oserverd utility at \n"
+msgstr "Kan inte hitta nyckelserver \"oserverd\" på\n"
+
+#: src/oesenc_pi.cpp:3182 src/oesenc_pi.cpp:3206
 msgid "oeserverd utility at \n"
 msgstr "nyckelserver \"oeserverd\" på\n"
 
-#: src/oesenc_pi.cpp:3068
+#: src/oesenc_pi.cpp:3186
 msgid " reports Unavailable.\n\n"
 msgstr " är inte tillgänglig.\n\n"
 
-#: src/oesenc_pi.cpp:3092
+#: src/oesenc_pi.cpp:3210
 msgid " could not be started.\n\n"
 msgstr " kunde inte startas.\n\n"
 
-#: src/oesenc_pi.cpp:3489
+#: src/oesenc_pi.cpp:3607
 msgid "Show EULA"
 msgstr "Visa licensavtalet (EULA)"
 
-#: src/oesenc_pi.cpp:3497
+#: src/oesenc_pi.cpp:3615
 msgid "System Identification"
 msgstr "Systemidentifiering"
 
-#: src/oesenc_pi.cpp:3507
+#: src/oesenc_pi.cpp:3625
 msgid "Create System Identifier file..."
 msgstr "Skapa system-ID fil..."
 
-#: src/oesenc_pi.cpp:3516
+#: src/oesenc_pi.cpp:3633
+msgid "Create USB key System ID file..."
+msgstr "Skapa en System ID-fil med USB-nyckel..."
+
+#: src/oesenc_pi.cpp:3642
 msgid "Show In Finder"
 msgstr "Visa i Finder"
 
-#: src/oesenc_pi.cpp:3518
+#: src/oesenc_pi.cpp:3644
 msgid "Show on disk"
 msgstr "Visa på disk"
 
-#: src/oesenc_pi.cpp:3539
+#: src/oesenc_pi.cpp:3665
 msgid "Reset System Name"
 msgstr "Återställ, reset, ditt systemnamn"
 
-#: src/oesenc_pi.cpp:3549
+#: src/oesenc_pi.cpp:3675
 msgid "Reset o-charts credentials"
 msgstr "Återställ O-Charts inloggningsuppgifter"
 
-#: src/oesenc_pi.cpp:3767 src/oesenc_pi.cpp:4119
+#: src/oesenc_pi.cpp:3953
 msgid "Administrator priveleges are required to copy fpr.\n"
 "  Please try again...."
 msgstr "Administratörsrättigheter krävs för att kopiera \"fingeravtryck\" fpr.   \n"
 " Vänligen försök igen...."
 
-#: src/oesenc_pi.cpp:3878
+#: src/oesenc_pi.cpp:4064
 msgid "System name RESET shall be performed only by request from o-charts technical support staff."
 msgstr "Återställning av systemnamnet skall utföras endast på begäran från o-charts tekniska supportpersonal."
 
-#: src/oesenc_pi.cpp:3880
+#: src/oesenc_pi.cpp:4066
 msgid "Proceed to RESET?"
 msgstr "Gå vidare till Återställning?"
 
-#: src/oesenc_pi.cpp:3934
+#: src/oesenc_pi.cpp:4120
 msgid "Credential Reset Successful"
 msgstr "Inloggningsuppgifter återställda"
 
-#: src/oesenc_pi.cpp:3958 src/oesenc_pi.cpp:4143
+#: src/oesenc_pi.cpp:4127 src/oesenc_pi.cpp:4175
+msgid "To obtain a chart set, you must generate a Unique System Identifier File.\n"
+msgstr "För att ladda hem ett set sjökort, måste du skapa en fil med ett unik System-ID.\n"
+
+#: src/oesenc_pi.cpp:4129
+msgid "The fingerprint file contains information related to a connected USB key dongle.\n\n"
+msgstr "Nyckelfilen innehåller information som gäller en ansluten USB-sticka (dongle).\n\n"
+
+#: src/oesenc_pi.cpp:4130 src/oesenc_pi.cpp:4178
+msgid "After creating this file, you will need it to obtain your chart sets at the o-charts.org shop.\n\n"
+msgstr "När filen är skapad, kommer du att behöva den för att ladda hem dina sjökortsfiler från \n"
+"o-charts.org webshop.\n\n"
+
+#: src/oesenc_pi.cpp:4149 src/oesenc_pi.cpp:4190
 msgid "Fingerprint file created.\n"
 msgstr "Identifieringsfilen har skapas.\n"
 
-#: src/oesenc_pi.cpp:3962 src/oesenc_pi.cpp:4147
+#: src/oesenc_pi.cpp:4153 src/oesenc_pi.cpp:4194
 msgid "\n\n"
 " Fingerprint file is also copied to desktop."
 msgstr "\n\n"
 "ID-filen, ftr, kopieras också till skrivbordet."
 
-#: src/oesenc_pi.cpp:4755
+#: src/oesenc_pi.cpp:4177
+msgid "The fingerprint file contains information to uniquely identify this computer.\n\n"
+msgstr "Nyckelfilen innehåller unik information för att identifiera denna dator.\n\n"
+
+#: src/oesenc_pi.cpp:4794
 msgid "Could not open oesenc_pi EULA: "
 msgstr "Kunde inte öppna oesenc_pi EULA: "
 
-#: src/oesenc_pi.cpp:4828
+#: src/oesenc_pi.cpp:4867
 msgid "oeSENC PlugIn for OpenCPN"
 msgstr "Plugin oeSENC för OpenCPN"
 
-#: src/oesenc_pi.cpp:4891
+#: src/oesenc_pi.cpp:4930
 msgid "License"
 msgstr "Licens"
 
-#: src/oesenc_pi.cpp:4916
+#: src/oesenc_pi.cpp:4955
 msgid "Accept"
 msgstr "Godkänn"
 
-#: src/oesenc_pi.cpp:4921
+#: src/oesenc_pi.cpp:4960
 msgid "Reject"
 msgstr "Avvisa"
 
-#: src/oesenc_pi.cpp:4962
+#: src/oesenc_pi.cpp:5001
 msgid "Available Chart sets:"
 msgstr "Tillgängliga set av sjökort:"
 
-#: src/oesenc_pi.cpp:5031
+#: src/oesenc_pi.cpp:5070
 msgid "The following Chart sets are available:"
 msgstr "Följande set av sjökort finns tillgängliga:"
 
-#: src/oesenc_pi.cpp:5041
+#: src/oesenc_pi.cpp:5080
 msgid "Chart set"
 msgstr "Sjökortset"
 
-#: src/oesenc_pi.cpp:5045
+#: src/oesenc_pi.cpp:5084
 msgid "Version"
 msgstr "Version"
 
-#: src/oesenc_pi.cpp:5049
+#: src/oesenc_pi.cpp:5088
 msgid "Valid until"
 msgstr "är giltiga till"
 
-#: src/oesenc_pi.cpp:5405 src/oesenc_pi.cpp:5420
+#: src/oesenc_pi.cpp:5449 src/oesenc_pi.cpp:5464
 msgid "oeSENC Charts"
 msgstr "oeSENC Sjökort"
 
-#: src/oesenc_pi.cpp:5452
+#: src/oesenc_pi.cpp:5496
 msgid "Add/Update oeSENC chartsets"
 msgstr "Lägg till/uppdatera oeSENC sjökortslista"
 
-#: src/oesenc_pi.cpp:5457
+#: src/oesenc_pi.cpp:5501
 msgid "Visit o-charts.org Website"
 msgstr "Besök o-charts.org hemsida"
 
-#: src/oesenc_pi.cpp:5458
+#: src/oesenc_pi.cpp:5502
 msgid "Here you may order new oeSENC chartsets."
 msgstr "Här kan du beställa licens för nya oeSENC kortset."
 
-#: src/oesenc_pi.h:321
+#: src/oesenc_pi.h:322
 msgid "OpenCPN SENC UserKey Required"
 msgstr "Det krävs en användarlicens för OpenCPN SENC"
 
-#: src/oesenc_pi.h:449
+#: src/oesenc_pi.h:450
 msgid "oeSENC_PI Information"
 msgstr "oeSENC_PI Information"
 
-#: src/s52plib.cpp:2371 src/s52plib.cpp:2396 src/s52plib.cpp:2504
-#: src/s52plib.cpp:2690 src/s52plib.cpp:2706
+#: src/s52plib.cpp:2300 src/s52plib.cpp:2327 src/s52plib.cpp:2435
+#: src/s52plib.cpp:2620 src/s52plib.cpp:2636
 msgid "ChartTexts"
 msgstr "Text på vektorsjökort"
 
-#: src/ochartShop.cpp:363
+#: src/ochartShop.cpp:457
 msgid "Available."
 msgstr "Tillgängligt."
 
-#: src/ochartShop.cpp:367
+#: src/ochartShop.cpp:461
 msgid "Installed, Up-to-date."
 msgstr "Installerat, Uppdaterat."
 
-#: src/ochartShop.cpp:371
+#: src/ochartShop.cpp:465
 msgid "Installed, Update available."
 msgstr "Installerat. Uppdatering är tillgänglig."
 
-#: src/ochartShop.cpp:376
+#: src/ochartShop.cpp:470
 msgid "Expired."
 msgstr "Utgånget."
 
-#: src/ochartShop.cpp:380
+#: src/ochartShop.cpp:474
 msgid "Preparing your chartset."
-msgstr "Förbereder skjökorten."
+msgstr "Förbereder sjökorten."
 
-#: src/ochartShop.cpp:384
+#: src/ochartShop.cpp:478
 msgid "Ready for download."
 msgstr "Klart att hämta."
 
-#: src/ochartShop.cpp:388
+#: src/ochartShop.cpp:482
 msgid "Please update Chart List."
 msgstr "Uppdatera sjökortslistan."
 
-#: src/ochartShop.cpp:392
+#: src/ochartShop.cpp:486
 msgid "Ready for Download Request."
 msgstr "Klart för nedladdning."
 
-#: src/ochartShop.cpp:579
+#: src/ochartShop.cpp:502 src/ochartShop.cpp:504
+msgid "USB Dongle Key"
+msgstr "USB-dongle systemnyckel"
+
+#: src/ochartShop.cpp:510
+msgid "System Key"
+msgstr "Systemnyckel"
+
+#: src/ochartShop.cpp:691
 msgid "o-charts API error code: "
 msgstr "o-Charts API felkod: "
 
-#: src/ochartShop.cpp:585
+#: src/ochartShop.cpp:698
 msgid "Invalid user/email name or password."
 msgstr "Ogiltigt användare/mejl eller lösenord."
 
-#: src/ochartShop.cpp:588
+#: src/ochartShop.cpp:701
 msgid "Check your configuration and try again."
 msgstr "Kontrollera din konfiguration och försök igen."
 
-#: src/ochartShop.cpp:603
+#: src/ochartShop.cpp:716
 msgid "internet communications error code: "
 msgstr "felkod från Internetkommunikation: "
 
-#: src/ochartShop.cpp:607
+#: src/ochartShop.cpp:720
 msgid "Check your connection and try again."
 msgstr "Kontrollera din anslutning och försök igen."
 
-#: src/ochartShop.cpp:627
+#: src/ochartShop.cpp:740
 msgid "Invalid Login."
 msgstr "Ogiltig inloggning."
 
-#: src/ochartShop.cpp:943
+#: src/ochartShop.cpp:1070
 msgid "This action will PERMANENTLY assign the chart:"
 msgstr "Åtgärden kommer att permanent koppla sjökort:"
 
-#: src/ochartShop.cpp:947
+#: src/ochartShop.cpp:1074
 msgid "to this systemName:"
 msgstr "till denna enhet:"
 
-#: src/ochartShop.cpp:951
+#: src/ochartShop.cpp:1078 src/ochartShop.cpp:2245 src/ochartShop.cpp:3302
+#: src/ochartShop.cpp:3315
+msgid "USB Key Dongle"
+msgstr "USB-dongle systemnyckel"
+
+#: src/ochartShop.cpp:1082
 msgid "Proceed?"
 msgstr "Fortsätta?"
 
-#: src/ochartShop.cpp:1258 src/ochartShop.cpp:1332
+#: src/ochartShop.cpp:1223
+msgid "  [USB Dongle not found.]"
+msgstr "  [Kan inte hitta rätt USB-dongle.]"
+
+#: src/ochartShop.cpp:1226
+msgid "  [fpr file not found.]"
+msgstr "  [Kan inte hitta rätt system-ID, fpr, fil.]"
+
+#: src/ochartShop.cpp:1229
+msgid "  [fpr file not created.]"
+msgstr " [System-ID-fil, fpr, är inte skapad.]"
+
+#: src/ochartShop.cpp:1233
+msgid "ERROR Creating Fingerprint file"
+msgstr "Fel när system-ID-fil skulle skapas"
+
+#: src/ochartShop.cpp:1234
+msgid "Check OpenCPN log file."
+msgstr "Kontrollera i OpenCPN loggfil."
+
+#: src/ochartShop.cpp:1425 src/ochartShop.cpp:1499
 msgid "Unzipping chart files..."
 msgstr "Packar upp kortfiler..."
 
-#: src/ochartShop.cpp:1311
+#: src/ochartShop.cpp:1478
 msgid "Choose chart install location."
 msgstr "Välj var korten skall installeras."
 
-#: src/ochartShop.cpp:1325
+#: src/ochartShop.cpp:1492
 msgid "Ready for unzipping chart files."
 msgstr "Klart att packa upp paketet."
 
-#: src/ochartShop.cpp:1341
+#: src/ochartShop.cpp:1508
 msgid "Error extracting zip file"
 msgstr "Fel vid uppackning av zip-filen"
 
-#: src/ochartShop.cpp:1615
+#: src/ochartShop.cpp:1782
 msgid "Chart Edition:"
 msgstr "Sjökortsutgåva:"
 
-#: src/ochartShop.cpp:1621
+#: src/ochartShop.cpp:1788
 msgid "Order Reference:"
 msgstr "Orderreferens:"
 
-#: src/ochartShop.cpp:1627
+#: src/ochartShop.cpp:1794
 msgid "Purchase date:"
 msgstr "Inköpsdatum:"
 
-#: src/ochartShop.cpp:1633
+#: src/ochartShop.cpp:1800
 msgid "Expiration date:"
 msgstr "Giltig tom:"
 
-#: src/ochartShop.cpp:1639
+#: src/ochartShop.cpp:1806
 msgid "Status:"
 msgstr "Status:"
 
-#: src/ochartShop.cpp:1690
+#: src/ochartShop.cpp:1816
+msgid "Key type:"
+msgstr "Typ av systemnyckel:"
+
+#: src/ochartShop.cpp:1865
 msgid "Chart Edition: "
 msgstr "Sjökortsutgåva: "
 
-#: src/ochartShop.cpp:1694
+#: src/ochartShop.cpp:1869
 msgid "Order Reference: "
 msgstr "Orderreferens: "
 
-#: src/ochartShop.cpp:1701
+#: src/ochartShop.cpp:1876
 msgid "Purchase date: "
 msgstr "Inköpsdatum: "
 
-#: src/ochartShop.cpp:1705
+#: src/ochartShop.cpp:1880
 msgid "Expiration date: "
 msgstr "Giltig tom: "
 
-#: src/ochartShop.cpp:1718
+#: src/ochartShop.cpp:1893
 msgid "Assigment 1"
 msgstr "Enhet/System 1"
 
-#: src/ochartShop.cpp:1722 src/ochartShop.cpp:1745
+#: src/ochartShop.cpp:1897 src/ochartShop.cpp:1920
 msgid "System: "
 msgstr "Enhet: "
 
-#: src/ochartShop.cpp:1726 src/ochartShop.cpp:1749
+#: src/ochartShop.cpp:1901 src/ochartShop.cpp:1924
 msgid "Installed edition: "
 msgstr "Installerad utgåva: "
 
-#: src/ochartShop.cpp:1734 src/ochartShop.cpp:1757
+#: src/ochartShop.cpp:1909 src/ochartShop.cpp:1932
 msgid "Status: "
 msgstr "Status: "
 
-#: src/ochartShop.cpp:1741
+#: src/ochartShop.cpp:1916
 msgid "Assigment 2"
 msgstr "Enhet/System 2"
 
-#: src/ochartShop.cpp:1914
+#: src/ochartShop.cpp:2089
 msgid "My Charts"
 msgstr "Mina sjökort"
 
-#: src/ochartShop.cpp:1917
+#: src/ochartShop.cpp:2092
 msgid "Refresh Chart List"
 msgstr "Uppdatera listan"
 
-#: src/ochartShop.cpp:1936
+#: src/ochartShop.cpp:2111
 msgid "Actions"
 msgstr "Åtgärder"
 
-#: src/ochartShop.cpp:1946 src/ochartShop.cpp:2692
+#: src/ochartShop.cpp:2121 src/ochartShop.cpp:2938
 msgid "Install Selected Chart"
 msgstr "Installera markerade sjökort"
 
-#: src/ochartShop.cpp:1949
+#: src/ochartShop.cpp:2124
 msgid "Cancel Operation"
 msgstr "Avbryt åtgärden"
 
-#: src/ochartShop.cpp:1958
+#: src/ochartShop.cpp:2133
 msgid "Status: Chart List Refresh required."
 msgstr "Status: Kortlistan behöver uppdateras."
 
-#: src/ochartShop.cpp:1964 src/ochartShop.cpp:1992 src/ochartShop.cpp:2131
-#: src/ochartShop.cpp:2754
+#: src/ochartShop.cpp:2139 src/ochartShop.cpp:2167 src/ochartShop.cpp:2243
+#: src/ochartShop.cpp:2251 src/ochartShop.cpp:3020
 msgid "System Name:"
 msgstr "Enhetsnamn:"
 
-#: src/ochartShop.cpp:2066
+#: src/ochartShop.cpp:2266
 msgid "Contacting o-charts server..."
 msgstr "Kontaktar o-charts server..."
 
-#: src/ochartShop.cpp:2077 src/ochartShop.cpp:2092
+#: src/ochartShop.cpp:2277 src/ochartShop.cpp:2292
 msgid "Status: Login error."
 msgstr "Status: Inloggningsfel."
 
-#: src/ochartShop.cpp:2096 src/ochartShop.cpp:2107 src/ochartShop.cpp:2456
+#: src/ochartShop.cpp:2296 src/ochartShop.cpp:2307 src/ochartShop.cpp:2702
 msgid "Status: Communications error."
 msgstr "Status: Kommunikationsfel."
 
-#: src/ochartShop.cpp:2118 src/ochartShop.cpp:2125
+#: src/ochartShop.cpp:2339
 msgid "Invalid System Name"
 msgstr "Ogiltigt systemnamn/ID"
 
-#: src/ochartShop.cpp:2137 src/ochartShop.cpp:2219
-msgid "Status: Ready"
-msgstr "Status: Klart"
-
-#: src/ochartShop.cpp:2159
-msgid "Chart download cancelled."
-msgstr "Hämtningen är avbruten."
-
-#: src/ochartShop.cpp:2172
-msgid "Chart download error, missing file."
-msgstr "Fel vid hämtning, fil(er) saknas."
-
-#: src/ochartShop.cpp:2207
-msgid "Chart download complete."
-msgstr "Nedladdning är klar."
-
-#: src/ochartShop.cpp:2209
-msgid "Proceed to install?"
-msgstr "Fortsätt för att installera?"
-
-#: src/ochartShop.cpp:2214
-msgid "Installing charts"
-msgstr "Installerar sjökorten"
-
-#: src/ochartShop.cpp:2222
-msgid "Chart installation complete."
-msgstr "Installation är slutförd."
-
-#: src/ochartShop.cpp:2425
-msgid "Preparing your charts..."
-msgstr "Förbereder skjökorten..."
-
-#: src/ochartShop.cpp:2473
-msgid "Status: Downloading..."
-msgstr "Status: nedladdning..."
-
-#: src/ochartShop.cpp:2478
-msgid "Downloading..."
-msgstr "Laddar ner..."
-
-#: src/ochartShop.cpp:2506 src/ochartShop.cpp:2548 src/ochartShop.cpp:2611
-#: src/ochartShop.cpp:3148
-msgid "Status: OK"
-msgstr "Status: OK"
-
-#: src/ochartShop.cpp:2588
-msgid "Your chart preparation is not complete."
-msgstr "Kortsammanställningen är inte klar."
-
-#: src/ochartShop.cpp:2590
-msgid "You may continue to wait, or return to this screen later to complete the download."
-msgstr "Du kan fortsätta att vänta eller gå tillbaka till den här skärmen senare för att slutföra nedladdningen."
-
-#: src/ochartShop.cpp:2592
-msgid "You will receive an email message when preparation for download is complete"
-msgstr "Du får ett e-postmeddelande när förberedelsen för nedladdning är klar"
-
-#: src/ochartShop.cpp:2594
-msgid "Continue waiting?"
-msgstr "Fortsätt att vänta?"
-
-#: src/ochartShop.cpp:2696
-msgid "Reinstall Selected Chart"
-msgstr "Installera om markerade sjökort"
-
-#: src/ochartShop.cpp:2700
-msgid "Update Selected Chart"
-msgstr "Uppdatera markerade sjökort"
-
-#: src/ochartShop.cpp:2704 src/ochartShop.cpp:2708
-msgid "Download Selected Chart"
-msgstr "Ladda ner valda sjökort"
-
-#: src/ochartShop.cpp:2870
-msgid "New OpenCPN oeSENC System Name"
-msgstr "Nytt OpenCPN oeSENC system/enhets-namn"
-
-#: src/ochartShop.cpp:2887
-msgid "Enter New System Name"
-msgstr "Ange ett nytt enhetsnamn"
-
-#: src/ochartShop.cpp:2898
+#: src/ochartShop.cpp:2340 src/ochartShop.cpp:3167
 msgid "A valid System Name is 3 to 15 characters in length."
-msgstr "Ett giltigt enhetsnamn är 3-15 tecken långt."
+msgstr "Ett giltigt namn är 3-15 tecken långt. Bara bokstäver eller siffror."
 
-#: src/ochartShop.cpp:2901
-msgid "lower case letters and numbers only."
-msgstr "Använd endast små bokstäver eller siffror."
-
-#: src/ochartShop.cpp:2904
+#: src/ochartShop.cpp:2341 src/ochartShop.cpp:3173
 msgid "No symbols or spaces are allowed."
 msgstr "Inga symboler eller blanksteg kan användas."
 
-#: src/ochartShop.cpp:3000
+#: src/ochartShop.cpp:2350
+msgid "This System Name has been disabled\n"
+"Please choose another SystemName"
+msgstr "Detta systemnamn har inaktiverats\n"
+"Vänligen välj en annan Systemnamn"
+
+#: src/ochartShop.cpp:2356
+msgid "This System Name already exists.\n"
+"Please choose another SystemName"
+msgstr "Detta systemnamn har redan använts.\n"
+"Vänligen välj ett annat Systemnamn"
+
+#: src/ochartShop.cpp:2367 src/ochartShop.cpp:2452
+msgid "Status: Ready"
+msgstr "Status: Klart"
+
+#: src/ochartShop.cpp:2389
+msgid "Chart download cancelled."
+msgstr "Hämtningen är avbruten."
+
+#: src/ochartShop.cpp:2402
+msgid "Chart download error, missing file."
+msgstr "Fel vid hämtning, fil(er) saknas."
+
+#: src/ochartShop.cpp:2437
+msgid "Chart download complete."
+msgstr "Nedladdning är klar."
+
+#: src/ochartShop.cpp:2439
+msgid "Proceed to install?"
+msgstr "Fortsätt för att installera?"
+
+#: src/ochartShop.cpp:2447
+msgid "Installing charts"
+msgstr "Installerar sjökorten"
+
+#: src/ochartShop.cpp:2455
+msgid "Chart installation complete."
+msgstr "Installation är slutförd."
+
+#: src/ochartShop.cpp:2532
+msgid "Status: Dongle FPR upload error"
+msgstr "Status: Fel vid uppladdning av system-ID-fil, FPR, för USB-dongeln"
+
+#: src/ochartShop.cpp:2541
+msgid "Status: System FPR upload error"
+msgstr "Status: Fel vid uppladdning av system-ID-fil, FPR"
+
+#: src/ochartShop.cpp:2583
+msgid "Status: Assignment error"
+msgstr "Status: Fel vid koppling av system-ID till sjökortsset"
+
+#: src/ochartShop.cpp:2671
+msgid "Preparing your charts..."
+msgstr "Förbereder sjökorten..."
+
+#: src/ochartShop.cpp:2719
+msgid "Status: Downloading..."
+msgstr "Status: nedladdning..."
+
+#: src/ochartShop.cpp:2724
+msgid "Downloading..."
+msgstr "Laddar ner..."
+
+#: src/ochartShop.cpp:2752 src/ochartShop.cpp:2794 src/ochartShop.cpp:2857
+#: src/ochartShop.cpp:3435
+msgid "Status: OK"
+msgstr "Status: OK"
+
+#: src/ochartShop.cpp:2834
+msgid "Your chart preparation is not complete."
+msgstr "Kortsammanställningen är inte klar."
+
+#: src/ochartShop.cpp:2836
+msgid "You may continue to wait, or return to this screen later to complete the download."
+msgstr "Du kan fortsätta att vänta eller gå tillbaka till den här skärmen senare för att slutföra nedladdningen."
+
+#: src/ochartShop.cpp:2838
+msgid "You will receive an email message when preparation for download is complete"
+msgstr "Du får ett e-postmeddelande när förberedelsen för nedladdning är klar"
+
+#: src/ochartShop.cpp:2840
+msgid "Continue waiting?"
+msgstr "Fortsätt att vänta?"
+
+#: src/ochartShop.cpp:2942
+msgid "Reinstall Selected Chart"
+msgstr "Installera om markerade sjökort"
+
+#: src/ochartShop.cpp:2946
+msgid "Update Selected Chart"
+msgstr "Uppdatera markerade sjökort"
+
+#: src/ochartShop.cpp:2950 src/ochartShop.cpp:2954
+msgid "Download Selected Chart"
+msgstr "Ladda ner valda sjökort"
+
+#: src/ochartShop.cpp:3139
+msgid "New OpenCPN oeSENC System Name"
+msgstr "Nytt OpenCPN oeSENC system/enhets-namn"
+
+#: src/ochartShop.cpp:3156
+msgid "Enter New System Name"
+msgstr "Ange ett nytt enhetsnamn"
+
+#: src/ochartShop.cpp:3269
 msgid "Select OpenCPN/oeSENC System Name"
 msgstr "Nytt OpenCPN oeSENC system/enhets-namn"
 
-#: src/ochartShop.cpp:3016
+#: src/ochartShop.cpp:3285
 msgid "Select your System Name from the following list, or "
 msgstr "Välj system/enhet från listan nedan eller "
 
-#: src/ochartShop.cpp:3021
+#: src/ochartShop.cpp:3290
 msgid " create a new System Name for this computer."
 msgstr " skapa ett nytt enhetsnamn för den här datorn."
 
-#: src/ochartShop.cpp:3031
+#: src/ochartShop.cpp:3318
 msgid "new..."
 msgstr "ny..."
 
-#: src/ochartShop.cpp:3033
+#: src/ochartShop.cpp:3320
 msgid "System Names"
 msgstr "Enhetsnamn"
 
-#: src/ochartShop.cpp:3197
+#: src/ochartShop.cpp:3484
 msgid "Downloaded:  "
 msgstr "Hämta:  "
 
-#: src/ochartShop.cpp:3275
+#: src/ochartShop.cpp:3562
 msgid "Login to o-charts.org"
 msgstr "Logga in till o-charts.org"
 
-#: src/ochartShop.cpp:3292
+#: src/ochartShop.cpp:3579
 msgid "email address:"
 msgstr "E-postadress:"
 
-#: src/ochartShop.cpp:3299
+#: src/ochartShop.cpp:3586
 msgid "Password:"
 msgstr "Lösenord:"
 
