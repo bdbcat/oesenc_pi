@@ -280,6 +280,8 @@ bool itemChart::isChartsetExpired() {
 }
 
 bool itemChart::isChartsetAssignedToAnyDongle() {
+    if(!g_dongleName.Length())
+        return false;
     
     if(isSlotAssignedToAnyDongle(0))
         return true;
@@ -372,6 +374,16 @@ int itemChart::getChartStatus()
     if(isChartsetExpired()){
         m_status = STAT_EXPIRED;
         return m_status;
+    }
+    
+    // The case where one slot is assigned to systemFPR, one slot empty, and dongle is inserted
+    if(g_dongleName.Len()){
+        if(!isChartsetAssignedToAnyDongle()){
+            if(!sysID1.Length() || !sysID0.Length()){
+                m_status = STAT_PURCHASED;
+                return m_status;
+            }
+        }
     }
     
     if(!isChartsetAssignedToMe( g_systemName )){
@@ -1811,13 +1823,16 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
 
-        tx = m_pChart->getKeytypeString();
-        if(tx.Len()){
-            tx = _("Key type:");
-            dc.DrawText( tx, text_x, yPos);
+        //  If the chart is unassigned, then there is no defined "key type".
+        if(m_pChart->m_status != STAT_PURCHASED){
             tx = m_pChart->getKeytypeString();
-            dc.DrawText( tx, text_x_val, yPos);
-            yPos += yPitch;
+            if(tx.Len()){
+                tx = _("Key type:");
+                dc.DrawText( tx, text_x, yPos);
+                tx = m_pChart->getKeytypeString();
+                dc.DrawText( tx, text_x_val, yPos);
+                yPos += yPitch;
+            }
         }
 
 
@@ -2550,13 +2565,25 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     
     
     //  Check if I am already assigned to this chart
-    if(chart->statusID0.IsSameAs(_T("requestable"))){
-        if( chart->sysID0.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID0.IsSameAs(g_dongleName)))
+    if(g_dongleName.Length()){
+        if(chart->statusID0.IsSameAs(_T("requestable"))){
+            if( chart->sysID0.IsSameAs(g_dongleName))
             slot = 0;
+        }
+        if(chart->statusID1.IsSameAs(_T("requestable"))){
+            if( chart->sysID1.IsSameAs(g_dongleName))
+                slot = 1;
+        }
     }
-    if(chart->statusID1.IsSameAs(_T("requestable"))){
-        if( chart->sysID1.IsSameAs(g_systemName) || (g_dongleName.Len() && chart->sysID1.IsSameAs(g_dongleName)))
-            slot = 1;
+    else{
+        if(chart->statusID0.IsSameAs(_T("requestable"))){
+            if( chart->sysID0.IsSameAs(g_systemName) )
+                slot = 0;
+        }
+        if(chart->statusID1.IsSameAs(_T("requestable"))){
+            if( chart->sysID1.IsSameAs(g_systemName) )
+                slot = 1;
+        }
     }
         
     if(slot < 0){                       // need assigment

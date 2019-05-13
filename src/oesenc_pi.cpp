@@ -692,9 +692,9 @@ int oesenc_pi::Init(void)
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
     if(IsDongleAvailable())
-        wxLogMessage(_T("Dongle OK"));
+        wxLogMessage(_T("Dongle detected"));
     else
-        wxLogMessage(_T("Dongle NOT FOUND"));
+        wxLogMessage(_T("No Dongle detected"));
         
     g_benable_screenlog = g_buser_enable_screenlog;
     
