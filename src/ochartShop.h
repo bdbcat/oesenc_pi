@@ -262,7 +262,6 @@ public:
     oeSencChartPanel *GetSelectedChart(){ return m_ChartSelected; }
     
     void OnButtonUpdate( wxCommandEvent& event );
-    void OnButtonDownload( wxCommandEvent& event );
     void OnButtonCancelOp( wxCommandEvent& event );
     void OnButtonInstall( wxCommandEvent& event );
     void OnButtonInstallChain( wxCommandEvent& event );
@@ -281,12 +280,14 @@ public:
     void setStatusTextProgress( const wxString &text ){ m_staticTextStatus/*m_staticTextStatusProgress*/->SetLabel( text );  /*m_staticTextStatusProgress->Refresh();*/ }
     InProgressIndicator *getInProcessGuage() {return m_ipGauge; }
     void MakeChartVisible(oeSencChartPanel *chart);
-    
+    int GetActiveSlotAction( itemChart *chart );
+
     int m_prepareTimerCount;
     int m_prepareTimeout;
     int m_prepareProgress;
     wxTimer m_prepareTimer;
     int m_activeSlot;
+    int m_action;
     wxString m_ChartSelectedID;
     wxString m_ChartSelectedOrder;
     wxString m_ChartSelectedQty;
