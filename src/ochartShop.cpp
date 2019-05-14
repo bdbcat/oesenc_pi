@@ -343,13 +343,13 @@ bool itemChart::isChartsetDontShow()
     
 bool itemChart::isChartsetShow()
 {
-    if(isChartsetAssignedToMe(g_systemName))
-        return true;
-    
     if(!isChartsetFullyAssigned())
         return true;
 
-    if(isChartsetAssignedToAnyDongle())
+    if(isChartsetAssignedToMe(g_systemName))
+        return true;
+    
+    if(isChartsetAssignedToMe( g_dongleName))
         return true;
 
     return false;
@@ -377,14 +377,14 @@ int itemChart::getChartStatus()
     }
     
     // The case where one slot is assigned to systemFPR, one slot empty, and dongle is inserted
-    if(g_dongleName.Len()){
-        if(!isChartsetAssignedToAnyDongle()){
-            if(!sysID1.Length() || !sysID0.Length()){
-                m_status = STAT_PURCHASED;
-                return m_status;
-            }
-        }
-    }
+//     if(g_dongleName.Len()){
+//         if(!isChartsetAssignedToAnyDongle()){
+//             if(!sysID1.Length() || !sysID0.Length()){
+//                 m_status = STAT_PURCHASED;
+//                 return m_status;
+//             }
+//         }
+//     }
     
     if(!isChartsetAssignedToMe( g_systemName )){
         if(!g_dongleName.Len()){
@@ -394,12 +394,26 @@ int itemChart::getChartStatus()
             }
         }
         else{
-            if(!isChartsetAssignedToAnyDongle()){
-                m_status = STAT_PURCHASED;
-                return m_status;
+            if(!isChartsetAssignedToMe( g_dongleName )){
+                if(!sysID1.Length() || !sysID0.Length()){
+                    m_status = STAT_PURCHASED;
+                    return m_status;
+                }
             }
         }
     }
+    
+    //  Special case:
+    //  Already assigned to system FPR, one slot available,and dongle is inserted
+    //  Then we want to allow assignment of second slot to dongle 
+    if(isChartsetAssignedToMe( g_systemName )){
+        if( g_dongleName.Len() && !isChartsetFullyAssigned()){
+            m_status = STAT_PURCHASED;
+            return m_status;
+        }
+    }
+            
+    
     
     // We know that chart is assigned to me, so one of the sysIDx fields will match
     wxString cStat = statusID0;
@@ -523,6 +537,41 @@ wxString itemChart::getKeytypeString(){
     else
         return _T("");
 }
+
+wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
+
+    if(slot == 0){
+        if(isSlotAssignedToAnyDongle( 0 )){
+            if(!sysID0.IsSameAs(g_dongleName))
+                tcolour = wxColour(128, 128, 128);
+            return _("USB Dongle Key") + _T("  [ ") + sysID0 +_T(" ]");
+        }
+        else{
+            if (sysID0.Length())
+                return _("System Key") + _T("  [ ") + sysID0 +_T(" ]");
+            else
+                return _T("");
+        }
+
+    }
+
+    if(slot == 1){
+        if(isSlotAssignedToAnyDongle( 1 )){
+             if(!sysID1.IsSameAs(g_dongleName))
+                tcolour = wxColour(128, 128, 128);
+            return _("USB Dongle Key") + _T("  [ ") + sysID1 +_T(" ]");
+        }
+        else{
+            if (sysID1.Length())
+                return _("System Key") + _T("  [ ") + sysID1 +_T(" ]");
+            else
+                return _T("");
+        }
+    }
+    
+    return _T("");
+}
+
 
 wxBitmap& itemChart::GetChartThumbnail(int size)
 {
@@ -1817,23 +1866,49 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         
         tx = _("Status:");
         dc.DrawText( tx, text_x, yPos);
-        tx = m_pChart->getStatusString();
-        if(g_statusOverride.Len())
-            tx = g_statusOverride;
-        dc.DrawText( tx, text_x_val, yPos);
+         tx = m_pChart->getStatusString();
+         if(g_statusOverride.Len())
+             tx = g_statusOverride;
+         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
 
+        tx = _("Assignments:");
+        dc.DrawText( tx, text_x, yPos);
+        
+        wxColor tcolor = wxColour(0,0,0);
+        tx = _("Slot 1: ");
+        wxString txs = m_pChart->getKeytypeString( 0, tcolor );
+        tx += txs;
+        if(!txs.Length())
+            tx += _("Available");
+        dc.SetTextForeground(tcolor);
+        dc.DrawText( tx, text_x_val, yPos);
+        dc.SetTextForeground(wxColour(0,0,0));
+        
+        yPos += yPitch;
+
+        tcolor = wxColour(0,0,0);
+        tx = _("Slot 2: ");
+        txs = m_pChart->getKeytypeString( 1, tcolor );
+        tx += txs;
+        if(!txs.Length())
+            tx += _("Available");
+        dc.SetTextForeground(tcolor);
+        dc.DrawText( tx, text_x_val, yPos);
+        dc.SetTextForeground(wxColour(0,0,0));
+        yPos += yPitch;
+       
         //  If the chart is unassigned, then there is no defined "key type".
-        if(m_pChart->m_status != STAT_PURCHASED){
-            tx = m_pChart->getKeytypeString();
-            if(tx.Len()){
-                tx = _("Key type:");
-                dc.DrawText( tx, text_x, yPos);
-                tx = m_pChart->getKeytypeString();
-                dc.DrawText( tx, text_x_val, yPos);
-                yPos += yPitch;
-            }
-        }
+//         if(m_pChart->m_status != STAT_PURCHASED){
+//             tx = m_pChart->getKeytypeString();
+//             if(tx.Len()){
+//                 tx = _("Key type:");
+//                 dc.DrawText( tx, text_x, yPos);
+//                 tx = m_pChart->getKeytypeString();
+//                 dc.DrawText( tx, text_x_val, yPos);
+//                 yPos += yPitch;
+//             }
+//         }
 
 
 #if 0        
@@ -2575,7 +2650,8 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
                 slot = 1;
         }
     }
-    else{
+    
+    if( slot < 0 ){
         if(chart->statusID0.IsSameAs(_T("requestable"))){
             if( chart->sysID0.IsSameAs(g_systemName) )
                 slot = 0;
@@ -2585,7 +2661,14 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
                 slot = 1;
         }
     }
-        
+    
+    // Check ambiguous case:
+    // System FPR assigned/requestable, but dongle installed and one slot is available
+    // In this case we want to select the dongle, and assign it to the empty slot.
+    if(g_dongleName.Length() && !chart->isChartsetFullyAssigned()){
+        slot = -1;
+    }
+
     if(slot < 0){                       // need assigment
         bNeedAssign = true;
             // Choose the first available slot

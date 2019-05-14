@@ -92,7 +92,8 @@ public:
     int getChartStatus();
     wxBitmap& GetChartThumbnail(int size);
     wxString getKeytypeString();
-    
+    wxString getKeytypeString( int slot, wxColour &tcolor );
+
     //wxString ident;
     
     wxString orderRef;
