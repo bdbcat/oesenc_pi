@@ -480,7 +480,7 @@ wxString itemChart::getStatusString()
             break;
             
         case STAT_PURCHASED:
-            sret = _("Available.");
+            sret = _("Available");
             break;
             
         case STAT_CURRENT:
@@ -1882,7 +1882,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         dc.DrawText( tx, text_x, yPos);
         
         wxColor tcolor = wxColour(0,0,0);
-        tx = _("1: ");
+        tx = _T("1: ");
         wxString txs = m_pChart->getKeytypeString( 0, tcolor );
         tx += txs;
         if(!txs.Length())
@@ -1894,7 +1894,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         yPos += yPitch;
 
         tcolor = wxColour(0,0,0);
-        tx = _("2: ");
+        tx = _T("2: ");
         txs = m_pChart->getKeytypeString( 1, tcolor );
         tx += txs;
         if(!txs.Length())
