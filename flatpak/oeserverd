@@ -1,0 +1,4 @@
+#!/bin/bash
+here=$(dirname $(readlink -fn $0))
+export PATH=$PATH:$here
+exec $here/oeserverd.prog $@
