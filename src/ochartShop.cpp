@@ -1408,7 +1408,7 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, bool
 {
     bool ret = true;
     
-    std::auto_ptr<wxZipEntry> entry(new wxZipEntry());
+    std::unique_ptr<wxZipEntry> entry(new wxZipEntry());
     
     do
     {
@@ -2189,7 +2189,6 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
     sysBox->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
     
-
     wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Charts")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
@@ -3414,7 +3413,7 @@ bool shopPanel::doSystemNameWizard( bool *bnew )
         wxString sName = dlg.getRBSelection();
         if(g_systemNameChoiceArray.Index(sName) == wxNOT_FOUND){
             // Is it the dongle selected?
-            if(sName.Index(_T("Dongle")) != wxNOT_FOUND){
+            if(sName.Find(_T("Dongle")) != wxNOT_FOUND){
                 wxString ssName = sName.Mid(0, 11);
                 g_systemNameChoiceArray.Insert(ssName, 0);
                 sName = ssName;

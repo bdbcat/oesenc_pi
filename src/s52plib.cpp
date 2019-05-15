@@ -4950,8 +4950,8 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     if( rzRules->obj->m_n_lsindex  && !rzRules->obj->m_ls_list) 
         return RenderLCLegacy(rzRules, rules, vp);
     
-    wxPoint *ptp;
-    int npt;
+   // wxPoint *ptp;
+    //int npt;
     wxPoint r;
     
     
@@ -5189,8 +5189,8 @@ int s52plib::RenderLCLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     
     //  Must be cm93
         
-    wxPoint *ptp;
-    int npt;
+    //wxPoint *ptp;
+    //int npt;
     wxPoint r;
 
     int isym_len = rules->razRule->pos.line.bnbox_w.SYHL;
@@ -5359,7 +5359,7 @@ int s52plib::RenderLCLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
 int s52plib::RenderLCPlugIn( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 {
-    int npt;
+    //int npt;
     wxPoint r;
     
     int isym_len = rules->razRule->pos.line.bnbox_w.SYHL;
@@ -5384,7 +5384,7 @@ int s52plib::RenderLCPlugIn( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         
     if( rzRules->obj->m_ls_list_legacy )
     {
-        float *ppt;
+        //float *ppt;
         
         VE_Element *pedge;
         PI_line_segment_element *ls = rzRules->obj->m_ls_list_legacy;
@@ -10652,8 +10652,8 @@ void s52plib::PLIB_LoadS57ObjectConfig()
     //    Get a pointer to the opencpn configuration object
     wxFileConfig *pconfig = GetOCPNConfigObject();
 
-    int read_int;
-    double dval;
+    //int read_int;
+    //double dval;
 
     //    S57 Object Class Visibility
     
@@ -10838,7 +10838,7 @@ void s52plib::SetAnchorOn(bool val)
 
 void s52plib::SetQualityOfData(bool val)
 {
-    int old_vis = GetQualityOfData();
+    bool old_vis = GetQualityOfData() == 1;
     if(old_vis == val)
         return;
     
