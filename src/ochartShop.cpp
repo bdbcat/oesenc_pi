@@ -547,8 +547,11 @@ wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
             return _("USB Dongle Key") + _T("  [ ") + sysID0 +_T(" ]");
         }
         else{
-            if (sysID0.Length())
+            if (sysID0.Length()){
+                if( !sysID0.IsSameAs(g_systemName) )
+                    tcolour = wxColour(128, 128, 128);
                 return _("System Key") + _T("  [ ") + sysID0 +_T(" ]");
+            }
             else
                 return _T("");
         }
@@ -562,8 +565,11 @@ wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
             return _("USB Dongle Key") + _T("  [ ") + sysID1 +_T(" ]");
         }
         else{
-            if (sysID1.Length())
+            if (sysID1.Length()){
+                if( !sysID1.IsSameAs(g_systemName) )
+                    tcolour = wxColour(128, 128, 128);
                 return _("System Key") + _T("  [ ") + sysID1 +_T(" ]");
+            }
             else
                 return _T("");
         }
