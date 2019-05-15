@@ -2703,9 +2703,11 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
 
     // Choose the "active" slot and action
     int activeSlot = GetActiveSlotAction( chart );
-    
     if(activeSlot < 0){
-        OCPNMessageBox_PlugIn(GetOCPNCanvasWindow(), _("Unable to determine requested ACTION\nPlease contact o-charts support"), _("oeSENC_pi Message"), wxOK);
+        wxString msg(_("Unable to determine requested ACTION"));
+        msg += _T("\n");
+        msg += _("Please contact o-charts support.");
+        OCPNMessageBox_PlugIn(GetOCPNCanvasWindow(), msg, _("oeSENC_pi Message"), wxOK);
         return;
     }       
 
@@ -2717,43 +2719,6 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         doDownloadGui();
         return;
     }
-
-#if 0    
-    // Is chart already in "download" state for me?
-    int dlSlot = -1;
-    if(chart->isChartsetAssignedToAnyDongle()){
-        if(chart->isSlotAssignedToMyDongle( 0 )){
-            if(chart->statusID0.IsSameAs(_T("download"))){
-                dlSlot = 0;
-            }
-        }
-
-        else if(chart->isSlotAssignedToMyDongle( 1 )){
-            if(chart->statusID1.IsSameAs(_T("download"))){
-                dlSlot = 1;
-            }
-        }            
-    }
-    
-    else{
-        if(chart->statusID0.IsSameAs(_T("download"))){
-            if(chart->sysID0.IsSameAs(g_systemName))
-                dlSlot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("download"))){
-            if(chart->sysID1.IsSameAs(g_systemName))
-                dlSlot = 1;
-        }
-    }
-    
-    if(dlSlot >= 0){
-        m_activeSlot = dlSlot;
-        m_startedDownload = false;
-        doDownloadGui();
-        return;
-    }
-    
-#endif
 
     // Otherwise, do the assign/prepare steps
     
@@ -2805,70 +2770,6 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         m_action = ACTION_REQUEST_SYSTEM;
     } 
         
-#if 0        
-    int slot = -1;
-    bool bNeedAssign = false;
-    
-    
-    
-    //  Check if I am already assigned to this chart
-    if(g_dongleName.Length()){
-        if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if( chart->sysID0.IsSameAs(g_dongleName))
-            slot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if( chart->sysID1.IsSameAs(g_dongleName))
-                slot = 1;
-        }
-    }
-    
-    if( slot < 0 ){
-        if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if( chart->sysID0.IsSameAs(g_systemName) )
-                slot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if( chart->sysID1.IsSameAs(g_systemName) )
-                slot = 1;
-        }
-    }
-    
-    // Check ambiguous case:
-    // System FPR assigned/requestable, but dongle installed and one slot is available
-    // In this case we want to select the dongle, and assign it to the empty slot.
-    if(g_dongleName.Length() && !chart->isChartsetFullyAssigned()){
-        slot = -1;
-    }
-
-    if(slot < 0){                       // need assigment
-        bNeedAssign = true;
-            // Choose the first available slot
-        
-        if(chart->statusID0.IsSameAs(_T("unassigned"))){
-            slot = 0;
-        }
-        else if(chart->statusID1.IsSameAs(_T("unassigned"))){
-            slot = 1;
-        }
-    }
-        
-    int assignResult;
-    if(bNeedAssign){
-        if(g_dongleName.Len())
-            assignResult = doAssign(chart, slot, g_dongleName);
-        else
-            assignResult = doAssign(chart, slot, g_systemName);
-            
-        if(assignResult != 0){
-            g_statusOverride.Clear();
-            setStatusText( _("Status: Assignment error"));
-            m_buttonInstall->Enable();
-            return;
-        }
-    }
-#endif
-
     m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
     m_ChartSelectedOrder = chart->orderRef;
     m_ChartSelectedQty = chart->quantityId;
@@ -2877,218 +2778,9 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         doPrepareGUI();
     }
 
-#if 0        
-        
-        // Is the selected chart ready for download?
-            // If not, we do the "Request/Prepare" step
-        bool bNeedRequestWait = false;    
-        if(m_activeSlot == 0){
-                if(!chart->statusID0.IsSameAs(_T("download")))
-                    bNeedRequestWait = true;
-        }
-        else if(m_activeSlot == 1){
-                if(!chart->statusID1.IsSameAs(_T("download")))
-                    bNeedRequestWait = true;
-        }
-        
-        int request_return;
-        if(bNeedRequestWait){
-            request_return = doPrepareGUI();
-            return;
-        }
-        else{
-            m_startedDownload = false;
-            doDownloadGui();
-        }
-#endif        
-            
-
     return;
     
 }
-#if 0
-void shopPanel::OnButtonInstall( wxCommandEvent& event )
-{
-        // Check the dongle
-    g_dongleName.Clear();
-    if(IsDongleAvailable()){
-        g_dongleSN = GetDongleSN();
-        char sName[20];
-        snprintf(sName, 19, "sgl%08X", g_dongleSN);
-
-        g_dongleName = wxString(sName);
-    }
-
-    m_buttonInstall->Disable();
-    m_buttonCancelOp->Show();
-    
-    itemChart *chart = m_ChartSelected->m_pChart;
-    if(!chart)
-        return;
-
-    // Choose the "active" slot
-    int activeSlot = GetActiveSlotAction( chart );
-    
-    // Is chart already in "download" state for me?
-    int dlSlot = -1;
-    if(chart->isChartsetAssignedToAnyDongle()){
-        if(chart->isSlotAssignedToMyDongle( 0 )){
-            if(chart->statusID0.IsSameAs(_T("download"))){
-                dlSlot = 0;
-            }
-        }
-
-        else if(chart->isSlotAssignedToMyDongle( 1 )){
-            if(chart->statusID1.IsSameAs(_T("download"))){
-                dlSlot = 1;
-            }
-        }            
-    }
-    
-    else{
-        if(chart->statusID0.IsSameAs(_T("download"))){
-            if(chart->sysID0.IsSameAs(g_systemName))
-                dlSlot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("download"))){
-            if(chart->sysID1.IsSameAs(g_systemName))
-                dlSlot = 1;
-        }
-    }
-    
-    if(dlSlot >= 0){
-        m_activeSlot = dlSlot;
-        m_startedDownload = false;
-        doDownloadGui();
-        return;
-    }
-    
-    // Otherwise, do the assign/prepare steps
-    
-    // Is this systemName known to the server?
-    //   If not, need to upload XFPR first
-    
-    // Prefer to use the dongle, if present
-    if(g_dongleName.Len()){
-        if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
-            if( doUploadXFPR( true ) != 0){
-                g_statusOverride.Clear();
-                setStatusText( _("Status: Dongle FPR upload error"));
-                return;
-            }
-        }
-    }
-    else{
-        if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
-            if( doUploadXFPR( false ) != 0){
-                g_statusOverride.Clear();
-                setStatusText( _("Status: System FPR upload error"));
-                return;
-            }
-        }
-    }
-
-    int slot = -1;
-    bool bNeedAssign = false;
-    
-    
-    
-    //  Check if I am already assigned to this chart
-    if(g_dongleName.Length()){
-        if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if( chart->sysID0.IsSameAs(g_dongleName))
-            slot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if( chart->sysID1.IsSameAs(g_dongleName))
-                slot = 1;
-        }
-    }
-    
-    if( slot < 0 ){
-        if(chart->statusID0.IsSameAs(_T("requestable"))){
-            if( chart->sysID0.IsSameAs(g_systemName) )
-                slot = 0;
-        }
-        if(chart->statusID1.IsSameAs(_T("requestable"))){
-            if( chart->sysID1.IsSameAs(g_systemName) )
-                slot = 1;
-        }
-    }
-    
-    // Check ambiguous case:
-    // System FPR assigned/requestable, but dongle installed and one slot is available
-    // In this case we want to select the dongle, and assign it to the empty slot.
-    if(g_dongleName.Length() && !chart->isChartsetFullyAssigned()){
-        slot = -1;
-    }
-
-    if(slot < 0){                       // need assigment
-        bNeedAssign = true;
-            // Choose the first available slot
-        
-        if(chart->statusID0.IsSameAs(_T("unassigned"))){
-            slot = 0;
-        }
-        else if(chart->statusID1.IsSameAs(_T("unassigned"))){
-            slot = 1;
-        }
-    }
-        
-    int assignResult;
-    if(bNeedAssign){
-        if(g_dongleName.Len())
-            assignResult = doAssign(chart, slot, g_dongleName);
-        else
-            assignResult = doAssign(chart, slot, g_systemName);
-            
-        if(assignResult != 0){
-            g_statusOverride.Clear();
-            setStatusText( _("Status: Assignment error"));
-            m_buttonInstall->Enable();
-            return;
-        }
-    }
-    
-    if(1){
-        m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
-        m_ChartSelectedOrder = chart->orderRef;
-        m_ChartSelectedQty = chart->quantityId;
-        
-        m_activeSlot = slot;
-        
-        if(m_activeSlot < 0)
-            return;
-        
-        // Is the selected chart ready for download?
-            // If not, we do the "Request/Prepare" step
-        bool bNeedRequestWait = false;    
-        if(m_activeSlot == 0){
-                if(!chart->statusID0.IsSameAs(_T("download")))
-                    bNeedRequestWait = true;
-        }
-        else if(m_activeSlot == 1){
-                if(!chart->statusID1.IsSameAs(_T("download")))
-                    bNeedRequestWait = true;
-        }
-        
-        int request_return;
-        if(bNeedRequestWait){
-            request_return = doPrepareGUI();
-            return;
-        }
-        else{
-            m_startedDownload = false;
-            doDownloadGui();
-        }
-            
-    }
-
-    return;
-    
-}
-#endif
-
 
 int shopPanel::doPrepareGUI()
 {
