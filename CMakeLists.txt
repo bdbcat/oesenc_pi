@@ -12,6 +12,10 @@ IF (COMMAND cmake_policy)
   CMAKE_POLICY(SET CMP0003 OLD)
   CMAKE_POLICY(SET CMP0005 OLD)
   CMAKE_POLICY(SET CMP0011 OLD)
+  CMAKE_POLICY(SET CMP0037 OLD)
+  if (POLICY CMP0053)
+      CMAKE_POLICY(SET CMP0053 NEW)
+  endif ()
 ENDIF (COMMAND cmake_policy)
 
 PROJECT(oesenc_pi)
@@ -33,8 +37,10 @@ SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
 
 SET(OCPN_MIN_VERSION "ov50")
 OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
+OPTION(OCPN_FLATPAK "Build flatpak plugin" OFF)
  
-#SET(CMAKE_BUILD_TYPE Release)
+include("cmake/PluginSetup.cmake")
+set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 IF( NOT CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE Release CACHE STRING
@@ -153,6 +159,33 @@ ENDIF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
 MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 MESSAGE (STATUS "*** CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 MESSAGE (STATUS "*** PACKAGE_FORMAT is ${PACKAGE_FORMAT}")
+
+if (OCPN_FLATPAK)
+    find_program(TAR NAMES gtar tar)
+    if (NOT TAR)
+        message(FATAL_ERROR "tar not found, required for OCPN_FLATPAK")
+    endif ()
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml
+    )
+    add_custom_target(flatpak-build ALL
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/flatpak
+        COMMAND flatpak-builder --force-clean
+            ${CMAKE_CURRENT_BINARY_DIR}/app
+            org.opencpn.OpenCPN.Plugin.oesenc.yaml
+    )
+    add_custom_target("package")
+    add_custom_command(
+        TARGET package
+        COMMAND ${TAR}
+            -czf ${PKG_NVR}_${PKG_TARGET_NVR}.tar.gz
+            --transform 's|.*/files/|oesenc_pi-flatpak-${PACKAGE_VERSION}/|'
+            ${CMAKE_CURRENT_BINARY_DIR}/app/files
+    )
+    return ()
+endif()
+
 
 
 #  To build for android, use this cmake invocation..
@@ -519,8 +552,6 @@ INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
 
-set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
-message(STATUS "Build target: ${PKG_TARGET}-${PKG_TARGET_VERSION}")
 configure_file(
   ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
   ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml

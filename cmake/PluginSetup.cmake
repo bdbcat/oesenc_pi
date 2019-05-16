@@ -16,7 +16,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-if (MINGW)
+if (OCPN_FLATPAK)
+    set(PKG_TARGET "flatpak")
+    set(PKG_TARGET_VERSION "18.08")    # As of flatpak/*yaml
+elseif (MINGW)
     set(PKG_TARGET "mingw")
     if (CMAKE_SYSTEM_VERSION)
         set(PKG_TARGET_VERSION ${CMAKE_SYSTEM_VERSION})
