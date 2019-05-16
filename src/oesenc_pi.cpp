@@ -2431,8 +2431,8 @@ void ShowGenericErrorMessage()
 _("This chart cannot be loaded due to any of the following reasons:\n\n\
 - You have made important hardware changes on your computer.\n\
 - Your OS has been updated and your license has been suspended.\n\
-- This chart set was encrypted for another system.\n\
-- This chart set was encrypted for a USB key dongle, but dongle is not detected.\n\
+- This chart set was prepared for another system.\n\
+- This chart set was prepared for a USB key dongle, but dongle is not detected.\n\
 - There are corrupted files due to errors during download or unzip.\n\n\
 Please contact info@o-charts.org if the problem persists.\n");
 
@@ -3599,7 +3599,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         content->SetSizer(bSizer2);
         
         // Plugin Version
-        wxString versionText = _T(" oeSENC Version: ") + g_versionString;
+        wxString versionText = _(" oeSENC Version: ") + g_versionString;
         wxStaticText *versionTextBox = new wxStaticText(content, wxID_ANY, versionText);
         bSizer2->Add(versionTextBox, 1, wxALL | wxALIGN_CENTER_HORIZONTAL, 20 );
  
@@ -3630,7 +3630,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
 
 #ifndef OCPN_ARM64        
-        m_buttonNewDFPR = new wxButton( content, wxID_ANY, _("Create USB key System ID file..."), wxDefaultPosition, wxDefaultSize, 0 );
+        m_buttonNewDFPR = new wxButton( content, wxID_ANY, _("Create USB key dongle System ID file..."), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 5 );
         bSizer2->Add( m_buttonNewDFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
@@ -4141,7 +4141,7 @@ void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
         
         // Check for missing dongle...
         if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT"))){
-            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n USB key dongle not detected."), _("oeSENC_pi Message"), wxOK);
+            OCPNMessageBox_PlugIn(NULL, _("ERROR Creating Fingerprint file\n USB key dongle not detected."), _("oeSENC_pi Message"), wxOK);
             return;
         }
         
@@ -4158,7 +4158,7 @@ void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
             
         }
         else{
-            OCPNMessageBox_PlugIn(NULL, _T("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
+            OCPNMessageBox_PlugIn(NULL, _("ERROR Creating Fingerprint file\n Check OpenCPN log file."), _("oeSENC_pi Message"), wxOK);
         }
         
         g_fpr_file = fpr_file;
@@ -5493,13 +5493,13 @@ oesencPanel::oesencPanel( oesenc_pi* plugin, wxWindow* parent, wxWindowID id, co
     wxBoxSizer* bSizerBtns = new wxBoxSizer( wxVERTICAL );
     mainSizer->Add( bSizerBtns, 0, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, border_size );
     
-    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oeSENC chartsets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    m_bManageCharts = new wxButton( this, wxID_ANY, _("Add/Update oeSENC chart sets"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     //m_bManageCharts->SetToolTip( _("Add a new chart catalog.") );
     bSizerBtns->Add( m_bManageCharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     
     m_bVisitOcharts = new wxButton( this, wxID_ANY, _("Visit o-charts.org Website"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_bVisitOcharts->SetToolTip( _("Here you may order new oeSENC chartsets.") );
+    m_bVisitOcharts->SetToolTip( _("Here you may order new oeSENC chart sets.") );
     bSizerBtns->Add( m_bVisitOcharts, 0, wxALL|wxEXPAND, 20 );
     bSizerBtns->AddSpacer(20);
     

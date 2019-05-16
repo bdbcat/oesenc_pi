@@ -497,7 +497,7 @@ wxString itemChart::getStatusString()
             break;
             
         case STAT_PREPARING:
-            sret = _("Preparing your chartset.");
+            sret = _("Preparing your chart set.");
             break;
             
         case STAT_READY_DOWNLOAD:
@@ -525,9 +525,9 @@ wxString itemChart::getKeytypeString(){
  
     if(isChartsetAssignedToAnyDongle()){
         if(isSlotAssignedToAnyDongle( 0 ))
-            return _("USB Dongle Key") + _T("  [ ") + sysID0 +_T(" ]");
+            return _("USB Key Dongle") + _T("  [ ") + sysID0 +_T(" ]");
         if(isSlotAssignedToAnyDongle( 1 ))
-            return _("USB Dongle Key") + _T("  [ ") + sysID1 +_T(" ]");
+            return _("USB Key Dongle") + _T("  [ ") + sysID1 +_T(" ]");
         else
          return _T("");
     }
@@ -544,7 +544,7 @@ wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
         if(isSlotAssignedToAnyDongle( 0 )){
             if(!sysID0.IsSameAs(g_dongleName))
                 tcolour = wxColour(128, 128, 128);
-            return _("USB Dongle Key") + _T("  [ ") + sysID0 +_T(" ]");
+            return _("USB Key Dongle") + _T("  [ ") + sysID0 +_T(" ]");
         }
         else{
             if (sysID0.Length()){
@@ -562,7 +562,7 @@ wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
         if(isSlotAssignedToAnyDongle( 1 )){
              if(!sysID1.IsSameAs(g_dongleName))
                 tcolour = wxColour(128, 128, 128);
-            return _("USB Dongle Key") + _T("  [ ") + sysID1 +_T(" ]");
+            return _("USB Key Dongle") + _T("  [ ") + sysID1 +_T(" ]");
         }
         else{
             if (sysID1.Length()){
@@ -1134,7 +1134,7 @@ int getChartList( bool bShowErrorDialogs = true){
 
 int doAssign(itemChart *chart, int slot, wxString systemName)
 {
-    wxString msg = _("This action will PERMANENTLY assign the chart:");
+    wxString msg = _("This action will PERMANENTLY assign the chart set:");
     msg += _T("\n        ");
     msg += chart->chartName;
     msg += _T("\n\n");
@@ -1287,13 +1287,13 @@ int doUploadXFPR(bool bDongle)
             
         }
         else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT")))
-            err = _("  [USB Dongle not found.]");
+            err = _("[USB Key Dongle not found.]");
             
         else
-            err = _("  [fpr file not found.]");
+            err = _("[fpr file not found.]");
     }
     else{
-        err = _("  [fpr file not created.]");
+        err = _("[fpr file not created.]");
     }
     
     if(err.Len()){
@@ -1489,7 +1489,7 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, bool
                 
                 wxFileOutputStream file(name);
                 
-                g_shopPanel->setStatusText( _("Unzipping chart files...") + fn.GetFullName());
+                g_shopPanel->setStatusText( _("Unzipping chart set files...") + fn.GetFullName());
                 wxYield();
                 
                 if( !file )
@@ -1542,7 +1542,7 @@ int doUnzip(itemChart *chart, int slot)
         else if(g_lastInstallDir.Length())
             installLocn = g_lastInstallDir;
         
-        wxDirDialog dirSelector( NULL, _("Choose chart install location."), installLocn, wxDD_DEFAULT_STYLE  );
+        wxDirDialog dirSelector( NULL, _("Choose chart set install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
         
         if(result == wxID_OK){
@@ -1556,14 +1556,14 @@ int doUnzip(itemChart *chart, int slot)
         chosenInstallDir = installDir;
     }
     
-    g_shopPanel->setStatusText( _("Ready for unzipping chart files."));
+    g_shopPanel->setStatusText( _("Ready for unzipping chart set files."));
     g_shopPanel->Refresh(true);
     wxYield();
     
     // Ready for unzip
     if( downloadFile.Lower().EndsWith(_T("zip")) ) //Zip compressed
     {
-        g_shopPanel->setStatusText( _("Unzipping chart files..."));
+        g_shopPanel->setStatusText( _("Unzipping chart set files..."));
         wxYield();
         
         ::wxBeginBusyCursor();
@@ -1663,6 +1663,9 @@ int doUnzip(itemChart *chart, int slot)
     }
     
     g_lastInstallDir = chosenInstallDir;
+    
+    // We can delete the downloaded zip file here
+    wxRemoveFile( downloadFile );
     
     ForceChartDBUpdate();
     
@@ -1846,7 +1849,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         int text_x_val = scaledWidth + ((width - scaledWidth) * 4 / 10);
         
         // Create and populate the current chart information
-        tx = _("Chart Edition:");
+        tx = _("Chart Set Edition:");
         dc.DrawText( tx, text_x, yPos);
         tx = m_pChart->currentChartEdition;
         dc.DrawText( tx, text_x_val, yPos);
@@ -1886,7 +1889,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         wxString txs = m_pChart->getKeytypeString( 0, tcolor );
         tx += txs;
         if(!txs.Length())
-            tx += _("Available");
+            tx += _("Unassigned");
         dc.SetTextForeground(tcolor);
         dc.DrawText( tx, text_x_val, yPos);
         dc.SetTextForeground(wxColour(0,0,0));
@@ -1898,7 +1901,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         txs = m_pChart->getKeytypeString( 1, tcolor );
         tx += txs;
         if(!txs.Length())
-            tx += _("Available");
+            tx += _("Unassigned");
         dc.SetTextForeground(tcolor);
         dc.DrawText( tx, text_x_val, yPos);
         dc.SetTextForeground(wxColour(0,0,0));
@@ -1917,119 +1920,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
 //         }
 
 
-#if 0        
-        dc.SetBrush( wxBrush( m_boxColour ) );
-        
-        GetGlobalColor( _T ( "UITX1" ), &c );
-        dc.SetPen( wxPen( c, 3 ));
-        
-        dc.DrawRoundedRectangle( 0, 0, width-1, height-1, height / 10);
-         
-        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
-        double font_size = dFont->GetPointSize() * 4/3;
-        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
-
-        dc.SetFont( *qFont );
-        dc.SetTextForeground(wxColour(0,0,0));
-        dc.DrawText(m_pChart->chartName, 5, 5);
-        
-        dc.SetFont( *dFont );
-        
-        int offset = GetCharHeight();
-        
-        int yPitch = GetCharHeight();
-        int yPos = yPitch * 2;
-        int xcolumn = GetCharHeight();
-        wxString tx; 
-        // Create and populate the current chart information
-/*        
-        <order>OAUMRVVRP</order>
-        <purchase>2017-07-06 19:27:41</purchase>
-        <expiration>2018-07-06 19:27:41</expiration>
-        <chartid>10</chartid>
-        <chartEdition>2018-2</chartEdition>
-        <chartPublication>1522533600</chartPublication>
-        <chartName>Netherlands and Belgium 2017</chartName>
-        <quantityId>1</quantityId>
-        
-        <slot>1</slot>
-        <assignedSystemName />
-        <lastRequested />
-        <state>unassigned</state>
-        <link />
-  */      
-        tx = _("Chart Edition: ") + m_pChart->currentChartEdition;
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-
-        tx = _("Order Reference: ") + m_pChart->orderRef;
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-
-        yPos = yPitch * 2;
-        xcolumn = width / 2;
-        
-        tx = _("Purchase date: ") + m_pChart->purchaseDate;
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-        
-        tx = _("Expiration date: ") + m_pChart->expDate;
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-        
-        dc.DrawLine( offset, yPos + 3, width - offset, yPos + 3);
-        yPos += 6;
-        
-        
-        //  The two assignment slots
-        xcolumn = GetCharHeight();
-        int yTable = yPos;
-        wxString adjStatus;
-        
-        tx = _("Assigment 1");
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-        
-        tx = _("System: ") + m_pChart->sysID0;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
-        
-        tx = _("Installed edition: ") + m_pChart->lastRequestEdition0;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
-        
-        adjStatus = m_pChart->statusID0;
-//         if(adjStatus.IsSameAs(_T("requestable")))
-//             adjStatus = _("ok");
-        
-        tx = _("Status: ") + adjStatus;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
- 
-        yPos = yTable;
-        xcolumn = width / 2;
-        
-        tx = _("Assigment 2");
-        dc.DrawText( tx, xcolumn, yPos);
-        yPos += yPitch;
-        
-        tx = _("System: ") + m_pChart->sysID1;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
-        
-        tx = _("Installed edition: ") + m_pChart->lastRequestEdition1;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
-        
-        adjStatus = m_pChart->statusID1;
-//        if(adjStatus.IsSameAs(_T("requestable")))
-//            adjStatus = _("ok");
-        
-        tx = _("Status: ") + adjStatus;
-        dc.DrawText( tx, xcolumn + yPitch, yPos);
-        yPos += yPitch;
-#endif
-        
+       
         
     }
     else{
@@ -2195,7 +2086,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
     sysBox->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
     
-    wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Charts")), wxVERTICAL);
+    wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Chart Sets")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
     wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
@@ -2223,7 +2114,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     wxGridSizer* gridSizerActionButtons = new wxGridSizer(1, 2, 0, 0);
     staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
     
-    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     gridSizerActionButtons->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
     m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
@@ -2240,14 +2131,6 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
     m_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
     staticBoxSizerAction->Add(m_ipGauge, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, WXC_FROM_DIP(5));
-/*
-    wxString sn = _("System Name:");
-    sn += _T(" ");
-    sn += g_systemName;
-    
-    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    staticBoxSizerAction->Add(m_staticTextSystemName, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-*/    
     
     SetName(wxT("shopPanel"));
     //SetSize(500,600);
@@ -2491,7 +2374,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             
             if(m_bAbortingDownload){
                 m_bAbortingDownload = false;
-                OCPNMessageBox_PlugIn(NULL, _("Chart download cancelled."), _("oeSENC_PI Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, _("Chart set download cancelled."), _("oeSENC_PI Message"), wxOK);
                 m_buttonInstall->Enable();
                 return;
             }
@@ -2504,7 +2387,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             // Does the download destination file exist?
             
             if(!::wxFileExists( chart->downloadingFile )){
-                OCPNMessageBox_PlugIn(NULL, _("Chart download error, missing file."), _("oeSENC_PI Message"), wxOK);
+                OCPNMessageBox_PlugIn(NULL, _("Chart set download error, missing file."), _("oeSENC_PI Message"), wxOK);
                 m_buttonInstall->Enable();
                 return;
             }
@@ -2539,7 +2422,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
                 chart->fileDownloadPath1 = chart->downloadingFile;
             }
              
-            wxString msg = _("Chart download complete.");
+            wxString msg = _("Chart set download complete.");
             msg +=_T("\n\n");
             msg += _("Proceed to install?");
             msg += _T("\n\n");
@@ -2557,7 +2440,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
                     setStatusText( _("Status: Ready"));
                 
                     if(0 == rv)
-                        OCPNMessageBox_PlugIn(NULL, _("Chart installation complete."), _("oeSENC_pi Message"), wxOK);
+                        OCPNMessageBox_PlugIn(NULL, _("Chart set installation complete."), _("oeSENC_pi Message"), wxOK);
                 
                     UpdateChartList();
                 }
@@ -2565,6 +2448,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
                     break;
 
             }
+            
             
             m_buttonInstall->Enable();
             return;
@@ -2729,7 +2613,7 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
             if( doUploadXFPR( true ) != 0){
                 g_statusOverride.Clear();
-                setStatusText( _("Status: Dongle FPR upload error"));
+                setStatusText( _("Status: USB Key Dongle FPR upload error"));
                 return;
             }
         }
@@ -2949,7 +2833,7 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         if(m_ipGauge)
             m_ipGauge->SetValue(100);
         
-        wxString msg = _("Your chart preparation is not complete.");
+        wxString msg = _("Your chart set preparation is not complete.");
         msg += _T("\n");
         msg += _("You may continue to wait, or return to this screen later to complete the download.");
         msg += _T("\n");
@@ -3053,23 +2937,23 @@ void shopPanel::UpdateActionControls()
 
 
     if(chart->getChartStatus() == STAT_PURCHASED){
-        m_buttonInstall->SetLabel(_("Install Selected Chart"));
+        m_buttonInstall->SetLabel(_("Install Selected Chart Set"));
         m_buttonInstall->Show();
     }
     else if(chart->getChartStatus() == STAT_CURRENT){
-        m_buttonInstall->SetLabel(_("Reinstall Selected Chart"));
+        m_buttonInstall->SetLabel(_("Reinstall Selected Chart Set"));
         m_buttonInstall->Show();
     }
     else if(chart->getChartStatus() == STAT_STALE){
-        m_buttonInstall->SetLabel(_("Update Selected Chart"));
+        m_buttonInstall->SetLabel(_("Update Selected Chart Set"));
         m_buttonInstall->Show();
     }
     else if(chart->getChartStatus() == STAT_READY_DOWNLOAD){
-        m_buttonInstall->SetLabel(_("Download Selected Chart"));
+        m_buttonInstall->SetLabel(_("Download Selected Chart Set"));
         m_buttonInstall->Show();       
     }
     else if(chart->getChartStatus() == STAT_REQUESTABLE){
-        m_buttonInstall->SetLabel(_("Download Selected Chart"));
+        m_buttonInstall->SetLabel(_("Download Selected Chart Set"));
         m_buttonInstall->Show();
     }
     else if(chart->getChartStatus() == STAT_PREPARING){
@@ -3566,6 +3450,8 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
         if(g_shopPanel->GetSelectedChart()){
             itemChart *chart = g_shopPanel->GetSelectedChart()->m_pChart;
             if(chart){
+                if( chart->downloadingFile.Length() )
+                    wxRemoveFile( chart->downloadingFile );
                 chart->downloadingFile.Clear();
             }
         }
