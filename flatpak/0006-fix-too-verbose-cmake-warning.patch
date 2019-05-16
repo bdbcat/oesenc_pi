@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c49e132..1919d35 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,9 @@ IF (COMMAND cmake_policy)
+   CMAKE_POLICY(SET CMP0003 OLD)
+   CMAKE_POLICY(SET CMP0005 OLD)
+   CMAKE_POLICY(SET CMP0011 OLD)
++  if (POLICY CMP0053)
++      CMAKE_POLICY(SET CMP0053 NEW)
++  endif ()
+ ENDIF (COMMAND cmake_policy)
+

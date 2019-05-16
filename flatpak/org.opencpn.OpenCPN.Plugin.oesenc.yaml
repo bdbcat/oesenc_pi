@@ -50,5 +50,7 @@ modules:
             path: 0004-Build-Add-flatpak-installation-path.patch
           - type: patch
             path: 0005-flatpak-Use-GetPluginDataDir-using-latest-API.patch
+          - type: patch
+            path: 0006-fix-too-verbose-cmake-warning.patch
           - type: file
             path: oeserverd
