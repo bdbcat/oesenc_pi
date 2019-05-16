@@ -1556,7 +1556,7 @@ int doUnzip(itemChart *chart, int slot)
         chosenInstallDir = installDir;
     }
     
-    g_shopPanel->setStatusText( _("Ready for unzipping set chart set files."));
+    g_shopPanel->setStatusText( _("Ready for unzipping chart set files."));
     g_shopPanel->Refresh(true);
     wxYield();
     

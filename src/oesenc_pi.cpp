@@ -2431,8 +2431,8 @@ void ShowGenericErrorMessage()
 _("This chart cannot be loaded due to any of the following reasons:\n\n\
 - You have made important hardware changes on your computer.\n\
 - Your OS has been updated and your license has been suspended.\n\
-- This chart set was encrypted for another system.\n\
-- This chart set was encrypted for a USB key dongle, but dongle is not detected.\n\
+- This chart set was prepared for another system.\n\
+- This chart set was prepared for a USB key dongle, but dongle is not detected.\n\
 - There are corrupted files due to errors during download or unzip.\n\n\
 Please contact info@o-charts.org if the problem persists.\n");
 
