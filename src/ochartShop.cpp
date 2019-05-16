@@ -1664,6 +1664,9 @@ int doUnzip(itemChart *chart, int slot)
     
     g_lastInstallDir = chosenInstallDir;
     
+    // We can delete the downloaded zip file here
+    wxRemoveFile( downloadFile );
+    
     ForceChartDBUpdate();
     
     saveShopConfig();
@@ -2445,6 +2448,7 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
                     break;
 
             }
+            
             
             m_buttonInstall->Enable();
             return;
@@ -3446,6 +3450,8 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
         if(g_shopPanel->GetSelectedChart()){
             itemChart *chart = g_shopPanel->GetSelectedChart()->m_pChart;
             if(chart){
+                if( chart->downloadingFile.Length() )
+                    wxRemoveFile( chart->downloadingFile );
                 chart->downloadingFile.Clear();
             }
         }
