@@ -78,6 +78,8 @@ wxString g_lastInstallDir;
 
 unsigned int g_dongleSN;
 wxString g_dongleName;
+double g_targetDownloadSizeMB;
+double g_targetDownloadSize;
 
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
@@ -1375,6 +1377,10 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     if(slot == 1)
         downloadURL = chart->fileDownloadURL1;
 
+    chart->filedownloadSize0.ToDouble(&g_targetDownloadSizeMB);
+    if( slot == 1 );
+        chart->filedownloadSize1.ToDouble(&g_targetDownloadSizeMB);
+    
     uri.Create(downloadURL);
     
     wxString serverFilename = uri.GetPath();
@@ -1393,7 +1399,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     //wxLogMessage(_T("fileTarget: ") + fileTarget);
     //wxLogMessage(_T("downloadFile: ") + downloadFile);
     
-    if(fileTarget.IsEmpty()){
+    if(fileTarget.IsEmpty() || !g_targetDownloadSizeMB ){
         wxLogMessage(_T("fileTarget is empty, download aborted"));
         return 0;
     }
@@ -2384,35 +2390,26 @@ void shopPanel::OnButtonInstallChain( wxCommandEvent& event )
             
             //We can check some data to be sure.
             
-            // Does the download destination file exist?
+            // Check the length
+            long dlFileLength = 0;
+            wxFile tFile(chart->downloadingFile);
+            if(tFile.IsOpened())
+                dlFileLength = tFile.Length();
+
+            double fileLength = (double)dlFileLength;
             
-            if(!::wxFileExists( chart->downloadingFile )){
+            bool lengthMatch = fabs(fileLength - g_targetDownloadSize) < (0.001 * g_targetDownloadSize);
+            
+            // Does the download destination file exist, and length match?
+            
+            if(!::wxFileExists( chart->downloadingFile) || !lengthMatch ){
                 OCPNMessageBox_PlugIn(NULL, _("Chart set download error, missing file."), _("oeSENC_PI Message"), wxOK);
                 m_buttonInstall->Enable();
                 return;
             }
             
-            /*        
-             *        long dlFileLength = 0;
-             *        
-             *        wxFile tFile(dlFile);
-             *        if(tFile.IsOpened())
-             *            dlFileLength = tFile.Length();
-             *        else
-             *            return;
-             *        
-             *        long testLength;
-             *        if(!dlSize.ToLong(&testLength))
-             *            return;
-             *        
-             *        if(testLength != dlFileLength){
-             *            OCPNMessageBox_PlugIn(NULL, _("Chart download error, wrong file length."), _("oeSENC_PI Message"), wxOK);
-             *            return;
-             }
-             */      
+
             // So far, so good.
-            
-            // Download exists
 
             // Update the records
             if(m_activeSlot == 0){
@@ -3472,6 +3469,7 @@ void OESENC_CURL_EvtHandler::onProgressEvent(wxCurlDownloadEvent &evt)
 {
     dl_now = evt.GetDownloadedBytes();
     dl_total = evt.GetTotalBytes();
+    g_targetDownloadSize = dl_total;
     
     // Calculate the gauge value
     if(evt.GetTotalBytes() > 0){
