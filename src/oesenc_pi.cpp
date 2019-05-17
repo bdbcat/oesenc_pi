@@ -3653,7 +3653,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
 #endif        
         // System Name
         if(g_systemName.Length()){
-            wxString nameText = _T(" System Name: ") + g_systemName;
+            wxString nameText = _T(" ") + _("System Name:") + _T(" ") + g_systemName;
             m_nameTextBox = new wxStaticText(content, wxID_ANY, nameText);
             bSizer2->AddSpacer( 20 );
             bSizer2->Add(m_nameTextBox, 1, wxTOP | wxBOTTOM | wxALIGN_CENTER_HORIZONTAL, 10 );
