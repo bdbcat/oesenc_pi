@@ -654,35 +654,38 @@ int oesenc_pi::Init(void)
     //        Specify the location of the oeserverd helper.
     wxFileName fn_exe(GetOCPN_ExePath());
     g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
+    if (!wxFileExists(g_sencutil_bin)) {
+        std::string path(find_in_path("oeserverd"));
+        if (path == "") {
+            wxLogWarning("Cannot locate oeserverd binary in $PATH");
+        }
+        else {
+            g_sencutil_bin = wxString(path.c_str());
+        }
+    }
        
-    
-#ifdef __WXMSW__
-    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-    _T("plugins\\oesenc_pi\\oeserverd.exe\"");
-#endif
-    
-#ifdef __WXOSX__
-    fn_exe.RemoveLastDir();
-    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-    _T("PlugIns/oesenc_pi/oeserverd\"");
-#endif
-    
-#ifdef __OCPN__ANDROID__
+#if defined(__OCPN__ANDROID__)
     wxString piLocn = GetPlugInPath(this); //*GetpSharedDataLocation();
     wxFileName fnl(piLocn);
     g_sencutil_bin = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("oeserverda");
     g_serverProc = 0;
 #endif
 
-#ifdef __linux__
-    std::string path(find_in_path("oeserverd"));
-    if (path == "") {
-	wxLogWarning("Cannot locate oeserverd binary in $PATH");
-    }
-    else {
-        g_sencutil_bin = wxString(path.c_str());
-    }
+
+    if (!wxFileExists(g_sencutil_bin)) {
+        // Should not happen (besides android), find_in_path() should fix it.
+        // But, just in case:
+#ifdef __WXMSW__
+        g_sencutil_bin = _T("\"")
+            + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR)
+            + _T("plugins\\oesenc_pi\\oeserverd.exe\"");
+#elif defined(__WXOSX__)
+        fn_exe.RemoveLastDir();
+        g_sencutil_bin = _T("\"")
+            + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR)
+            + _T("PlugIns/oesenc_pi/oeserverd\"");
 #endif
+    }
 
 #if !defined(__WXMSW__) && !defined(__WXMAC__)
     // Set environment variable to find the required sglock dongle

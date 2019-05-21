@@ -15,13 +15,13 @@
 #include <wx/event.h>
 #include <wx/menuitem.h>
 #include <wx/gdicmn.h>
+#include <wx/platinfo.h>
 
 #include  "ocpn_plugin.h"
 
 
 typedef std::unordered_map<std::string, std::string> pathmap_t;
 
-static const char SEP  = wxFileName::GetPathSeparator();
 
 std::vector<std::string> split(std::string s, char delimiter)
 {
@@ -52,8 +52,17 @@ std::string find_in_path(std::string binary)
 {
     using namespace std;
 
-    string path(getenv("PATH"));
-    vector<string> elements = split(path, ':');
+    wxString wxPath;
+    wxGetEnv("PATH", &wxPath);
+    string path(wxPath.c_str()); 
+
+    auto const osSystemId = wxPlatformInfo::Get().GetOperatingSystemId();
+    char delimiter = ':';
+    if (osSystemId & wxOS_WINDOWS) {
+        delimiter =  ';';
+        binary += ".exe";
+    }
+    vector<string> elements = split(path, delimiter);
     for (auto element: elements) {
        string filename = element + "/" + binary;
        if (exists(filename)) {
@@ -62,94 +71,3 @@ std::string find_in_path(std::string binary)
     }
     return "";
 }
-
-#if 0
-
-static void mkdir(const std::string path)
-{
-#if defined(_WIN32)
-    _mkdir(path.c_str());
-#else
-    mkdir(path.c_str(), 0755);
-#endif
-}
-
-
-
-static std::string pluginsConfigDir()
-{
-    std::string pluginDataDir =
-        (*GetpPrivateApplicationDataLocation()).ToStdString();
-    pluginDataDir += SEP + "plugins";
-    if (!exists(pluginDataDir)) {
-        mkdir(pluginDataDir.c_str());
-    }
-    pluginDataDir += SEP + "install_data";
-    if (!exists(pluginDataDir)) {
-        mkdir(pluginDataDir);
-    }
-    return pluginDataDir;
-}
-
-
-static std::string dirListPath(std::string name)
-{
-    return pluginsConfigDir() + SEP + name + ".dirs";
-}
-
-
-static bool hasDirlist(const std::string name)
-{
-
-    std::ifstream s(dirListPath(name));
-    if (!s.is_open()) {
-        return false;
-    }
-    s.close();
-    return true;
-}
-
-
-static bool parseDirlist(const std::string name, pathmap_t& pathmap)
-{
-    using namespace std;
-
-    ifstream s(dirListPath(name));
-    if (!s.is_open()) {
-        return false;
-    }
-    string line;
-    while (getline(s, line)) {
-        stringstream lineStream(line);
-        string key("");
-        string value("undef");
-        string token;
-        bool ok = true;
-        while(lineStream >> token) {
-            if      (key == "") key = token;
-            else if (token == ":") { value = ""; continue; }
-            else if (value == "")  value = token;
-            else { wxLogWarning("Cannot parse line: %s", line); ok = false; }
-        }
-        if (ok && value != "" && key != "") pathmap[key] = value;
-std::cout << "setting pathmap[" << key << "] to " << value << endl;
-    }
-    s.close();
-    return true;
-}
-
-
-wxString getInstallationBindir(const char* name)
-{
-    pathmap_t pathmap;
-    if (!parseDirlist(name, pathmap)
-        || pathmap.find("bindir") == pathmap.end())
-    {
-        wxString  s("");
-        return s;
-    }
-    wxString s(pathmap["bindir"]);
-    return s;
-}
-
-#endif // if 0

@@ -11,4 +11,11 @@
  */
 wxString getInstallationBindir(const char* name);
 #endif
+
+/*
+ * Look for binary with given basename (no extension) in PATH.
+ *
+ * @return path to binary if found, else 0.
+ *
+ */
 std::string find_in_path(std::string binary);
