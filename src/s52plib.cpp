@@ -8442,7 +8442,11 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         if( b_useVBO ){        
         //  Has a VBO been built for this object?
             if( 1 ) {
-                 
+
+                //  CLear GL error stack
+                 GLenum xerr = glGetError();
+                 while(xerr){ xerr =glGetError();}
+
                  if(rzRules->obj->auxParm0 <= 0) {
 #ifdef xUSE_ANDROID_GLES2
                   if(ppg_vbo->data_type != DATA_TYPE_SHORT){
@@ -8530,6 +8534,10 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error A: %d"), err);
                         wxLogMessage(msg);
+                        glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
+                        glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+                        if(b_transform)
+                            glPopMatrix();
                         return 0;
                     }
                     
@@ -8537,13 +8545,17 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 #ifndef USE_ANDROID_GLES2
                     glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 #endif
-                    glBufferData(GL_ARRAY_BUFFER,
-                                    ppg_vbo->single_buffer_size, ppg_vbo->single_buffer, GL_STATIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, ppg_vbo->single_buffer_size, ppg_vbo->single_buffer, GL_STATIC_DRAW);
                     err = glGetError();
                     if(err){
                         wxString msg;
                         msg.Printf(_T("VBO Error B: %d"), err);
                         wxLogMessage(msg);
+                        glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
+                        glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+                        if(b_transform)
+                            glPopMatrix();
+
                         return 0;
                     }
                     
@@ -8555,6 +8567,11 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error C: %d"), err);
                         wxLogMessage(msg);
+                        glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
+                        glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+                        if(b_transform)
+                            glPopMatrix();
+
                         return 0;
                     }
                     
