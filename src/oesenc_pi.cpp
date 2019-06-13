@@ -3006,8 +3006,17 @@ void init_GLLibrary(void)
             
             g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
         }
-        
-         
+
+        // Intel integrated GPU processors do not handle VBO in legacy direct mode very well.
+        // Mainly, problems are seen with loss of mapping, and leakage of deleted buffers.
+        // Performance seems not markedly better using VBO, anyway.
+        // So, on MSW and MacOS platforms, Intel graphics, we override the core GL options and disable VBO
+
+#if defined( __WXMSW__ ) || defined(__WXOSX__)
+    if( renderer.Upper().Find( _T("INTEL") ) != wxNOT_FOUND )
+        g_b_EnableVBO = false;
+#endif
+ 
         //  Setup device dependent OpenGL options as communicated from core by JSON message
         ps52plib->SetGLOptions(g_b_useStencil, g_b_useStencilAP, g_b_useScissorTest, g_b_useFBO,  g_b_EnableVBO, g_oe_texture_rectangle_format);
 

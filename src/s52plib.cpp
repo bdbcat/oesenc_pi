@@ -8448,7 +8448,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                  while(xerr){ xerr =glGetError();}
 
                  if(rzRules->obj->auxParm0 <= 0) {
-#ifdef xUSE_ANDROID_GLES2
+#ifdef USE_ANDROID_GLES2
                   if(ppg_vbo->data_type != DATA_TYPE_SHORT){
                     // We convert the vertex data from FLOAT to GL_SHORT to make the VBO smaller, but still keeping enough precision
                     //  This requires a scale factor to reduce the range from existing  data to +/- 32K
