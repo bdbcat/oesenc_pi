@@ -6428,6 +6428,35 @@ wxString eSENCChart::CreateObjDescriptions( ListOfPI_S57Obj* obj_list )
                 
             }
     } // Object for loop
+    
+    // Add the additional info files
+    wxFileName file;       
+    wxArrayString files;
+    file.Assign( GetFullPath() );
+    
+    wxString suppPath = file.GetPath();
+    suppPath += wxFileName::GetPathSeparator();
+    suppPath += file.GetName();
+    
+    wxString AddFiles = wxString::Format(_T("<hr noshade><br><b>Additional info files attached to: </b> <font size=-2>%s</font><br><table border=0 cellspacing=0 cellpadding=3>"), file.GetFullName() );
+    wxDir::GetAllFiles( suppPath, &files,  wxT("*.TXT")  );
+    wxDir::GetAllFiles( suppPath, &files,  wxT("*.txt")  );
+    int nf = files.Count();
+    if ( files.Count() > 0 )
+    {      
+        for ( size_t i=0; i < files.Count(); i++){
+            wxString fileToAdd = files.Item(i);
+            file.Assign( files.Item(i) );
+            AddFiles << wxString::Format( _T("<tr><td valign=top><font size=-2><a href=\"%s\">%s</a></font></td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</td>"), file.GetFullPath(), file.GetFullName() );
+            if ( files.Count() > ++i){
+                file.Assign( files.Item(i) );
+                AddFiles << wxString::Format( _T("<td valign=top><font size=-2><a href=\"%s\">%s</a></font></td>"), file.GetFullPath(), file.GetFullName() );                
+            }                
+        }
+        ret_val << AddFiles <<_T("</table>");
+    }
+
+
 
 #if 1    
     if( !lights.empty()  ) {
