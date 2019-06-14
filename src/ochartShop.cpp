@@ -803,16 +803,18 @@ int checkResponseCode(int iResponseCode)
 
 int doLogin()
 {
-    oeSENCLogin login(g_shopPanel);
-    login.ShowModal();
-    if(!login.GetReturnCode() == 0){
+    oeSENCLogin *login = new oeSENCLogin(g_shopPanel);
+    login->ShowModal();
+    if(!login->GetReturnCode() == 0){
+        delete login;
         g_shopPanel->setStatusText( _("Invalid Login."));
         wxYield();
         return 55;
     }
     
-    g_loginUser = login.m_UserNameCtl->GetValue();
-    wxString pass = login.m_PasswordCtl->GetValue();
+    g_loginUser = login->m_UserNameCtl->GetValue();
+    wxString pass = login->m_PasswordCtl->GetValue();
+    delete login;
     
     wxString url = userURL;
     if(g_admin)
