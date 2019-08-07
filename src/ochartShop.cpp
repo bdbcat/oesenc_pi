@@ -87,6 +87,37 @@ double g_targetDownloadSize;
 bool IsDongleAvailable();
 unsigned int GetDongleSN();
 
+
+// Utility Functions
+std::string UriEncode(const std::string & sSrc)
+{
+   const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
+   const unsigned char * pSrc = (const unsigned char *)sSrc.c_str();
+   const int SRC_LEN = sSrc.length();
+   unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
+   unsigned char * pEnd = pStart;
+   const unsigned char * const SRC_END = pSrc + SRC_LEN;
+
+   for (; pSrc < SRC_END; ++pSrc)
+   {
+      if ( (*pSrc >= 'a' && *pSrc <= 'z') ||
+           (*pSrc >= 'A' && *pSrc <= 'Z') ||
+           (*pSrc >= '0' && *pSrc <= '9') )
+    
+         *pEnd++ = *pSrc;
+      else
+      {
+         // escape this char
+         *pEnd++ = '%';
+         *pEnd++ = DEC2HEX[*pSrc >> 4];
+         *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+      }
+   }
+
+   std::string sResult((char *)pStart, (char *)pEnd);
+   delete [] pStart;
+   return sResult;
+}
 // Private class implementations
 
 size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcharbuf)
@@ -816,6 +847,10 @@ int doLogin()
     wxString pass = login->m_PasswordCtl->GetValue();
     delete login;
     
+    // "percent encode" any special characters in password
+    std::string spass(pass.mb_str());
+    std::string percentPass = UriEncode(spass);
+
     wxString url = userURL;
     if(g_admin)
         url = adminURL;
@@ -825,7 +860,7 @@ int doLogin()
     wxString loginParms;
     loginParms += _T("taskId=login");
     loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&password=") + pass;
+    loginParms += _T("&password=") + wxString(percentPass.c_str());
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
     
@@ -916,9 +951,9 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-        // wxString p = wxString(body.c_str(), wxConvUTF8);
-        // wxLogMessage(_T("ProcessResponse results:"));
-        // wxLogMessage(p);
+         wxString p = wxString(body.c_str(), wxConvUTF8);
+         wxLogMessage(_T("ProcessResponse results:"));
+         wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
