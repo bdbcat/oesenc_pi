@@ -838,6 +838,15 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
             return dresult;
         }
     }
+    else{               // Error "3", extended
+        if(result.StartsWith('3')){
+            wxString msg = _("o-charts API error code: "); 
+                msg += _T("\n") + result + _T("\n");
+
+            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+        }
+    }
+    
     return 98;
 }
 
