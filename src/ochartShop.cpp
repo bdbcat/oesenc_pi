@@ -81,6 +81,34 @@ wxString g_dongleName;
 double g_targetDownloadSizeMB;
 double g_targetDownloadSize;
 
+#define N_MESSAGES 22
+wxString errorMessages[] = {
+        _("Undetermined error"),
+        _("Succesful"),
+        _("Production server in maintenance mode"),
+        _("Wrong data"), 
+        _("Wrong password"),
+        _("Wrong user"),
+        _("Wrong key"),
+        _("System name already exists"),
+        _("System name does not exist"),
+        _("Wrong xfpr name (extension)"),
+        _("Wrong xfpr name (length)"),
+        _("Wrong xfpr name (OS)"),
+        _("Wrong xfpr name (version oc01 or oc03)"),
+        _("Wrong xfpr name (date)"),
+        _("Production server error"),
+        _("Webshop database error"),
+        _("Expired chart"),
+        _("Chart already has a system assigned"),
+        _("Chart already has that system assigned"),
+        _("This request is already being processed or available for downloading"),
+        _("This chart does not have this system assigned"),
+        _("Wrong System name")
+};
+
+
+
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
 
@@ -775,7 +803,17 @@ void saveShopConfig()
    }
 }
 
-            
+wxString GetMessageText(int index)
+{
+    if(index < N_MESSAGES)
+        return errorMessages[index];
+    else
+        return _("Undetermined error");
+
+}
+
+
+
 int checkResult(wxString &result, bool bShowErrorDialog = true)
 {
     if(g_shopPanel){
@@ -788,19 +826,12 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
             return 0;
         else{
             if(bShowErrorDialog){
-                wxString msg = _("o-charts API error code: ");
+                wxString msg = _("o-charts API error code: "); 
                 wxString msg1;
                 msg1.Printf(_T("{%ld}\n\n"), dresult);
                 msg += msg1;
-                switch(dresult){
-                    case 4:
-                    case 5:
-                        msg += _("Invalid user/email name or password.");
-                        break;
-                    default:    
-                        msg += _("Check your configuration and try again.");
-                        break;
-                }
+                
+                msg += GetMessageText(dresult);
                 
                 OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
             }
@@ -1152,6 +1183,7 @@ int getChartList( bool bShowErrorDialogs = true){
         wxString result = ProcessResponse(post.GetResponseBody());
         
         return checkResult( result, bShowErrorDialogs );
+            
     }
     else
         return checkResponseCode(iResponseCode);
@@ -2312,7 +2344,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
      wxYield();
 
     ::wxBeginBusyCursor();
-    int err_code = getChartList( false );               // no error code dialog, we handle here
+    int err_code = getChartList( true );               
     ::wxEndBusyCursor();
  
     // Could be a change in login_key, userName, or password.
@@ -2327,7 +2359,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         
         // Try to get the status one more time only.
         ::wxBeginBusyCursor();
-        int err_code_2 = getChartList( false );               // no error code dialog, we handle here
+        int err_code_2 = getChartList( true );               // no error code dialog, we handle here
         ::wxEndBusyCursor();
         
         if(err_code_2 != 0){                  // Some error on second getlist() try, if so just return to GUI
