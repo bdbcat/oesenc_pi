@@ -140,6 +140,7 @@ IF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
 ENDIF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
 
 MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
+MESSAGE (STATUS "*** CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 
 
 #  To build for android, use this cmake invocation..
@@ -179,7 +180,7 @@ INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/src/dsa)
 INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR})
 
 IF(NOT WIN32)
- ADD_DEFINITIONS( "-Wall -g -fexceptions -O2 -Wno-unused -fno-strict-aliasing")
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -O2 -Wno-unused -fno-strict-aliasing ")
 
  IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     ADD_DEFINITIONS( " -O0")
