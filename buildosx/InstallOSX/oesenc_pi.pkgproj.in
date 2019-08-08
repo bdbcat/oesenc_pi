@@ -706,11 +706,38 @@
 		<key>PACKAGE_SCRIPTS</key>
 		<dict>
 			<key>POSTINSTALL_PATH</key>
-			<dict/>
+			<dict>
+				<key>PATH</key>
+				<string>sgli</string>
+				<key>PATH_TYPE</key>
+				<integer>1</integer>
+			</dict>
 			<key>PREINSTALL_PATH</key>
-			<dict/>
+			<dict>
+				<key>PATH_TYPE</key>
+				<integer>0</integer>
+			</dict>
 			<key>RESOURCES</key>
-			<array/>
+			<array>
+				<dict>
+					<key>BUNDLE_CAN_DOWNGRADE</key>
+					<false/>
+					<key>CHILDREN</key>
+					<array/>
+					<key>GID</key>
+					<integer>0</integer>
+					<key>PATH</key>
+					<string>SGLockInstall.scptd</string>
+					<key>PATH_TYPE</key>
+					<integer>1</integer>
+					<key>PERMISSIONS</key>
+					<integer>493</integer>
+					<key>TYPE</key>
+					<integer>3</integer>
+					<key>UID</key>
+					<integer>0</integer>
+				</dict>
+			</array>
 		</dict>
 		<key>PACKAGE_SETTINGS</key>
 		<dict>
