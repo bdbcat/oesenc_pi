@@ -159,8 +159,10 @@ IF(APPLE)
 configure_file(${PROJECT_SOURCE_DIR}/cmake/gpl.txt ${CMAKE_CURRENT_BINARY_DIR}/license.txt COPYONLY)
 
 configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/pkg_background.jpg ${CMAKE_CURRENT_BINARY_DIR}/pkg_background.jpg COPYONLY)
+#configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/SG-LockV1.4.mpkg ${CMAKE_CURRENT_BINARY_DIR}/SG-LockV1.4.mpkg COPYONLY)
+#configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/SGLockInstall.scptd ${CMAKE_CURRENT_BINARY_DIR}/SGLockInstall.scptd COPYONLY)
+#configure_file(${PROJECT_SOURCE_DIR}/buildosx/InstallOSX/sgli ${CMAKE_CURRENT_BINARY_DIR}/sgli COPYONLY)
 
-            
   # This is a bit of a hack...
   # We need to copy the helper utility to the binary build directory so that the PACKAGES scripts will find it.
   # Would be nicer if this could be specified from the top level cmake file, so that this file remains generic...

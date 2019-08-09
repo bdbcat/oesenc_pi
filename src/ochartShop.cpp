@@ -81,12 +81,71 @@ wxString g_dongleName;
 double g_targetDownloadSizeMB;
 double g_targetDownloadSize;
 
+#define N_MESSAGES 22
+wxString errorMessages[] = {
+        _("Undetermined error"),
+        _("Succesful"),
+        _("Production server in maintenance mode"),
+        _("Wrong data"), 
+        _("Wrong password"),
+        _("Wrong user"),
+        _("Wrong key"),
+        _("System name already exists"),
+        _("System name does not exist"),
+        _("Wrong xfpr name (extension)"),
+        _("Wrong xfpr name (length)"),
+        _("Wrong xfpr name (OS)"),
+        _("Wrong xfpr name (version oc01 or oc03)"),
+        _("Wrong xfpr name (date)"),
+        _("Production server error"),
+        _("Webshop database error"),
+        _("Expired chart"),
+        _("Chart already has a system assigned"),
+        _("Chart already has that system assigned"),
+        _("This request is already being processed or available for downloading"),
+        _("This chart does not have this system assigned"),
+        _("Wrong System name")
+};
+
+
+
 #define ID_CMD_BUTTON_INSTALL 7783
 #define ID_CMD_BUTTON_INSTALL_CHAIN 7784
 
 bool IsDongleAvailable();
 unsigned int GetDongleSN();
 
+
+// Utility Functions
+std::string UriEncode(const std::string & sSrc)
+{
+   const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
+   const unsigned char * pSrc = (const unsigned char *)sSrc.c_str();
+   const int SRC_LEN = sSrc.length();
+   unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
+   unsigned char * pEnd = pStart;
+   const unsigned char * const SRC_END = pSrc + SRC_LEN;
+
+   for (; pSrc < SRC_END; ++pSrc)
+   {
+      if ( (*pSrc >= 'a' && *pSrc <= 'z') ||
+           (*pSrc >= 'A' && *pSrc <= 'Z') ||
+           (*pSrc >= '0' && *pSrc <= '9') )
+    
+         *pEnd++ = *pSrc;
+      else
+      {
+         // escape this char
+         *pEnd++ = '%';
+         *pEnd++ = DEC2HEX[*pSrc >> 4];
+         *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+      }
+   }
+
+   std::string sResult((char *)pStart, (char *)pEnd);
+   delete [] pStart;
+   return sResult;
+}
 // Private class implementations
 
 size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcharbuf)
@@ -744,7 +803,17 @@ void saveShopConfig()
    }
 }
 
-            
+wxString GetMessageText(int index)
+{
+    if(index < N_MESSAGES)
+        return errorMessages[index];
+    else
+        return _("Undetermined error");
+
+}
+
+
+
 int checkResult(wxString &result, bool bShowErrorDialog = true)
 {
     if(g_shopPanel){
@@ -757,25 +826,27 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
             return 0;
         else{
             if(bShowErrorDialog){
-                wxString msg = _("o-charts API error code: ");
+                wxString msg = _("o-charts API error code: "); 
                 wxString msg1;
                 msg1.Printf(_T("{%ld}\n\n"), dresult);
                 msg += msg1;
-                switch(dresult){
-                    case 4:
-                    case 5:
-                        msg += _("Invalid user/email name or password.");
-                        break;
-                    default:    
-                        msg += _("Check your configuration and try again.");
-                        break;
-                }
+                
+                msg += GetMessageText(dresult);
                 
                 OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
             }
             return dresult;
         }
     }
+    else{               // Error "3", extended
+        if(result.StartsWith('3')){
+            wxString msg = _("o-charts API error code: "); 
+                msg += _T("\n") + result + _T("\n");
+
+            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
+        }
+    }
+    
     return 98;
 }
 
@@ -816,6 +887,10 @@ int doLogin()
     wxString pass = login->m_PasswordCtl->GetValue();
     delete login;
     
+    // "percent encode" any special characters in password
+    std::string spass(pass.mb_str());
+    std::string percentPass = UriEncode(spass);
+
     wxString url = userURL;
     if(g_admin)
         url = adminURL;
@@ -825,13 +900,15 @@ int doLogin()
     wxString loginParms;
     loginParms += _T("taskId=login");
     loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&password=") + pass;
+    loginParms += _T("&password=") + wxString(percentPass.c_str());
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    const char* s = loginParms.mb_str(wxConvUTF8);    
+    
+    size_t res = post.Post( s, strlen(s), url );
     
     // get the response code of the server
     int iResponseCode;
@@ -916,9 +993,9 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-        // wxString p = wxString(body.c_str(), wxConvUTF8);
-        // wxLogMessage(_T("ProcessResponse results:"));
-        // wxLogMessage(p);
+         //wxString p = wxString(body.c_str(), wxConvUTF8);
+         //wxLogMessage(_T("ProcessResponse results:"));
+         //wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
@@ -1093,7 +1170,8 @@ int getChartList( bool bShowErrorDialogs = true){
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     
-    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    const char* s = loginParms.mb_str(wxConvUTF8);    
+    size_t res = post.Post( s, strlen(s), url );
     
     // get the response code of the server
     int iResponseCode;
@@ -1112,6 +1190,7 @@ int getChartList( bool bShowErrorDialogs = true){
         wxString result = ProcessResponse(post.GetResponseBody());
         
         return checkResult( result, bShowErrorDialogs );
+            
     }
     else
         return checkResponseCode(iResponseCode);
@@ -1183,7 +1262,8 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    const char* s = loginParms.mb_str(wxConvUTF8);    
+    size_t res = post.Post( s, strlen(s), url );
     
     // get the response code of the server
     int iResponseCode;
@@ -1265,7 +1345,9 @@ int doUploadXFPR(bool bDongle)
             
             wxCurlHTTPNoZIP post;
             post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-            size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+            const char* s = loginParms.mb_str(wxConvUTF8);    
+
+            size_t res = post.Post( s, strlen(s), url );
             
             // get the response code of the server
             int iResponseCode;
@@ -1346,7 +1428,9 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    size_t res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    const char* s = loginParms.mb_str(wxConvUTF8);    
+
+    size_t res = post.Post( s, strlen(s), url );
     
     // get the response code of the server
     int iResponseCode;
@@ -2264,7 +2348,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
      wxYield();
 
     ::wxBeginBusyCursor();
-    int err_code = getChartList( false );               // no error code dialog, we handle here
+    int err_code = getChartList( true );               
     ::wxEndBusyCursor();
  
     // Could be a change in login_key, userName, or password.
@@ -2279,7 +2363,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         
         // Try to get the status one more time only.
         ::wxBeginBusyCursor();
-        int err_code_2 = getChartList( false );               // no error code dialog, we handle here
+        int err_code_2 = getChartList( true );               // no error code dialog, we handle here
         ::wxEndBusyCursor();
         
         if(err_code_2 != 0){                  // Some error on second getlist() try, if so just return to GUI
