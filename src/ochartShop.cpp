@@ -994,9 +994,9 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-         wxString p = wxString(body.c_str(), wxConvUTF8);
-         wxLogMessage(_T("ProcessResponse results:"));
-         wxLogMessage(p);
+         //wxString p = wxString(body.c_str(), wxConvUTF8);
+         //wxLogMessage(_T("ProcessResponse results:"));
+         //wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
