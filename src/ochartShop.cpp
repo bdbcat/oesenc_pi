@@ -899,8 +899,7 @@ int doLogin()
     
     wxString loginParms;
     loginParms += _T("taskId=login");
-    //loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&username=") + wxString(UriEncode(std::string(g_loginUser.mb_str(wxConvUTF8)).c_str()));
+    loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&password=") + wxString(percentPass.c_str());
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
@@ -1162,8 +1161,7 @@ int getChartList( bool bShowErrorDialogs = true){
     
     wxString loginParms;
     loginParms += _T("taskId=getlist");
-//    loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&username=") + wxString(UriEncode(std::string(g_loginUser.mb_str(wxConvUTF8)).c_str()));
+    loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
@@ -1251,8 +1249,7 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     
     wxString loginParms;
     loginParms += _T("taskId=assign");
-    //loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&username=") + wxString(UriEncode(std::string(g_loginUser.mb_str(wxConvUTF8)).c_str()));
+    loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
@@ -1331,8 +1328,7 @@ int doUploadXFPR(bool bDongle)
             
             wxString loginParms;
             loginParms += _T("taskId=xfpr");
-            //loginParms += _T("&username=") + g_loginUser;
-            loginParms += _T("&username=") + wxString(UriEncode(std::string(g_loginUser.mb_str(wxConvUTF8)).c_str()));
+            loginParms += _T("&username=") + g_loginUser;
             loginParms += _T("&key=") + g_loginKey;
             if(g_debugShop.Len())
                 loginParms += _T("&debug=") + g_debugShop;
@@ -1419,8 +1415,7 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
         
     wxString loginParms;
     loginParms += _T("taskId=request");
-//    loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&username=") + wxString(UriEncode(std::string(g_loginUser.mb_str(wxConvUTF8)).c_str()));
+    loginParms += _T("&username=") + g_loginUser;
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
