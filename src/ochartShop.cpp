@@ -887,10 +887,14 @@ int doLogin()
     wxString pass = login->m_PasswordCtl->GetValue();
     delete login;
     
+    wxString loginPass = pass;
+#ifndef __WXMSW__    
     // "percent encode" any special characters in password
     std::string spass(pass.mb_str());
     std::string percentPass = UriEncode(spass);
-
+    loginPass = wxString(percentPass.c_str());
+#endif
+    
     wxString url = userURL;
     if(g_admin)
         url = adminURL;
@@ -900,9 +904,11 @@ int doLogin()
     wxString loginParms;
     loginParms += _T("taskId=login");
     loginParms += _T("&username=") + g_loginUser;
-    loginParms += _T("&password=") + wxString(percentPass.c_str());
+    loginParms += _T("&password=") + loginPass;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
+
+    wxLogMessage(_T("loginParms: ") + loginParms);
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
