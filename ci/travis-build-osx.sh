@@ -7,7 +7,7 @@
 # bailout on errors and echo commands
 set -xe
 
-brew install cairo libexif xz libarchive
+brew install cairo libexif xz libarchive python3
 wget http://opencpn.navnux.org/build_deps/wx312_opencpn50_macos109.tar.xz
 tar xJf wx312_opencpn50_macos109.tar.xz -C /tmp
 export PATH="/usr/local/opt/gettext/bin:$PATH"
