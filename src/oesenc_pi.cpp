@@ -646,7 +646,8 @@ int oesenc_pi::Init(void)
     AddLocaleCatalog( _T("opencpn-oesenc_pi") );
 
       //    Build an arraystring of dynamically loadable chart class names
-    m_class_name_array.Add(_T("eSENCChart"));
+    m_class_name_array.Add(_T("oeSENCChart"));
+    m_class_name_array.Add(_T("oeEVCChart"));
 
      
     //        Specify the location of the oeserverd helper.

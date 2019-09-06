@@ -376,6 +376,42 @@ protected:
 
 };
 
+// ----------------------------------------------------------------------------
+// oeSENCChart Definition
+// ----------------------------------------------------------------------------
+class  oeSENCChart : public eSENCChart
+{
+DECLARE_DYNAMIC_CLASS(oeSENCChart)
+
+    public:
+      //    Public methods
+
+      oeSENCChart();
+      virtual ~oeSENCChart();
+      
+      wxString GetFileSearchMask(void);
+
+};
+
+
+// ----------------------------------------------------------------------------
+// oeEVCChart Definition
+// ----------------------------------------------------------------------------
+class  oeEVCChart : public eSENCChart
+{
+DECLARE_DYNAMIC_CLASS(oeEVCChart)
+
+    public:
+      //    Public methods
+
+      oeEVCChart();
+      virtual ~oeEVCChart();
+      
+      wxString GetFileSearchMask(void);
+
+};
+
+
 class PI_S57ObjX : public PI_S57Obj
 {
 public:
