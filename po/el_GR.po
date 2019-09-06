@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-15 23:22-0400\n"
-"PO-Revision-Date: 2019-05-17 00:41\n"
+"PO-Revision-Date: 2019-08-29 01:53\n"
 "Last-Translator: Pavel Kalian (nohal)\n"
 "Language-Team: Greek\n"
 "Language: el_GR\n"
@@ -127,7 +127,13 @@ msgid "This chart cannot be loaded due to any of the following reasons:\n\n"
 "- This chart set was prepared for a USB key dongle, but dongle is not detected.\n"
 "- There are corrupted files due to errors during download or unzip.\n\n"
 "Please contact info@o-charts.org if the problem persists.\n"
-msgstr ""
+msgstr "Αυτός ο χάρτης δεν μπορεί να φορτωθεί για κάποιον από τους παρακάτω λόγους:\n\n"
+"- Έχουν γίνει σημαντικές υλικές αλλαγές στον υπολογιστή σας.\n"
+"- Το λογισμικό έχει ανανεωθεί και η άδειά σας έχει ακυρωθεί.\n"
+"- Αυτοί οι χάρτες ετοιμάστηκαν για ένα άλλο σύστημα.\n"
+"- Αυτοί οι χάρτες ετοιμάστηκαν για ένα USB key dongle, που δεν βρέθηκε.\n"
+"- Χαλασμένα αρχεία λόγω σφαλμάτων κατά το κατέβασμα ή το unzip.\n\n"
+"Επικοινωνήστε με το info@o-charts.org αν το πρόβλημα επιμένει.\n"
 
 #: src/oesenc_pi.cpp:2439 src/oesenc_pi.cpp:3103 src/oesenc_pi.cpp:3211
 #: src/oesenc_pi.cpp:3953 src/oesenc_pi.cpp:4120 src/oesenc_pi.cpp:4144
@@ -161,11 +167,11 @@ msgstr " δεν ήταν δυνατή η εκκίνηση.\n\n"
 
 #: src/oesenc_pi.cpp:3602
 msgid " oeSENC Version: "
-msgstr ""
+msgstr " Εκδοχή oeSENC: "
 
 #: src/oesenc_pi.cpp:3607
 msgid "Show EULA"
-msgstr ""
+msgstr "Προβολή EULA"
 
 #: src/oesenc_pi.cpp:3615
 msgid "System Identification"
@@ -173,11 +179,11 @@ msgstr "Αναγνώριση συστήματος"
 
 #: src/oesenc_pi.cpp:3625
 msgid "Create System Identifier file..."
-msgstr "Δημιουργία το αρχείο αναγνώρισης του συστήματος..."
+msgstr "Δημιουργία αρχείου αναγνώρισης του συστήματος..."
 
 #: src/oesenc_pi.cpp:3633
 msgid "Create USB key dongle System ID file..."
-msgstr ""
+msgstr "Δημιουργία αρχείου αναγνώρισης του συστήματος για το USB key dongle..."
 
 #: src/oesenc_pi.cpp:3642
 msgid "Show In Finder"
@@ -189,11 +195,11 @@ msgstr "Προβολή στον δίσκο"
 
 #: src/oesenc_pi.cpp:3665
 msgid "Reset System Name"
-msgstr ""
+msgstr "Ανακαθορισμός του ονόματος του συστήματος"
 
 #: src/oesenc_pi.cpp:3675
 msgid "Reset o-charts credentials"
-msgstr ""
+msgstr "Ανακαθορισμός της άδειας των o-charts"
 
 #: src/oesenc_pi.cpp:3953
 msgid "Administrator priveleges are required to copy fpr.\n"
@@ -291,11 +297,11 @@ msgstr "Έγκυρη μέχρι"
 
 #: src/oesenc_pi.cpp:5449 src/oesenc_pi.cpp:5464
 msgid "oeSENC Charts"
-msgstr ""
+msgstr "Χάρτες oeSENC"
 
 #: src/oesenc_pi.cpp:5496
 msgid "Add/Update oeSENC chart sets"
-msgstr ""
+msgstr "Προσθήκη/ανανέωση χαρτών oeSENC"
 
 #: src/oesenc_pi.cpp:5501
 msgid "Visit o-charts.org Website"
@@ -303,7 +309,7 @@ msgstr "Επισκεφτείτε την ιστοσελίδα o-charts.org"
 
 #: src/oesenc_pi.cpp:5502
 msgid "Here you may order new oeSENC chart sets."
-msgstr ""
+msgstr "Εδώ μπορείτε να παραγγείλετε καινούργιες ομάδες χαρτών oesenc."
 
 #: src/oesenc_pi.h:322
 msgid "OpenCPN SENC UserKey Required"
@@ -320,31 +326,31 @@ msgstr "ΚείμεναΧάρτη"
 
 #: src/ochartShop.cpp:483
 msgid "Available"
-msgstr ""
+msgstr "Διαθέσιμο"
 
 #: src/ochartShop.cpp:487
 msgid "Installed, Up-to-date."
-msgstr ""
+msgstr "Εγκαταστημένο, εκσυγχρονισμένο."
 
 #: src/ochartShop.cpp:491
 msgid "Installed, Update available."
-msgstr ""
+msgstr "Εγκαταστημένο, υπάρχει ανανέωση."
 
 #: src/ochartShop.cpp:496
 msgid "Expired."
-msgstr ""
+msgstr "Έληξε."
 
 #: src/ochartShop.cpp:500
 msgid "Preparing your chart set."
-msgstr ""
+msgstr "Προετοιμασία των χαρτών σας."
 
 #: src/ochartShop.cpp:504
 msgid "Ready for download."
-msgstr ""
+msgstr "Έτοιμο για κατέβασμα."
 
 #: src/ochartShop.cpp:508
 msgid "Please update Chart List."
-msgstr ""
+msgstr "Ενημερώστε τον κατάλογο των χαρτών."
 
 #: src/ochartShop.cpp:512
 msgid "Ready for Download Request."
@@ -358,7 +364,7 @@ msgstr ""
 
 #: src/ochartShop.cpp:536 src/ochartShop.cpp:553 src/ochartShop.cpp:571
 msgid "System Key"
-msgstr ""
+msgstr "Κλειδί συστήματος"
 
 #: src/ochartShop.cpp:758
 msgid "o-charts API error code: "
@@ -382,7 +388,7 @@ msgstr ""
 
 #: src/ochartShop.cpp:807
 msgid "Invalid Login."
-msgstr ""
+msgstr "Μη έγκυρη σύνδεση."
 
 #: src/ochartShop.cpp:1137
 msgid "This action will PERMANENTLY assign the chart set:"
@@ -394,7 +400,7 @@ msgstr ""
 
 #: src/ochartShop.cpp:1149
 msgid "Proceed?"
-msgstr ""
+msgstr "Συνέχεια;"
 
 #: src/ochartShop.cpp:1290
 msgid "[USB Key Dongle not found.]"
@@ -414,11 +420,11 @@ msgstr ""
 
 #: src/ochartShop.cpp:1301
 msgid "Check OpenCPN log file."
-msgstr ""
+msgstr "Κοιτάξτε το Opencpn log."
 
 #: src/ochartShop.cpp:1492 src/ochartShop.cpp:1566
 msgid "Unzipping chart set files..."
-msgstr ""
+msgstr "Αποσυμπίεση του zip..."
 
 #: src/ochartShop.cpp:1545
 msgid "Choose chart set install location."
@@ -430,7 +436,7 @@ msgstr ""
 
 #: src/ochartShop.cpp:1575
 msgid "Error extracting zip file"
-msgstr ""
+msgstr "Σφάλμα με την αποσυμπίεση του zip"
 
 #: src/ochartShop.cpp:1852
 msgid "Chart Set Edition:"
@@ -442,48 +448,48 @@ msgstr ""
 
 #: src/ochartShop.cpp:1864
 msgid "Purchase date:"
-msgstr ""
+msgstr "Ημερομηνία αγοράς:"
 
 #: src/ochartShop.cpp:1870
 msgid "Expiration date:"
-msgstr ""
+msgstr "Ημερομηνία λήξης:"
 
 #: src/ochartShop.cpp:1876
 msgid "Status:"
-msgstr ""
+msgstr "Κατάσταση:"
 
 #: src/ochartShop.cpp:1884
 msgid "Assignments:"
-msgstr ""
+msgstr "Αναθέσεις:"
 
 #: src/ochartShop.cpp:1892 src/ochartShop.cpp:1904
 msgid "Unassigned"
-msgstr ""
+msgstr "Μη αναθετημένο"
 
 #: src/ochartShop.cpp:2078 src/ochartShop.cpp:2155 src/ochartShop.cpp:2231
 #: src/ochartShop.cpp:2239 src/ochartShop.cpp:3022
 msgid "System Name:"
-msgstr ""
+msgstr "Όνομα συστήματος:"
 
 #: src/ochartShop.cpp:2085
 msgid "Refresh Chart List"
-msgstr ""
+msgstr "Ανανέωση λίστας χαρτών"
 
 #: src/ochartShop.cpp:2089
 msgid "My Chart Sets"
-msgstr ""
+msgstr "Οι χάρτες μου"
 
 #: src/ochartShop.cpp:2107
 msgid "Actions"
-msgstr ""
+msgstr "Ενέργειες"
 
 #: src/ochartShop.cpp:2117 src/ochartShop.cpp:2940
 msgid "Install Selected Chart Set"
-msgstr ""
+msgstr "Εγκατάσταση επιλεγμένης ομάδας χαρτών"
 
 #: src/ochartShop.cpp:2120
 msgid "Cancel Operation"
-msgstr ""
+msgstr "Ακύρωση"
 
 #: src/ochartShop.cpp:2129
 msgid "Status: Chart List Refresh required."
@@ -581,12 +587,12 @@ msgstr ""
 
 #: src/ochartShop.cpp:2726
 msgid "Downloading..."
-msgstr ""
+msgstr "Γίνεται λήψη..."
 
 #: src/ochartShop.cpp:2754 src/ochartShop.cpp:2796 src/ochartShop.cpp:2859
 #: src/ochartShop.cpp:3437
 msgid "Status: OK"
-msgstr ""
+msgstr "Κατάσταση: ΟΚ"
 
 #: src/ochartShop.cpp:2836
 msgid "Your chart set preparation is not complete."
@@ -638,25 +644,25 @@ msgstr ""
 
 #: src/ochartShop.cpp:3320
 msgid "new..."
-msgstr ""
+msgstr "νέο..."
 
 #: src/ochartShop.cpp:3322
 msgid "System Names"
-msgstr ""
+msgstr "Ονόματα συστήματος"
 
 #: src/ochartShop.cpp:3488
 msgid "Downloaded:  "
-msgstr ""
+msgstr "Ελήφθησαν:  "
 
 #: src/ochartShop.cpp:3566
 msgid "Login to o-charts.org"
-msgstr ""
+msgstr "Σύνδεση με το o-charts.org"
 
 #: src/ochartShop.cpp:3583
 msgid "email address:"
-msgstr ""
+msgstr "διεύθυνση email:"
 
 #: src/ochartShop.cpp:3590
 msgid "Password:"
-msgstr ""
+msgstr "Κωδικός:"
 
