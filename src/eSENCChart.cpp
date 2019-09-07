@@ -502,6 +502,44 @@ render_canvas_parms::~render_canvas_parms( void )
 {
 }
 
+// ----------------------------------------------------------------------------
+// oeSENCChart Implementation
+// ----------------------------------------------------------------------------
+IMPLEMENT_DYNAMIC_CLASS(oeSENCChart, eSENCChart)
+
+
+oeSENCChart::oeSENCChart() : eSENCChart()
+{
+}
+
+oeSENCChart::~oeSENCChart()
+{
+}
+
+wxString oeSENCChart::GetFileSearchMask(void)
+{
+      return _T("*.oesenc");
+}
+
+
+// ----------------------------------------------------------------------------
+// oeEVCChart Implementation
+// ----------------------------------------------------------------------------
+IMPLEMENT_DYNAMIC_CLASS(oeEVCChart, eSENCChart)
+
+
+oeEVCChart::oeEVCChart() : eSENCChart()
+{
+}
+
+oeEVCChart::~oeEVCChart()
+{
+}
+
+wxString oeEVCChart::GetFileSearchMask(void)
+{
+      return _T("*.oeevc");
+}
 
 
 // ----------------------------------------------------------------------------
@@ -993,7 +1031,7 @@ int eSENCChart::Init( const wxString& name, int init_flags )
 
 wxString eSENCChart::GetFileSearchMask(void)
 {
-      return _T("*.oesenc");
+      return _T("*.esenc");
 }
 
 bool eSENCChart::GetChartExtent(ExtentPI *pext)
