@@ -34,6 +34,8 @@ SET(PKG_RELEASE "1")
 SET(PKG_API_VERSION "1.16")
 SET(PKG_AUTHOR "David S Register")
 SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
+SET(PKG_BASE_URL "https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-unstable/raw/files")
+
 SET(API_DIR "${CMAKE_SOURCE_DIR}/api-16")
 
 SET(OCPN_MIN_VERSION "ov50")
