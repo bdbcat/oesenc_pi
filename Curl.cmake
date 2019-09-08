@@ -6,7 +6,6 @@
 
 # configure curl library
 
-INCLUDE_DIRECTORIES(src/wxcurl)
 IF(WIN32)
   IF(MSVC)
     SET(CURL_LIBRARIES "${CMAKE_SOURCE_DIR}/buildwin/libcurl.lib")
@@ -15,14 +14,15 @@ IF(WIN32)
     #INSTALL(FILES "buildwin/ssleay32.dll" DESTINATION ".")
     #INSTALL(FILES "buildwin/zlib1.dll" DESTINATION ".")
     #INSTALL(FILES "buildwin/curl-ca-bundle.crt" DESTINATION ".")
+    INCLUDE_DIRECTORIES(src/wxcurl)
+    INCLUDE_DIRECTORIES(src/wxcurl/include)
 
   ELSE(MSVC) ## mingw
-    SET(CURL_LIBRARIES "curl.dll")
-    INSTALL(FILES "buildwin/libcurl.dll" DESTINATION ".")
+    FIND_PACKAGE(CURL REQUIRED)
+    INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIRS})
   ENDIF(MSVC)
     
   #TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${CURL_LIBRARIES})
-  INCLUDE_DIRECTORIES(src/wxcurl/include)
 ENDIF(WIN32)
 
 IF(UNIX)
