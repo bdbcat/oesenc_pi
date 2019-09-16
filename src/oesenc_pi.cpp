@@ -3757,6 +3757,7 @@ void androidGetDeviceName()
 
 bool IsDongleAvailable()
 {
+#ifndef __OCPN__ANDROID__    
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -s ");                  // Available?
 
@@ -3779,6 +3780,7 @@ bool IsDongleAvailable()
     }
 
     g_sencutil_bin.Clear();
+#endif
     
     return false;
 }
@@ -3787,6 +3789,7 @@ unsigned int GetDongleSN()
 {
     unsigned int rv = 0;
     
+#ifndef __OCPN__ANDROID__    
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -t ");                  // SN
 
@@ -3799,7 +3802,7 @@ unsigned int GetDongleSN()
         line.ToLong(&sn, 10);
         rv = sn;
     }
-    
+#endif    
     return rv;
 }
     
@@ -4124,10 +4127,12 @@ extern void saveShopConfig();
 
 void oesenc_pi_event_handler::OnClearCredentials( wxCommandEvent &event )
 {
+#ifndef __OCPN__ANDROID__    
     g_loginKey.Clear();
     saveShopConfig();
     
     OCPNMessageBox_PlugIn(NULL, _("Credential Reset Successful"), _("oeSENC_pi Message"), wxOK);
+#endif    
  
 }
 

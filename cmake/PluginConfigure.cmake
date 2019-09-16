@@ -70,7 +70,7 @@ IF(QT_ANDROID)
   ADD_DEFINITIONS(-DOCPN_USE_WRAPPER)
   ADD_DEFINITIONS(-DANDROID)
 
-  SET(CMAKE_CXX_FLAGS "-pthread -fPIC -s -O2")
+  SET(CMAKE_CXX_FLAGS "-pthread -fPIC -O2")
 
   ## Compiler flags
  #   if(CMAKE_COMPILER_IS_GNUCXX)
@@ -85,7 +85,7 @@ IF(QT_ANDROID)
   INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtOpenGL")
   INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtTest")
 
-  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
+  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-3.1")
   INCLUDE_DIRECTORIES("${wxQt_Base}/include")
 
   ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
@@ -158,24 +158,22 @@ IF (QT_ANDROID )
         # Presently, Android Plugins are built in the core tree, so the variables {wxQT_BASE}, etc.
         # flow to this module from above.  If we want to build Android plugins out-of-core, this will need improvement.
 
-        # TODO This is pretty ugly, but there seems no way to avoid specifying a full path in a cross build....
-        #/home/dsr/Projects/opencpn/build-opencpn-Production_build_Android_for_armeabi_v7a_GCC_4_8_Qt_5_5_0-Release/libopencpn.so
-        /home/dsr/Projects/opencpn/build-opencpn-Production_Android_for_armeabi_v7a_Core_55_46_GCC_4_8_Qt_5_5_0-Release/libopencpn.so
+  
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_core-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_html-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_xml-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_qa-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_adv-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_aui-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_net-3.1.so
+    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_gl-3.1.so
+    ${Qt_Base}/${Qt_Build}/lib/libQt5Core.so
+    ${Qt_Base}/${Qt_Build}/lib/libQt5OpenGL.so
+    ${Qt_Base}/${Qt_Build}/lib/libQt5Widgets.so
+    ${Qt_Base}/${Qt_Build}/lib/libQt5Gui.so
+    ${Qt_Base}/${Qt_Build}/lib/libQt5AndroidExtras.so
 
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_core-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_html-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_xml-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_qa-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_adv-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_aui-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_net-3.1-arm-linux-androideabi.a
-        ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_gl-3.1-arm-linux-androideabi.a
-        ${Qt_Base}/${Qt_Build}/lib/libQt5Core.so
-        ${Qt_Base}/${Qt_Build}/lib/libQt5OpenGL.so
-        ${Qt_Base}/${Qt_Build}/lib/libQt5Widgets.so
-        ${Qt_Base}/${Qt_Build}/lib/libQt5Gui.so
-        ${Qt_Base}/${Qt_Build}/lib/libQt5AndroidExtras.so
         libGLESv2.so
         libEGL.so
         )
