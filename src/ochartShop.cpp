@@ -1281,10 +1281,6 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
         
-        if(result.IsSameAs(_T("7"))){                    // 7: System name already exist
-            return 0;
-        }
-
         return checkResult(result);
     }
     else
@@ -1361,10 +1357,6 @@ int doUploadXFPR(bool bDongle)
             if(iResponseCode == 200){
                 wxString result = ProcessResponse(post.GetResponseBody());
                 
-                if(result.IsSameAs(_T("7"))){                   // 7: System name already exist
-                    return 0;                                   // This is not an error
-                }
-
                 int iret = checkResult(result);
                 
                 return iret;
