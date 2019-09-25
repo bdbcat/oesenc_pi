@@ -822,31 +822,34 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
     
     long dresult;
     if(result.ToLong(&dresult)){
-        if(dresult == 1)
+        if(dresult == 1){
             return 0;
+        }
         else{
             if(bShowErrorDialog){
-                wxString msg = _("o-charts API error code: "); 
+                wxString msg = _("o-charts API error code: ");
                 wxString msg1;
                 msg1.Printf(_T("{%ld}\n\n"), dresult);
                 msg += msg1;
-                
-                msg += GetMessageText(dresult);
+                switch(dresult){
+                    case 4:
+                    case 5:
+                        msg += _("Invalid user/email name or password.");
+                        break;
+                    default:    
+                        msg += _("Check your configuration and try again.");
+                        break;
+                }
                 
                 OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
             }
             return dresult;
         }
     }
-    else{               // Error "3", extended
-        if(result.StartsWith('3')){
-            wxString msg = _("o-charts API error code: "); 
-                msg += _T("\n") + result + _T("\n");
-
-            OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"), wxOK);
-        }
+    else{
+        OCPNMessageBox_PlugIn(NULL, _("o-Charts shop interface error") + _T("\n") + result + _T("\n") + _("Operation cancelled"), _("oeSENC_pi Message"), wxOK);
     }
-    
+     
     return 98;
 }
 
@@ -936,7 +939,7 @@ int doLogin()
             TiXmlElement * root = doc->RootElement();
             if(!root){
                 wxString r = _T("50");
-                checkResult(r);                              // undetermined error??
+                checkResult(r);                              // ProcessResponse parse error
                 return false;
             }
             
@@ -982,7 +985,7 @@ wxString ProcessResponse(std::string body)
     
         //doc->Print();
         
-        wxString queryResult;
+        wxString queryResult = _T("50");  // Default value, general error.;
         wxString chartOrder;
         wxString chartPurchase;
         wxString chartExpiration;
@@ -1006,7 +1009,7 @@ wxString ProcessResponse(std::string body)
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
-                return _T("57");                              // undetermined error??
+                return _T("50");                              // undetermined error??
             }
             
             wxString rootName = wxString::FromUTF8( root->Value() );
@@ -1278,14 +1281,6 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
         
-        if(result.IsSameAs(_T("8"))){                    // Unknown system name
-            return 0;
-        }
-
-        if(result.IsSameAs(_T("50"))){                  // General network error
-            return 0;                                   // OK
-        }
-        
         return checkResult(result);
     }
     else
@@ -1362,14 +1357,6 @@ int doUploadXFPR(bool bDongle)
             if(iResponseCode == 200){
                 wxString result = ProcessResponse(post.GetResponseBody());
                 
-                if(result.IsSameAs(_T("8"))){                    // Unknown system name
-                    return 0;                                   // OK
-                }
-
-                if(result.IsSameAs(_T("50"))){                  // General network error
-                    return 0;                                   // OK
-                }
-                
                 int iret = checkResult(result);
                 
                 return iret;
@@ -1444,10 +1431,6 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     
     if(iResponseCode == 200){
         wxString result = ProcessResponse(post.GetResponseBody());
-        
-        if(result.IsSameAs(_T("50"))){                  // General network error
-            return 0;                                   // OK
-        }
         
         return checkResult(result);
     }
@@ -2699,7 +2682,8 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
     //   If not, need to upload XFPR first
     
     if(m_action == ACTION_ASSIGN_DONGLE){
-        if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND){
+        //if(g_systemNameServerArray.Index(g_dongleName) == wxNOT_FOUND)
+        {
             if( doUploadXFPR( true ) != 0){
                 g_statusOverride.Clear();
                 setStatusText( _("Status: USB Key Dongle FPR upload error"));
@@ -2708,7 +2692,8 @@ void shopPanel::OnButtonInstall( wxCommandEvent& event )
         }
     }
     else if(m_action == ACTION_ASSIGN_SYSTEM){
-        if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND){
+        //if(g_systemNameServerArray.Index(g_systemName) == wxNOT_FOUND)
+        {
             if( doUploadXFPR( false ) != 0){
                 g_statusOverride.Clear();
                 setStatusText( _("Status: System FPR upload error"));

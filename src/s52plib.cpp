@@ -46,6 +46,7 @@
 #include "TexFont.h"
 #include "ocpn_plugin.h"
 #include "cpl_csv.h"
+#include "eSENCChart.h"
 
 #include <wx/image.h>
 #include <wx/tokenzr.h>
@@ -6576,7 +6577,9 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 #endif
         }
 
+#ifndef USE_ANDROID_GLES2
         glDisableClientState(GL_VERTEX_ARRAY);
+#endif
         glDisable( GL_LINE_SMOOTH );
         glDisable( GL_BLEND );
     
@@ -6666,7 +6669,9 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     LLBBox symbox;
     symbox.Set( latmin, lonmin, latmax, lonmax );
     rzRules->obj->BBObj.Expand( symbox );
-#endif
+    
+#endif                  //#ifndef USE_ANDROID_GLES2
+
     return 1;
 }
     
@@ -8534,10 +8539,12 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error A: %d"), err);
                         wxLogMessage(msg);
+#ifndef USE_ANDROID_GLES2
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
                             glPopMatrix();
+#endif                  
                         return 0;
                     }
                     
@@ -8551,10 +8558,12 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error B: %d"), err);
                         wxLogMessage(msg);
+#ifndef USE_ANDROID_GLES2
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
                             glPopMatrix();
+#endif
 
                         return 0;
                     }
@@ -8567,10 +8576,12 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error C: %d"), err);
                         wxLogMessage(msg);
+#ifndef USE_ANDROID_GLES2
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
                             glPopMatrix();
+#endif
 
                         return 0;
                     }
@@ -8882,7 +8893,7 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 {
 #ifdef USE_ANDROID_GLES2
     return RenderToGLAP_GLSL( rzRules, rules, vp);
-#endif
+#else
 
 #ifdef ocpnUSE_GL
     if( rules->razRule == NULL )
@@ -9169,6 +9180,8 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
     free( ptp );
 #endif                  //#ifdef ocpnUSE_GL
+
+#endif                  //#ifdef USE_ANDROID_GLES2
     
     return 1;
 }
@@ -12070,7 +12083,7 @@ void PLIBDrawGLThickLine( float x1, float y1, float x2, float y2, wxPen pen, boo
 
 #ifdef USE_ANDROID_GLES2
 
-#include "../glshim/include/GLES/gl2.h"
+#include "../include/GLES/gl2.h"
 
 // Simple colored triangle shader
 
