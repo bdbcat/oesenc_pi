@@ -2592,12 +2592,12 @@ int shopPanel::GetActiveSlotAction( itemChart *chart )
     // No dongle
     // If any system chart is in a "download" state, choose that slot
         if(chart->isChartsetAssignedToMe( g_systemName )){
-            if(chart->statusID0.IsSameAs(_T("download"))){
+            if(chart->statusID0.IsSameAs(_T("download")) && chart->sysID0.IsSameAs(g_systemName)){
                 m_activeSlot = 0;
                 m_action = ACTION_DOWNLOAD_SYSTEM;
                 return 0;
             }
-            if(chart->statusID1.IsSameAs(_T("download"))){
+            if(chart->statusID1.IsSameAs(_T("download")) && chart->sysID1.IsSameAs(g_systemName)){
                 m_activeSlot = 1;
                 m_action = ACTION_DOWNLOAD_SYSTEM;
                 return 1;
