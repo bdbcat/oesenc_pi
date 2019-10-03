@@ -233,6 +233,13 @@ extern OE_ChartSymbols          *g_oeChartSymbols;
 
 #ifdef __OCPN__ANDROID__
 extern JavaVM *java_vm;         // found in androidUtil.cpp, accidentally exported....
+
+// Older Android devices do not export atof from their libc.so
+double atof(const char *nptr)
+{
+    return (strtod(nptr, NULL));
+}
+
 #endif
 
 // the class factories, used to create and destroy instances of the PlugIn
@@ -2449,6 +2456,8 @@ bool validateUserKey( wxString sencFileName)
     
     wxLogMessage(_T("validateUserKey"));
     
+    wxLogMessage(_T("Current userKey: ") + g_UserKey);
+    
     if(g_bDeclaredInvalid)
         return false;
     
@@ -2516,6 +2525,8 @@ bool validateUserKey( wxString sencFileName)
                     }
                 }
             }
+            
+            wxLogMessage(_T("userKey from Chartinfo.txt: ") + new_userKey);
             
             if(new_userKey.Len() && (!new_userKey.IsSameAs(g_UserKey))){
                 wxLogMessage(_T("Switching userKey to: ") + new_userKey);
@@ -3094,11 +3105,14 @@ bool validate_SENC_server(void)
     
 #ifndef __OCPN__ANDROID__    
     //Verify that oeserverd actually exists, and runs.
-    
+    wxLogMessage(_T("Validation Path to oeserverd is: ") + g_sencutil_bin);
+
     if(wxNOT_FOUND != g_sencutil_bin.Find('\"'))
         bin_test = g_sencutil_bin.Mid(1).RemoveLast();
     
-    wxString msg = _("Checking oeserverd utility at ");
+    wxLogMessage(_T("Validation Path to server test is: ") + bin_test);
+
+    wxString msg = _T("Checking oeserverd utility at ");
     msg += _T("{");
     msg += bin_test;
     msg += _T("}");
@@ -3111,9 +3125,15 @@ bool validate_SENC_server(void)
         msg += bin_test;
         msg += _T("}");
         OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
-        wxLogMessage(_T("oesenc_pi: ") + msg);
         
-        g_sencutil_bin.Clear();
+        wxString msge= _T("Cannot find the oeserverd utility at \n");
+        msge += _T("{");
+        msge += bin_test;
+        msge += _T("}");
+
+        wxLogMessage(_T("oesenc_pi: ") + msge);
+        
+        //g_sencutil_bin.Clear();
         return false;
     }
 
@@ -3763,7 +3783,22 @@ bool IsDongleAvailable()
 
     wxArrayString ret_array, err_array;      
     wxExecute(cmd, ret_array, err_array );
-            
+ 
+    wxLogMessage(_T("IsDongleAvailable()::oeserverd execution results:"));
+    for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
+        wxString line = ret_array[i];
+        wxLogMessage(line);
+    }
+
+    // Show error in log
+    if( err_array.GetCount() ){
+        wxLogMessage(_T("IsDongleAvailable()::oeserverd execution error:"));
+        for(unsigned int i=0 ; i < err_array.GetCount() ; i++){
+            wxString line = err_array[i];
+            wxLogMessage(line);
+        }
+    }
+
     for(unsigned int i=0 ; i < ret_array.GetCount() ; i++){
         wxString line = ret_array[i];
         if(line.IsSameAs(_T("1")))
@@ -3773,13 +3808,13 @@ bool IsDongleAvailable()
     }
 
     // Show error in log
-    wxLogMessage(_T("oeserverd execution error:"));
+    wxLogMessage(_T("IsDongleAvailable()::oeserverd execution error:"));
     for(unsigned int i=0 ; i < err_array.GetCount() ; i++){
         wxString line = err_array[i];
         wxLogMessage(line);
     }
 
-    g_sencutil_bin.Clear();
+    //g_sencutil_bin.Clear();
 #endif
     
     return false;
