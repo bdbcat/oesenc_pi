@@ -85,7 +85,7 @@ IF(QT_ANDROID)
   INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtOpenGL")
   INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtTest")
 
-  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-3.1")
+  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
   INCLUDE_DIRECTORIES("${wxQt_Base}/include")
 
   ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
@@ -159,15 +159,6 @@ IF (QT_ANDROID )
         # flow to this module from above.  If we want to build Android plugins out-of-core, this will need improvement.
 
   
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_core-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_html-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_xml-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_qa-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_adv-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_aui-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_baseu_net-3.1.so
-    ${wxQt_Base}/${wxQt_Build}/lib/libwx_qtu_gl-3.1.so
     ${Qt_Base}/${Qt_Build}/lib/libQt5Core.so
     ${Qt_Base}/${Qt_Build}/lib/libQt5OpenGL.so
     ${Qt_Base}/${Qt_Build}/lib/libQt5Widgets.so
