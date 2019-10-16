@@ -2200,7 +2200,11 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                 }
             }
             if (i == TXF_CACHE) {
+#ifndef __OCPN__ANDROID__
                 i = rand() & (TXF_CACHE -1);
+#else
+                i = TXF_CACHE - 1;
+#endif                
             }
             if (f_cache == 0) {
                 s_txf[i].key = ptext->pFont;
