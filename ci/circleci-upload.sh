@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 #
-# Upload the .tar.gz and .xml artifacts.
+# Upload the .tar.gz and .xml artifacts to cloudsmith
 #
 
 set -xe
 
-REPO='alec-leamas/opencpn-plugins-unstable'
+UNSTABLE_REPO='alec-leamas/opencpn-plugins-unstable'
+STABLE_REPO='alec-leamas/opencpn-plugins-stable'
 
 if [ -z "$CIRCLECI" ]; then
     exit 0;
@@ -35,12 +36,27 @@ fi
 
 BUILD_ID=${CIRCLE_BUILD_NUM:-1}
 commit=$(git rev-parse --short=7 HEAD) || commit="unknown"
-now=$(date --rfc-3339=seconds) || now=$(date)
+tag=$(git tag --contains HEAD)
 
 tarball=$(ls $HOME/project/build/*.tar.gz)
 xml=$(ls $HOME/project/build/*.xml)
-sudo chmod 666 $xml
-echo '<!--'" Date: $now Commit: $commit Build nr: $BUILD_ID -->" >> $xml
+test -z "$tag" || sudo sed -i -e "s|$UNSTABLE_REPO|$STABLE_REPO|" $xml
 
-cloudsmith push raw --republish --no-wait-for-sync $REPO $tarball
-cloudsmith push raw --republish --no-wait-for-sync $REPO $xml
+source $HOME/project/build/pkg_version.sh
+test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}+${BUILD_ID}.${commit}"
+test -n "$tag" && REPO="$STABLE_REPO" || REPO="$UNSTABLE_REPO"
+
+cloudsmith push raw \
+    --republish \
+    --no-wait-for-sync \
+    --name oesenc-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
+    --version ${VERSION} \
+    --summary "oesenc opencpn plugin metadata for automatic installation" \
+    $REPO $xml
+cloudsmith push raw  \
+    --republish \
+    --no-wait-for-sync \
+    --name oesenc-${PKG_TARGET}-${PKG_TARGET_VERSION}-tarball \
+    --version ${VERSION} \
+    --summary "oesenc opencpn plugin tarball for automatic installation" \
+    $REPO $tarball

@@ -163,6 +163,12 @@ MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 MESSAGE (STATUS "*** CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 MESSAGE (STATUS "*** PACKAGE_FORMAT is ${PACKAGE_FORMAT}")
 
+configure_file(
+  # Required in flatpak, done early.
+  ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
+)
+
 if (OCPN_FLATPAK)
     find_program(TAR NAMES gtar tar)
     if (NOT TAR)
