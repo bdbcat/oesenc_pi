@@ -7,7 +7,19 @@
 # bailout on errors and echo commands
 set -xe
 
-for pkg in cairo libexif xz libarchive python3 wget cmake; do
+# As of travis-ci-macos-10.13-xcode9.4.1-1529955246, the travis osx image
+# contains a broken homebrew. Walk-around by reinstalling:
+curl -fsSL \
+    https://raw.githubusercontent.com/Homebrew/install/master/uninstall \
+    > uninstall
+chmod 755 uninstall
+./uninstall -f
+inst="https://raw.githubusercontent.com/Homebrew/install/master/install"
+/usr/bin/ruby -e "$(curl -fsSL $inst)"
+
+
+set -o pipefail
+for pkg in cairo cmake libarchive libexif python3 wget; do
     brew list $pkg 2>&1 >/dev/null || brew install $pkg
 done
 
