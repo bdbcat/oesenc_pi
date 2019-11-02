@@ -34,7 +34,11 @@ SET(PKG_RELEASE "2")
 SET(PKG_API_VERSION "1.16")
 SET(PKG_AUTHOR "David S Register")
 SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
-SET(PKG_BASE_URL "https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-unstable/raw/files")
+
+# The @keyword@ references are patched to actual values by upload script.
+SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
+SET(TARBALL_URL ${TARBALL_URL}/names/@name@/versions/@version@/@filename@)
+
 
 SET(API_DIR "${CMAKE_SOURCE_DIR}/api-16")
 

@@ -24,8 +24,6 @@ can only be used after purchasing decryption keys from o-charts.org.
 
   <target>${PKG_TARGET}</target>
   <target-version>${PKG_TARGET_VERSION}</target-version>
-  <tarball-url>
-    ${PKG_BASE_URL}/${PKG_NVR}_${PKG_TARGET_NVR}.tar.gz
-  </tarball-url>
+  <tarball-url> ${TARBALL_URL} </tarball-url>
 </opencpn-plugin>
 
