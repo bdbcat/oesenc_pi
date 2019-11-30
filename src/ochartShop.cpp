@@ -1491,10 +1491,10 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     return 0;
 }
 
-bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, bool aStripPath, wxDateTime aMTime, bool aRemoveZip )
+bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, wxString &tlDir, bool aStripPath, wxDateTime aMTime, bool aRemoveZip )
 {
     bool ret = true;
-    
+    wxString topDir;
     std::unique_ptr<wxZipEntry> entry(new wxZipEntry());
     
     do
@@ -1534,6 +1534,8 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, bool
             // read 'zip' to access the entry's data
             if( entry->IsDir() )
             {
+                if(!topDir.Length())            // Save the top level directory
+                    topDir = name;
                 int perm = entry->GetMode();
                 if( !wxFileName::Mkdir(name, perm, wxPATH_MKDIR_FULL) )
                 {
@@ -1589,6 +1591,18 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, bool
     }
     while(false);
     
+    if(!topDir.Length()){        // if there is no directory in the zip file, then declare
+                                 // the tlDir as the zip file name itself, without extension
+       wxFileName fn(aZipFile);
+       topDir = aTargetDir + wxFileName::GetPathSeparator() + fn.GetName();
+    }
+
+    // Strip trailing '/'
+    if(topDir.EndsWith(wxFileName::GetPathSeparator()))
+        topDir = topDir.BeforeLast(wxFileName::GetPathSeparator());
+    
+    tlDir = topDir;
+    
     if( aRemoveZip )
         wxRemoveFile(aZipFile);
     
@@ -1642,28 +1656,26 @@ int doUnzip(itemChart *chart, int slot)
     wxYield();
     
     // Ready for unzip
-    if( downloadFile.Lower().EndsWith(_T("zip")) ) //Zip compressed
-    {
-        g_shopPanel->setStatusText( _("Unzipping chart set files..."));
-        wxYield();
+
+    g_shopPanel->setStatusText( _("Unzipping chart set files..."));
+    wxYield();
         
-        ::wxBeginBusyCursor();
-        bool ret = ExtractZipFiles( downloadFile, chosenInstallDir, false, wxDateTime::Now(), false);
-        ::wxEndBusyCursor();
+    ::wxBeginBusyCursor();
+    wxString tlDir;
+    bool ret = ExtractZipFiles( downloadFile, chosenInstallDir, tlDir, false, wxDateTime::Now(), false);
+    ::wxEndBusyCursor();
         
-        if(!ret){
-            wxLogError(_T("oesenc_pi: Unable to extract: ") + downloadFile );
-            OCPNMessageBox_PlugIn(NULL, _("Error extracting zip file"), _("oeSENC_pi Message"), wxOK);
-            return 2;
-        }
+    if(!ret){
+        wxLogError(_T("oesenc_pi: Unable to extract: ") + downloadFile );
+        OCPNMessageBox_PlugIn(NULL, _("Error extracting zip file"), _("oeSENC_pi Message"), wxOK);
+        return 2;
     }
-    
-    //  We know that the unzip process puts all charts in a subdir whose name in the "downloadFile", without extension
-    //  This is the dir that we want to add to database.
-    wxFileName fn(downloadFile);
-    wxString chartDir = fn.GetName();
-    wxString targetAddDir = chosenInstallDir + wxFileName::GetPathSeparator() + chartDir;
-    
+
+    // The unzip process will return the name of the first directory encountered in the zip file,
+    //  or the zip file name itself, if no embedded dirs are found
+    //  This is the name to add to the chart database
+    wxString targetAddDir = tlDir;
+
     //  If the currect core chart directories do not cover this new directory, then add it
     bool covered = false;
     for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ )

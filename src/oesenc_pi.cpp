@@ -708,7 +708,7 @@ int oesenc_pi::Init(void)
     
     g_ChartInfoArray.Clear();
    
-    testSENCServer();
+    //testSENCServer();
     
     int flags =  INSTALLS_PLUGIN_CHART_GL |
                  WANTS_PLUGIN_MESSAGING   |
