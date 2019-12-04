@@ -1453,7 +1453,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
         downloadURL = chart->fileDownloadURL1;
 
     chart->filedownloadSize0.ToDouble(&g_targetDownloadSizeMB);
-    if( slot == 1 );
+    if( slot == 1 )
         chart->filedownloadSize1.ToDouble(&g_targetDownloadSizeMB);
     
     uri.Create(downloadURL);
