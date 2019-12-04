@@ -2430,12 +2430,12 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
      }
  }
  
-void ShowGenericErrorMessage()
+void ShowGenericErrorMessage(wxString s_file)
 {
     if(g_GenericMessageShown)
         return;
         
-    wxString msg = 
+    wxString msg =
 _("This chart cannot be loaded due to any of the following reasons:\n\n\
 - You have made important hardware changes on your computer.\n\
 - Your OS has been updated and your license has been suspended.\n\
@@ -2443,7 +2443,8 @@ _("This chart cannot be loaded due to any of the following reasons:\n\n\
 - This chart set was prepared for a USB key dongle, but dongle is not detected.\n\
 - There are corrupted files due to errors during download or unzip.\n\n\
 Please contact info@o-charts.org if the problem persists.\n");
-
+    msg << _T("\n") << s_file; //Show one example file
+    
     OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_pi Message"),  wxOK, -1, -1);
     
     g_GenericMessageShown = true;
@@ -2545,7 +2546,7 @@ bool validateUserKey( wxString sencFileName)
 
             wxLogMessage(_T("validateUserKey E2.6"));
 
-            ShowGenericErrorMessage();
+            ShowGenericErrorMessage(sencFileName);
             return false;
 #if 0            
 
@@ -3071,15 +3072,16 @@ bool validate_SENC_server(void)
 {
       
     
-    if(g_debugLevel)printf("\n-------validate_SENC_server\n");
-    wxLogMessage(_T("validate_SENC_server"));
+    if (g_debugLevel) {
+        printf("\n-------validate_SENC_server\n");
+        wxLogMessage(_T("validate_SENC_server"));
+    }
 
     if(g_serverProc){
     // Check to see if the server is already running, and available
         //qDebug() << "Check running server Proc";
         Osenc_instream testAvail;
         if(testAvail.isAvailable(g_UserKey)){
-            wxLogMessage(_T("Available TRUE"));
             return true;
         }
 
@@ -5200,11 +5202,11 @@ void showChartinfoDialog( void )
 
 bool processChartinfo(const wxString &oesenc_file)
 {
-    wxLogMessage(_T("processChartInfo ") + oesenc_file);
-    
     // Do not process anything if a EULA has been rejected
-    if(g_bEULA_Rejected)
+    if (g_bEULA_Rejected) {
+        wxLogMessage(_T("processChartInfo but EULA_Rejected ") + oesenc_file);
         return false;
+    }
     
     // get the Chartinfo as a wxTextFile
     wxFileName fn(oesenc_file);
