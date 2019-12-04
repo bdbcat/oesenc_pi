@@ -911,7 +911,7 @@ int doLogin()
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
 
-    wxLogMessage(_T("loginParms: ") + loginParms);
+    //wxLogMessage(_T("loginParms: ") + loginParms);
     
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
@@ -1342,7 +1342,7 @@ int doUploadXFPR(bool bDongle)
             loginParms += _T("&xfpr=") + stringFPR;
             loginParms += _T("&xfprName=") + fprName;
             
-            wxLogMessage(loginParms);
+            //wxLogMessage(loginParms);
             
             wxCurlHTTPNoZIP post;
             post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
