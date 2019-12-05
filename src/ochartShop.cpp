@@ -69,6 +69,7 @@ extern wxString g_loginUser;
 extern wxString g_PrivateDataDir;
 extern wxString g_debugShop;
 extern wxString g_versionString;
+extern wxString systemOS;
 
 shopPanel *g_shopPanel;
 OESENC_CURL_EvtHandler *g_CurlEventHandler;
@@ -108,6 +109,7 @@ wxString errorMessages[] = {
         _("This chart does not have this system assigned"),
         _("Wrong System name")
 };
+
 
 
 
@@ -912,7 +914,7 @@ int doLogin()
     loginParms += _T("&password=") + loginPass;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
-    loginParms += _T("&version=") + g_versionString;
+    loginParms += _T("&version=") + g_systemOS + g_versionString;
 
     //wxLogMessage(_T("loginParms: ") + loginParms);
     
@@ -1177,7 +1179,7 @@ int getChartList( bool bShowErrorDialogs = true){
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
-    loginParms += _T("&version=") + g_versionString;
+    loginParms += _T("&version=") + g_systemOS + g_versionString;
 
     
     wxCurlHTTPNoZIP post;
@@ -1266,7 +1268,7 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
-    loginParms += _T("&version=") + g_versionString;
+    loginParms += _T("&version=") + g_systemOS + g_versionString;
 
     loginParms += _T("&systemName=") + systemName;
     loginParms += _T("&chartid=") + chart->chartID;
@@ -1338,7 +1340,7 @@ int doUploadXFPR(bool bDongle)
             loginParms += _T("&key=") + g_loginKey;
             if(g_debugShop.Len())
                 loginParms += _T("&debug=") + g_debugShop;
-            loginParms += _T("&version=") + g_versionString;
+            loginParms += _T("&version=") + g_systemOS + g_versionString;
 
             if(!bDongle)
                 loginParms += _T("&systemName=") + g_systemName;
@@ -1418,7 +1420,7 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     loginParms += _T("&key=") + g_loginKey;
     if(g_debugShop.Len())
         loginParms += _T("&debug=") + g_debugShop;
-    loginParms += _T("&version=") + g_versionString;
+    loginParms += _T("&version=") + g_systemOS + g_versionString;
 
     loginParms += _T("&assignedSystemName=") + aSysName;
     loginParms += _T("&chartid=") + chart->chartID;

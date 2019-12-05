@@ -224,6 +224,7 @@ wxString                        g_deviceInfo;
 wxString                        g_systemName;
 wxString                        g_loginUser;
 wxString                        g_loginKey;
+wxString                        g_systemOS;
 
 bool                            g_GenericMessageShown;
 
@@ -719,6 +720,23 @@ int oesenc_pi::Init(void)
     flags |= WANTS_PREFERENCES;             
 
     init_S52Library();
+
+    // Establish the system build type for server identification
+    /*
+    w = Windows
+    d = macOS
+    l = Linux
+    r = Android
+    */
+    g_systemOS = _T("l.");            // default
+#ifdef __WXMSW__
+    g_systemOS = _T("w.");
+#endif
+#ifdef __WXMAC__
+    g_systemOS = _T("d.");
+#endif
+    // Android handled in Java-side interface
+    
     
     return flags;
     
