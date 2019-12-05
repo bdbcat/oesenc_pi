@@ -69,7 +69,7 @@ extern wxString g_loginUser;
 extern wxString g_PrivateDataDir;
 extern wxString g_debugShop;
 extern wxString g_versionString;
-extern wxString systemOS;
+extern wxString g_systemOS;
 
 shopPanel *g_shopPanel;
 OESENC_CURL_EvtHandler *g_CurlEventHandler;
@@ -839,6 +839,13 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
                     case 4:
                     case 5:
                         msg += _("Invalid user/email name or password.");
+                        break;
+                    case 27:
+                        msg += _("This oeSENC plugin version is obsolete.");
+                        msg += _T("\n");
+                        msg += _("Please update your plugin.");
+                        msg += _T("\n");
+                        msg +=  _("Operation cancelled");
                         break;
                     default:    
                         msg += _("Check your configuration and try again.");
