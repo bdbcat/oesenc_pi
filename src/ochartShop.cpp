@@ -85,6 +85,7 @@ double g_targetDownloadSizeMB;
 double g_targetDownloadSize;
 
 #define N_MESSAGES 22
+#if 0
 wxString errorMessages[] = {
         _("Undetermined error"),
         _("Succesful"),
@@ -109,7 +110,7 @@ wxString errorMessages[] = {
         _("This chart does not have this system assigned"),
         _("Wrong System name")
 };
-
+#endif
 
 
 
@@ -807,6 +808,7 @@ void saveShopConfig()
    }
 }
 
+#if 0
 wxString GetMessageText(int index)
 {
     if(index < N_MESSAGES)
@@ -815,7 +817,7 @@ wxString GetMessageText(int index)
         return _("Undetermined error");
 
 }
-
+#endif
 
 
 int checkResult(wxString &result, bool bShowErrorDialog = true)
