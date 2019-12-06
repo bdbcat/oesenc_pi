@@ -826,8 +826,10 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
         g_shopPanel->getInProcessGuage()->Stop();
     }
     
+    wxString resultDigits = result.BeforeFirst(':');
+    
     long dresult;
-    if(result.ToLong(&dresult)){
+    if(resultDigits.ToLong(&dresult)){
         if(dresult == 1){
             return 0;
         }
@@ -849,8 +851,12 @@ int checkResult(wxString &result, bool bShowErrorDialog = true)
                         msg += _T("\n");
                         msg +=  _("Operation cancelled");
                         break;
-                    default:    
-                        msg += _("Check your configuration and try again.");
+                    default:
+                        if(result.AfterFirst(':').Length()){
+                            msg += result.AfterFirst(':');
+                            msg += _T("\n");
+                        }
+                        msg += _("Operation cancelled");
                         break;
                 }
                 
