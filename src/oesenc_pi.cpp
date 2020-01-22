@@ -4436,6 +4436,19 @@ void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
         if(nf){
             for(size_t i = 0 ; i < files.GetCount() ; i++){
                 qDebug() << "looking at FPR file: " << files[i].mb_str();
+                wxString msg;
+                msg.Printf(_T("looking at FPR file: %s"), files[i].mb_str());
+                wxLogMessage(msg);
+                wxFileInputStream stream(files[i]);
+                if(stream.IsOk() && !stream.Eof() ){
+                    char c = stream.GetC();
+                    if(!stream.Eof()){
+                        wxString sc;
+                        sc.Printf(_T("%02X"), c);
+                        wxLogMessage(_T("  First char: ") + sc);
+                    }
+                }
+
                 time_t t = ::wxFileModificationTime(files[i]);
                 if(t > tmax){
                     tmax = t;
@@ -4443,6 +4456,10 @@ void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
                 }
             }
         }
+        
+        wxString msg;
+        msg.Printf(_T("last FPR file: %s"), lastFile.mb_str());
+        wxLogMessage(msg);
         
         qDebug() << "last FPR file: " << lastFile.mb_str();
             
