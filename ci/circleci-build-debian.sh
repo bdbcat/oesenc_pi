@@ -7,9 +7,6 @@ set -xe
 sudo apt-get -qq update
 sudo apt-get install devscripts equivs
 
-pwd
-ls -R
-
 mkdir  build
 cd build
 mk-build-deps ../ci/control
