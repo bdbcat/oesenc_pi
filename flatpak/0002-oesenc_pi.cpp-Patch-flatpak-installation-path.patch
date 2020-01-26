@@ -1,0 +1,28 @@
+From a87dd701f49f30bc947e2687ca69375331ef944c Mon Sep 17 00:00:00 2001
+From: Alec Leamas <leamas.alec@gmail.com>
+Date: Sun, 15 Jul 2018 23:40:16 +0200
+Subject: [PATCH 2/4] oesenc_pi.cpp: Patch flatpak installation path.
+
+---
+ src/oesenc_pi.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/oesenc_pi.cpp b/src/oesenc_pi.cpp
+index 998d498..c715338 100755
+--- a/src/oesenc_pi.cpp
++++ b/src/oesenc_pi.cpp
+@@ -644,6 +644,11 @@ int oesenc_pi::Init(void)
+     g_serverProc = 0;
+ #endif
+ 
++#ifdef FLATPAK
++    wxFileName binFile("/app/extensions/oesenc/bin/oeserverd", "");
++    g_sencutil_bin = binFile.GetPath();
++#endif
++
+     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
+ 
+     g_benable_screenlog = g_buser_enable_screenlog;
+-- 
+2.14.4
+
