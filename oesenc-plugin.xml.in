@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opencpn-plugin version="1">
-  <name> oesenc </name>
+  <name> oeSENC </name>
   <version> ${PACKAGE_VERSION} </version>
   <release> ${PKG_RELEASE} </release>
   <summary> OpenCPN support for encrypted OCPN Vector Charts </summary>
