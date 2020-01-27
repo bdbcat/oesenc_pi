@@ -16,7 +16,7 @@ jobs:
            | sudo tee -a /etc/apt/sources.list
        - run: cat /etc/apt/sources.list
        - run: ci/circleci-build-debian.sh
-       #- run: ci/circleci-upload.sh
+        run: ci/circleci-upload.sh
    build-buster:
      docker:
        - image: circleci/buildpack-deps:buster-scm
