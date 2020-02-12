@@ -45,8 +45,11 @@ tarball_basename=${tarball##*/}
 # extract the project name for a filename.  e.g. oernc-pi... sets PROJECT to  "oernc"
 echo "Check 1"
 pwd
-ls $HOME/project/build/*.xml
-PROJECT=$(ls $HOME/project/build/*.xml | awk '{split($0,a,"-"); print a[1]}')
+cd build
+ls *.xml
+PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
+cd ..
+echo $PROJECT
 
 source $HOME/project/build/pkg_version.sh
 test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}.${commit}"
