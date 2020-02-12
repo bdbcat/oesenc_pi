@@ -43,7 +43,8 @@ tarball=$(ls $HOME/project/build/*.tar.gz)
 tarball_basename=${tarball##*/}
 
 # extract the project name for a filename.  e.g. oernc-pi... sets PROJECT to  "oernc"
-PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
+ls $HOME/project/build/*.xml
+PROJECT=$(ls $HOME/project/build/*.xml | awk '{split($0,a,"-"); print a[1]}')
 
 source $HOME/project/build/pkg_version.sh
 test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}.${commit}"
