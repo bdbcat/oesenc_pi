@@ -43,10 +43,10 @@ tarball=$(ls $HOME/project/build/*.tar.gz)
 tarball_basename=${tarball##*/}
 
 # extract the project name for a filename.  e.g. oernc-pi... sets PROJECT to  "oernc"
-echo "Check 1"
-pwd
+#echo "Check 1"
+#pwd
 cd build
-ls *.xml
+#ls *.xml
 PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
 cd ..
 echo $PROJECT
