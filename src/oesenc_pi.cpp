@@ -719,6 +719,7 @@ int oesenc_pi::Init(void)
 #endif
 
     // Set environment variable for some platforms to find the required sglock dongle library
+    wxFileName fn_exe(GetOCPN_ExePath());
 
 #if !defined(__WXMSW__) && !defined(__WXMAC__)
     // Set environment variable to find the required sglock dongle library
