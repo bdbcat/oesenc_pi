@@ -41,9 +41,10 @@ SET(TARBALL_URL ${TARBALL_URL}/names/@name@/versions/@version@/@filename@)
 
 
 SET(API_DIR "${CMAKE_SOURCE_DIR}/api-16")
+SET(OCPN_USE_API_16 ON)
 
 SET(OCPN_MIN_VERSION "ov50")
-OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
+#OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
 OPTION(OCPN_FLATPAK "Build flatpak plugin" OFF)
  
 include("cmake/PluginSetup.cmake")
