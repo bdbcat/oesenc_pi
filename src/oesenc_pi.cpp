@@ -57,6 +57,7 @@
 #include "jsonreader.h"
 #include "dsa_utils.h"
 #include "sha1.h"
+#include "InstallDirs.h"
 
 #ifndef __OCPN__ANDROID__
 #include "ochartShop.h"
@@ -658,7 +659,42 @@ int oesenc_pi::Init(void)
     m_class_name_array.Add(_T("oeEVCChart"));
 
      
-    //        Specify the location of the oeserverd helper.
+    // Specify the location of the xxserverd helper.
+#ifdef __WXMSW__
+      g_sencutil_bin = GetPluginDataDir("oesenc_pi") + _T("\\oeserverd.exe");
+
+//#else      
+      //wxFileName fn_exe(GetOCPN_ExePath());
+      //g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
+#endif
+      
+      // Search for helper in the $PATH.
+      // This will avoid accidentally picking up a helper location lefover from a Legacy installation.
+      
+      if (!wxFileExists(g_sencutil_bin)) {
+        std::string path(find_in_path("oeserverd"));
+        if (path == "") {
+            wxLogWarning("Cannot locate oeserverd binary in $PATH");
+        }
+        else {
+            g_sencutil_bin = wxString(path.c_str());
+        }
+      }
+      
+            // Account for possible "space" in Mac directory name.
+#ifdef __WXOSX__
+      g_sencutil_bin.Prepend(_T("\""));
+      g_sencutil_bin.Append(_T("\""));
+#endif    
+
+
+    
+    
+    
+    
+#if 0    
+    
+    
     wxFileName fn_exe(GetOCPN_ExePath());
     g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
        
@@ -673,7 +709,8 @@ int oesenc_pi::Init(void)
     g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
     _T("PlugIns/oesenc_pi/oeserverd\"");
 #endif
-    
+#endif
+
 #ifdef __OCPN__ANDROID__
     wxString piLocn = GetPlugInPath(this); //*GetpSharedDataLocation();
     wxFileName fnl(piLocn);
