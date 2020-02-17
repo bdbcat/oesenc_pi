@@ -38,19 +38,7 @@ modules:
           - install -t /app/extensions/oesenc/bin/ -m 755 oeserverd
       sources:
           - type: git
-            url: https://github.com/bdbcat/oesenc_pi.git
-            commit: 2f169d94
-          - type: patch
-            path: 0001-oesenc-pi.cpp-Remove-trailing-whitespace.patch
-          - type: patch
-            path: 0002-oesenc_pi.cpp-Patch-flatpak-installation-path.patch
-          - type: patch
-            path: 0003-CMakeLists-Remove-trailing-whitespace.patch
-          - type: patch
-            path: 0004-Build-Add-flatpak-installation-path.patch
-          - type: patch
-            path: 0005-flatpak-Use-GetPluginDataDir-using-latest-API.patch
-          - type: patch
-            path: 0006-fix-too-verbose-cmake-warning.patch
+            url: ..
+            branch: ci
           - type: file
             path: oeserverd
