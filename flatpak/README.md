@@ -1,28 +1,34 @@
 Oesenc flatpak README
 ---------------------
 
-This is a simple packaging to use the oesenc plugin when using the
-opencpn's flatpak package. To build and install:
+This is the flatpak packaging of the oesenc plugin, to be managed
+by opencpn's new plugin installer.
 
-  - Install flatpak and flatpak-builder as described in https://flatpak.org/
-  - Install the opencpn flatpak package. Using the provisionary repo at
-    fedorapeople.org do:
 
-      $ flatpak install --user \
-          https://leamas.fedorapeople.org/opencpn/opencpn.flatpakref
-
-  - The shipdriver plugin can now be built and installed using
-
-      $ make
-      $ make install
-
-  - The oesenc plugin requires extended permissions. Do:
+Testing
+-------
+  - The plugin requires extended permissions. Do (initial setup):
 
       $ flatpak override --user --allow=devel
 
-After this you could just start opencpn and enable the plugin. You will have to
-purchase and register you charts as described on http://o-charts.org/
+  - Install flatpak and flatpak-builder as described in https://flatpak.org/
+  - Enable the flathub repo and install platform packages:
+     
+      $  flatpak --user remote-add --if-not-exists \
+            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      $ flatpak --user install org.freedesktop.Platform//18.08
+      $ flatpak --user install org.freedesktop.Sdk//18.08
+      $ flatpak --user install org.flatpak.Builder
 
-The actual plugin version built depends on the *commit:* stanza in the yaml file;
-update to other versions as preferred. The sources are available at
-https://github.com/bdbcat/oesenc_pi.
+  - Install opencpn from the beta testing repo:
+
+      $ flatpak --user remote-add --no-gpg-verify plug-mgr \
+           http://opencpn.duckdns.org/opencpn-beta/website/repo
+      $ flatpak --user install plug-mgr org.opencpn.OpenCPN
+
+  - Build plugin tarball and metadata from the ci branch:
+
+      $ cd build
+      $ cmake -DOCPN_FLATPAK=ON ..
+      $ make flatpak-build
+      $ make package
