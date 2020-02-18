@@ -3798,6 +3798,7 @@ void androidGetDeviceName()
 bool IsDongleAvailable()
 {
 #ifndef __OCPN__ANDROID__    
+#ifndef OCPN_ARM64
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -s ");                  // Available?
 
@@ -3835,6 +3836,7 @@ bool IsDongleAvailable()
     }
 
     //g_sencutil_bin.Clear();
+#endif
 #endif
     
     return false;
