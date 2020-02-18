@@ -82,7 +82,11 @@ IF(UNIX AND NOT APPLE)
 
 
   IF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm*")
-    SET (ARCH "armhf")
+    IF (CMAKE_SIZEOF_VOID_P MATCHES "8")
+      SET (ARCH "arm64")
+    ELSE ()
+      SET (ARCH "armhf")
+    ENDIF ()
     # don't bother with rpm on armhf
     SET(CPACK_GENERATOR "DEB;TBZ2")
   ELSE ()
