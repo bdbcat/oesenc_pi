@@ -6,6 +6,15 @@ build-extension: true
 separate-locales: false
 appstream-compose: false
 modules:
+    - name: libusb
+      no-autogen: true
+      sources:
+          - type: archive
+            url: https://sourceforge.net/projects/libusb/files/libusb-0.1%20%28LEGACY%29/0.1.6/libusb-0.1.6.tar.gz
+            sha256: 0bafb64bfc41da07ba24c80ee86f57d43c15334e6ff593f806fc331ff8a19571
+      make-install-args:
+          - prefix=/app/extensions/oesenc
+
     - name: iproute
       no-autogen: true
       make-install-args:
@@ -36,6 +45,9 @@ modules:
             mv /app/extensions/oesenc/bin/oeserverd
             /app/extensions/oesenc/bin/oeserverd.prog
           - install -t /app/extensions/oesenc/bin/ -m 755 oeserverd
+          - >
+            install -t /app/extensions/oesenc/lib -m 755
+            buildlinux64/oeserverd/libsgllnx64-2.29.02.so
       sources:
           - type: git
             url: ..
