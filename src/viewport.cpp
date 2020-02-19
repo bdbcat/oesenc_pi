@@ -433,7 +433,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &region, const LLReg
 
     std::list<ContourRegion> cregions;
     for(std::list<poly_contour>::const_iterator i = llregion.contours.begin(); i != llregion.contours.end(); i++) {
-        float *contour_points = new float[2*i->size()];
+        float* contour_points = (float*) malloc(sizeof(float) * 2 * i->size());
         int idx = 0;
         std::list<contour_pt>::const_iterator j;
         for(j = i->begin(); j != i->end(); j++) {
@@ -459,7 +459,6 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &region, const LLReg
         s.maxlat = maxlat;
         s.subtract = total < 0;
         s.r = GetVPRegionIntersect(region, i->size(), contour_points, chart_native_scale, NULL);
-        delete [] contour_points;
 
         std::list<ContourRegion>::iterator k = cregions.begin();
         while(k!=cregions.end()) {
@@ -468,6 +467,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &region, const LLReg
             k++;
         }
         cregions.insert(k, s);
+        free(contour_points);
     }
 
     OCPNRegion r;
@@ -544,7 +544,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
     wxPoint *pp;
 
     //    Use the passed point buffer if available
-    if( ppoints == NULL ) pp = new wxPoint[nPoints];
+    if( ppoints == NULL ) pp = (wxPoint*) malloc(nPoints * sizeof(wxPoint));
     else
         pp = ppoints;
 
@@ -581,7 +581,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
 
     if(!valid)
     {
-        delete[] pp;
+        if (ppoints) delete[] ppoints; else free(pp);
         return OCPNRegion(); //empty;
     }
  
@@ -711,18 +711,18 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
                 float rlon = (p0.x + p1.x)/2.;
                 
                 if(G_PtInPolygon_FL((float_2Dpt *)llpoints, nPoints, rlon, rlat)){
-                    if( NULL == ppoints ) delete[] pp;
+                    if( NULL == ppoints ) free(pp);
                     return Region;
                 }
                 rlon += 360.;
                 if(G_PtInPolygon_FL((float_2Dpt *)llpoints, nPoints, rlon, rlat)){
-                    if( NULL == ppoints ) delete[] pp;
+                    if( NULL == ppoints ) free(pp);
                     return Region;
                 }
                 
                 //  otherwise, there is no intersection
                 else{
-                    if( NULL == ppoints ) delete[] pp;
+                    if( NULL == ppoints ) free(pp);
                     wxRegion r;
                     return r;
                 }
@@ -734,7 +734,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
         else{
         //  Subject polygon is entirely outside of target Region
         //  so the intersection must be empty.
-            if( NULL == ppoints ) delete[] pp;
+            if( NULL == ppoints ) free(pp);
             wxRegion r;
             return r;
         }
@@ -743,7 +743,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
         //  subject polygon is entirely withing the target Region,
         //  so the intersection is the subject polygon
         OCPNRegion r = OCPNRegion( nPoints, pp );
-        if( NULL == ppoints ) delete[] pp;
+        if( NULL == ppoints ) free(pp);
         return r;
     }
         
@@ -777,7 +777,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
 
         OCPNRegion r = OCPNRegion(nPoints, pp);
         if(NULL == ppoints)
-            delete[] pp;
+            free(pp);
 
         sigaction(SIGSEGV, &sa_all_old, NULL);        // reset signal handler
         r.Intersect(Region);
@@ -787,7 +787,7 @@ OCPNRegion ViewPort::GetVPRegionIntersect( const OCPNRegion &Region, size_t nPoi
 #else
     OCPNRegion r = OCPNRegion( nPoints, pp );
 
-    if( NULL == ppoints ) delete[] pp;
+    if( NULL == ppoints ) free(pp);
 
     r.Intersect( Region );
     return r;
