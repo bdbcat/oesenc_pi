@@ -1,0 +1,41 @@
+From cd6fd2d2b76b3dc6a86193c72152c86696236c8f Mon Sep 17 00:00:00 2001
+From: Alec Leamas <leamas.alec@gmail.com>
+Date: Sat, 22 Feb 2020 11:17:40 +0100
+Subject: [PATCH 07/14] debian patch 06 -- bsd.diff.
+
+---
+ bsd.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/bsd.c b/bsd.c
+index 09d401d..844bdf0 100644
+--- a/bsd.c
++++ b/bsd.c
+@@ -39,14 +39,22 @@
+ #include <sys/time.h>
+ #include <sys/ioctl.h>
+ 
+-#include <dev/usb/usb.h>
++#include "freebsd-usb.h"
+ 
+ #include "usbi.h"
+ #ifdef HAVE_CONFIG_H
+ #include "config.h"
+ #endif
+ 
+-#ifdef HAVE_OLD_DEV_USB_USB_H
++/*
++ * Since the Debian version includes "freebsd-usb.h" instead of
++ * <dev/usb/usb.h>, the API provided by the latter file does not matter. The
++ * configure check gives false positives as of 2012, but rather than fixing a
++ * check for something we don't use anyway, just unconditionally skip those
++ * definitions.
++ * #ifdef HAVE_OLD_DEV_USB_USB_H
++ */
++#if 0
+ /*
+  * It appears some of the BSD's (OpenBSD atleast) have switched over to a
+  * new naming convention, so we setup some macro's for backward
+-- 
+2.21.0
+
