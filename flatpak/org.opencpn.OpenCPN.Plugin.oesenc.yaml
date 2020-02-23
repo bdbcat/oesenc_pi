@@ -30,5 +30,5 @@ modules:
           - type: file
             path: oeserverd
           - type: file
-            # originally libusb-0.1.so.4.1.1, built from libusb-0.1.6
+            # originally libusb-0.1.so.4.1.1, built from  libusb-0.1.6
             path: libusb-0.1.so.4
