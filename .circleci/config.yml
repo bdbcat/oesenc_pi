@@ -89,8 +89,8 @@ jobs:
        - setup_remote_docker:
        - run:
      command: |
-     docker run --rm --privileged multiarch/qemu-user-static:register
-     docker run opencpn/raspbian-buster:plugin_build_tooling
+     docker run --rm --privileged multiarch/qemu-user-static:register |
+     docker run opencpn/raspbian-buster:plugin_build_tooling |
      docker run: bash ci/circleci-build-debian.sh
        #- run: bash ci/circleci-upload.sh
 workflows:
