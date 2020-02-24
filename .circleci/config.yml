@@ -80,19 +80,6 @@ jobs:
        - checkout
        - run: ci/circleci-build-macos.sh
        - run: ci/circleci-upload.sh
-   build-armhf-buster:
-     environment:
-       - OCPN_TARGET:  build-armhf-buster
-       - CLOUDSMITH_PKG_EXT: exe
-     steps:
-       - checkout
-       - setup_remote_docker:
-       - run:
-     command: |
-     docker run --rm --privileged multiarch/qemu-user-static:register |
-     docker run opencpn/raspbian-buster:plugin_build_tooling |
-     docker run: bash ci/circleci-build-debian.sh
-       #- run: bash ci/circleci-upload.sh
 workflows:
   version: 2
   build_all:
@@ -122,10 +109,6 @@ workflows:
             branches:
               only: ci
       - build-mingw:
-          filters:
-            branches:
-              only: ci
-      - build-armhf-buster:
           filters:
             branches:
               only: ci
