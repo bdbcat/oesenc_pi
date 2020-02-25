@@ -7109,6 +7109,9 @@ void eSENCChart::AssembleLineGeometry( void )
                         pls->priority = 0;
                         pls->pedge = pedge;
                         pls->ls_type = TYPE_EE;
+                        if( !edge_dir )
+                            pls->ls_type = TYPE_EE_REV;
+ 
                         
                         le_current->next = pls;             // hook it up
                         le_current = pls;
