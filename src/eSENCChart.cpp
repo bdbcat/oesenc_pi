@@ -4860,6 +4860,7 @@ void eSENCChart::SetLinePriorities( void )
                     while( list ){
                         switch (list->ls_type){
                             case TYPE_EE:
+                            case TYPE_EE_REV:
                                 
                                 pedge = list->pedge;// (VE_Element *)list->private0;
                                 if(pedge)
