@@ -322,8 +322,8 @@ private:
     
     void UpdateOBJLArray( S57Obj *obj );
 
-    int reduceLOD( double LOD_meters, int nPoints, double *source, wxPoint2DDouble **dest);
-    
+    int reduceLOD( double LOD_meters, int nPoints, double *source, wxPoint2DDouble **dest, int *maskIn, int **maskOut);
+
     int RenderLSLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp );
     int RenderLCLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp );
     int RenderGLLSLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp );
@@ -342,9 +342,8 @@ private:
         S52color *c, render_canvas_parms *pb_spec,
         render_canvas_parms *patt_spec, ViewPort *vp );
 
-    void draw_lc_poly( wxDC *pdc, wxColor &color, int width, wxPoint *ptp,
-        int npt, float sym_len, float sym_factor, Rule *draw_rule,
-        ViewPort *vp );
+    void draw_lc_poly( wxDC *pdc, wxColor &color, int width, wxPoint *ptp, int *mask, int npt,
+        float sym_len, float sym_factor, Rule *draw_rule, ViewPort *vp );
 
     bool RenderHPGL( ObjRazRules *rzRules, Rule * rule_in, wxPoint &r,
         ViewPort *vp, float rot_angle = 0. );
