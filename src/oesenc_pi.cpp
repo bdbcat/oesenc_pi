@@ -731,7 +731,7 @@ int oesenc_pi::Init(void)
 
 #ifdef __WXMAC__
     // Set environment variable to find the required sglock dongle library
-    wxString libDir = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("PlugIns/oesenc_pi" _T("\""));
+    wxString libDir = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("PlugIns/oesenc_pi");
     wxSetEnv(_T("DYLD_LIBRARY_PATH"), libDir ); 
     wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);
 #endif
