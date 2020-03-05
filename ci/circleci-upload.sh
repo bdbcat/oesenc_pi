@@ -6,8 +6,8 @@
 
 set -xe
 
-UNSTABLE_REPO='david-register/ocpn-plugins-unstable'
-STABLE_REPO='david-register/ocpn-plugins-stable'
+UNSTABLE_REPO=${CLOUDSMITH_UNSTABLE_REPO:-'david-register/ocpn-plugins-unstable'}
+STABLE_REPO=${CLOUDSMITH_STABLE_REPO:-'david-register/ocpn-plugins-stable'}
 
 if [ -z "$CIRCLECI" ]; then
     exit 0;
