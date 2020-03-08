@@ -142,7 +142,6 @@ IF(QT_ANDROID)
 ENDIF(QT_ANDROID)
 
 IF (NOT QT_ANDROID )
-    set (WXWIDGETS_FORCE_VERSION CACHE VERSION "Force usage of a specific wxWidgets version.")
     if(WXWIDGETS_FORCE_VERSION)
         set (wxWidgets_CONFIG_OPTIONS --version=${WXWIDGETS_FORCE_VERSION})
     endif()
