@@ -1,0 +1,15 @@
+Source: oesenc-pi
+Section: misc
+Priority: extra
+Maintainer: Dave Register <bdbcat@yahoo.com>
+Build-Depends: debhelper (>= 8.0.0), cmake, cdbs, libgtk2.0-dev, gettext, wx-common, libwxgtk3.0-dev, libglu1-mesa-dev, libgtk2.0-dev, wx3.0-headers, libsdl1.2debian, libcurl4-openssl-dev
+Standards-Version: 3.9.3
+Homepage: https://www.opencpn.org
+#Vcs-Git: git://git.debian.org/collab-maint/opencpn.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/opencpn.git;a=summary
+
+Package: oesenc-pi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, wx3.0-i18n, opencpn (>= 4.1.0)
+Description: Plugin for OpenCPN
+ OpenCPN is a free software (GPLv2) project to create a concise chartplotter and navigation software for use as an underway or planning tool.  OpenCPN is developed by a team of active sailors using real world conditions for program testing and refinement.
