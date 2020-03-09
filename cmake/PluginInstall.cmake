@@ -17,14 +17,12 @@ IF(WIN32)
 #	glu32.lib)
     TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${OPENGL_LIBRARIES})
 
-    SET(OPENCPN_IMPORT_LIB "${PARENT}.lib")
   ENDIF(MSVC)
 
   IF(MINGW)
 # assuming wxwidgets is compiled with unicode, this is needed for mingw headers
     ADD_DEFINITIONS( " -DUNICODE" )
     TARGET_LINK_LIBRARIES(${PACKAGE_NAME} ${OPENGL_LIBRARIES})
-    SET(OPENCPN_IMPORT_LIB "${PARENT}.dll")
     SET( CMAKE_SHARED_LINKER_FLAGS "-L../buildwin" )
   ENDIF(MINGW)
 

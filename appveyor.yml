@@ -2,11 +2,6 @@ clone_folder: c:\project\opencpn\plugin_source
 shallow_clone: false
 clone_depth: 10
 
-# environment variables
-environment:
-  STABLE_REPO: david-register/ocpn-plugins-stable
-  UNSTABLE_REPO: david-register/ocpn-plugins-unstable
-
 image:
 - Visual Studio 2017
 

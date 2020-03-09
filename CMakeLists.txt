@@ -9,14 +9,17 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
 # This should be 2.8.0 to have FindGTK2 module
 IF (COMMAND cmake_policy)
-  CMAKE_POLICY(SET CMP0003 OLD)
-  CMAKE_POLICY(SET CMP0005 OLD)
-  CMAKE_POLICY(SET CMP0011 OLD)
-  CMAKE_POLICY(SET CMP0037 OLD)
+  CMAKE_POLICY(SET CMP0003 NEW)
+  CMAKE_POLICY(SET CMP0005 NEW)
+  CMAKE_POLICY(SET CMP0011 NEW)
+  CMAKE_POLICY(SET CMP0037 NEW)
   if (POLICY CMP0053)
       CMAKE_POLICY(SET CMP0053 NEW)
   endif ()
 ENDIF (COMMAND cmake_policy)
+
+# Prefer libGL.so to libOpenGL.so, see CMP0072
+set(OpenGL_GL_PREFERENCE "LEGACY")
 
 PROJECT(oesenc_pi)
 
@@ -47,7 +50,6 @@ SET(OCPN_MIN_VERSION "ov50")
 #OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
 OPTION(OCPN_FLATPAK "Build flatpak plugin" OFF)
  
-include("cmake/PluginSetup.cmake")
 set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 IF( NOT CMAKE_BUILD_TYPE )
@@ -176,13 +178,15 @@ MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 MESSAGE (STATUS "*** CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 MESSAGE (STATUS "*** PACKAGE_FORMAT is ${PACKAGE_FORMAT}")
 
-configure_file(
-  # Required in flatpak, done early.
-  ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
-  ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
-)
-
 if (OCPN_FLATPAK)
+    # Lie to PluginSetup that we have found wxWidgets so it don't barfs.
+    set(wxWidgets_LIBRARIES FOOBAR)
+    include("cmake/PluginSetup.cmake")
+    configure_file(
+      # Required in flatpak, done early.
+      ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
+      ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
+    )
     find_program(TAR NAMES gtar tar)
     if (NOT TAR)
         message(FATAL_ERROR "tar not found, required for OCPN_FLATPAK")
@@ -594,6 +598,10 @@ INCLUDE("cmake/PluginInstall.cmake")
 INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
 
+configure_file(
+  ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
+)
 configure_file(
   ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
   ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml
