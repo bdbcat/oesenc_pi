@@ -593,15 +593,17 @@ ENDIF(NOT WIN32)
 
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")
 
+INCLUDE("cmake/PluginLocalization.cmake")
+INCLUDE("cmake/PluginInstall.cmake")
+INCLUDE("cmake/PluginSetup.cmake")
+INCLUDE("cmake/PluginPackage.cmake")
+
 configure_file(
   ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
   ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
 )
 
-INCLUDE("cmake/PluginLocalization.cmake")
-INCLUDE("cmake/PluginInstall.cmake")
-INCLUDE("cmake/PluginSetup.cmake")
-INCLUDE("cmake/PluginPackage.cmake")
+set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
