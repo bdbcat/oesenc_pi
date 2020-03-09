@@ -187,6 +187,8 @@ if (OCPN_FLATPAK)
       ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
       ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
     )
+    set(PLUGIN_NAME ${VERBOSE_NAME}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+
     find_program(TAR NAMES gtar tar)
     if (NOT TAR)
         message(FATAL_ERROR "tar not found, required for OCPN_FLATPAK")
@@ -603,7 +605,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
 )
 
-set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+set(PLUGIN_NAME ${VERBOSE_NAME}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
