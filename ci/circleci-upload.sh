@@ -43,13 +43,14 @@ tarball=$(ls $HOME/project/build/*.tar.gz)
 tarball_basename=${tarball##*/}
 
 # extract the project name for a filename.  e.g. oernc-pi... sets PROJECT to  "oernc"
-#echo "Check 1"
+echo "Check 1"
 #pwd
 cd build
-#ls *.xml
+ls *.xml
 PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
 cd ..
 echo $PROJECT
+echo $xml
 
 source $HOME/project/build/pkg_version.sh
 test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}.${commit}"
@@ -59,16 +60,16 @@ xml_name=${PROJECT}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION}.xml
 echo $xml_name
 
 
-sudo sed -i -e "s|@pkg_repo@|$REPO|" $xml_name
-sudo sed -i -e "s|@name@|$tarball_name|" $xml_name
-sudo sed -i -e "s|@version@|$VERSION|" $xml_name
-sudo sed -i -e "s|@filename@|$tarball_basename|" $xml_name
+sudo sed -i -e "s|@pkg_repo@|$REPO|" $xml
+sudo sed -i -e "s|@name@|$tarball_name|" $xml
+sudo sed -i -e "s|@version@|$VERSION|" $xml
+sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
 cloudsmith push raw --republish --no-wait-for-sync \
     --name ${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
     --version ${VERSION} \
     --summary "opencpn plugin metadata for automatic installation" \
-    $REPO $xml_name
+    $REPO $xml
 
 cloudsmith push raw --republish --no-wait-for-sync \
     --name $tarball_name \
