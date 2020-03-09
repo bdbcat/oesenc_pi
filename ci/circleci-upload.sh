@@ -51,13 +51,13 @@ PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
 cd ..
 echo $PROJECT
 
-xml_name=${PROJECT}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION}.xml
-echo $xml_name
-
 source $HOME/project/build/pkg_version.sh
 test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}.${commit}"
 test -n "$tag" && REPO="$STABLE_REPO" || REPO="$UNSTABLE_REPO"
 tarball_name=${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-tarball
+xml_name=${PROJECT}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION}.xml
+echo $xml_name
+
 
 sudo sed -i -e "s|@pkg_repo@|$REPO|" $xml_name
 sudo sed -i -e "s|@name@|$tarball_name|" $xml_name
