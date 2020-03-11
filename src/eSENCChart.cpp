@@ -2012,7 +2012,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
     //qDebug() << "PI RenderTimeD2" << sw.GetTime();
     
     for( i = 0; i < PRIO_NUM; ++i ) {
-        
+
         top = razRules[i][2];           //LINES
         while( top != NULL ) {
             ObjRazRules *crnt = top;
@@ -2021,7 +2021,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
     }
-    
+
     for( i = 0; i < PRIO_NUM; ++i ) {
         if( ps52plib->m_nSymbolStyle == SIMPLIFIED )
             top = razRules[i][0];       //SIMPLIFIED Points
@@ -2034,7 +2034,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             crnt->sm_transform_parms = &vp_transform;
             ps52plib->RenderObjectToGL( glc, crnt, &tvp );
         }
-        
+
     }
 
     //qDebug() << "PI RenderTimeD4" << sw.GetTime();
@@ -2191,34 +2191,36 @@ bool eSENCChart::DCRenderText( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp )
     
     for( i = 0; i < PRIO_NUM; ++i ) {
         
-        if( ps52plib->m_nBoundaryStyle == SYMBOLIZED_BOUNDARIES ) top = razRules[i][4]; // Area Symbolized Boundaries
+        if ( ps52plib->m_nBoundaryStyle == SYMBOLIZED_BOUNDARIES )
+            top = razRules[i][4]; // Area Symbolized Boundaries
         else
             top = razRules[i][3];           // Area Plain Boundaries
-            while( top != NULL ) {
-                crnt = top;
-                top = top->next;               // next object
-                crnt->sm_transform_parms = &vp_transform;
-                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
-            }
-            
-            top = razRules[i][2];           //LINES
-            while( top != NULL ) {
-                ObjRazRules *crnt = top;
-                top = top->next;
-                crnt->sm_transform_parms = &vp_transform;
-                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
-            }
-            
-            if( ps52plib->m_nSymbolStyle == SIMPLIFIED ) top = razRules[i][0];       //SIMPLIFIED Points
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;               // next object
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+        }
+
+        top = razRules[i][2];           //LINES
+        while( top != NULL ) {
+            ObjRazRules *crnt = top;
+            top = top->next;
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+        }
+
+        if( ps52plib->m_nSymbolStyle == SIMPLIFIED )
+            top = razRules[i][0];       //SIMPLIFIED Points
         else
             top = razRules[i][1];           //Paper Chart Points Points
-            
-            while( top != NULL ) {
-                crnt = top;
-                top = top->next;
-                crnt->sm_transform_parms = &vp_transform;
-                ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
-            }
+
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDCText( &dcinput, crnt, &tvp );
+        }
     }
     
     return true;
@@ -5434,7 +5436,7 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     crnt = top;
                     top = top->next;               // next object
                     crnt->sm_transform_parms = &vp_transform;
-                    
+
                     // This may be a deferred tesselation
                     // Don't pre-process the geometry unless the object is to be actually rendered
                     if(!crnt->obj->pPolyTessGeo->IsOk() ){ 
@@ -5505,38 +5507,38 @@ bool eSENCChart::DCRenderLPB( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
         
         if( PI_GetPLIBBoundaryStyle() == PI_SYMBOLIZED_BOUNDARIES )
             top = razRules[i][4]; // Area Symbolized Boundaries
-            else
-                top = razRules[i][3];           // Area Plain Boundaries
-                while( top != NULL ) {
-                    crnt = top;
-                    top = top->next;               // next object
-                    crnt->sm_transform_parms = &vp_transform;
-                    ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
-                }
-                
-                top = razRules[i][2];           //LINES
-                while( top != NULL ) {
-                    ObjRazRules *crnt = top;
-                    top = top->next;
-                     
-                    crnt->sm_transform_parms = &vp_transform;
-                    ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
-                }
-                
-                if( PI_GetPLIBSymbolStyle() == PI_SIMPLIFIED )
-                    top = razRules[i][0];       //SIMPLIFIED Points
-                else
-                    top = razRules[i][1];           //Paper Chart Points Points
-                        
-                        while( top != NULL ) {
-                            crnt = top;
-                            top = top->next;
-                            crnt->sm_transform_parms = &vp_transform;
-                            ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
-                        }
-                        
-                        //      Destroy Clipper
-                        if( pdcc ) delete pdcc;
+        else
+            top = razRules[i][3];           // Area Plain Boundaries
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;               // next object
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
+        }
+
+        top = razRules[i][2];           //LINES
+        while( top != NULL ) {
+            ObjRazRules *crnt = top;
+            top = top->next;
+
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
+        }
+
+        if( PI_GetPLIBSymbolStyle() == PI_SIMPLIFIED )
+            top = razRules[i][0];       //SIMPLIFIED Points
+        else
+            top = razRules[i][1];           //Paper Chart Points Points
+
+        while( top != NULL ) {
+            crnt = top;
+            top = top->next;
+            crnt->sm_transform_parms = &vp_transform;
+            ps52plib->RenderObjectToDC( &dcinput, crnt, &cvp );
+        }
+
+        //      Destroy Clipper
+        if( pdcc ) delete pdcc;
     }
     
     return true;
@@ -6178,10 +6180,10 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
                                             return true;
                                         }
                                         
-                                        north0 = north;
-                                    east0 = east;
+                             north0 = north;
+                             east0 = east;
                                 
-                                ppt += 2;
+                             ppt += 2;
                         }            
                         
                         ls = ls->next;
