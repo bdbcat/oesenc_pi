@@ -972,7 +972,7 @@ Rules *s52plib::StringToRules( const wxString& str_in )
 
     size_t len = strlen( buffer.data() );
     char *str0 = (char *) calloc( len + 1, 1 );
-    strncpy( str0, buffer.data(), len );
+    memcpy( str0, buffer.data(), len );
     char *str = str0;
 
     Rules *top;
@@ -1643,7 +1643,7 @@ char *s52plib::_getParamVal( ObjRazRules *rzRules, char *str, char *buf, int bsz
         wxCharBuffer buffer=value.ToUTF8();
         if(buffer.data()){
             unsigned int len = wxMin(strlen(buffer.data()), (unsigned int)bsz-1);
-            strncpy( buf, buffer.data(), len );
+            memcpy( buf, buffer.data(), len );
             buf[len] = 0;
         }
         else
@@ -6978,7 +6978,7 @@ bool s52plib::PreloadOBJLFromCSV(const wxString &csv_file)
                 wxCharBuffer buffer=token.ToUTF8();
                 if(buffer.data()) {
                     OBJLElement *pOLE = (OBJLElement *) calloc( sizeof(OBJLElement), 1 );
-                    strncpy( pOLE->OBJLName, buffer.data(), 6 );
+                    memcpy( pOLE->OBJLName, buffer.data(), 6 );
                     pOLE->nViz = 0;
 
                     pOBJLArray->Add( (void *) pOLE );
@@ -7010,7 +7010,7 @@ void s52plib::UpdateOBJLArray( S57Obj *obj )
     //    Not found yet, so add an element
     if( bNeedNew ) {
         pOLE = (OBJLElement *) calloc( sizeof(OBJLElement), 1 );
-        strncpy( pOLE->OBJLName, obj->FeatureName, 6 );
+        memcpy( pOLE->OBJLName, obj->FeatureName, 6 );
         pOLE->nViz = 1;
 
         pOBJLArray->Add( (void *) pOLE );
@@ -10288,7 +10288,7 @@ void s52plib::GetAndAddCSRules( ObjRazRules *rzRules, Rules *rules )
 
         //sscanf(pBuf+11, "%d", &LUP->RCID);
 
-        strncpy( NewLUP->OBCL, rzRules->LUP->OBCL, 6 ); // the object class name
+        memcpy( NewLUP->OBCL, rzRules->LUP->OBCL, 6 ); // the object class name
 
 //      Add the complete CS string to the LUP
         wxString *pINST = new wxString( cs_string );
