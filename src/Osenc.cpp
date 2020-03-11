@@ -453,7 +453,7 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
 
         wxCharBuffer buf = senc_file_name.ToUTF8();
         if(buf.data()) 
-            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name));
+            strncpy(msg.senc_name, buf.data(), sizeof(msg.senc_name) - 1);
         
         //printf("\n\n            Opening senc: %s\n", msg.senc_name);
         
@@ -462,7 +462,7 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         wxString tmp_file = wxFileName::CreateTempFileName( _T("") );
         wxCharBuffer bufn = tmp_file.ToUTF8();
         if(bufn.data()) 
-            strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name));
+            strncpy(privatefifo_name, bufn.data(), sizeof(privatefifo_name) - 1);
         
             // Create the private FIFO
         if(-1 == mkfifo(privatefifo_name, 0666)){
@@ -487,7 +487,7 @@ bool Osenc_instream::Open( unsigned char cmd, wxString senc_file_name, wxString 
         
         buf = crypto_key.ToUTF8();
         if(buf.data()) 
-            strncpy(msg.senc_key, buf.data(), sizeof(msg.senc_key));
+            strncpy(msg.senc_key, buf.data(), sizeof(msg.senc_key) - 1);
         
         msg.cmd = cmd;
         
