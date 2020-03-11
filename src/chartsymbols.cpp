@@ -712,7 +712,7 @@ void OE_ChartSymbols::BuildSymbol( ChartSymbol& symbol )
     wxString SCRF;
 
     symb->RCID = symbol.RCID;
-    strncpy( symb->name.SYNM, symbol.name.char_str(), 8 );
+    memcpy( symb->name.SYNM, symbol.name.char_str(), 8 );
 
     symb->exposition.SXPO = new wxString( symbol.description );
 
