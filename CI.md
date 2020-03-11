@@ -40,9 +40,10 @@ To get the built artifacts pushed to cloudsmith after build (assuming all
 builders are up & running):
 
   - Register a free account on cloudsmith.
-  - Create two open-source repositories called for example 
+  - Create two open-source repositories [[10]](#fn10) called for example
     *opencpn-plugins-stable* and *opencpn-plugins-unstable*
-  - In the builders, set up the following environment variables:
+  - In the builders, set up the following environment variables
+    [[7]](#fn7), [[8]](#fn8), [[9]](#fn9):
 
      - **CLOUDSMITH_API_KEY**: The value of the API key for the cloudsmith
        account (available in the cloudsmith ui).
@@ -69,7 +70,11 @@ plugins project [[5]](#fn5).
 <div id="fn1"/> [1] https://www.appveyor.com/ <br>
 <div id="fn2"/> [2] https://circleci.com/ <br>
 <div id="fn3"/> [3] https://travis-ci.com/ <br>
-<div id="fn4"/> [4] https://cloudsmith.io/ <br>
+<div id="fn4"/> [4] https://cloudsmith.io/~david-register/repos/ <br>
 <div id="fn5"/> [5] https://github.com/opencpn/plugins <br>
 <div id="fn6"/> [6] https://opencpn.org/wiki/dokuwiki/doku.php?id=opencpn:developer_manual <br>
 
+<div id="fn7"/> [7] https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings <br>
+<div id="fn8"/> [8] https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project <br>
+<div id="fn9"/> [9] https://www.appveyor.com/docs/build-configuration/#environment-variables <br>
+<div id="fn10"/> [10] https://help.cloudsmith.io/docs/create-a-repository <br>
