@@ -9,8 +9,9 @@ deploys artifacts which can be used by the new plugin installer. The
 setup is based on storing the sources on github.
 
 In a first step, the software is built. This step uses builders from
-appveyor[[1]](#fn1), circleci[[2]](#fn2) and travis[[3]](#fn3). It
-produces an xml metadata file and a tarball for each build.
+appveyor[[1]](#fn1), circleci[[2]](#fn2) and travis[[3]](#fn3) to make
+around 10  builds for different platforms. Each build  produces an xml
+metadata file and a tarball.
 
 In next step the build artifacts are uploaded to a cloudsmith [[4]](#fn4)
 deployment server.
@@ -23,15 +24,15 @@ Builders
 The appveyor builder can be activated after registering a free account
 on the appveyor website. After creating the account, start following the 
 project. From this point a new build is initiated as soon as a commit is
-pushed to github. Configuration lives in appveyor.yml
+pushed to github. Configuration lives in `appveyor.yml`.
 
 The circleci and travis builders works the same way: register an account
 and start following the project. The builds are triggered after a commit
-is pushed to github. Configuration lives in .circleci/config.yml and
-.travis.yml
+is pushed to github. Configuration lives in `.circleci/config.yml` and
+`.travis.yml`.
 
 Circleci requires user to manually request a MacOS builder before it can
-be used. This process has been working flawlessly.
+be used[[11]](#fn11). This process has been working flawlessly.
 
 
 Cloudsmith
@@ -42,8 +43,8 @@ builders are up & running):
   - Register a free account on cloudsmith.
   - Create two open-source repositories [[10]](#fn10) called for example
     *opencpn-plugins-stable* and *opencpn-plugins-unstable*
-  - In the builders, set up the following environment variables
-    [[7]](#fn7), [[8]](#fn8), [[9]](#fn9):
+  - Set up the following environment variables in the travis[[7]](#fn7),
+    circleci[[8]](#fn8) and appveyour[[9]](#fn9) builders:
 
      - **CLOUDSMITH_API_KEY**: The value of the API key for the cloudsmith
        account (available in the cloudsmith ui).
@@ -64,7 +65,7 @@ Using the generated artifacts
 -----------------------------
 
 To use the generated tarballs a new ocpn-plugins.xml file needs to be
-genererated. This is ot ouf scope for this document, see the opencpn
+generated. This is out of scope for this document, see the opencpn
 plugins project [[5]](#fn5).
 
 <div id="fn1"/> [1] https://www.appveyor.com/ <br>
@@ -78,3 +79,5 @@ plugins project [[5]](#fn5).
 <div id="fn8"/> [8] https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project <br>
 <div id="fn9"/> [9] https://www.appveyor.com/docs/build-configuration/#environment-variables <br>
 <div id="fn10"/> [10] https://help.cloudsmith.io/docs/create-a-repository <br>
+<div id="fn11"/> [11] https://circleci.com/open-source/ <br>
+
