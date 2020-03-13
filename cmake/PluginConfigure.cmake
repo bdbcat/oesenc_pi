@@ -7,11 +7,6 @@
 SET(PLUGIN_SOURCE_DIR .)
 
 # This should be 2.8.0 to have FindGTK2 module
-IF (COMMAND cmake_policy)
-  CMAKE_POLICY(SET CMP0003 OLD)
-  CMAKE_POLICY(SET CMP0005 OLD)
-  CMAKE_POLICY(SET CMP0011 OLD)
-ENDIF (COMMAND cmake_policy)
 
 MESSAGE (STATUS "*** Staging to build ${PACKAGE_NAME} ***")
 
@@ -142,7 +137,6 @@ IF(QT_ANDROID)
 ENDIF(QT_ANDROID)
 
 IF (NOT QT_ANDROID )
-    set (WXWIDGETS_FORCE_VERSION CACHE VERSION "Force usage of a specific wxWidgets version.")
     if(WXWIDGETS_FORCE_VERSION)
         set (wxWidgets_CONFIG_OPTIONS --version=${WXWIDGETS_FORCE_VERSION})
     endif()

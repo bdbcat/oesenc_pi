@@ -1,0 +1,239 @@
+o-charts API
+
+https://test.o-charts.org/shop/index.php?fc=module&module=occharts&controller=api
+to connect to test ad to .conf:
+DEBUG_SHOP=bdbcat@yahoo.com or info@o-charts.org (para recibir emails)
+ADMIN=1
+-----------------------------------------------------------------
+myemail@rr-consult.net
+da1742dc776b6fb18866ef197c508952
+bdbcat@yahoo.com
+4534e7d09405b8f2b9d22e4e4c8070e3
+-----------------------------------------------------------------
+PUT request encoded as "application/x-www-form-urlencoded". 
+All parameters set as name/value pairs.
+
+taskId=getlist&username=myemail%40rr-consult.net&key=da1742dc776b6fb18866ef197c508952
+-----------------------------------------------------------------
+<UUID I1="5bcab7b3-7bd8-3e4a-9c90-b1cad18fe991"/>
+<HWH H1="4CCB9FAE"/>
+<DATE  D1="1495412808"/>
+
+HW_ID: standard oesenc hash of (I1+H1) concatenated strings.
+-----------------------------------------------------------------
+xfprName = oc03R_1495855975.fpr
+-----------------------------------------------------------------
+xfpr = 0D616C7C7C157C080A1704565A545A02570A1A02535001180B5001581A0C520D09185A045658530409525C0C01041716093F0D7C6E7D187D0404150172777B0C7E74701B180B3B087D746C70151973040C16080101000D0C020C06011B1A063F
+xfpr=0d65797317127f060f1207560e060708020f0851530f520a0d0657151d0e3b0961677e7612177b010c170d060f0a710177021c7072010f1f070f04711c7472020f1f0a007309030307030207710f101f0f3f087f64776017126300081612740200797f616b0c7301667810180c3a0d606760171267060f127e595d445e5740177051475cf79a4557121f5d5c58435d57455053415b5543501d10180c380b76716570141273030f1503050507030005050007101f0f3f
+-----------------------------------------------------------------
+result values
+
+		0: Undetermined error
+		1: Succesful
+		2: Production server in maintenance mode
+		3: Wrong data
+			3a: void taskId
+			3b: invalid taskId
+			3c: unknown taskId
+			3d: void username
+			3e: invalid username
+			3f: void password
+			3g: wrong password
+			3h: void key
+			3i: invalid key
+			3j: void systemName
+			3k: invalid systemName
+			3l: void fpr name
+			3m: invalid fpr name extension
+			3n: invalid fpr name length
+			3o: invalid fpr name OS
+			3p: invalid fpr name version (oc01 or oc03)
+			3q: void xfpr content
+		4: User does not exist
+		5: Wrong user
+		5 (new API): Wrong password
+		6: Wrong key
+		6 (new API): User does not exist or username/key do not match
+		7: System name already exist
+		8: System name does not exist
+		9: Production server error (9:<error code>:<message>)
+			9:300:Forbidden. (unauthorized connection attempt, token does not match)
+			9:403:Bad file arguments.
+			9:503:Internal Server Database Error. (error saving hardware id)
+			9:603:Old oeSENC plugin. Error Processing file.
+			9:604:Error Processing file. There is a problem with your system. (system without MAC address)
+			9:605:Error Processing file. (void HW_ID, possible error running oc_fnv328)
+			9:607:Error Processing file. There is a problem with your dongle. (empty dongle serial)
+			9:610:This system already exists but fingerprint does not match.
+			9:611:Error Processing file. Invalid fingerprint. (see production server log)
+			9:612:There is already a system for this machine: <systemName>
+			9:613:Fingerprint format too old. Please update the plugin
+			9:614:System name not found
+			9:615:Operation not supported
+		10: Webshop database error
+		11: Disabled system name
+		12 (new API): 
+		13 (new API):
+		14: Production server error (14:<error code>:<english message>)
+		15: Webshop database error
+		16: Expired chart
+		17: Chart already has a system assigned
+		18: Chart already has that system assigned
+		19: This request is already being processed or available for downloading
+		20: This chart does not have this system assigned
+		21: Wrong System name
+
+
+		
+		25: Production server does not respond
+		26: This order does not exist for this customer
+		27: Your plugin version is too old. Please update it
+
+1- First login.
+
+	Request:
+		a. taskId: login
+		b. username: user email on shop
+		c. password: user password on shop
+		d. debug: bdbcat@yahoo.com or info@o-charts.org
+		e. version: N.N.N 
+
+	Response:
+
+		a. result: see result values.
+		b. key: hash built from password and some secret keys.
+
+		<response>
+			<result>1</result>
+			<key>xxxxxxxxxxxxxxxxxxxxxx</key>
+		</response>
+
+2- Upload fingerprint.
+
+	This request can be done at any time. If the xfpr matches an already known systemName, then no change to server occurs and reports result 1. If systemName and xfpr do not exist, a new entry in server will be done with result 1. If the xfpr does NOT match the existing systemName, an error 9:610 will result. If the systemName does NOT match the existing xfpr, an error 9:612 will result.
+	
+	Request:
+		a. taskId: xfpr
+		b. username:
+		c. key: got after first login
+		d. systemName: 3 characters minimum and 15 maximum. Only lowercase letters and numbers allowed. No symbols or spaces
+		e. xfpr: obfuscated file. ascii hex, 2 bytes per character.
+		f. xfprName: as usual.
+		g. debug: bdbcat@yahoo.com or info@o-charts.org
+		h. version: N.N.N
+
+	Response:
+
+		a. result: see result values.
+
+		<response>
+			<result>1</result>
+		</response>
+
+4- Get list of charts assigned to that system or with no assigment.
+	a. taskId: getlist
+	b. username:
+	c. key:
+	d. debug: bdbcat@yahoo.com or info@o-charts.org
+	Response (XML):
+	a. result: see result values
+	b. list:
+		b0. chartid (unique chart id on shop)
+		b1. order (order reference)
+		b2. chartName
+		b3. chartEdition (current chart edition on shop)
+		b4. chartPublication (YY-MM-DD)
+		b5. state (unassigned/expired/requestable/processing/download)
+		b6. link (download link, void if state is not "download")
+		b7. size (download file size, void if state is not "download")
+		b8. expiration (YY-MM-DD)
+		b9. lastRequested (current chart edition on computer, void if never requested yet)
+		b10. purchase (YY-MM-DD)
+		b11. quantityId (if user bought more than one item of the same chart)
+		b12. slot (0, 1)
+		b13. assignedSystemName (assigned system name, void if no assigment)
+		b14. thumbLink
+		b15. sha1
+	c. list:
+		c0. systemName (system names for that user)
+	d. version: N.N.N
+
+	<response>
+		<result>1</result>
+		<chart>
+			<order>GBLAQPDMG</order>
+			<purchase>2017-05-18</purchase>
+			<expiration>2018-05-18</expiration>
+			<chartid>15</chartid>
+			<thumbLink>http://test.o-charts.org/shop/img/p/4/4/44-home_default.jpg</thumbLink>
+			<chartEdition>2017-2</chartEdition>
+			<chartPublication>2017-04-01</chartPublication>
+			<chartName>British Isles 2017</chartName>
+			<quantityId>1</quantityId>
+			<slot>0</slot>
+			<assignedSystemName>mylaptop</assignedSystemName>
+			<lastRequested>2017-2</lastRequested>
+			<state>download</state>
+			<link>https://ocharts.blob.core.windows.net/test911/roberto/1495103442.01/roberto-FRatl_UK-2017-1.zip?sr=b&sp=r&sig=QsfNOaCaMI61NS1Xm1JAtThklq5zXFpiQiKt7/5o1AA%3D&sv=2015-07-08&se=2017-05-26T12%3A04%3A21Z</link>
+			<size>1GB</size>
+			<sha1>TsfkOaCaMI61NS1Xm1JAtThklq5zXFpiQiK6y</sha1>
+		</chart>
+		<chart>
+			....
+		</chart>
+		<systemName>mylaptop</systemName>
+		<systemName>mydesktop</systemName>
+		<systemName>myandroid</systemName>
+		<systemName>myraspberry</systemName>
+	</response>
+
+5. Chart assigment
+	a. taskId: assign
+	b. username:
+	c. key:
+	d. systemName:
+	e. chartid
+	f. order
+	g. quantityId
+	h. slot
+	g. debug: bdbcat@yahoo.com or info@o-charts.org
+	h. version: N.N.N
+
+	Response (XML): same as request 4
+
+6. chart request
+	a. taskId: request
+	b. username:
+	c. key:
+	d. assignedSystemName:
+	e. chartid
+	f. order
+	g. quantityId
+	h. slot
+	i. debug: bdbcat@yahoo.com or info@o-charts.org
+	j. version: N.N.N
+
+	Response (XML): same as request 4
+
+7- Identify System:
+
+	Request:
+
+		a. taskId: identifySystem
+		b. username
+		c. key
+		d. xfpr: obfuscated file. ascii hex, 2 bytes per character.
+		e. xfprName: file name.
+		f. debug
+		g. version: N.N.N
+
+	Response:
+
+		a. result: see result values.
+
+		<response>
+			<result>1</result>
+			<systemName>mylaptop</systemName>
+		</response>
+
+

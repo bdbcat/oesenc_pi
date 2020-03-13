@@ -4860,6 +4860,7 @@ void eSENCChart::SetLinePriorities( void )
                     while( list ){
                         switch (list->ls_type){
                             case TYPE_EE:
+                            case TYPE_EE_REV:
                                 
                                 pedge = list->pedge;// (VE_Element *)list->private0;
                                 if(pedge)
@@ -7109,6 +7110,9 @@ void eSENCChart::AssembleLineGeometry( void )
                         pls->priority = 0;
                         pls->pedge = pedge;
                         pls->ls_type = TYPE_EE;
+                        if( !edge_dir )
+                            pls->ls_type = TYPE_EE_REV;
+ 
                         
                         le_current->next = pls;             // hook it up
                         le_current = pls;

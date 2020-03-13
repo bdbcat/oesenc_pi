@@ -1,0 +1,25 @@
+From 43e3e5756b55c7f5f100c7b2ec250c1a85521e29 Mon Sep 17 00:00:00 2001
+From: Alec Leamas <leamas.alec@gmail.com>
+Date: Sun, 15 Jul 2018 11:20:08 +0200
+Subject: [PATCH] build: Remove failing tc subdur.
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index fa200dd..f81066f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -46,7 +46,7 @@ WFLAGS += -Wmissing-declarations -Wold-style-definition -Wformat=2
+ CFLAGS := $(WFLAGS) $(CCOPTS) -I../include $(DEFINES) $(CFLAGS)
+ YACCFLAGS = -d -t -v
+ 
+-SUBDIRS=lib ip tc bridge misc netem genl tipc devlink man
++SUBDIRS=lib ip bridge misc netem genl tipc devlink man
+ 
+ LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
+ LDLIBS += $(LIBNETLINK)
+-- 
+2.14.4
+

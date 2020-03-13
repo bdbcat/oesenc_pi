@@ -9,10 +9,17 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
 # This should be 2.8.0 to have FindGTK2 module
 IF (COMMAND cmake_policy)
-  CMAKE_POLICY(SET CMP0003 OLD)
-  CMAKE_POLICY(SET CMP0005 OLD)
-  CMAKE_POLICY(SET CMP0011 OLD)
+  CMAKE_POLICY(SET CMP0003 NEW)
+  CMAKE_POLICY(SET CMP0005 NEW)
+  CMAKE_POLICY(SET CMP0011 NEW)
+  CMAKE_POLICY(SET CMP0037 NEW)
+  if (POLICY CMP0053)
+      CMAKE_POLICY(SET CMP0053 NEW)
+  endif ()
 ENDIF (COMMAND cmake_policy)
+
+# Prefer libGL.so to libOpenGL.so, see CMP0072
+set(OpenGL_GL_PREFERENCE "LEGACY")
 
 PROJECT(oesenc_pi)
 
@@ -21,13 +28,29 @@ SET(VERBOSE_NAME oesenc)
 SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
-SET(VERSION_MAJOR "1")
+SET(VERSION_MAJOR "4")
 SET(VERSION_MINOR "2")
 SET(VERSION_PATCH "0")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+
+SET(PKG_RELEASE "3")
+SET(PKG_API_VERSION "1.16")
+SET(PKG_AUTHOR "David S Register")
+SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
+
+# The @keyword@ references are patched to actual values by upload script.
+SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
+SET(TARBALL_URL ${TARBALL_URL}/names/@name@/versions/@version@/@filename@)
+
+
+SET(API_DIR "${CMAKE_SOURCE_DIR}/api-16")
+SET(OCPN_USE_API_16 ON)
+
 SET(OCPN_MIN_VERSION "ov50")
+#OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
+OPTION(OCPN_FLATPAK "Build flatpak plugin" OFF)
  
-#SET(CMAKE_BUILD_TYPE Release)
+set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 IF( NOT CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE Release CACHE STRING
@@ -99,6 +122,14 @@ IF (NOT WIN32)
         ENDIF (CMAKE_SIZEOF_VOID_P MATCHES "8")
       ENDIF (CMAKE_SYSTEM_PROCESSOR MATCHES "arm*")
     ENDIF (EXISTS /etc/debian_version)
+    IF(NOT DEFINED PACKAGE_FORMAT)
+      IF (EXISTS /app)
+        MESSAGE (STATUS "*** Flatpak detected  ***")
+        SET (PACKAGE_FORMAT "TGZ")
+        SET (ARCH "x86_64")
+        SET (LIB_INSTALL_DIR "lib")
+      ENDIF (EXISTS /app)
+    ENDIF(NOT DEFINED PACKAGE_FORMAT)
     
     IF(NOT DEFINED PACKAGE_FORMAT)
      IF (EXISTS /etc/redhat-release)
@@ -147,6 +178,43 @@ MESSAGE (STATUS "*** Build Architecture is ${ARCH}")
 MESSAGE (STATUS "*** CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 MESSAGE (STATUS "*** PACKAGE_FORMAT is ${PACKAGE_FORMAT}")
 
+if (OCPN_FLATPAK)
+    # Lie to PluginSetup that we have found wxWidgets so it don't barfs.
+    set(wxWidgets_LIBRARIES FOOBAR)
+    include("cmake/PluginSetup.cmake")
+    configure_file(
+      # Required in flatpak, done early.
+      ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
+      ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
+    )
+    set(PLUGIN_NAME ${VERBOSE_NAME}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+
+    find_program(TAR NAMES gtar tar)
+    if (NOT TAR)
+        message(FATAL_ERROR "tar not found, required for OCPN_FLATPAK")
+    endif ()
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml
+    )
+    add_custom_target(flatpak-build ALL
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/flatpak
+        COMMAND flatpak-builder --force-clean
+            ${CMAKE_CURRENT_BINARY_DIR}/app
+            org.opencpn.OpenCPN.Plugin.oesenc.yaml
+    )
+    add_custom_target("package")
+    add_custom_command(
+        TARGET package
+        COMMAND ${TAR}
+            -czf ${PKG_NVR}_${PKG_TARGET_NVR}.tar.gz
+            --transform 's|.*/files/|oesenc_pi-flatpak-${PACKAGE_VERSION}/|'
+            ${CMAKE_CURRENT_BINARY_DIR}/app/files
+    )
+    return ()
+endif()
+
+
 
 #  To build for android, use this cmake invocation..
 #$cmake -DUSE_GARMINHOST=OFF -D_wx_selected_config=androideabi-qt
@@ -185,6 +253,12 @@ INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/src/cpl)
 INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/src/dsa)
 INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR})
+
+if (OCPN_USE_API_16) 
+  INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/api-16)
+else ()
+  INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/api-13)
+endif ()
 
 IF(NOT WIN32)
  ADD_DEFINITIONS( "-Wall -g -fexceptions -O2 -Wno-unused -fno-strict-aliasing ")
@@ -229,6 +303,8 @@ SET(SRC_OESENC
             src/oesenc_pi.cpp
             src/eSENCChart.cpp
             src/eSENCChart.h
+            src/InstallDirs.cpp
+            src/InstallDirs.h
             src/Osenc.cpp
             src/Osenc.h
             src/mygeom.h
@@ -376,9 +452,15 @@ IF (QT_ANDROID )
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "${OCPN_Base}/${OCPN_Build}/libgorp.so" )
 ENDIF(QT_ANDROID)
 
+
+if (MINGW)
+  SET(OPENCPN_IMPORT_LIB "${API_DIR}/mingw/libopencpn.dll.a")
+elseif (WIN32)
+  SET(OPENCPN_IMPORT_LIB "${API_DIR}/msvc/opencpn.lib")
+endif ()
+
 IF(WIN32)
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${CURL_LIBRARIES})
-  SET(OPENCPN_IMPORT_LIB "C:/Projects/opencpn/build/${CMAKE_CFG_INTDIR}/opencpn.lib")
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} ${OPENCPN_IMPORT_LIB} )
 
 ENDIF(WIN32)
@@ -484,15 +566,14 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(APPLE)
-SET(CMAKE_INSTALL_PREFIX "/tmp")
 
 INSTALL(FILES "buildosx/oeserverd/oeserverd"
        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ WORLD_EXECUTE
-       DESTINATION "oesenc_pi/oesenc_pi")
+       DESTINATION "OpenCPN.app/Contents/PlugIns/")
 
 INSTALL(FILES "src/rrc_eula_ChartSetsForOpenCPN.txt"
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-      DESTINATION "oesenc_pi/oesenc_pi" )
+      DESTINATION "OpenCPN.app/Contents/SharedSupport/plugins/${PACKAGE_NAME}" )
 
   # We also need to copy the helper utility and required dylibs to the binary build directory so that the PACKAGES scripts will find it.
 configure_file(${PROJECT_SOURCE_DIR}/buildosx/oeserverd/oeserverd
@@ -516,4 +597,17 @@ SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "dsr")
 
 INCLUDE("cmake/PluginLocalization.cmake")
 INCLUDE("cmake/PluginInstall.cmake")
+INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/pkg_version.sh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
+)
+
+set(PLUGIN_NAME ${VERBOSE_NAME}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}.xml
+)
