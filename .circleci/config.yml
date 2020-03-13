@@ -1,6 +1,22 @@
 ---
 version: 2
 jobs:
+   build-trusty:
+     docker:
+       - image: circleci/buildpack-deps:trusty-scm
+     environment:
+       - OCPN_TARGET:  trusty
+     steps:
+       - checkout
+       - run: >
+           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main"
+           | sudo tee -a /etc/apt/sources.list
+       - run: >
+           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ trusty-updates main"
+           | sudo tee -a /etc/apt/sources.list
+       - run: cat /etc/apt/sources.list
+       - run: ci/circleci-build-debian.sh
+       - run: ci/circleci-upload.sh
    build-xenial:
      docker:
        - image: circleci/buildpack-deps:xenial-scm
