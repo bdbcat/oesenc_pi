@@ -10,7 +10,8 @@ sudo apt-get install devscripts equivs
 mkdir  build
 cd build
 mk-build-deps ../ci/control
-sudo apt install  ./*all.deb  || :
+#sudo apt install  ./*all.deb
+sudo dpkg -i ./*all.deb
 sudo apt-get --allow-unauthenticated install -f
 
 #if [ -n "$BUILD_GTK3" ]; then
