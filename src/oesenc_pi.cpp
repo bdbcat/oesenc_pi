@@ -3836,7 +3836,7 @@ void androidGetDeviceName()
 bool IsDongleAvailable()
 {
 #ifndef __OCPN__ANDROID__    
-#ifndef OCPN_ARM64  // SDlock is not supported for ARM64
+#ifndef OCPN_ARM64  // SGlock is not supported for ARM64
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -s ");                  // Available?
 
