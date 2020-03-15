@@ -18,6 +18,6 @@ if [ -n "$BUILD_GTK3" ]; then
         /usr/lib/*-linux-*/wx/config/gtk3-unicode-3.0
 fi
 
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr ..
 make -sj2
 make package
