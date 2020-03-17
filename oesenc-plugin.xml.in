@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opencpn-plugin version="1">
+<plugin version="1">
   <name> oeSENC </name>
   <version> ${PACKAGE_VERSION} </version>
   <release> ${PKG_RELEASE} </release>
@@ -25,5 +25,5 @@ can only be used after purchasing decryption keys from o-charts.org.
   <target>${PKG_TARGET}</target>
   <target-version>${PKG_TARGET_VERSION}</target-version>
   <tarball-url> ${TARBALL_URL} </tarball-url>
-</opencpn-plugin>
+</plugin>
 
