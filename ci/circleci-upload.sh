@@ -41,24 +41,14 @@ tag=$(git tag --contains HEAD)
 xml=$(ls $HOME/project/build/*.xml)
 tarball=$(ls $HOME/project/build/*.tar.gz)
 tarball_basename=${tarball##*/}
+tarball_name=${tarball_basename%.tar.gz}
 
 # extract the project name for a filename.  e.g. oernc-pi... sets PROJECT to  "oernc"
-echo "Check 1"
-#pwd
-cd build
-ls *.xml
-PROJECT=$(ls *.xml | awk '{split($0,a,"-"); print a[1]}')
-cd ..
-echo $PROJECT
-echo $xml
+PROJECT=${tarball_basename%%_pi*}
 
 source $HOME/project/build/pkg_version.sh
 test -n "$tag" && VERSION="$tag" || VERSION="${VERSION}.${commit}"
 test -n "$tag" && REPO="$STABLE_REPO" || REPO="$UNSTABLE_REPO"
-tarball_name=${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-tarball
-xml_name=${PROJECT}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION}.xml
-echo $xml_name
-
 
 sudo sed -i -e "s|@pkg_repo@|$REPO|" $xml
 sudo sed -i -e "s|@name@|$tarball_name|" $xml
