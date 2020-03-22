@@ -31,12 +31,12 @@ MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 include("VERSION.cmake")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
-SET(PKG_RELEASE "4")
+SET(PKG_RELEASE "0")
 SET(PKG_API_VERSION "1.16")
 SET(PKG_AUTHOR "David S Register")
 
-# NVR: Name-version-release
-SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
+# NVR: <Name-version>[-release]
+SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION})
 
 # The @keyword@ references are patched to actual values by upload script.
 SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
