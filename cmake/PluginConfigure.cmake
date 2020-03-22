@@ -4,8 +4,6 @@
 ## License:     GPLv3+
 ##---------------------------------------------------------------------------
 
-SET(PLUGIN_SOURCE_DIR .)
-
 # This should be 2.8.0 to have FindGTK2 module
 
 MESSAGE (STATUS "*** Staging to build ${PACKAGE_NAME} ***")

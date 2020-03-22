@@ -25,7 +25,6 @@ PROJECT(oesenc_pi)
 
 SET(PACKAGE_NAME oesenc_pi)
 SET(VERBOSE_NAME oesenc)
-SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 include("VERSION.cmake")
