@@ -1776,39 +1776,39 @@ else
             strcat(sym, ",CHMGD, 2");                 // default is magenta
             
             
-            if ( strlen(litvisstr))               // Obscured/faint sector?
-            {
-                _parseList(litvisstr, litvis, sizeof(litvis));
-                
-                if (strpbrk(litvis, "\003\007\010"))
-                    strcpy(sym, ";CA(CHBLK, 4,CHBRN, 1");
-            }
+        if ( strlen(litvisstr))               // Obscured/faint sector?
+        {
+            _parseList(litvisstr, litvis, sizeof(litvis));
             
-            if(sectr2 <= sectr1)
-                sectr2 += 360;
-            
-            //    Sectors are defined from seaward
-                if(sectr1 > 180)
-                    sectr1 -= 180;
-                else
-                    sectr1 += 180;
-                
-                if(sectr2 > 180)
-                    sectr2 -= 180;
-                else
-                    sectr2 += 180;
-                
-                char arc_data[80];
-                sprintf(arc_data, ",%5.1f, %5.1f, %5.1f, %5.1f", sectr1, sectr2, arc_radius, sector_radius);
-                
-                strcat(sym, arc_data);
-                
-                wxString ssym(sym, wxConvUTF8);
-                lights06 = ssym;
-                
-                goto l06_end;
-                
-                
+            if (strpbrk(litvis, "\003\007\010"))
+                strcpy(sym, ";CA(CHBLK, 4,CHBRN, 1");
+        }
+
+        if(sectr2 <= sectr1)
+            sectr2 += 360;
+
+        //    Sectors are defined from seaward
+        if(sectr1 > 180)
+            sectr1 -= 180;
+        else
+            sectr1 += 180;
+
+        if(sectr2 > 180)
+            sectr2 -= 180;
+        else
+            sectr2 += 180;
+
+        char arc_data[80];
+        sprintf(arc_data, ",%5.1f, %5.1f, %5.1f, %5.1f", sectr1, sectr2, arc_radius, sector_radius);
+
+        strcat(sym, arc_data);
+
+        wxString ssym(sym, wxConvUTF8);
+        lights06 = ssym;
+
+        goto l06_end;
+
+
     }
     
     

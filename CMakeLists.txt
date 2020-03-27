@@ -25,16 +25,17 @@ PROJECT(oesenc_pi)
 
 SET(PACKAGE_NAME oesenc_pi)
 SET(VERBOSE_NAME oesenc)
-SET(PLUGIN_SOURCE_DIR .)
 MESSAGE (STATUS "*** Building ${PACKAGE_NAME} ***")
 
 include("VERSION.cmake")
 SET(PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
-SET(PKG_RELEASE "3")
+SET(PKG_RELEASE "0")
 SET(PKG_API_VERSION "1.16")
 SET(PKG_AUTHOR "David S Register")
-SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
+
+# NVR: <Name-version>[-release]
+SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION})
 
 # The @keyword@ references are patched to actual values by upload script.
 SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
@@ -48,7 +49,7 @@ SET(OCPN_MIN_VERSION "ov50")
 #OPTION(OCPN_USE_API_16 "Use plugin api 16 (default: api 13)." OFF)
 OPTION(OCPN_FLATPAK "Build flatpak plugin" OFF)
  
-set(PLUGIN_NAME oesenc-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
+set(PLUGIN_NAME ${PKG_NVR}_${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 IF( NOT CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE Release CACHE STRING
