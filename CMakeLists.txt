@@ -35,7 +35,7 @@ SET(PKG_API_VERSION "1.16")
 SET(PKG_AUTHOR "David S Register")
 
 # NVR: <Name-version>[-release]
-SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION})
+SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
 
 # The @keyword@ references are patched to actual values by upload script.
 SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
