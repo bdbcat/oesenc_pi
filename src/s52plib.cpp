@@ -4953,8 +4953,16 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     //         return 0;
     
     // catch cm93 and legacy PlugIns (e.g.s63_pi)
-    if( rzRules->obj->m_n_lsindex  && !rzRules->obj->m_ls_list) 
-        return RenderLCLegacy(rzRules, rules, vp);
+    if( rzRules->obj->m_n_lsindex  && !rzRules->obj->m_ls_list) {
+        //return RenderLCLegacy(rzRules, rules, vp);
+        wxString msg;
+        msg.Printf(_T("oeSENC RLC:  %s %d  "), rzRules->obj->FeatureName, rzRules->obj->Index);
+        if(rzRules->obj->m_chart_context->chart){
+            msg += rzRules->obj->m_chart_context->chart->GetFullPath();
+        }
+        wxLogMessage(msg);
+        return 0;
+    }
     
    // wxPoint *ptp;
     //int npt;
