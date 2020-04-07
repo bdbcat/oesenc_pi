@@ -2420,7 +2420,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     
     // User reset system name, and removed dongle
     if(!g_systemName.Len() && !g_dongleName.Len())
-        bNeedSystemName = true;
+         bNeedSystemName = true;
     
     
     if(bNeedSystemName ){
@@ -2469,6 +2469,21 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         }
     }
     
+    // If a new systemName was selected, verify on the server
+    // If the server already has a systemName associated with this FPR, cancel the operation.
+    if(bNeedSystemName && !g_systemName.IsEmpty()){
+        if( doUploadXFPR( false ) != 0){
+            g_systemName.Clear();
+            wxString sn = _("System Name:");
+            m_staticTextSystemName->SetLabel( sn );
+            m_staticTextSystemName->Refresh();
+
+            setStatusText( _("Status: Ready"));
+            m_ipGauge->Stop();
+            return;
+        }
+    }
+
     setStatusText( _("Status: Ready"));
     m_ipGauge->Stop();
     
