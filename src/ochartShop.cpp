@@ -2474,6 +2474,8 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     if(bNeedSystemName && !g_systemName.IsEmpty()){
         if( doUploadXFPR( false ) != 0){
             g_systemName.Clear();
+            saveShopConfig();           // Record the blank systemName
+            
             wxString sn = _("System Name:");
             m_staticTextSystemName->SetLabel( sn );
             m_staticTextSystemName->Refresh();
