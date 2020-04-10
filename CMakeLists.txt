@@ -594,6 +594,8 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/pkg_version.sh
 )
 
+INCLUDE("cmake/PluginSetup.cmake")
+
 set(PLUGIN_NAME ${VERBOSE_NAME}-plugin-${PKG_TARGET}-${PKG_TARGET_VERSION})
 
 configure_file(
@@ -603,6 +605,5 @@ configure_file(
 
 INCLUDE("cmake/PluginLocalization.cmake")
 INCLUDE("cmake/PluginInstall.cmake")
-INCLUDE("cmake/PluginSetup.cmake")
 INCLUDE("cmake/PluginPackage.cmake")
 
