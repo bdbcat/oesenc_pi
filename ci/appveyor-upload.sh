@@ -48,10 +48,8 @@ done < $xml > xml.tmp && cp xml.tmp $xml && rm xml.tmp
 
 gunzip $tarball
 tarball_tar=$(ls *.tar)
-#cd build
-xml_here=$(ls *.xml) 
-tar -rf $tarball_tar $xml_here
-#cd ..
+cp $xml metadata.xml 
+tar -rf $tarball_tar metadata.xml
 gzip $tarball_tar
 
 cloudsmith push raw --republish --no-wait-for-sync \

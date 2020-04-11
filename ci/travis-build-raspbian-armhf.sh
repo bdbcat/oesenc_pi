@@ -133,6 +133,12 @@ echo "Check 4"
 cat ~/$xml
 #cat ~/xml.tmp
 
+sudo gunzip $tarball
+tarball_tar=$(ls *.tar)
+sudo cp ~/$xml metadata.xml 
+sudo tar -rf $tarball_tar metadata.xml
+sudo gzip $tarball_tar
+
 cloudsmith push raw --republish --no-wait-for-sync \
     --name ${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
     --version ${VERSION} \
