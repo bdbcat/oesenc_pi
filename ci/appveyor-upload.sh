@@ -46,6 +46,14 @@ while read line; do
     echo $line
 done < $xml > xml.tmp && cp xml.tmp $xml && rm xml.tmp
 
+gunzip $tarball
+tarball_tar=$(ls $HOME/project/build/*.tar)
+cd build
+xml_here=$(ls *.xml) 
+tar -rf $tarball_tar $xml_here
+cd ..
+gzip $tarball_tar
+
 cloudsmith push raw --republish --no-wait-for-sync \
     --name ${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
     --version ${VERSION} \
