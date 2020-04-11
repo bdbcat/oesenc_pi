@@ -57,7 +57,8 @@ sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
 gunzip $tarball
 tarball_tar=$(ls $HOME/project/build/*.tar)
-tar -rf $tarball_tar -C $HOME/project/build $xml
+xml_here=$(ls *.xml) 
+tar -rf $tarball_tar $xml_here
 gzip $tarball_tar
 
 
