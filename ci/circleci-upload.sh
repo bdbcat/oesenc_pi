@@ -55,7 +55,8 @@ sudo sed -i -e "s|@name@|$tarball_name|" $xml
 sudo sed -i -e "s|@version@|$VERSION|" $xml
 sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
-cd project/build
+pwd
+#cd project/build
 gunzip $tarball
 tarball_tar=$(ls $HOME/project/build/*.tar)
 tar -rf $tarball_tar $xml
