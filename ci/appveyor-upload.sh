@@ -47,11 +47,11 @@ while read line; do
 done < $xml > xml.tmp && cp xml.tmp $xml && rm xml.tmp
 
 gunzip $tarball
-tarball_tar=$(ls $HOME/project/build/*.tar)
-cd build
+tarball_tar=$(ls *.tar)
+#cd build
 xml_here=$(ls *.xml) 
 tar -rf $tarball_tar $xml_here
-cd ..
+#cd ..
 gzip $tarball_tar
 
 cloudsmith push raw --republish --no-wait-for-sync \
