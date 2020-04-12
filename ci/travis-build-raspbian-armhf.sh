@@ -136,7 +136,7 @@ cat ~/$xml
 sudo gunzip $tarball
 tarball_tar=$(ls *.tar)
 sudo cp ~/$xml metadata.xml 
-sudo tar -rbf 64 $tarball_tar metadata.xml
+sudo tar -r -b 64 -f $tarball_tar metadata.xml
 sudo gzip $tarball_tar
 
 cloudsmith push raw --republish --no-wait-for-sync \
