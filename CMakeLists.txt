@@ -249,6 +249,7 @@ SET(SRC_OESENC
             src/tinyxmlerror.cpp
             src/tinyxmlparser.cpp
             src/razdsparser.cpp
+            src/pi_DepthFont.cpp
      )
 
 SET(SRC_CPL
