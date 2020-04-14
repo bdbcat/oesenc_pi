@@ -55,11 +55,16 @@ sudo sed -i -e "s|@name@|$tarball_name|" $xml
 sudo sed -i -e "s|@version@|$VERSION|" $xml
 sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
-sudo gunzip $tarball
-tarball_tar=$(ls $HOME/project/build/*.tar)
-sudo cp $xml metadata.xml 
-sudo tar -rf $tarball_tar metadata.xml
-sudo gzip $tarball_tar
+#sudo gunzip $tarball
+#tarball_tar=$(ls $HOME/project/build/*.tar)
+#sudo cp $xml metadata.xml 
+#sudo tar -rf $tarball_tar metadata.xml
+#sudo gzip $tarball_tar
+
+sudo tar xf $tarball
+tar_dir=${tarball%%.tar.gz}
+sudo cp $xml $tar_dir
+sudo tar czf $tarball $tar_dir
 
 
 cloudsmith push raw --republish --no-wait-for-sync \
