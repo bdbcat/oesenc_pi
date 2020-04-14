@@ -67,6 +67,7 @@ extern double  g_overzoom_emphasis_base;
 extern bool    g_oz_vector_scale;
 extern float g_ChartScaleFactorExp;
 extern int g_chart_zoom_modifier_vector;
+extern GLenum       g_oe_texture_rectangle_format;
 
 float g_scaminScale;
 
@@ -2064,8 +2065,6 @@ bool s52plib::RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y, wxRect *pRe
                     int draw_width = ptext->text_width;
                     int draw_height = ptext->text_height;
                     
-                    extern GLenum       g_oe_texture_rectangle_format;
-                    
                     glEnable( GL_BLEND );
                     glEnable( GL_TEXTURE_2D );
                     
@@ -3742,7 +3741,6 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
         glEnable( GL_BLEND );
         
         if(texture) {
-            extern GLenum       g_texture_rectangle_format;
 
             glEnable(GL_TEXTURE_2D);
             glEnable( GL_BLEND );
@@ -3757,7 +3755,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 //            glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                 wxSize size = m_texSoundings.GLTextureSize();
                 tx1 /= size.x, tx2 /= size.x;
                 ty1 /= size.y, ty2 /= size.y;
@@ -3786,7 +3784,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 #else
 
                 
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                     
                 // Normalize the sybmol texture coordinates against the next higher POT size
                 wxSize size = ChartSymbols::GLTextureSize();
@@ -3865,7 +3863,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 
 
 #endif          // GLES2
-            glDisable(g_texture_rectangle_format);
+            glDisable(g_oe_texture_rectangle_format);
         } else { /* this is only for legacy mode, or systems without NPOT textures */
             float cr = cosf( vp->rotation );
             float sr = sinf( vp->rotation );
