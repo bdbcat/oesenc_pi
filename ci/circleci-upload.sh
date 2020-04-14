@@ -62,12 +62,12 @@ sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 #sudo gzip $tarball_tar
 
 cd build
-tar xf $tarball
+sudo tar xf $tarball
 tar_dir=${tarball%%.tar.gz}
 ls -la
 ls -la $tar_dir
-cp $xml $tar_dir
-tar czf $tarball $tar_dir
+sudo cp $xml $tar_dir
+sudo tar czf $tarball $tar_dir -C /home/circleci/project/build
 cd ..
 
 
