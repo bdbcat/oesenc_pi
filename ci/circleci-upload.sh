@@ -67,7 +67,7 @@ tar_dir=${tarball%%.tar.gz}
 ls -la
 ls -la $tar_dir
 sudo cp $xml $tar_dir
-sudo tar czf $tarball $tar_dir -C /home/circleci/project/build
+sudo tar czf $tarball -C /home/circleci/project/build $tar_dir
 cd ..
 
 
