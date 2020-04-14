@@ -61,12 +61,14 @@ sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 #sudo tar -rf $tarball_tar metadata.xml
 #sudo gzip $tarball_tar
 
+cd build
 tar xf $tarball
 tar_dir=${tarball%%.tar.gz}
 ls -la
 ls -la $tar_dir
 cp $xml $tar_dir
 tar czf $tarball $tar_dir
+cd ..
 
 
 cloudsmith push raw --republish --no-wait-for-sync \
