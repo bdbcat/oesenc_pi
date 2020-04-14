@@ -9,11 +9,14 @@ set -xe
 
 # As of travis-ci-macos-10.13-xcode9.4.1-1529955246, the travis osx image
 # contains a broken homebrew. Walk-around by reinstalling:
-curl -fsSL \
-    https://raw.githubusercontent.com/Homebrew/install/master/uninstall \
-    > uninstall
-chmod 755 uninstall
-./uninstall -f
+#curl -fsSL \
+#    https://raw.githubusercontent.com/Homebrew/install/master/uninstall \
+#    > uninstall
+#chmod 755 uninstall
+#./uninstall -f
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+
 inst="https://raw.githubusercontent.com/Homebrew/install/master/install"
 /usr/bin/ruby -e "$(curl -fsSL $inst)"
 
