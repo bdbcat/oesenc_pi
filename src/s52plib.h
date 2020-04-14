@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "pi_s52s57.h"                 //types
+#include "pi_DepthFont.h"
 
 class wxGLContext;
 
@@ -349,6 +350,9 @@ private:
         ViewPort *vp, float rot_angle = 0. );
     bool RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         ViewPort *vp, float rot_angle = 0. );
+    bool RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
+        ViewPort *vp, wxColor symColor, float rot_angle = 0. );
+
     wxImage RuleXBMToImage( Rule *prule );
 
     bool RenderText( wxDC *pdc, S52_TextC *ptext, int x, int y,
@@ -432,6 +436,7 @@ private:
     RenderFromHPGL* HPGL;
 
     TexFont *m_txf;
+    DepthFont m_texSoundings;
     
     bool m_benableGLLS;
     DisCat m_nDisplayCategory;
@@ -454,7 +459,8 @@ private:
 
     float *workBuf;
     size_t workBufSize;
-    
+    wxFont *m_soundFont;
+
 };
 
 
