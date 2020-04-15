@@ -64,8 +64,8 @@ sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 cd build
 sudo tar xf $tarball
 tar_dir=${tarball%%.tar.gz}
-#ls -la
-#ls -la $tar_dir
+sudo ls -la
+sudo ls -la $tar_dir
 sudo cp $xml $tar_dir/metadata.xml
 tar_dir_here=${tar_dir##*/}
 sudo tar czf $tarball $tar_dir_here
