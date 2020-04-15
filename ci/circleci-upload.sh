@@ -67,7 +67,7 @@ tar_dir=${tarball%%.tar.gz}
 ls -la
 ls -la $tar_dir
 sudo cp $xml $tar_dir
-tar_dir_here=$(ls *.tar)
+tar_dir_here=${tar_dir##*/}
 sudo tar czf $tarball $tar_dir_here
 cd ..
 
