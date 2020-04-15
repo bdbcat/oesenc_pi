@@ -67,6 +67,7 @@ extern double  g_overzoom_emphasis_base;
 extern bool    g_oz_vector_scale;
 extern float g_ChartScaleFactorExp;
 extern int g_chart_zoom_modifier_vector;
+extern GLenum g_oe_texture_rectangle_format;
 
 float g_scaminScale;
 
@@ -3571,7 +3572,6 @@ int s52plib::RenderSY( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     return 0;
 
 }
-
 bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPort *vp,
                                    wxColor symColor, float rot_angle )
 {
@@ -3614,7 +3614,8 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
     wxScreenDC sdc;
     int charWidth, charHeight, charDescent;
     while((point_size < 20) && not_done){
-        wxFont *tentativeFont = FindOrCreateFont_PlugIn( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+        //wxFont *tentativeFont = FindOrCreateFont_PlugIn( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+        wxFont *tentativeFont = wxTheFontList->FindOrCreateFont( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
         sdc.GetTextExtent( _T("0"), &charWidth, &charHeight, &charDescent, NULL, tentativeFont ); // measure the text
         double font_size_mm = (double)(charHeight- charDescent) / GetPPMM();
 
@@ -3630,12 +3631,12 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
         if(!m_texSoundings.IsBuilt() || (fabs(m_texSoundings.GetScale() - scale_factor) > 0.1)){
             m_texSoundings.Delete();
         
-            m_soundFont = FindOrCreateFont_PlugIn( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+            m_soundFont = wxTheFontList->FindOrCreateFont( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
             m_texSoundings.Build(m_soundFont, scale_factor);        //texSounding owns the font
         }
     }
     else{
-        m_soundFont = FindOrCreateFont_PlugIn( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
+        m_soundFont = wxTheFontList->FindOrCreateFont( point_size, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
         m_pdc->SetFont(*m_soundFont);
         charHeight -= charDescent;
     }
@@ -3742,7 +3743,6 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
         glEnable( GL_BLEND );
         
         if(texture) {
-            extern GLenum       g_texture_rectangle_format;
 
             glEnable(GL_TEXTURE_2D);
             glEnable( GL_BLEND );
@@ -3757,7 +3757,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 //            glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                 wxSize size = m_texSoundings.GLTextureSize();
                 tx1 /= size.x, tx2 /= size.x;
                 ty1 /= size.y, ty2 /= size.y;
@@ -3786,7 +3786,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 #else
 
                 
-            if(g_texture_rectangle_format == GL_TEXTURE_2D) {
+            if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                     
                 // Normalize the sybmol texture coordinates against the next higher POT size
                 wxSize size = ChartSymbols::GLTextureSize();
@@ -3865,7 +3865,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 
 
 #endif          // GLES2
-            glDisable(g_texture_rectangle_format);
+            glDisable(g_oe_texture_rectangle_format);
         } else { /* this is only for legacy mode, or systems without NPOT textures */
             float cr = cosf( vp->rotation );
             float sr = sinf( vp->rotation );
@@ -3908,7 +3908,6 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
 
     return true;
 }
-
 
 // Line Simple Style, OpenGL
 int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
@@ -6241,7 +6240,6 @@ int s52plib::RenderMPS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     wxPoint cr0 = vp_local.GetPixFromLL( vp_local.GetBBox().GetMaxLat(), vp_local.GetBBox().GetMinLon());
     wxPoint cr1 = vp_local.GetPixFromLL( vp_local.GetBBox().GetMinLat(), vp_local.GetBBox().GetMaxLon());
     wxRect clip_rect(cr0, cr1);
-    
     for( int ip = 0; ip < npt; ip++ ) {
         
         double lon = *pdl++;
@@ -6288,7 +6286,6 @@ int s52plib::RenderMPS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
             rules = rules->next;
         }
     }
-    
     return 1;
 }
 
