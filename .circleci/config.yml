@@ -83,7 +83,7 @@ jobs:
      steps:
        - checkout
        - run: ci/circleci-build-flatpak.sh
-       - run: ci/circleci-upload.sh
+       - run: ci/circleci-upload-flatpak.sh
    build-fedora:
      docker:
          - image: fedora:29
