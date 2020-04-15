@@ -65,10 +65,10 @@ sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
 cd build
 sudo tar xf $tarball
-tar_dir_here=$PROJECT_pi-flatpak-$VERSION3   ${tarball%%-0_flatpak-18.08.tar.gz}
 sudo ls -la
-sudo ls -la $tar_dir
-sudo cp $xml $tar_dir/metadata.xml
+tar_dir_here=$PROJECT'_pi'-flatpak-$VERSION3
+sudo ls -la $tar_dir_here
+sudo cp $xml $tar_dir_here/metadata.xml
 sudo tar czf $tarball $tar_dir_here
 cd ..
 
