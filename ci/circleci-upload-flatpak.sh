@@ -6,6 +6,9 @@
 
 set -xe
 
+source $HOME/project/ci/commons.sh
+
+
 UNSTABLE_REPO=${CLOUDSMITH_UNSTABLE_REPO:-'david-register/ocpn-plugins-unstable'}
 STABLE_REPO=${CLOUDSMITH_STABLE_REPO:-'david-register/ocpn-plugins-stable'}
 
@@ -57,21 +60,9 @@ sudo sed -i -e "s|@name@|$tarball_name|" $xml
 sudo sed -i -e "s|@version@|$VERSION|" $xml
 sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
-#sudo gunzip $tarball
-#tarball_tar=$(ls $HOME/project/build/*.tar)
-#sudo cp $xml metadata.xml 
-#sudo tar -rf $tarball_tar metadata.xml
-#sudo gzip $tarball_tar
-
-cd build
-sudo tar xf $tarball
-sudo ls -la
-tar_dir_here=$PROJECT'_pi'-flatpak-$VERSION3
-sudo ls -la $tar_dir_here
-sudo cp $xml $tar_dir_here/metadata.xml
-sudo tar czf $tarball $tar_dir_here
-cd ..
-
+sudo cp $xml metadata.xml
+sudo chmod 666 $tarball
+repack $tarball metadata.xml
 
 cloudsmith push raw --republish --no-wait-for-sync \
     --name ${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
