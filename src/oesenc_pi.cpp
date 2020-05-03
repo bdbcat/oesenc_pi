@@ -885,6 +885,9 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 if(needReconfig){
                     ps52plib->PLIB_LoadS57GlobalConfig();
                     ps52plib->PLIB_LoadS57ObjectConfig();
+                    
+                    // Set the chart object scale factor, it may have changed.
+                    g_ChartScaleFactorExp = GetOCPNChartScaleFactor_Plugin();
                 }
             }
 
