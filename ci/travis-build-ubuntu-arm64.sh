@@ -14,7 +14,8 @@ echo "DOCKER_OPTS=\"-H tcp://127.0.0.1:2375 -H $DOCKER_SOCK -s devicemapper\"" \
 sudo service docker restart;
 sleep 5;
 
-docker run --rm --privileged multiarch/qemu-user-static:register --reset
+#docker run --rm --privileged multiarch/qemu-user-static:register --reset
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
 docker run --privileged -d -ti -e "container=docker" \
       -v ~/source_top:/source_top \
@@ -30,7 +31,7 @@ echo $DOCKER_CONTAINER_ID
 sleep 5
 sudo docker ps
 
-#docker exec -ti $DOCKER_CONTAINER_ID cat /etc/os-release
+docker exec -ti $DOCKER_CONTAINER_ID uname -a
 
 docker exec -ti $DOCKER_CONTAINER_ID apt-get update
 docker exec -ti $DOCKER_CONTAINER_ID echo "------\nEND apt-get update\n" 
