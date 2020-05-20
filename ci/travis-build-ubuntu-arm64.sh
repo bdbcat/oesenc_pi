@@ -56,8 +56,6 @@ docker ps -a
 docker stop $DOCKER_CONTAINER_ID
 docker rm -v $DOCKER_CONTAINER_ID
 
-exit 0
-
 sudo apt-get install python3-pip python3-setuptools
 
 #  Upload to cloudsmith
