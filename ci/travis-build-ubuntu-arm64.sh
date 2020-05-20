@@ -23,7 +23,7 @@ docker run --privileged -d -ti -e "container=docker" \
  
 sudo docker ps
 
-DOCKER_CONTAINER_ID=$(sudo docker ps | grep ubuntu | awk '{print $1}')
+DOCKER_CONTAINER_ID=$(sudo docker ps | grep 'ubuntu' | awk '{print $1}')
 
 
 echo $DOCKER_CONTAINER_ID 
