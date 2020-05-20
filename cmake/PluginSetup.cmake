@@ -45,6 +45,11 @@ elseif (UNIX)
                     OUTPUT_VARIABLE PKG_TARGET)
     execute_process(COMMAND "lsb_release" "-rs"
                     OUTPUT_VARIABLE PKG_TARGET_VERSION)
+                    
+if(ARCH MATCHES "arm64")
+ set(PKG_TARGET "${PKG_TARGET}-ARM64")
+endif ()    
+        
 else ()
     set(PKG_TARGET "unknown")
     set(PKG_TARGET_VERSION 1)
