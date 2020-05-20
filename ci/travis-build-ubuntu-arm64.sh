@@ -28,7 +28,7 @@ DOCKER_CONTAINER_ID=$(sudo docker ps | grep ubuntu | awk '{print $1}')
 
 echo $DOCKER_CONTAINER_ID 
 
-docker exec -ti $DOCKER_CONTAINER_ID cat /etc/os-release
+#docker exec -ti $DOCKER_CONTAINER_ID cat /etc/os-release
 
 docker exec -ti $DOCKER_CONTAINER_ID apt-get update
 docker exec -ti $DOCKER_CONTAINER_ID echo "------\nEND apt-get update\n" 
