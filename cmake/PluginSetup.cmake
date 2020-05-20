@@ -42,9 +42,11 @@ elseif (APPLE)
 elseif (UNIX)
     # Some linux dist:
     execute_process(COMMAND "lsb_release" "-is"
-                    OUTPUT_VARIABLE PKG_TARGET)
+                    OUTPUT_VARIABLE PKG_TARGET
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
     execute_process(COMMAND "lsb_release" "-rs"
-                    OUTPUT_VARIABLE PKG_TARGET_VERSION)
+                    OUTPUT_VARIABLE PKG_TARGET_VERSION
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
                     
 if(ARCH MATCHES "arm64")
  set(PKG_TARGET "${PKG_TARGET}-ARM64")
