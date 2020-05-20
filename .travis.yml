@@ -21,6 +21,14 @@ matrix:
     - docker
     script:
     - "./ci/travis-build-raspbian-armhf.sh"
+  - env:
+    - OCPN_TARGET=bionic-arm64
+    - OCPN_BRANCH=master
+    - DOCKER_IMAGE=arm64v8/ubuntu:18.04
+    services:
+    - docker
+    script:
+    - "./ci/travis-build-ubuntu-arm64.sh"
 
 
 branches:
