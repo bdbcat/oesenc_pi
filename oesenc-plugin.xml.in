@@ -24,6 +24,7 @@ can only be used after purchasing decryption keys from o-charts.org.
 
   <target>${PKG_TARGET}</target>
   <target-version>${PKG_TARGET_VERSION}</target-version>
+  <target-arch>${ARCH}</target-arch>
   <tarball-url> ${TARBALL_URL} </tarball-url>
 </plugin>
 
