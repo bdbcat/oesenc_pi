@@ -7,6 +7,8 @@
 set -xe
 sudo apt-get -qq update
 
+source $HOME/project/ci/commons.sh
+
 DOCKER_SOCK="unix:///var/run/docker.sock"
 
 echo "DOCKER_OPTS=\"-H tcp://127.0.0.1:2375 -H $DOCKER_SOCK -s devicemapper\"" \
@@ -146,13 +148,18 @@ cat ~/$xml
 #sudo tar -rf $tarball_tar metadata.xml
 #sudo gzip $tarball_tar
 
-sudo tar xf $tarball
-tar_dir=${tarball%%.tar.gz}
-ls -la
-ls -la $tar_dir
-sudo cp $xml $tar_dir/metadata.xml
-tar_dir_here=${tar_dir##*/}
-sudo tar czf $tarball $tar_dir_here
+#sudo tar xf $tarball
+#tar_dir=${tarball%%.tar.gz}
+#ls -la
+#ls -la $tar_dir
+#sudo cp $xml $tar_dir/metadata.xml
+#tar_dir_here=${tar_dir##*/}
+#sudo tar czf $tarball $tar_dir_here
+
+# Repack using gnu tar (cmake's is problematic) and add metadata.
+cp $xml metadata.xml
+sudo chmod 666 $tarball
+repack $tarball metadata.xml
 
 cloudsmith push raw --republish --no-wait-for-sync \
     --name ${PROJECT}-${PKG_TARGET}-${PKG_TARGET_VERSION}-metadata \
