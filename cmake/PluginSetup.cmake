@@ -55,7 +55,7 @@ elseif(ARCH MATCHES "armhf")
  set(PKG_TARGET "${PKG_TARGET}-ARMHF")
 elseif(ARCH MATCHES "i386")
  set(PKG_TARGET "${PKG_TARGET}-i386")
-else
+else ()
  set(PKG_TARGET "${PKG_TARGET}-x86_64")
 endif ()    
         
