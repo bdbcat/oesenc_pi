@@ -47,9 +47,16 @@ elseif (UNIX)
     execute_process(COMMAND "lsb_release" "-rs"
                     OUTPUT_VARIABLE PKG_TARGET_VERSION
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-                    
+
+# Generate architecturally uniques names for linux output packages
 if(ARCH MATCHES "arm64")
  set(PKG_TARGET "${PKG_TARGET}-ARM64")
+elseif(ARCH MATCHES "armhf")
+ set(PKG_TARGET "${PKG_TARGET}-ARMHF")
+elseif(ARCH MATCHES "i386")
+ set(PKG_TARGET "${PKG_TARGET}-i386")
+else
+ set(PKG_TARGET "${PKG_TARGET}-x86_64")
 endif ()    
         
 else ()
