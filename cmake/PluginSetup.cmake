@@ -74,3 +74,6 @@ if (NOT DEFINED wxWidgets_LIBRARIES)
 elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET STREQUAL "ubuntu")
   set(PKG_TARGET "${PKG_TARGET}-gtk3")
 endif ()
+
+message(STATUS "PluginSetup: PKG_TARGET: ${PKG_TARGET}")
+message(STATUS "PluginSetup: PKG_TARGET_VERSION: ${PKG_TARGET_VERSION}")
