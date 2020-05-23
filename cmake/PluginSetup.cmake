@@ -71,7 +71,7 @@ string(TOLOWER "${PKG_TARGET_VERSION}" PKG_TARGET_VERSION)
 set(PKG_TARGET_NVR "${PKG_TARGET}-${PKG_TARGET_VERSION}")
 if (NOT DEFINED wxWidgets_LIBRARIES)
   message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
-elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET STREQUAL "ubuntu")
+elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET MATCHES "ubuntu*")
   set(PKG_TARGET "${PKG_TARGET}-gtk3")
 endif ()
 
