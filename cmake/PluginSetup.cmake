@@ -48,6 +48,13 @@ elseif (UNIX)
                     OUTPUT_VARIABLE PKG_TARGET_VERSION
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+    # Handle gtk3 build variant                
+    if (NOT DEFINED wxWidgets_LIBRARIES)
+        message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
+    elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET MATCHES "ubuntu*")
+        set(PKG_TARGET "${PKG_TARGET}-gtk3")
+    endif ()
+
     # Generate architecturally uniques names for linux output packages
     if(ARCH MATCHES "arm64")
         set(PKG_TARGET "${PKG_TARGET}-ARM64")
@@ -69,11 +76,6 @@ string(TOLOWER "${PKG_TARGET}" PKG_TARGET)
 string(STRIP "${PKG_TARGET_VERSION}" PKG_TARGET_VERSION)
 string(TOLOWER "${PKG_TARGET_VERSION}" PKG_TARGET_VERSION)
 set(PKG_TARGET_NVR "${PKG_TARGET}-${PKG_TARGET_VERSION}")
-if (NOT DEFINED wxWidgets_LIBRARIES)
-  message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
-elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET MATCHES "ubuntu*")
-  set(PKG_TARGET "${PKG_TARGET}-gtk3")
-endif ()
 
 message(STATUS "PluginSetup: PKG_TARGET: ${PKG_TARGET}")
 message(STATUS "PluginSetup: PKG_TARGET_VERSION: ${PKG_TARGET_VERSION}")
