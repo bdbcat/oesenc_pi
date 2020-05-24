@@ -51,7 +51,8 @@ elseif (UNIX)
     # Handle gtk3 build variant                
     if (NOT DEFINED wxWidgets_LIBRARIES)
         message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
-    elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET MATCHES "ubuntu*")
+    elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET STREQUAL "ubuntu")
+        message(STATUS "PluginSetup: gtk3 found")
         set(PKG_TARGET "${PKG_TARGET}-gtk3")
     endif ()
 
