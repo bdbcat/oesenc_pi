@@ -48,6 +48,9 @@ elseif (UNIX)
                     OUTPUT_VARIABLE PKG_TARGET_VERSION
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+
+    message(STATUS "PluginSetup: PKG_TARGET(test): XXX${PKG_TARGET}YYY")
+                
     # Handle gtk3 build variant                
     if (NOT DEFINED wxWidgets_LIBRARIES)
         message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
