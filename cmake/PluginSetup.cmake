@@ -49,9 +49,9 @@ elseif (UNIX)
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
-    message(STATUS "PluginSetup: PKG_TARGET(test): XXX${PKG_TARGET}YYY")
-                
-    # Handle gtk3 build variant                
+    # Handle gtk3 build variant           
+    string(STRIP "${PKG_TARGET}" PKG_TARGET)
+    string(TOLOWER "${PKG_TARGET}" PKG_TARGET)
     if (NOT DEFINED wxWidgets_LIBRARIES)
         message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
     elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET STREQUAL "ubuntu")
