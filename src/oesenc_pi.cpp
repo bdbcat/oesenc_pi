@@ -2463,8 +2463,12 @@ Your oeSENC UserKey may be obtained from your chart provider.\n\n"),
          return g_UserKey;
      else
      {
+         wxWindow *canvas=GetOCPNCanvasWindow();
+         if (canvas == NULL) return g_UserKey;
+         
          g_old_UserKey = g_UserKey;
-         SENCGetUserKeyDialog dlg( legendID, GetOCPNCanvasWindow());
+         
+         SENCGetUserKeyDialog dlg( legendID, canvas);
          
          wxSize dialogSize(500, -1);
          
@@ -4204,6 +4208,8 @@ void oesenc_pi_event_handler::OnClearSystemName( wxCommandEvent &event )
 void oesenc_pi_event_handler::OnShowEULA( wxCommandEvent &event )
 {
     ChartSetEULA *CSE;
+    wxWindow *canvas=GetOCPNCanvasWindow();
+    if (canvas == NULL) return;
     
     for(unsigned int i=0 ; i < g_EULAArray.GetCount() ; i++){
         CSE = g_EULAArray.Item(i);
@@ -4211,7 +4217,7 @@ void oesenc_pi_event_handler::OnShowEULA( wxCommandEvent &event )
         file.Replace('!', wxFileName::GetPathSeparator());
         
         if(wxFileExists(file)){
-            oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), file );
+            oesenc_pi_about *pab = new oesenc_pi_about( canvas, file );
             pab->SetOKMode();
             pab->ShowModal();
             pab->Destroy();
@@ -4618,12 +4624,13 @@ bool CheckEULA( void )
     
     if(g_bEULA_OK && g_UserKey.Length())
         return true;
-       
+    wxWindow *canvas=GetOCPNCanvasWindow();
+    if (canvas == NULL) return true;   
     wxString shareLocn =*GetpSharedDataLocation() +
     _T("plugins") + wxFileName::GetPathSeparator() +
     _T("oesenc_pi") + wxFileName::GetPathSeparator();
     
-    oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow() );
+    oesenc_pi_about *pab = new oesenc_pi_about( canvas );
     pab->ShowModal();
     g_bEULA_OK = (pab->GetReturnCode() == 0);
     
@@ -4690,6 +4697,8 @@ wxString getEULASha1( wxString fileName)
 bool ShowEULA( wxString fileName )
 {
     wxLogMessage(_T("ShowEULA"));
+    wxWindow *canvas=GetOCPNCanvasWindow();
+    if (canvas == NULL) return true;
     
     wxString sha = getEULASha1(fileName);
     
@@ -4703,7 +4712,7 @@ bool ShowEULA( wxString fileName )
     androidHideBusyIcon();
 #endif
     
-    oesenc_pi_about *pab = new oesenc_pi_about( GetOCPNCanvasWindow(), fileName );
+    oesenc_pi_about *pab = new oesenc_pi_about( canvas, fileName );
     pab->ShowModal();
     bool bEULA_OK = (pab->GetReturnCode() == 0);
     
