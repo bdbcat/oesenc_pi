@@ -724,6 +724,9 @@ void s52plib::GenerateStateHash()
     if(offset + sizeof(bool) < sizeof(state_buffer))
         { memcpy(&state_buffer[offset], &m_bExtendLightSectors, sizeof(bool));  offset += sizeof(bool); }
 
+    if(offset + sizeof(bool) < sizeof(state_buffer))
+        { memcpy(&state_buffer[offset], &m_nSoundingFactor, sizeof(int));  offset += sizeof(int); }
+
     m_state_hash = crc32buf(state_buffer, offset );
     
 }
@@ -3622,6 +3625,13 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
             break;
         }
         point_size++;
+    }
+
+    double postmult =  m_SoundingsScaleFactor;
+    if((postmult <= 2.0) && (postmult >= 0.5)){
+        point_size *= postmult;
+        scale_factor *= postmult;
+        charWidth *= postmult;
     }
 
     // Build the texDepth object, if required
@@ -11209,6 +11219,9 @@ void PrepareS52ShaderUniforms(ViewPort *vp);
     lastLightLat = 0;
     lastLightLon = 0;
     
+    //Precalulate the ENC Soundings scale factor
+    m_SoundingsScaleFactor = exp( m_nSoundingFactor * (log(2.0) / 5.0) );
+
 }
 
 void s52plib::SetAnchorOn(bool val)
