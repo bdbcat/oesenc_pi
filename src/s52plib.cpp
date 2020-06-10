@@ -427,6 +427,7 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     m_lightsOff = false;
     m_anchorOn = true;
     m_qualityOfDataOn = false;
+    m_nSoundingFactor = 0;
 
     GenerateStateHash();
 
