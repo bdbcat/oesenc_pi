@@ -151,10 +151,6 @@ workflows:
           filters:
             branches:
               only: master
-      - build-fedora:
-          filters:
-            branches:
-              only: master
       - build-macos:
           filters:
             branches:
