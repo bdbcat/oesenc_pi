@@ -6894,7 +6894,7 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     int nPoints = 0;
     line_segment_element *ls_list = obj->m_ls_list;
     while( ls_list){
-        if(ls_list->ls_type == TYPE_EE)
+        if((ls_list->ls_type == TYPE_EE) || (ls_list->ls_type == TYPE_EE_REV))
             nPoints += ls_list->pedge->nCount;
         else
             nPoints += 2;
@@ -6916,7 +6916,7 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     while( ls_list){
         size_t vbo_offset = 0;
         size_t count = 0;
-        if(ls_list->ls_type == TYPE_EE){
+        if((ls_list->ls_type == TYPE_EE) || (ls_list->ls_type == TYPE_EE_REV)){
             vbo_offset = ls_list->pedge->vbo_offset;
             count = ls_list->pedge->nCount;
         }
@@ -9354,7 +9354,7 @@ bool isPointInObjectBoundary( double east, double north, S57Obj *obj )
                     
                     int nPoints;
                     // fetch the first point
-                    if(ls->ls_type == TYPE_EE){
+                    if((ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV)){
                         ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
                         nPoints = ls->pedge->nCount;
                     }
@@ -9411,7 +9411,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
         
         while(lsa){
             
-            if(lsa->ls_type == TYPE_EE)
+            if((lsa->ls_type == TYPE_EE) || (lsa->ls_type == TYPE_EE_REV))
                 max_points += lsa->pedge->nCount;
             else
                 max_points += 2;
@@ -9449,7 +9449,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
                 
                 int nPoints;
                 // fetch the first point
-                if(ls->ls_type == TYPE_EE){
+                if( (ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV) ){
                     ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
                     nPoints = ls->pedge->nCount;
                 }
@@ -9472,7 +9472,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
                 line_segment_element *lsn = ls->next;
                 
                 // fetch the first point
-                if(lsn->ls_type == TYPE_EE){
+                if((lsn->ls_type == TYPE_EE) || (lsn->ls_type == TYPE_EE_REV)){
                     ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
                     nPoints_next = lsn->pedge->nCount;
                 }
@@ -9517,7 +9517,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
         //transcribe the segment in the proper order into the output buffer
         int nPoints;
         // fetch the first point
-        if(ls->ls_type == TYPE_EE){
+        if((ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV)){
             ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
             nPoints = ls->pedge->nCount;
             
@@ -9563,7 +9563,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
             int nPoints_next;
             line_segment_element *lsn = ls->next;
             // fetch the first point
-            if(lsn->ls_type == TYPE_EE){
+            if((lsn->ls_type == TYPE_EE) || (lsn->ls_type == TYPE_EE_REV)){
                 ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
                 nPoints_next = lsn->pedge->nCount;
             }
