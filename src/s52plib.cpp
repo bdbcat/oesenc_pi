@@ -3800,7 +3800,7 @@ bool s52plib::RenderSoundingSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &
             if(g_oe_texture_rectangle_format == GL_TEXTURE_2D) {
                     
                 // Normalize the sybmol texture coordinates against the next higher POT size
-                wxSize size = ChartSymbols::GLTextureSize();
+                wxSize size = g_oeChartSymbols->GLTextureSize();
                 int rb_x = size.x;
                 int rb_y = size.y;
 
