@@ -3721,14 +3721,12 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         m_buttonNewFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewFPRClick), NULL, g_event_handler );
 
-#ifndef OCPN_ARM64        
         m_buttonNewDFPR = new wxButton( content, wxID_ANY, _("Create USB key dongle System ID file..."), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 5 );
         bSizer2->Add( m_buttonNewDFPR, 0, wxALIGN_CENTER_HORIZONTAL, 50 );
         
         m_buttonNewDFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnNewDFPRClick), NULL, g_event_handler );
-#endif
             
 #ifdef __WXMAC__
         m_buttonShowFPR = new wxButton( content, wxID_ANY, _("Show In Finder"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -3840,7 +3838,6 @@ void androidGetDeviceName()
 bool IsDongleAvailable()
 {
 #ifndef __OCPN__ANDROID__    
-#ifndef OCPN_ARM64  // SGlock is not supported for ARM64
     wxString cmd = g_sencutil_bin;
     cmd += _T(" -s ");                  // Available?
 
@@ -3878,7 +3875,6 @@ bool IsDongleAvailable()
     }
 
     //g_sencutil_bin.Clear();
-#endif
 #endif
     
     return false;
