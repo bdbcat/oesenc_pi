@@ -374,7 +374,7 @@ IF (QT_ANDROID )
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lc++_shared")
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "-lz" )
     TARGET_LINK_LIBRARIES( ${PACKAGE_NAME}  ${Qt_Base}/${Qt_Build}/lib/libQt5Core.so )
-    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "${OCPN_Base}/${OCPN_Build}/libopencpn.so" )
+    TARGET_LINK_LIBRARIES( ${PACKAGE_NAME} "${OCPN_Base}/${OCPN_Build}/libgorp.so" )
 ENDIF(QT_ANDROID)
 
 IF(WIN32)
