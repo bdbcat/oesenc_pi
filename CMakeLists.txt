@@ -41,7 +41,6 @@ SET(PKG_NVR ${PACKAGE_NAME}-${PACKAGE_VERSION}-${PKG_RELEASE})
 SET(TARBALL_URL "https://dl.cloudsmith.io/public/@pkg_repo@/raw")
 SET(TARBALL_URL ${TARBALL_URL}/names/@name@/versions/@version@/@filename@)
 
-
 SET(API_DIR "${CMAKE_SOURCE_DIR}/api-16")
 SET(OCPN_USE_API_16 ON)
 
