@@ -39,6 +39,10 @@ elseif (APPLE)
     set(PKG_TARGET "darwin")
     execute_process(COMMAND "sw_vers" "-productVersion"
                     OUTPUT_VARIABLE PKG_TARGET_VERSION)
+elseif(_wx_selected_config MATCHES "androideabi-qt")
+     #Android is cross built, so set wxWidgets dependies directly, elsewhere
+     set(wxWidgets_LIBRARIES FOOBAR)
+                   
 elseif (UNIX)
     # Some linux dist:
     execute_process(COMMAND "lsb_release" "-is"
