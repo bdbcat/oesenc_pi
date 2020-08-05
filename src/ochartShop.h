@@ -35,12 +35,15 @@
 
 #include <wx/statline.h>
 //#include <../../wxWidgets/wxWidgets-3.0.2/wxWidgets-3.0.2/include/wx/gtk/gauge.h>
+
+#ifdef __OCPN_USE_CURL__
 #include "wxcurl/wx/curl/http.h"
+#endif
 
 #ifdef WXC_FROM_DIP
 #undef WXC_FROM_DIP
 #endif
-#if wxVERSION_NUMBER >= 3100
+#if (wxVERSION_NUMBER >= 3100) && !defined(__OCPN__ANDROID__)
 #define WXC_FROM_DIP(x) wxWindow::FromDIP(x, NULL)
 #else
 #define WXC_FROM_DIP(x) x
@@ -93,6 +96,7 @@ public:
     wxBitmap& GetChartThumbnail(int size);
     wxString getKeytypeString();
     wxString getKeytypeString( int slot, wxColour &tcolor );
+    wxString getKeyString( int slot, wxColour &tcolor );
 
     //wxString ident;
     
@@ -137,7 +141,7 @@ public:
     
     wxString lastInstall;          // For updates, the full path of installed chartset
     int m_status;
-        
+    wxArrayString(m_nameArrayString);
 };
 
 WX_DECLARE_OBJARRAY(itemChart *,      ArrayOfCharts);    
@@ -169,6 +173,8 @@ private:
     wxStaticText *m_pName;
     wxColour m_boxColour;
     int m_unselectedHeight;
+    wxArrayString(m_nameArrayString);
+    int m_refDim;
     
     DECLARE_EVENT_TABLE()
 };
@@ -227,7 +233,8 @@ protected:
     InProgressIndicator *m_ipGauge;
     wxStaticText *m_staticTextStatus;
     wxStaticText *m_staticTextStatusProgress;
-    
+    wxPanel *m_chartListPanel;
+    wxBoxSizer *m_boxSizerchartListPanel;
     
 protected:
     
@@ -251,7 +258,7 @@ public:
     wxButton* GetButtonInstall() { return m_buttonInstall; }
     wxButton* GetButtonUpdate() { return m_buttonUpdate; }
     void RefreshSystemName();
-    
+    int GetScrollRate(){ return m_scrollRate; }
     
     shopPanel(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(500,600), long style = wxTAB_TRAVERSAL);
     virtual ~shopPanel();
@@ -295,6 +302,7 @@ public:
     bool m_binstallChain;
     bool m_bAbortingDownload;
     bool m_startedDownload;
+    int m_scrollRate;
 };
 
 
@@ -402,7 +410,7 @@ public:
     bool m_bAlive;
 };
 
-
+#ifdef __OCPN_USE_CURL__
 class OESENC_CURL_EvtHandler : public wxEvtHandler
 {
 public:
@@ -413,8 +421,8 @@ public:
     void onEndEvent(wxCurlEndPerformEvent &evt);
     void onProgressEvent(wxCurlDownloadEvent &evt);
     
-    
 };
+#endif
 
 class oeSENCLogin: public wxDialog
 {

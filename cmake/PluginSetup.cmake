@@ -41,8 +41,10 @@ elseif (APPLE)
                     OUTPUT_VARIABLE PKG_TARGET_VERSION)
 elseif(_wx_selected_config MATCHES "androideabi-qt")
      #Android is cross built, so set wxWidgets dependies directly, elsewhere
-     set(wxWidgets_LIBRARIES FOOBAR)
-                   
+     set(wxWidgets_LIBRARIES FOOBAT)
+     set(PKG_TARGET "Android-ARM64")
+     set(PKG_TARGET_VERSION 16)
+     set(ARCH arm64)              
 elseif (UNIX)
     # Some linux dist:
     execute_process(COMMAND "lsb_release" "-is"

@@ -59,9 +59,9 @@
 #include "sha1.h"
 #include "InstallDirs.h"
 
-#ifndef __OCPN__ANDROID__
+//#ifndef __OCPN__ANDROID__
 #include "ochartShop.h"
-#endif
+//#endif
 
 #include "version.h"
 
@@ -3702,7 +3702,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         m_buttonShowEULA->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowEULA), NULL, g_event_handler );
         bSizer2->AddSpacer( 20 );
 
-#ifndef __OCPN__ANDROID__        
+//#ifndef __OCPN__ANDROID__        
         //  FPR File Permit
         wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( content, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
         m_fpr_text = new wxStaticText(content, wxID_ANY, _T(" "));
@@ -3740,7 +3740,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
 
         m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
 
-#endif        
+//#endif        
         // System Name
         if(g_systemName.Length()){
             wxString nameText = _T(" ") + _("System Name:") + _T(" ") + g_systemName;
@@ -3751,7 +3751,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         else
             bSizer2->AddSpacer( 10 );
  
-#ifndef __OCPN__ANDROID__        
+//#ifndef __OCPN__ANDROID__        
         m_buttonClearSystemName = new wxButton( content, wxID_ANY, _("Reset System Name"), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 10 );
@@ -3770,7 +3770,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         m_buttonClearCreds->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearCredentials), NULL, g_event_handler );
         
         
-#endif
+//#endif
             
         m_sdbSizer1 = new wxStdDialogButtonSizer();
         m_sdbSizer1OK = new wxButton( content, wxID_OK );
@@ -3904,7 +3904,9 @@ unsigned int GetDongleSN()
     
 wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
 {
-            
+
+#ifndef __OCPN__ANDROID__    
+   
             wxString msg1;
             wxString fpr_file;
             wxString fpr_dir = *GetpPrivateApplicationDataLocation(); //GetWritableDocumentsDir();
@@ -4102,6 +4104,60 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
             return _T("");
         else
             return fpr_file;
+#else   // android
+
+        // Get XFPR from the oeserverda helper utility.
+        //  The target binary executable
+        wxString cmd = g_sencutil_bin;
+
+//  Set up the parameter passed as the local app storage directory, and append "cache/" to it
+        wxString dataLoc = *GetpPrivateApplicationDataLocation();
+        wxFileName fn(dataLoc);
+        wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        dataDir += _T("cache/");
+
+        wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        
+        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+        // This will be {dir of g_sencutil_bin}
+        wxFileName fnl(cmd);
+//        wxString libDir = fnl.GetPath();
+        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+      
+        wxLogMessage(_T("oernc_pi: Getting XFPR: Starting: ") + cmd );
+        wxLogMessage(_T("oernc_pi: Getting XFPR: Parms: ") + rootDir + _T(" ") + dataDir + _T(" ") + libDir );
+
+        qDebug() << "FPR3" << cmd.mb_str();
+        wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
+
+        wxLogMessage(_T("oernc_pi: Start Result: ") + result);
+
+        bool berror = true;            //TODO
+        
+        // Find the file...
+        wxArrayString files;
+        wxString lastFile = _T("NOT_FOUND");
+        time_t tmax = -1;
+        size_t nf = wxDir::GetAllFiles(dataDir, &files, _T("*.fpr"), wxDIR_FILES);
+        if(nf){
+            for(size_t i = 0 ; i < files.GetCount() ; i++){
+                qDebug() << "looking at FPR file: " << files[i].mb_str();
+                time_t t = ::wxFileModificationTime(files[i]);
+                if(t > tmax){
+                    tmax = t;
+                    lastFile = files[i];
+                }
+            }
+        }
+
+        qDebug() << "Selected FPR file: " << lastFile.mb_str();
+
+        if(::wxFileExists(lastFile))
+            return lastFile;
+        else
+            return _T("");
+
+#endif        
         
 }
 
@@ -4281,7 +4337,7 @@ void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
 
 void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 {
-#ifndef __OCPN__ANDROID__    
+#ifndef x__OCPN__ANDROID__    
     wxString msg = _("To obtain a chart set, you must generate a Unique System Identifier File.\n");
     msg += _("This file is also known as a\"fingerprint\" file.\n");
     msg += _("The fingerprint file contains information to uniquely identify this computer.\n\n");
@@ -4290,7 +4346,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 
     int ret = OCPNMessageBox_PlugIn(NULL, msg, _("oeSENC_PI Message"), wxYES_NO);
     
-    if(ret == wxID_YES){
+    if((ret == wxID_YES) || (ret == wxID_OK) ){
         wxString msg1;
         
         bool b_copyOK = false;
@@ -4436,7 +4492,7 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
 {
     
-#ifndef __OCPN__ANDROID__
+#ifndef x__OCPN__ANDROID__
 
         doShop();
 #else
@@ -5572,7 +5628,7 @@ void androidHideBusyIcon()
 
 void oesenc_pi::OnSetupOptions( void )
 {
-#ifdef __OCPN__ANDROID__
+#ifdef x__OCPN__ANDROID__
     m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
     if( ! m_pOptionsPage )
     {

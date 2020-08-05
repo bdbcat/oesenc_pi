@@ -71,15 +71,17 @@ IF(QT_ANDROID)
         set(CMAKE_EXE_LINKER_FLAGS "-s")  ## Strip binary
  #   endif()
 
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtCore")
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include")
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtWidgets")
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtGui")
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtOpenGL")
-  INCLUDE_DIRECTORIES("${Qt_Base}/${Qt_Build}/include/QtTest")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include/QtCore")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include/QtWidgets")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include/QtGui")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include/QtOpenGL")
+  INCLUDE_DIRECTORIES("OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/include/QtTest")
 
-  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
-  INCLUDE_DIRECTORIES("${wxQt_Base}/include")
+#  INCLUDE_DIRECTORIES( "${wxQt_Base}/${wxQt_Build}/lib/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
+#  INCLUDE_DIRECTORIES("${wxQt_Base}/include")
+  INCLUDE_DIRECTORIES( "OCPNAndroidCommon/wxWidgets/libarm64/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
+  INCLUDE_DIRECTORIES( "OCPNAndroidCommon/wxWidgets/include")
 
   ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
 
@@ -151,11 +153,11 @@ IF (QT_ANDROID )
         # flow to this module from above.  If we want to build Android plugins out-of-core, this will need improvement.
 
   
-    ${Qt_Base}/${Qt_Build}/lib/libQt5Core.so
-    ${Qt_Base}/${Qt_Build}/lib/libQt5OpenGL.so
-    ${Qt_Base}/${Qt_Build}/lib/libQt5Widgets.so
-    ${Qt_Base}/${Qt_Build}/lib/libQt5Gui.so
-    ${Qt_Base}/${Qt_Build}/lib/libQt5AndroidExtras.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/lib/libQt5Core.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/lib/libQt5OpenGL.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/lib/libQt5Widgets.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/lib/libQt5Gui.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/OCPNAndroidCommon/qt5/build_arm64_O3/qtbase/lib/libQt5AndroidExtras.so
 
         libGLESv2.so
         libEGL.so

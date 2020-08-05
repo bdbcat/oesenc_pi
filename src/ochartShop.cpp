@@ -35,16 +35,34 @@
 #include <wx/uri.h>
 #include "wx/tokenzr.h"
 #include <wx/dir.h>
+#include <wx/textwrapper.h>
 #include "ochartShop.h"
 #include "ocpn_plugin.h"
+
+#ifdef __OCPN_USE_CURL__
 #include "wxcurl/wx/curl/http.h"
 #include "wxcurl/wx/curl/thread.h"
+#endif
+
 #include <tinyxml.h>
 //#include <../../opencpn/plugins/wmm_pi/src/WMMHeader.h>
 #include "wx/wfstream.h"
 #include <wx/zipstrm.h>
 #include <memory>
 
+
+#ifdef __OCPN__ANDROID__
+#include <QtAndroidExtras/QAndroidJniObject>
+#include "qdebug.h"
+wxString callActivityMethod_vs(const char *method);
+wxString callActivityMethod_ss(const char *method, wxString parm);
+wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
+wxString callActivityMethod_s5s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5);
+wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5, wxString parm6);
+wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
+void androidShowBusyIcon();
+void androidHideBusyIcon();
+#endif
 
 #include <wx/arrimpl.cpp> 
 WX_DEFINE_OBJARRAY(ArrayOfCharts);
@@ -72,8 +90,12 @@ extern wxString g_versionString;
 extern wxString g_systemOS;
 
 shopPanel *g_shopPanel;
+
+#ifdef __OCPN_USE_CURL__
 OESENC_CURL_EvtHandler *g_CurlEventHandler;
 wxCurlDownloadThread *g_curlDownloadThread;
+#endif
+
 wxFFileOutputStream *downloadOutStream;
 bool g_chartListUpdatedOK;
 wxString g_statusOverride;
@@ -122,6 +144,75 @@ unsigned int GetDongleSN();
 
 
 // Utility Functions
+
+class HardBreakWrapper : public wxTextWrapper
+    {
+    public:
+        HardBreakWrapper(wxWindow *win, const wxString& text, int widthMax)
+        {
+            m_lineCount = 0;
+            Wrap(win, text, widthMax);
+        }
+        wxString const& GetWrapped() const { return m_wrapped; }
+        int const GetLineCount() const { return m_lineCount; }
+        wxArrayString GetLineArray(){ return m_array; }
+        
+    protected:
+        virtual void OnOutputLine(const wxString& line)
+        {
+            m_wrapped += line;
+            m_array.Add(line);
+        }
+        virtual void OnNewLine()
+        {
+            m_wrapped += '\n';
+            m_lineCount++;
+        }
+    private:
+        wxString m_wrapped;
+        int m_lineCount;
+        wxArrayString m_array;
+    };
+
+#ifdef __OCPN__ANDROID__
+bool AndroidUnzip(wxString zipFile, wxString destDir, int nStrip, bool bRemoveZip)
+{
+    qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
+    
+    wxString ns;
+    ns.Printf(_T("%d"), nStrip);
+    
+    wxString br = _T("0");
+    if(bRemoveZip)
+        br = _T("1");
+    
+    qDebug() << "br" << br.mb_str();
+    
+    wxString stat = callActivityMethod_s4s( "unzipFile", zipFile, destDir, ns, br  );
+    
+    if(wxNOT_FOUND == stat.Find(_T("OK")))
+        return false;
+    
+    qDebug() << "unzip start";
+    
+    bool bDone = false;
+    while (!bDone){
+        wxMilliSleep(1000);
+        //wxSafeYield(NULL, true);
+        
+        qDebug() << "unzip poll";
+        
+        wxString result = callActivityMethod_ss( "getUnzipStatus", _T("") );
+        if(wxNOT_FOUND != result.Find(_T("DONE")))
+            bDone = true;
+    }
+    qDebug() << "unzip done";
+    
+    return true;    
+    
+}
+#endif
+
 std::string UriEncode(const std::string & sSrc)
 {
    const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
@@ -179,6 +270,7 @@ size_t wxcurl_string_write_UTF8(void* ptr, size_t size, size_t nmemb, void* pcha
     return iRealSize;
 }
 
+#ifdef __OCPN_USE_CURL__
 class wxCurlHTTPNoZIP : public wxCurlHTTP
 {
 public:
@@ -278,6 +370,8 @@ std::string wxCurlHTTPNoZIP::GetResponseBody() const
 #endif
     
 }
+
+#endif   //__OCPN_USE_CURL__
 
 // itemChart
 //------------------------------------------------------------------------------------------
@@ -644,6 +738,45 @@ wxString itemChart::getKeytypeString( int slot, wxColour &tcolour ){
     return _T("");
 }
 
+wxString itemChart::getKeyString( int slot, wxColour &tcolour ){
+
+    if(slot == 0){
+        if(isSlotAssignedToAnyDongle( 0 )){
+            if(!sysID0.IsSameAs(g_dongleName))
+                tcolour = wxColour(128, 128, 128);
+            return sysID0;
+        }
+        else{
+            if (sysID0.Length()){
+                if( !sysID0.IsSameAs(g_systemName) )
+                    tcolour = wxColour(128, 128, 128);
+                return sysID0;
+            }
+            else
+                return _T("");
+        }
+
+    }
+
+    if(slot == 1){
+        if(isSlotAssignedToAnyDongle( 1 )){
+             if(!sysID1.IsSameAs(g_dongleName))
+                tcolour = wxColour(128, 128, 128);
+            return sysID1;
+        }
+        else{
+            if (sysID1.Length()){
+                if( !sysID1.IsSameAs(g_systemName) )
+                    tcolour = wxColour(128, 128, 128);
+                return sysID1;
+            }
+            else
+                return _T("");
+        }
+    }
+    
+    return _T("");
+}
 
 wxBitmap& itemChart::GetChartThumbnail(int size)
 {
@@ -659,13 +792,13 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
         }
         else{
             if(g_chartListUpdatedOK && thumbnailURL.Length()){  // Do not access network until after first "getList"
-                wxCurlHTTP get;
-                get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-                bool getResult = get.Get(file, thumbnailURL);
+ //               wxCurlHTTP get;
+ //               get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+ //               bool getResult = get.Get(file, thumbnailURL);
 
             // get the response code of the server
-                int iResponseCode;
-                get.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+                int iResponseCode = 0;
+//                get.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
             
                 if(iResponseCode == 200){
                     if(::wxFileExists(file)){
@@ -932,7 +1065,47 @@ int doLogin()
     loginParms += _T("&version=") + g_systemOS + g_versionString;
 
     //wxLogMessage(_T("loginParms: ") + loginParms);
+    int iResponseCode =0;
+    TiXmlDocument *doc = 0;
+    size_t res = 0;
     
+#ifdef __OCPN_USE_CURL__    
+    wxCurlHTTPNoZIP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    if(iResponseCode == 200){
+        doc = new TiXmlDocument();
+        doc->Parse( post.GetResponseBody().c_str());
+    }
+
+#else
+
+    //qDebug() << url.mb_str();
+    //qDebug() << loginParms.mb_str();
+    
+    wxString postresult;
+    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, 5 );
+
+    //qDebug() << "doLogin Post Stat: " << stat;
+    
+    if(stat != OCPN_DL_FAILED){
+        wxCharBuffer buf = postresult.ToUTF8();
+        std::string response(buf.data());
+        
+        //qDebug() << response.c_str();
+        doc = new TiXmlDocument();
+        doc->Parse( response.c_str());
+        iResponseCode = 200;
+        res = 1;
+    }
+
+#endif
+
+    ///////// 
+#if 0    
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     const char* s = loginParms.mb_str(wxConvUTF8);    
@@ -942,14 +1115,15 @@ int doLogin()
     // get the response code of the server
     int iResponseCode;
     post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-    
+#endif
+
     if(iResponseCode == 200){
-        TiXmlDocument * doc = new TiXmlDocument();
-        const char *rr = doc->Parse( post.GetResponseBody().c_str());
+//        TiXmlDocument * doc = new TiXmlDocument();
+//        const char *rr = doc->Parse( post.GetResponseBody().c_str());
         
-        wxString p = wxString(post.GetResponseBody().c_str(), wxConvUTF8);
-        wxLogMessage(_T("doLogin results:"));
-        wxLogMessage(p);
+//        wxString p = wxString(post.GetResponseBody().c_str(), wxConvUTF8);
+//        wxLogMessage(_T("doLogin results:"));
+//        wxLogMessage(p);
         
         wxString queryResult;
         wxString loginKey;
@@ -1196,7 +1370,51 @@ int getChartList( bool bShowErrorDialogs = true){
         loginParms += _T("&debug=") + g_debugShop;
     loginParms += _T("&version=") + g_systemOS + g_versionString;
 
+    int iResponseCode = 0;
+    size_t res = 0;
+    std::string responseBody;
     
+#ifdef __OCPN_USE_CURL__    
+    wxCurlHTTPNoZIP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    
+    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+    std::string a = post.GetDetailedErrorString();
+    std::string b = post.GetErrorString();
+    std::string c = post.GetResponseBody();
+    
+    responseBody = post.GetResponseBody();
+    //printf("%s", post.GetResponseBody().c_str());
+    
+    //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
+#else
+     wxString postresult;
+    //qDebug() << url.mb_str();
+    //qDebug() << loginParms.mb_str();
+
+    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
+
+    //qDebug() << "getChartList Post Stat: " << stat;
+    
+    if(stat != OCPN_DL_FAILED){
+        wxCharBuffer buf = postresult.ToUTF8();
+        std::string response(buf.data());
+        
+        //qDebug() << response.c_str();
+        responseBody = response.c_str();
+        iResponseCode = 200;
+        res = 1;
+    }
+
+#endif    
+    
+#if 0
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     
@@ -1215,9 +1433,9 @@ int getChartList( bool bShowErrorDialogs = true){
     
     wxString tt(post.GetResponseBody().data(), wxConvUTF8);
     //wxLogMessage(tt);
-    
+#endif    
     if(iResponseCode == 200){
-        wxString result = ProcessResponse(post.GetResponseBody());
+        wxString result = ProcessResponse(responseBody);
         
         return checkResult( result, bShowErrorDialogs );
             
@@ -1291,6 +1509,50 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     loginParms += _T("&quantityId=") + chart->quantityId;
     loginParms += _T("&slot=") + sSlot;
 
+    int iResponseCode = 0;
+    size_t res = 0;
+    std::string responseBody;
+    
+#ifdef __OCPN_USE_CURL__    
+    wxCurlHTTPNoZIP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    
+    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+    std::string a = post.GetDetailedErrorString();
+    std::string b = post.GetErrorString();
+    std::string c = post.GetResponseBody();
+    
+    responseBody = post.GetResponseBody();
+    //printf("%s", post.GetResponseBody().c_str());
+    
+    //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
+#else
+     wxString postresult;
+    //qDebug() << url.mb_str();
+    //qDebug() << loginParms.mb_str();
+
+    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
+
+    //qDebug() << "getChartList Post Stat: " << stat;
+    
+    if(stat != OCPN_DL_FAILED){
+        wxCharBuffer buf = postresult.ToUTF8();
+        std::string response(buf.data());
+        
+        //qDebug() << response.c_str();
+        responseBody = response.c_str();
+        iResponseCode = 200;
+        res = 1;
+    }
+
+#endif    
+#if 0
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     const char* s = loginParms.mb_str(wxConvUTF8);    
@@ -1299,9 +1561,10 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     // get the response code of the server
     int iResponseCode;
     post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-    
+#endif
+
     if(iResponseCode == 200){
-        wxString result = ProcessResponse(post.GetResponseBody());
+        wxString result = ProcessResponse(responseBody);
         
         return checkResult(result);
     }
@@ -1367,6 +1630,50 @@ int doUploadXFPR(bool bDongle)
             
             //wxLogMessage(loginParms);
             
+    int iResponseCode = 0;
+    size_t res = 0;
+    std::string responseBody;
+    
+#ifdef __OCPN_USE_CURL__    
+    wxCurlHTTPNoZIP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    
+    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+    std::string a = post.GetDetailedErrorString();
+    std::string b = post.GetErrorString();
+    std::string c = post.GetResponseBody();
+    
+    responseBody = post.GetResponseBody();
+    //printf("%s", post.GetResponseBody().c_str());
+    
+    //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
+#else
+     wxString postresult;
+    //qDebug() << url.mb_str();
+    //qDebug() << loginParms.mb_str();
+
+    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
+
+    //qDebug() << "getChartList Post Stat: " << stat;
+    
+    if(stat != OCPN_DL_FAILED){
+        wxCharBuffer buf = postresult.ToUTF8();
+        std::string response(buf.data());
+        
+        //qDebug() << response.c_str();
+        responseBody = response.c_str();
+        iResponseCode = 200;
+        res = 1;
+    }
+
+#endif    
+#if 0
             wxCurlHTTPNoZIP post;
             post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
             const char* s = loginParms.mb_str(wxConvUTF8);    
@@ -1376,9 +1683,10 @@ int doUploadXFPR(bool bDongle)
             // get the response code of the server
             int iResponseCode;
             post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-            
+#endif
+
             if(iResponseCode == 200){
-                wxString result = ProcessResponse(post.GetResponseBody());
+                wxString result = ProcessResponse(responseBody);
                 
                 int iret = checkResult(result);
                 
@@ -1443,6 +1751,51 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     loginParms += _T("&quantityId=") + chart->quantityId;
     loginParms += _T("&slot=") + sSlot;
     
+    int iResponseCode = 0;
+    size_t res = 0;
+    std::string responseBody;
+    
+#ifdef __OCPN_USE_CURL__    
+    wxCurlHTTPNoZIP post;
+    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    
+    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+    // get the response code of the server
+    
+    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+    std::string a = post.GetDetailedErrorString();
+    std::string b = post.GetErrorString();
+    std::string c = post.GetResponseBody();
+    
+    responseBody = post.GetResponseBody();
+    //printf("%s", post.GetResponseBody().c_str());
+    
+    //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+    //wxLogMessage(tt);
+#else
+     wxString postresult;
+    //qDebug() << url.mb_str();
+    //qDebug() << loginParms.mb_str();
+
+    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
+
+    //qDebug() << "getChartList Post Stat: " << stat;
+    
+    if(stat != OCPN_DL_FAILED){
+        wxCharBuffer buf = postresult.ToUTF8();
+        std::string response(buf.data());
+        
+        //qDebug() << response.c_str();
+        responseBody = response.c_str();
+        iResponseCode = 200;
+        res = 1;
+    }
+
+#endif    
+
+#if 0
     wxCurlHTTPNoZIP post;
     post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
     const char* s = loginParms.mb_str(wxConvUTF8);    
@@ -1453,8 +1806,9 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
     int iResponseCode;
     post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
     
-    if(iResponseCode == 200){
-        wxString result = ProcessResponse(post.GetResponseBody());
+#endif
+if(iResponseCode == 200){
+        wxString result = ProcessResponse(responseBody);
         
         return checkResult(result);
     }
@@ -1467,6 +1821,7 @@ int doPrepare(oeSencChartPanel *chartPrepare, int slot)
 
 int doDownload(oeSencChartPanel *chartDownload, int slot)
 {
+#if 0    
     itemChart *chart = chartDownload->m_pChart;
 
     //  Create a destination file name for the download.
@@ -1511,7 +1866,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     g_curlDownloadThread->SetOutputStream(downloadOutStream);
     g_curlDownloadThread->Download();
  
-
+#endif
     return 0;
 }
 
@@ -1519,6 +1874,15 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, wxSt
 {
     bool ret = true;
     wxString topDir;
+    
+#ifdef __OCPN__ANDROID__
+    int nStrip = 0;
+    if(aStripPath)
+        nStrip = 1;
+    
+    ret = AndroidUnzip(aZipFile, aTargetDir, nStrip, true);
+#else
+
     std::unique_ptr<wxZipEntry> entry(new wxZipEntry());
     
     do
@@ -1629,7 +1993,7 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, wxSt
     
     if( aRemoveZip )
         wxRemoveFile(aZipFile);
-    
+#endif    
     return ret;
 }
 
@@ -1841,14 +2205,15 @@ oeSencChartPanel::oeSencChartPanel(wxWindow *parent, wxWindowID id, const wxPoin
     m_pChart = p_itemChart;
     m_bSelected = false;
 
-    int refHeight = GetCharHeight();
-    SetMinSize(wxSize(-1, 5 * refHeight));
-    m_unselectedHeight = 5 * refHeight;
+    m_refDim = GetCharHeight();
+    SetMinSize(wxSize(-1, 5 * m_refDim));
+    m_unselectedHeight = 5 * m_refDim;
     
-//     wxBoxSizer* itemBoxSizer01 = new wxBoxSizer(wxHORIZONTAL);
-//     SetSizer(itemBoxSizer01);
-     Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
-//     
+#ifdef __OCPN__ANDROID__
+    Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
+#else
+    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
+#endif    
     
 }
 
@@ -1878,19 +2243,51 @@ void oeSencChartPanel::SetSelected( bool selected )
 {
     m_bSelected = selected;
     wxColour colour;
-    int refHeight = GetCharHeight();
+    int refDim = m_refDim;
+   
+    bool bCompact = false;
+#ifdef __OCPN__ANDROID__
+    if(g_shopPanel->GetSize().x < 60 * refDim)
+        bCompact = true;
+#endif
     
+    wxString nameString = m_pChart->chartName;
+    if(!m_pChart->quantityId.IsSameAs(_T("1")))
+        nameString += _T(" (") + m_pChart->quantityId + _T(")");
+
     if (selected)
     {
         GetGlobalColor(_T("UIBCK"), &colour);
         m_boxColour = colour;
-        SetMinSize(wxSize(-1, 9 * refHeight));
+        if(!bCompact)
+            SetMinSize(wxSize(-1, 9 * refDim));
+        else
+            SetMinSize(wxSize(-1, 17 * refDim));
     }
     else
     {
         GetGlobalColor(_T("DILG0"), &colour);
         m_boxColour = colour;
-        SetMinSize(wxSize(-1, 5 * refHeight));
+        if(bCompact){
+            // Measure the required size
+           wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+           double font_size = dFont->GetPointSize() * 3/2;
+           wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
+           
+           SetFont( *qFont );
+           HardBreakWrapper wrapper(this, nameString, g_shopPanel->GetSize().x / 2);
+           SetFont( *dFont );
+
+           int lineCount = wrapper.GetLineCount() + 1;
+           m_unselectedHeight = (refDim * 3) + (lineCount * (refDim * 3/2));
+           SetMinSize(wxSize(-1, m_unselectedHeight));
+           m_nameArrayString = wrapper.GetLineArray();
+    
+        }
+        else{
+            SetMinSize(wxSize(-1, 5 * refDim));
+            m_unselectedHeight = 5 * refDim;
+        }
     }
     
     Refresh( true );
@@ -1908,6 +2305,14 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
 {
     int width, height;
     GetSize( &width, &height );
+    int refDim = m_refDim;
+    
+    bool bCompact = false;
+#ifdef __OCPN__ANDROID__
+    if(width < 60 * refDim)
+        bCompact = true;
+#endif
+    
     wxPaintDC dc( this );
  
     //dc.SetBackground(*wxLIGHT_GREY);
@@ -1935,26 +2340,35 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         // Draw the thumbnail
         int scaledWidth = height;
         
-        int scaledHeight = (height - (2 * base_offset)) * 95 / 100;
-        wxBitmap &bm = m_pChart->GetChartThumbnail( scaledHeight );
+        if(!bCompact){
+           int scaledHeight = (height - (2 * base_offset)) * 95 / 100;
+           wxBitmap &bm = m_pChart->GetChartThumbnail( scaledHeight );
         
-        if(bm.IsOk()){
-            dc.DrawBitmap(bm, base_offset + 3, base_offset + 3);
+           if(bm.IsOk()){
+              dc.DrawBitmap(bm, base_offset + 3, base_offset + 3);
+           }
         }
+        else
+            scaledWidth = 0;
         
         wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
         double font_size = dFont->GetPointSize() * 3/2;
         wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
+        dc.SetFont( *qFont );
         
         int text_x = scaledWidth * 12 / 10;
-        dc.SetFont( *qFont );
         dc.SetTextForeground(wxColour(0,0,0));
+        
+        int nameWidth;
+        dc.GetTextExtent( nameString, &nameWidth, NULL);
+        if(nameWidth > width)
+            nameString = wxControl::Ellipsize(nameString, dc, wxELLIPSIZE_END, width); 
+
         dc.DrawText(nameString, text_x, height * 5 / 100);
         
         int hTitle = dc.GetCharHeight();
         int y_line = (height * 5 / 100) + hTitle;
         dc.DrawLine( text_x, y_line, width - base_offset, y_line);
-        
         
         dc.SetFont( *dFont );           // Restore default font
         int offset = GetCharHeight();
@@ -1965,6 +2379,9 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         
         int text_x_val = scaledWidth + ((width - scaledWidth) * 4 / 10);
         
+        if(bCompact)
+            text_x_val = scaledWidth + ((width - scaledWidth) * 5 / 10);
+            
         // Create and populate the current chart information
         tx = _("Chart Set Edition:");
         dc.DrawText( tx, text_x, yPos);
@@ -1980,13 +2397,13 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         
         tx = _("Purchase date:");
         dc.DrawText( tx, text_x, yPos);
-        tx = m_pChart->purchaseDate;
+        tx = m_pChart->purchaseDate.BeforeFirst(' ');
         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
         
         tx = _("Expiration date:");
         dc.DrawText( tx, text_x, yPos);
-        tx = m_pChart->expDate;
+        tx = m_pChart->expDate.BeforeFirst(' ');
         dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
         
@@ -2001,9 +2418,14 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         tx = _("Assignments:");
         dc.DrawText( tx, text_x, yPos);
         
+        wxString txs;
         wxColor tcolor = wxColour(0,0,0);
         tx = _T("1: ");
-        wxString txs = m_pChart->getKeytypeString( 0, tcolor );
+        if(!bCompact)
+            txs = m_pChart->getKeytypeString( 0, tcolor );
+        else
+            txs = m_pChart->getKeyString( 0, tcolor );
+        
         tx += txs;
         if(!txs.Length())
             tx += _("Unassigned");
@@ -2015,7 +2437,11 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
 
         tcolor = wxColour(0,0,0);
         tx = _T("2: ");
-        txs = m_pChart->getKeytypeString( 1, tcolor );
+        if(!bCompact)
+            txs = m_pChart->getKeytypeString( 1, tcolor );
+        else
+            txs = m_pChart->getKeyString( 1, tcolor );
+
         tx += txs;
         if(!txs.Length())
             tx += _("Unassigned");
@@ -2024,21 +2450,6 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         dc.SetTextForeground(wxColour(0,0,0));
         yPos += yPitch;
        
-        //  If the chart is unassigned, then there is no defined "key type".
-//         if(m_pChart->m_status != STAT_PURCHASED){
-//             tx = m_pChart->getKeytypeString();
-//             if(tx.Len()){
-//                 tx = _("Key type:");
-//                 dc.DrawText( tx, text_x, yPos);
-//                 tx = m_pChart->getKeytypeString();
-//                 dc.DrawText( tx, text_x_val, yPos);
-//                 yPos += yPitch;
-//             }
-//         }
-
-
-       
-        
     }
     else{
         dc.SetBrush( wxBrush( m_boxColour ) );
@@ -2049,32 +2460,50 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         int offset = height / 10;
         dc.DrawRectangle( offset, offset, width - (2 * offset), height - (2 * offset));
     
-        // Draw the thumbnail
-        int scaledHeight = (height - (2 * offset)) * 95 / 100;
-        wxBitmap &bm = m_pChart->GetChartThumbnail( scaledHeight );
+        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+        if(!bCompact){
+            // Draw the thumbnail
+            int scaledHeight = (height - (2 * offset)) * 95 / 100;
+            wxBitmap &bm = m_pChart->GetChartThumbnail( scaledHeight );
         
-        if(bm.IsOk()){
-            dc.DrawBitmap(bm, offset + 3, offset + 3);
+            if(bm.IsOk())
+                dc.DrawBitmap(bm, offset + 3, offset + 3);
+        
+            int scaledWidth = bm.GetWidth() * scaledHeight / bm.GetHeight();
+        
+            double font_size = dFont->GetPointSize() * 3/2;
+            wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
+            dc.SetFont( *qFont );
+
+            dc.SetTextForeground(wxColour(128, 128, 128));
+        
+            if(m_pContainer->GetSelectedChart())
+                dc.SetTextForeground(wxColour(220,220,220));
+        
+            dc.DrawText(nameString, scaledWidth * 15 / 10, height * 35 / 100);
+        }
+        else{
+           double font_size = dFont->GetPointSize() * 3/2;
+           wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
+           dc.SetFont( *qFont );
+           
+           dc.SetTextForeground(wxColour(128, 128, 128));
+        
+            if(m_pContainer->GetSelectedChart())
+                dc.SetTextForeground(wxColour(220,220,220));
+        
+            int yp = height * 20 / 100;
+            int lineCount = m_nameArrayString.GetCount();
+            if(lineCount > 1)
+                yp = height * 10 / 100;
+
+            for(unsigned int i = 0; i < m_nameArrayString.GetCount(); i++){
+                dc.DrawText(m_nameArrayString.Item(i), refDim, yp);
+                yp += GetCharHeight();
+            }
         }
         
-        int scaledWidth = bm.GetWidth() * scaledHeight / bm.GetHeight();
-        
-        
-        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
-        double font_size = dFont->GetPointSize() * 3/2;
-        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
-
-        dc.SetFont( *qFont );
-        dc.SetTextForeground(wxColour(128, 128, 128));
-        
-        if(m_pContainer->GetSelectedChart())
-            dc.SetTextForeground(wxColour(220,220,220));
-        
-        dc.DrawText(nameString, scaledWidth * 15 / 10, height * 35 / 100);
-        
     }
-    
-    
 }
 
 
@@ -2177,8 +2606,9 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 {
     loadShopConfig();
     
+#ifdef __OCPN_USE_CURL__
     g_CurlEventHandler = new OESENC_CURL_EvtHandler;
-    
+#endif    
     g_shopPanel = this;
     m_binstallChain = false;
     m_bAbortingDownload = false;
@@ -2186,10 +2616,13 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_ChartSelected = NULL;
     m_choiceSystemName = NULL;
     int ref_len = GetCharHeight();
-    
+
+    bool bCompact = false;
+        
     wxBoxSizer* boxSizerTop = new wxBoxSizer(wxVERTICAL);
     this->SetSizer(boxSizerTop);
     
+#if 0
     wxGridSizer *sysBox = new wxGridSizer(2);
     boxSizerTop->Add(sysBox, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     wxString sn = _("System Name:");
@@ -2202,25 +2635,54 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
     sysBox->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+#else
+    wxString sn = _("System Name:");
+    sn += _T(" ");
+    sn += g_systemName;
     
+    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    boxSizerTop->Add(m_staticTextSystemName, 0, wxALL | wxALIGN_LEFT, WXC_FROM_DIP(5));
+
+    m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
+    boxSizerTop->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+
+#endif
+
     wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Chart Sets")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
-    staticBoxSizerChartList->Add(cPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    wxBoxSizer *boxSizercPanel = new wxBoxSizer(wxVERTICAL);
-    cPanel->SetSizer(boxSizercPanel);
+//     wxPanel *cPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
+//     staticBoxSizerChartList->Add(cPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+//     wxBoxSizer *boxSizercPanel = new wxBoxSizer(wxVERTICAL);
+//     cPanel->SetSizer(boxSizercPanel);
     
-    m_scrollWinChartList = new wxScrolledWindow(cPanel, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBORDER_RAISED | wxVSCROLL | wxBG_STYLE_ERASE );
-    m_scrollWinChartList->SetScrollRate(5, 5);
-    boxSizercPanel->Add(m_scrollWinChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
-    
+    m_scrollWinChartList = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)),  wxVSCROLL | wxBG_STYLE_ERASE );
+#ifdef __OCPN__ANDROID__    
+    m_scrollWinChartList->SetScrollRate(0, 1);
+    m_scrollRate = 1;
+#else
+    m_scrollWinChartList->SetScrollRate(0, 15);
+    m_scrollRate = 15;
+#endif     
+   
+    staticBoxSizerChartList->Add(m_scrollWinChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     boxSizerCharts = new wxBoxSizer(wxVERTICAL);
     m_scrollWinChartList->SetSizer(boxSizerCharts);
- 
-    m_scrollWinChartList->SetMinSize(wxSize(-1,15 * GetCharHeight()));
-    staticBoxSizerChartList->SetMinSize(wxSize(-1,16 * GetCharHeight()));
     
+    m_chartListPanel = new wxPanel(m_scrollWinChartList, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
+    boxSizerCharts->Add(m_chartListPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_boxSizerchartListPanel = new wxBoxSizer(wxVERTICAL);
+    m_chartListPanel->SetSizer(m_boxSizerchartListPanel);
+
+    
+    int size_scrollerLines = 15;
+    if(bCompact)
+        size_scrollerLines = 10;
+    
+    m_scrollWinChartList->SetMinSize(wxSize(-1,size_scrollerLines * GetCharHeight()));
+    staticBoxSizerChartList->SetMinSize(wxSize(-1,(size_scrollerLines + 1) * GetCharHeight()));
+
     wxStaticBoxSizer* staticBoxSizerAction = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("Actions")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerAction, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
@@ -2228,7 +2690,8 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
     ///Buttons
-    wxGridSizer* gridSizerActionButtons = new wxGridSizer(1, 2, 0, 0);
+#if 0    
+    wxGridSizer* gridSizerActionButtons = new wxFlexGridSizer(1, 2, 0, 0);
     staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
     
     m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
@@ -2237,6 +2700,14 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
     gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+#else
+    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    staticBoxSizerAction->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+    
+    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
+    staticBoxSizerAction->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+#endif
 
     wxStaticLine* sLine1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
     staticBoxSizerAction->Add(sLine1, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -2289,7 +2760,9 @@ void shopPanel::SelectChart( oeSencChartPanel *chart )
     if (m_ChartSelected)
         m_ChartSelected->SetSelected(true);
     
-    m_scrollWinChartList->GetSizer()->Layout();
+    //m_scrollWinChartList->GetSizer()->Layout();
+    m_chartListPanel->GetSizer()->Layout();
+    m_scrollWinChartList->FitInside();
     
     MakeChartVisible(m_ChartSelected);
     
@@ -2317,15 +2790,15 @@ void shopPanel::MakeChartVisible(oeSencChartPanel *chart)
         return;
     
     itemChart *vchart = chart->m_pChart;
-    
+    int ioff = 0;
     for(unsigned int i = 0 ; i < m_panelArray.GetCount() ; i++){
         itemChart *lchart = m_panelArray.Item(i)->m_pChart;
         if(vchart->chartID.IsSameAs(lchart->chartID) && vchart->orderRef.IsSameAs(lchart->orderRef) && vchart->quantityId.IsSameAs(lchart->quantityId)){
-            
-            int offset = i * chart->GetUnselectedHeight();
-            
-            m_scrollWinChartList->Scroll(-1, offset / 5);
+            m_scrollWinChartList->Scroll(-1, ioff / GetScrollRate());
         }
+        else
+            ioff += m_panelArray.Item(i)->GetUnselectedHeight();
+            
     }
     
 
@@ -2472,7 +2945,9 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     // If a new systemName was selected, verify on the server
     // If the server already has a systemName associated with this FPR, cancel the operation.
     if(bNeedSystemName && !g_systemName.IsEmpty()){
+        
         if( doUploadXFPR( false ) != 0){
+
             g_systemName.Clear();
             saveShopConfig();           // Record the blank systemName
             
@@ -2869,7 +3344,8 @@ void shopPanel::OnButtonCancelOp( wxCommandEvent& event )
         m_prepareTimer.Stop();
         m_ipGauge->SetValue(0);
     }
-    
+
+#ifdef __OCPN_USE_CURL__
     if(g_curlDownloadThread){
         m_bAbortingDownload = true;
         g_curlDownloadThread->Abort();
@@ -2877,7 +3353,8 @@ void shopPanel::OnButtonCancelOp( wxCommandEvent& event )
         setStatusTextProgress(_T(""));
         m_binstallChain = true;
     }
-    
+#endif
+
     setStatusText( _("Status: OK"));
     m_buttonCancelOp->Hide();
     
@@ -2996,6 +3473,64 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
 
 void shopPanel::UpdateChartList( )
 {
+    if(m_ChartSelected){
+        itemChart *chart = m_ChartSelected->m_pChart;
+        if(chart){
+            m_ChartSelectedID = chart->chartID;           // save a copy of the selected chart
+            m_ChartSelectedOrder = chart->orderRef;
+            m_ChartSelectedQty = chart->quantityId;
+        }
+    }
+
+    
+    delete m_chartListPanel;
+    
+    m_chartListPanel = new wxPanel(m_scrollWinChartList, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxBG_STYLE_ERASE );
+    boxSizerCharts->Add(m_chartListPanel, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+    m_boxSizerchartListPanel = new wxBoxSizer(wxVERTICAL);
+    m_chartListPanel->SetSizer(m_boxSizerchartListPanel);
+
+    m_panelArray.Clear();
+    m_ChartSelected = NULL;
+
+    
+    // Add new panels
+    for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
+        if(g_chartListUpdatedOK && g_ChartArray.Item(i)->isChartsetShow()){
+            oeSencChartPanel *chartPanel = new oeSencChartPanel( m_chartListPanel, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
+            chartPanel->SetSelected(false);
+        
+            m_boxSizerchartListPanel->Add( chartPanel, 0, wxEXPAND|wxALL, 0 );
+            m_panelArray.Add( chartPanel );
+        } 
+    }
+    
+    
+    m_scrollWinChartList->ClearBackground();
+    m_scrollWinChartList->GetSizer()->Layout();
+
+    m_scrollWinChartList->FitInside();
+    Layout();
+
+//     for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
+//         if(g_chartListUpdatedOK && g_ChartArray.Item(i)->isChartsetShow()){
+//             chartPanel->SetSelected(false);
+//         } 
+//     }
+
+    SelectChartByID(m_ChartSelectedID, m_ChartSelectedOrder, m_ChartSelectedQty);
+
+    //m_scrollWinChartList->ClearBackground();
+    
+    UpdateActionControls();
+    
+    saveShopConfig();
+    
+    Refresh( true );
+    
+    return;
+    
+
     // Capture the state of any selected chart
     if(m_ChartSelected){
         itemChart *chart = m_ChartSelected->m_pChart;
@@ -3019,23 +3554,22 @@ void shopPanel::UpdateChartList( )
     // Add new panels
     for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
         if(g_chartListUpdatedOK && g_ChartArray.Item(i)->isChartsetShow()){
-            oeSencChartPanel *chartPanel = new oeSencChartPanel( m_scrollWinChartList, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
+            oeSencChartPanel *chartPanel = new oeSencChartPanel( m_chartListPanel, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
             chartPanel->SetSelected(false);
         
-            boxSizerCharts->Add( chartPanel, 0, wxEXPAND|wxALL, 0 );
-//            boxSizerCharts->Layout();
+            m_boxSizerchartListPanel->Add( chartPanel, 0, wxEXPAND|wxALL, 0 );
             m_panelArray.Add( chartPanel );
         } 
     }
     
     SelectChartByID(m_ChartSelectedID, m_ChartSelectedOrder, m_ChartSelectedQty);
     
-    m_scrollWinChartList->ClearBackground();
+   // m_scrollWinChartList->ClearBackground();
     m_scrollWinChartList->GetSizer()->Layout();
 
     Layout();
 
-    m_scrollWinChartList->ClearBackground();
+    //m_scrollWinChartList->ClearBackground();
     
     UpdateActionControls();
     
@@ -3114,9 +3648,10 @@ bool shopPanel::doSystemNameWizard( bool *bnew )
     
     
     #ifdef __OCPN__ANDROID__
-    androidHideBusyIcon();
+    //androidHideBusyIcon();
     #endif             
     int ret = dlg.ShowModal();
+    ret = dlg.GetReturnCode();
     
     if(ret == 0){               // OK
         wxString sName = dlg.getRBSelection();
@@ -3535,6 +4070,7 @@ void InProgressIndicator::Stop()
      SetValue(0);
 }
 
+#ifdef __OCPN_USE_CURL__
 
 //-------------------------------------------------------------------------------------------
 OESENC_CURL_EvtHandler::OESENC_CURL_EvtHandler()
@@ -3625,6 +4161,7 @@ void OESENC_CURL_EvtHandler::onProgressEvent(wxCurlDownloadEvent &evt)
     }
     
 }
+#endif
 
 IMPLEMENT_DYNAMIC_CLASS( oeSENCLogin, wxDialog )
 BEGIN_EVENT_TABLE( oeSENCLogin, wxDialog )
