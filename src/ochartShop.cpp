@@ -105,6 +105,12 @@ unsigned int g_dongleSN;
 wxString g_dongleName;
 double g_targetDownloadSizeMB;
 double g_targetDownloadSize;
+bool g_bconnected;
+long g_FileDownloadHandle;
+double dl_now;
+double dl_total;
+time_t g_progressTicks;
+InProgressIndicator *g_ipGauge;
 
 #define N_MESSAGES 22
 #if 0
@@ -792,7 +798,7 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
         }
         else{
             if(g_chartListUpdatedOK && thumbnailURL.Length()){  // Do not access network until after first "getList"
-#ifndef __OCPN__ANDROID__
+#ifdef __OCPN_USE_CURL__
                 wxCurlHTTP get;
                 get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
                 bool getResult = get.Get(file, thumbnailURL);
@@ -958,7 +964,7 @@ wxString GetMessageText(int index)
 int checkResult(wxString &result, bool bShowErrorDialog = true)
 {
     if(g_shopPanel){
-        g_shopPanel->getInProcessGuage()->Stop();
+        g_ipGauge->Stop();
     }
     
     wxString resultDigits = result.BeforeFirst(':');
@@ -1821,9 +1827,8 @@ if(iResponseCode == 200){
     return 0;
 }
 
-int doDownload(oeSencChartPanel *chartDownload, int slot)
+void shopPanel::doDownload(oeSencChartPanel *chartDownload, int slot)
 {
-#ifndef __OCPN__ANDROID__    
     itemChart *chart = chartDownload->m_pChart;
 
     //  Create a destination file name for the download.
@@ -1857,20 +1862,97 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     
     if(fileTarget.IsEmpty() || !g_targetDownloadSizeMB ){
         wxLogMessage(_T("fileTarget is empty, download aborted"));
-        return 0;
+        return;
     }
         
-    
+
+#if __sOCPN_USE_CURL__        
     downloadOutStream = new wxFFileOutputStream(downloadFile);
     
     g_curlDownloadThread = new wxCurlDownloadThread(g_CurlEventHandler);
     g_curlDownloadThread->SetURL(downloadURL);
     g_curlDownloadThread->SetOutputStream(downloadOutStream);
     g_curlDownloadThread->Download();
-#else 
+#else
+    if(!g_bconnected){
+        Connect(wxEVT_DOWNLOAD_EVENT, (wxObjectEventFunction)(wxEventFunction)&shopPanel::onDLEvent);
+        g_bconnected = true;
+    }
+ 
+    OCPN_downloadFileBackground( downloadURL, downloadFile, this, &g_FileDownloadHandle);
+
 #endif
-    return 0;
+    return;
 }
+
+#ifndef x__OCPN_USE_CURL__
+
+void shopPanel::onDLEvent(OCPN_downloadEvent &evt)
+{
+    //qDebug() << "onDLEvent";
+    
+    wxDateTime now = wxDateTime::Now();
+    
+    switch(evt.getDLEventCondition()){
+        case OCPN_DL_EVENT_TYPE_END:
+        {
+            m_bTransferComplete = true;
+            m_bTransferSuccess = (evt.getDLEventStatus() == OCPN_DL_NO_ERROR) ? true : false;
+            
+            g_ipGauge->SetValue(100);
+            setStatusTextProgress(_T(""));
+            setStatusText( _("Status: OK"));
+            m_buttonCancelOp->Hide();
+            GetButtonUpdate()->Enable();
+
+            //  Send an event to chain back to "Install" button
+            wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED);
+            event.SetId( ID_CMD_BUTTON_INSTALL_CHAIN );
+            g_shopPanel->GetEventHandler()->AddPendingEvent(event);
+
+            break;
+        }   
+        case OCPN_DL_EVENT_TYPE_PROGRESS:
+
+            dl_now = evt.getTransferred();
+            dl_total = evt.getTotal();
+            g_targetDownloadSize = dl_total;
+
+            
+            // Calculate the gauge value
+            if(dl_total > 0){
+                float progress = dl_now/dl_total;
+                
+                g_ipGauge->SetValue(progress * 100);
+                g_ipGauge->Refresh();
+                
+            }
+            
+            if(now.GetTicks() != g_progressTicks){
+                
+                //  Set text status
+                wxString tProg;
+                tProg = _("Downloaded:  ");
+                wxString msg;
+                msg.Printf( _T("(%6.1f MiB / %4.0f MiB)    "), (float)(evt.getTransferred() / 1e6), (float)(evt.getTotal() / 1e6));
+                tProg += msg;
+                
+                setStatusTextProgress( tProg );
+                
+                g_progressTicks = now.GetTicks();
+            }
+            
+            break;
+            
+        case OCPN_DL_EVENT_TYPE_START:
+        case OCPN_DL_EVENT_TYPE_UNKNOWN:    
+        default:
+            break;
+    }
+}
+
+
+#endif
 
 bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, wxString &tlDir, bool aStripPath, wxDateTime aMTime, bool aRemoveZip )
 {
@@ -2608,6 +2690,8 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 {
     loadShopConfig();
     
+    g_bconnected = false;
+    
 #ifdef __OCPN_USE_CURL__
     g_CurlEventHandler = new OESENC_CURL_EvtHandler;
 #endif    
@@ -2623,33 +2707,30 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
         
     wxBoxSizer* boxSizerTop = new wxBoxSizer(wxVERTICAL);
     this->SetSizer(boxSizerTop);
-    
-#if 0
-    wxGridSizer *sysBox = new wxGridSizer(2);
-    boxSizerTop->Add(sysBox, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
+
     wxString sn = _("System Name:");
     sn += _T(" ");
     sn += g_systemName;
     
-    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    sysBox->Add(m_staticTextSystemName, 0, wxALL | wxALIGN_LEFT, WXC_FROM_DIP(5));
+    if(!bCompact){
+        wxGridSizer *sysBox = new wxGridSizer(2);
+        boxSizerTop->Add(sysBox, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
 
-    m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-    sysBox->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
-#else
-    wxString sn = _("System Name:");
-    sn += _T(" ");
-    sn += g_systemName;
-    
-    m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    boxSizerTop->Add(m_staticTextSystemName, 0, wxALL | wxALIGN_LEFT, WXC_FROM_DIP(5));
+        m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        sysBox->Add(m_staticTextSystemName, 0, wxALL | wxALIGN_LEFT, WXC_FROM_DIP(5));
 
-    m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
-    boxSizerTop->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+        m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
+        sysBox->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+    }
+    else{
+        m_staticTextSystemName = new wxStaticText(this, wxID_ANY, sn, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        boxSizerTop->Add(m_staticTextSystemName, 0, wxALL | wxALIGN_LEFT, WXC_FROM_DIP(5));
 
-#endif
+        m_buttonUpdate = new wxButton(this, wxID_ANY, _("Refresh Chart List"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        m_buttonUpdate->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonUpdate), NULL, this);
+        boxSizerTop->Add(m_buttonUpdate, 0, wxRIGHT | wxALIGN_RIGHT, WXC_FROM_DIP(5));
+    }
 
     wxStaticBoxSizer* staticBoxSizerChartList = new wxStaticBoxSizer( new wxStaticBox(this, wxID_ANY, _("My Chart Sets")), wxVERTICAL);
     boxSizerTop->Add(staticBoxSizerChartList, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -2692,24 +2773,25 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     staticBoxSizerAction->Add(m_staticLine121, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
     
     ///Buttons
-#if 0    
-    wxGridSizer* gridSizerActionButtons = new wxFlexGridSizer(1, 2, 0, 0);
-    staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
+    if(!bCompact){    
+        wxGridSizer* gridSizerActionButtons = new wxFlexGridSizer(1, 2, 0, 0);
+        staticBoxSizerAction->Add(gridSizerActionButtons, 1, wxALL|wxEXPAND, WXC_FROM_DIP(2));
     
-    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    gridSizerActionButtons->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+        m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        gridSizerActionButtons->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
-    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
-    gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
-#else
-    m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    staticBoxSizerAction->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+        m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
+        gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+    }
+    else{
+        m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        staticBoxSizerAction->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
-    m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
-    m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
-    staticBoxSizerAction->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
-#endif
+        m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        m_buttonCancelOp->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(shopPanel::OnButtonCancelOp), NULL, this);
+        staticBoxSizerAction->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
+    }
 
     wxStaticLine* sLine1 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), wxLI_HORIZONTAL);
     staticBoxSizerAction->Add(sLine1, 0, wxALL|wxEXPAND, WXC_FROM_DIP(5));
@@ -2719,8 +2801,8 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     m_staticTextStatus = new wxStaticText(this, wxID_ANY, _("Status: Chart List Refresh required."), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
     staticBoxSizerAction->Add(m_staticTextStatus, 0, wxALL|wxALIGN_LEFT, WXC_FROM_DIP(5));
 
-    m_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
-    staticBoxSizerAction->Add(m_ipGauge, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, WXC_FROM_DIP(5));
+    g_ipGauge = new InProgressIndicator(this, wxID_ANY, 100, wxDefaultPosition, wxSize(ref_len * 12, ref_len));
+    staticBoxSizerAction->Add(g_ipGauge, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, WXC_FROM_DIP(5));
     
     SetName(wxT("shopPanel"));
     //SetSize(500,600);
@@ -2844,7 +2926,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     }
     
      setStatusText( _("Contacting o-charts server..."));
-     m_ipGauge->Start();
+     g_ipGauge->Start();
      wxYield();
 
     ::wxBeginBusyCursor();
@@ -2855,7 +2937,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
     // if so, force a full (no_key) login, and retry
     if((err_code == 4) || (err_code == 5) || (err_code == 6)){
         setStatusText( _("Status: Login error."));
-        m_ipGauge->Stop();
+        g_ipGauge->Stop();
         wxYield();
         if(doLogin() != 1)      // if the second login attempt fails, return to GUI
             return;
@@ -2875,7 +2957,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
                 ec.Printf(_T(" [ %d ]"), err_code_2);
                 setStatusText( _("Status: Communications error.") + ec);
             }
-            m_ipGauge->Stop();
+            g_ipGauge->Stop();
             wxYield();
             return;
         }
@@ -2885,7 +2967,7 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
         wxString ec;
         ec.Printf(_T(" [ %d ]"), err_code);
         setStatusText( _("Status: Communications error.") + ec);
-        m_ipGauge->Stop();
+        g_ipGauge->Stop();
         wxYield();
         return;
     }
@@ -2958,13 +3040,13 @@ void shopPanel::OnButtonUpdate( wxCommandEvent& event )
             m_staticTextSystemName->Refresh();
 
             setStatusText( _("Status: Ready"));
-            m_ipGauge->Stop();
+            g_ipGauge->Stop();
             return;
         }
     }
 
     setStatusText( _("Status: Ready"));
-    m_ipGauge->Stop();
+    g_ipGauge->Stop();
     
     UpdateChartList();
     
@@ -3306,8 +3388,8 @@ int shopPanel::doPrepareGUI()
             wxString ec;
             ec.Printf(_T(" [ %d ]"), err_code);     
             setStatusText( _("Status: Communications error.") + ec);
-            if(m_ipGauge)
-                m_ipGauge->SetValue(0);
+            if(g_ipGauge)
+                g_ipGauge->SetValue(0);
             m_buttonCancelOp->Hide();
             m_prepareTimer.Stop();
             
@@ -3335,7 +3417,7 @@ int shopPanel::doDownloadGui()
     m_binstallChain = true;
     m_bAbortingDownload = false;
     
-    int err_code = doDownload(m_ChartSelected, m_activeSlot);
+    doDownload(m_ChartSelected, m_activeSlot);
     
     return 0;
 }
@@ -3344,14 +3426,14 @@ void shopPanel::OnButtonCancelOp( wxCommandEvent& event )
 {
     if(m_prepareTimer.IsRunning()){
         m_prepareTimer.Stop();
-        m_ipGauge->SetValue(0);
+        g_ipGauge->SetValue(0);
     }
 
 #ifdef __OCPN_USE_CURL__
     if(g_curlDownloadThread){
         m_bAbortingDownload = true;
         g_curlDownloadThread->Abort();
-        m_ipGauge->SetValue(0);
+        g_ipGauge->SetValue(0);
         setStatusTextProgress(_T(""));
         m_binstallChain = true;
     }
@@ -3374,8 +3456,8 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
     
     float progress = m_prepareProgress * 100 / m_prepareTimeout;
     
-    if(m_ipGauge)
-        m_ipGauge->SetValue(progress);
+    if(g_ipGauge)
+        g_ipGauge->SetValue(progress);
     
     
     //  Check the status every n seconds
@@ -3423,8 +3505,8 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
         }
         
         if(bDownloadReady){
-            if(m_ipGauge)
-                m_ipGauge->SetValue(0);
+            if(g_ipGauge)
+                g_ipGauge->SetValue(0);
             m_buttonCancelOp->Hide();
             m_prepareTimer.Stop();
             
@@ -3436,8 +3518,8 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
     if(m_prepareTimerCount >= m_prepareTimeout){
         m_prepareTimer.Stop();
         
-        if(m_ipGauge)
-            m_ipGauge->SetValue(100);
+        if(g_ipGauge)
+            g_ipGauge->SetValue(100);
         
         wxString msg = _("Your chart set preparation is not complete.");
         msg += _T("\n");
@@ -3454,14 +3536,14 @@ void shopPanel::OnPrepareTimer(wxTimerEvent &evt)
             m_prepareTimerCount = 0;
             m_prepareProgress = 0;
             m_prepareTimeout = 60;
-            if(m_ipGauge)
-                m_ipGauge->SetValue(0);
+            if(g_ipGauge)
+                g_ipGauge->SetValue(0);
             
             m_prepareTimer.Start( 1000 );
         }
         else{
-            if(m_ipGauge)
-                m_ipGauge->SetValue(0);
+            if(g_ipGauge)
+                g_ipGauge->SetValue(0);
             setStatusText( _("Status: OK"));
             m_buttonCancelOp->Hide();
             m_prepareTimer.Stop();
@@ -4097,7 +4179,7 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
 {
  //   OCPNMessageBox_PlugIn(NULL, _("DLEnd."), _("oeSENC_PI Message"), wxOK);
     
-    g_shopPanel->getInProcessGuage()->SetValue(0);
+    g_ipGauge->SetValue(0);
     g_shopPanel->setStatusTextProgress(_T(""));
     g_shopPanel->setStatusText( _("Status: OK"));
     g_shopPanel->m_buttonCancelOp->Hide();
@@ -4129,9 +4211,6 @@ void OESENC_CURL_EvtHandler::onEndEvent(wxCurlEndPerformEvent &evt)
     
 }
 
-double dl_now;
-double dl_total;
-time_t g_progressTicks;
 
 void OESENC_CURL_EvtHandler::onProgressEvent(wxCurlDownloadEvent &evt)
 {
@@ -4142,7 +4221,7 @@ void OESENC_CURL_EvtHandler::onProgressEvent(wxCurlDownloadEvent &evt)
     // Calculate the gauge value
     if(evt.GetTotalBytes() > 0){
         float progress = evt.GetDownloadedBytes()/evt.GetTotalBytes();
-        g_shopPanel->getInProcessGuage()->SetValue(progress * 100);
+        g_ipGauge->SetValue(progress * 100);
     }
     
     wxDateTime now = wxDateTime::Now();

@@ -39,6 +39,7 @@
 #ifdef __OCPN_USE_CURL__
 #include "wxcurl/wx/curl/http.h"
 #endif
+#include "ocpn_plugin.h"
 
 #ifdef WXC_FROM_DIP
 #undef WXC_FROM_DIP
@@ -230,12 +231,12 @@ protected:
     wxButton* m_buttonNewSystemName;
     wxTextCtrl*  m_sysName;
     wxButton* m_buttonChangeSystemName;
-    InProgressIndicator *m_ipGauge;
     wxStaticText *m_staticTextStatus;
     wxStaticText *m_staticTextStatusProgress;
     wxPanel *m_chartListPanel;
     wxBoxSizer *m_boxSizerchartListPanel;
     
+
 protected:
     
 public:
@@ -285,9 +286,10 @@ public:
     void UpdateActionControls();
     void setStatusText( const wxString &text ){ m_staticTextStatus->SetLabel( text );  m_staticTextStatus->Refresh(); }
     void setStatusTextProgress( const wxString &text ){ m_staticTextStatus/*m_staticTextStatusProgress*/->SetLabel( text );  /*m_staticTextStatusProgress->Refresh();*/ }
-    InProgressIndicator *getInProcessGuage() {return m_ipGauge; }
     void MakeChartVisible(oeSencChartPanel *chart);
     int GetActiveSlotAction( itemChart *chart );
+    void onDLEvent(OCPN_downloadEvent &evt);
+    void doDownload(oeSencChartPanel *chartDownload, int slot);
 
     int m_prepareTimerCount;
     int m_prepareTimeout;
@@ -303,6 +305,9 @@ public:
     bool m_bAbortingDownload;
     bool m_startedDownload;
     int m_scrollRate;
+    bool m_bTransferComplete;
+    bool m_bTransferSuccess;
+
 };
 
 
