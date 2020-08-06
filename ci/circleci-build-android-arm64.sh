@@ -10,13 +10,13 @@ set -xe
 echo "I am here..."
 pwd
 
-cd oesenc_pi
+cd project
+ls -la
+
 mkdir -p build_android_64_ci
 cd build_android_64_ci
 
 #sudo chown -R 1000 /oesenc_pi/build_android_64_ci
-
-#ls -la
 
 sudo apt-get -q update
 sudo apt-get -y install git cmake gettext
