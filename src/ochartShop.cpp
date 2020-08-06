@@ -1866,7 +1866,7 @@ void shopPanel::doDownload(oeSencChartPanel *chartDownload, int slot)
     }
         
 
-#if __sOCPN_USE_CURL__        
+#if __OCPN_USE_CURL__        
     downloadOutStream = new wxFFileOutputStream(downloadFile);
     
     g_curlDownloadThread = new wxCurlDownloadThread(g_CurlEventHandler);
@@ -1885,7 +1885,7 @@ void shopPanel::doDownload(oeSencChartPanel *chartDownload, int slot)
     return;
 }
 
-#ifndef x__OCPN_USE_CURL__
+#ifndef __OCPN_USE_CURL__
 
 void shopPanel::onDLEvent(OCPN_downloadEvent &evt)
 {
