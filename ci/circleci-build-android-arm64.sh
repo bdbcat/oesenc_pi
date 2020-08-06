@@ -10,7 +10,7 @@ set -xe
 echo "I am here..."
 pwd
 
-cd project
+#cd project
 ls -la
 
 mkdir -p build_android_64_ci
