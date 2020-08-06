@@ -792,19 +792,21 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
         }
         else{
             if(g_chartListUpdatedOK && thumbnailURL.Length()){  // Do not access network until after first "getList"
- //               wxCurlHTTP get;
- //               get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
- //               bool getResult = get.Get(file, thumbnailURL);
+#ifndef __OCPN__ANDROID__
+                wxCurlHTTP get;
+                get.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+                bool getResult = get.Get(file, thumbnailURL);
 
             // get the response code of the server
                 int iResponseCode = 0;
-//                get.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+                get.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
             
                 if(iResponseCode == 200){
                     if(::wxFileExists(file)){
                         m_ChartImage = wxImage( file, wxBITMAP_TYPE_ANY);
                     }
                 }
+#endif                
             }
         }
     }
@@ -1031,7 +1033,7 @@ int doLogin()
 {
     oeSENCLogin *login = new oeSENCLogin(g_shopPanel);
     login->ShowModal();
-    if(!login->GetReturnCode() == 0){
+    if((!login->GetReturnCode()) == 0){
         delete login;
         g_shopPanel->setStatusText( _("Invalid Login."));
         wxYield();
@@ -1821,7 +1823,7 @@ if(iResponseCode == 200){
 
 int doDownload(oeSencChartPanel *chartDownload, int slot)
 {
-#if 0    
+#ifndef __OCPN__ANDROID__    
     itemChart *chart = chartDownload->m_pChart;
 
     //  Create a destination file name for the download.
@@ -1865,7 +1867,7 @@ int doDownload(oeSencChartPanel *chartDownload, int slot)
     g_curlDownloadThread->SetURL(downloadURL);
     g_curlDownloadThread->SetOutputStream(downloadOutStream);
     g_curlDownloadThread->Download();
- 
+#else 
 #endif
     return 0;
 }
