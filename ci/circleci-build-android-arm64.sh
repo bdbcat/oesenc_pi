@@ -23,13 +23,14 @@ sudo apt-get -y install git cmake gettext unzip
 
 # Get the OCPN Android build support package.
 wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
-unzip -o master.zip
+unzip -qq -o master.zip
 
 pwd
 ls -la
 
-mkdir -p build_android_64_ci
-cd build_android_64_ci
+#change this for local build, so as not to overwrite any other generic build.
+mkdir -p build
+cd build
 
 sudo rm -f CMakeCache.txt
 
