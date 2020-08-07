@@ -127,6 +127,7 @@ jobs:
      steps:
        - checkout
        - run: ci/circleci-build-android-arm64.sh
+       - run: ci/circleci-upload.sh
 
        
 workflows:
