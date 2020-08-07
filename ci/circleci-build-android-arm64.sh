@@ -16,9 +16,6 @@ pwd
 
 ls -la
 
-mkdir -p build_android_64_ci
-cd build_android_64_ci
-
 #sudo chown -R 1000 /oesenc_pi/build_android_64_ci
 
 sudo apt-get -q update
@@ -31,7 +28,10 @@ unzip -o master.zip
 pwd
 ls -la
 
-sudo rm CMakeCache.txt
+mkdir -p build_android_64_ci
+cd build_android_64_ci
+
+sudo rm -f CMakeCache.txt
 
 sudo cmake  \
   -D_wx_selected_config=androideabi-qt \
