@@ -50,25 +50,26 @@ sudo make clean
 sudo make
 sudo make package
 
-ls -l 
+#  All below for local docker build
+#ls -l 
 
-xml=$(ls *.xml)
-tarball=$(ls *.tar.gz)
-tarball_basename=${tarball##*/}
+#xml=$(ls *.xml)
+#tarball=$(ls *.tar.gz)
+#tarball_basename=${tarball##*/}
 
-echo $xml
-echo $tarball
-echo $tarball_basename
-sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
+#echo $xml
+#echo $tarball
+#echo $tarball_basename
+#sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
 
 
-tmpdir=repack.$$
-sudo rm -rf $tmpdir && sudo mkdir $tmpdir
-sudo tar -C $tmpdir -xf $tarball_basename
-sudo cp oesenc-plugin-android-arm64-16.xml metadata.xml
-sudo cp metadata.xml $tmpdir
-sudo tar -C $tmpdir -czf $tarball_basename .
-sudo rm -rf $tmpdir
+#tmpdir=repack.$$
+#sudo rm -rf $tmpdir && sudo mkdir $tmpdir
+#sudo tar -C $tmpdir -xf $tarball_basename
+#sudo cp oesenc-plugin-android-arm64-16.xml metadata.xml
+#sudo cp metadata.xml $tmpdir
+#sudo tar -C $tmpdir -czf $tarball_basename .
+#sudo rm -rf $tmpdir
     
 
 
