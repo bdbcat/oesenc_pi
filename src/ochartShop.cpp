@@ -2109,6 +2109,11 @@ int doUnzip(itemChart *chart, int slot)
         else if(g_lastInstallDir.Length())
             installLocn = g_lastInstallDir;
         
+        wxString dirPath;
+        int result = PlatformDirSelectorDialog( NULL, &dirPath, _("Choose chart set install location."), installLocn);
+        qDebug() << "chooser result " << result;
+        qDebug() << "path: " << dirPath.mb_str();
+#if 0
         wxDirDialog dirSelector( NULL, _("Choose chart set install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
         
@@ -2118,6 +2123,14 @@ int doUnzip(itemChart *chart, int slot)
         else{
             return 1;
         }
+#else
+       if(result == wxID_OK){
+            chosenInstallDir = dirPath;
+        }
+        else{
+            return 1;
+        }
+#endif
     }
     else{
         chosenInstallDir = installDir;
@@ -2346,7 +2359,7 @@ void oeSencChartPanel::SetSelected( bool selected )
         if(!bCompact)
             SetMinSize(wxSize(-1, 9 * refDim));
         else
-            SetMinSize(wxSize(-1, 17 * refDim));
+            SetMinSize(wxSize(-1, 18 * refDim));
     }
     else
     {
@@ -2704,7 +2717,9 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     int ref_len = GetCharHeight();
 
     bool bCompact = false;
-        
+    if(GetSize().x < 60 * GetCharWidth())
+        bCompact = true;
+    
     wxBoxSizer* boxSizerTop = new wxBoxSizer(wxVERTICAL);
     this->SetSizer(boxSizerTop);
 
@@ -2785,7 +2800,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
         gridSizerActionButtons->Add(m_buttonCancelOp, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     }
     else{
-        m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Install Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
+        m_buttonInstall = new wxButton(this, ID_CMD_BUTTON_INSTALL, _("Download Selected Chart Set"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
         staticBoxSizerAction->Add(m_buttonInstall, 1, wxTOP | wxBOTTOM, WXC_FROM_DIP(2));
     
         m_buttonCancelOp = new wxButton(this, wxID_ANY, _("Cancel Operation"), wxDefaultPosition, wxDLG_UNIT(this, wxSize(-1,-1)), 0);
@@ -3356,7 +3371,7 @@ int shopPanel::doPrepareGUI()
 {
     m_buttonCancelOp->Show();
     
-    setStatusText( _("Preparing your charts..."));
+    setStatusText( _("Preparing charts..."));
     
     m_prepareTimerCount = 8;            // First status query happens in 2 seconds
     m_prepareProgress = 0;
