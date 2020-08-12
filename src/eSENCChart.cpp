@@ -1986,7 +1986,8 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
                         crnt->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( crnt->obj );
                 }
             }
-            ps52plib->RenderAreaToGL( glc, crnt, &tvp );
+            if(crnt->obj->pPolyTessGeo->IsOk() ) 
+                ps52plib->RenderAreaToGL( glc, crnt, &tvp );
         }
     }
 
@@ -6159,7 +6160,7 @@ bool eSENCChart::DoesLatLonSelectObject( float lat, float lon, float select_radi
                             nPoints = ls->pedge->nCount;
                         }
                         else{
-                            ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                            ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                             nPoints = 2;
                         }
                         
@@ -6896,7 +6897,7 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     int nPoints = 0;
     line_segment_element *ls_list = obj->m_ls_list;
     while( ls_list){
-        if(ls_list->ls_type == TYPE_EE)
+        if((ls_list->ls_type == TYPE_EE) || (ls_list->ls_type == TYPE_EE_REV))
             nPoints += ls_list->pedge->nCount;
         else
             nPoints += 2;
@@ -6918,12 +6919,12 @@ int eSENCChart::GetLineFeaturePointArray(S57Obj *obj, void **ret_array)
     while( ls_list){
         size_t vbo_offset = 0;
         size_t count = 0;
-        if(ls_list->ls_type == TYPE_EE){
+        if((ls_list->ls_type == TYPE_EE) || (ls_list->ls_type == TYPE_EE_REV)){
             vbo_offset = ls_list->pedge->vbo_offset;
             count = ls_list->pedge->nCount;
         }
         else{
-            vbo_offset = ls_list->pcs->vbo_offset;
+            vbo_offset = ls_list->pcs->vbo_offset_cs;
             count = 2;
         }
         
@@ -7078,7 +7079,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                 }
                                 
                                 connector_segment_vector.push_back(pair);
-                                pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                pcs->vbo_offset_cs = seg_pair_index;               // use temporarily
                                 seg_pair_index ++;
                                 
                                 // calculate the centroid of this connector segment, used for viz testing
@@ -7161,7 +7162,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                     pair.n1 = *ppt;
                                     
                                     connector_segment_vector.push_back(pair);
-                                    pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                    pcs->vbo_offset_cs = seg_pair_index;               // use temporarily
                                     seg_pair_index ++;
                                 
                                     // calculate the centroid of this connector segment, used for viz testing
@@ -7217,7 +7218,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                     pair.n1 = *ppt;
 
                                     connector_segment_vector.push_back(pair);
-                                    pcs->vbo_offset = seg_pair_index;               // use temporarily
+                                    pcs->vbo_offset_cs = seg_pair_index;               // use temporarily
                                     seg_pair_index ++;
                                     
                                     // calculate the centroid of this connector segment, used for viz testing
@@ -7299,13 +7300,13 @@ void eSENCChart::AssembleLineGeometry( void )
         connector_segment *pcs = iter->second;
         m_pcs_vector.push_back(pcs);
         
-        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
         *lvr++ = pair.e0;
         *lvr++ = pair.n0;
         *lvr++ = pair.e1;
         *lvr++ = pair.n1;
 
-        pcs->vbo_offset = offset;
+        pcs->vbo_offset_cs = offset;
         offset += 4 * sizeof(float);
     }
 
@@ -7314,13 +7315,13 @@ void eSENCChart::AssembleLineGeometry( void )
         connector_segment *pcs = iter->second;
         m_pcs_vector.push_back(pcs);
         
-        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
         *lvr++ = pair.e0;
         *lvr++ = pair.n0;
         *lvr++ = pair.e1;
         *lvr++ = pair.n1;
                 
-        pcs->vbo_offset = offset;
+        pcs->vbo_offset_cs = offset;
         offset += 4 * sizeof(float);
     }
     
@@ -7329,13 +7330,13 @@ void eSENCChart::AssembleLineGeometry( void )
         connector_segment *pcs = iter->second;
         m_pcs_vector.push_back(pcs);
         
-        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset);
+        segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
         *lvr++ = pair.e0;
         *lvr++ = pair.n0;
         *lvr++ = pair.e1;
         *lvr++ = pair.n1;
                 
-        pcs->vbo_offset = offset;
+        pcs->vbo_offset_cs = offset;
         offset += 4 * sizeof(float);
     }
     
@@ -9356,12 +9357,12 @@ bool isPointInObjectBoundary( double east, double north, S57Obj *obj )
                     
                     int nPoints;
                     // fetch the first point
-                    if(ls->ls_type == TYPE_EE){
+                    if((ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV)){
                         ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
                         nPoints = ls->pedge->nCount;
                     }
                     else{
-                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                         nPoints = 2;
                     }
                     
@@ -9398,8 +9399,19 @@ bool isPointInObjectBoundary( double east, double north, S57Obj *obj )
     return( (count&1) == 1);
 }
 
+#ifdef ARMHF
+#if defined(__clang__)
+[[clang::optnone]]
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
+#endif
+#endif
+
 Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
 {
+ 
     Extended_Geometry *xG = new Extended_Geometry;
     
     //  Get the countours from the line segment arrays already present in the object
@@ -9413,7 +9425,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
         
         while(lsa){
             
-            if(lsa->ls_type == TYPE_EE)
+            if((lsa->ls_type == TYPE_EE) || (lsa->ls_type == TYPE_EE_REV))
                 max_points += lsa->pedge->nCount;
             else
                 max_points += 2;
@@ -9422,7 +9434,7 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
         }
     }
     
-    //  Allocate some storage for ccontour points
+    //  Allocate some storage for contour points
     double *ptpf = (double *) malloc( ( max_points *2 ) * sizeof(double) );
     double *pfRun = ptpf;
     
@@ -9451,20 +9463,22 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
                 
                 int nPoints;
                 // fetch the first point
-                if(ls->ls_type == TYPE_EE){
+                if((ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV)){
                     ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
                     nPoints = ls->pedge->nCount;
                 }
                 else{
-                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                     nPoints = 2;
                 }
-                float pfirstx = ppt[1];
+                
                 float pfirsty = ppt[0];
+                float pfirstx = ppt[1];
                 
                 
                 // fetch the last point
                 int index_last = (nPoints-1) * 2;
+                
                 float plastx = ppt[index_last +1];
                 float plasty = ppt[index_last];
                 
@@ -9474,17 +9488,17 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
                 line_segment_element *lsn = ls->next;
                 
                 // fetch the first point
-                if(lsn->ls_type == TYPE_EE){
+
+                if((lsn->ls_type == TYPE_EE) || (lsn->ls_type == TYPE_EE_REV)){
                     ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
                     nPoints_next = lsn->pedge->nCount;
                 }
                 else{
-                    ppt = (float *)(vbo_point + lsn->pcs->vbo_offset);
+                    ppt = (float *)(vbo_point + lsn->pcs->vbo_offset_cs);
                     nPoints_next = 2;
                 }
-                float pfirstx_next = ppt[1];
                 float pfirsty_next = ppt[0];
-                
+                float pfirstx_next = ppt[1];
                 
                 // fetch the last point
                 int index_last_next = (nPoints_next-1) * 2;
@@ -9519,13 +9533,13 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
         //transcribe the segment in the proper order into the output buffer
         int nPoints;
         // fetch the first point
-        if(ls->ls_type == TYPE_EE){
+        if((ls->ls_type == TYPE_EE) || (ls->ls_type == TYPE_EE_REV)){
             ppt = (float *)(vbo_point + ls->pedge->vbo_offset);
             nPoints = ls->pedge->nCount;
             
         }
         else{
-            ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+            ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
             nPoints = 2;
         }
         
@@ -9565,12 +9579,12 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
             int nPoints_next;
             line_segment_element *lsn = ls->next;
             // fetch the first point
-            if(lsn->ls_type == TYPE_EE){
+            if((lsn->ls_type == TYPE_EE) || (lsn->ls_type == TYPE_EE_REV)){
                 ppt = (float *)(vbo_point + lsn->pedge->vbo_offset);
                 nPoints_next = lsn->pedge->nCount;
             }
             else{
-                ppt = (float *)(vbo_point + lsn->pcs->vbo_offset);
+                ppt = (float *)(vbo_point + lsn->pcs->vbo_offset_cs);
                 nPoints_next = 2;
             }
             

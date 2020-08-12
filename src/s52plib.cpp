@@ -4180,7 +4180,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                 {
                     // render the segment
                         b_drawit = true;
-                        seg_vbo_offset = ls_list->pcs->vbo_offset;
+                        seg_vbo_offset = ls_list->pcs->vbo_offset_cs;
                         point_count = 2;
                  }
             }
@@ -4396,7 +4396,7 @@ int s52plib::RenderLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                     nPoints = ls->pedge->nCount;
                 }
                 else{
-                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                     nPoints = 2;
                 }
 
@@ -5197,7 +5197,7 @@ int s52plib::RenderLS_Dash_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *v
                         nPoints = ls->pedge->nCount;
                     }
                     else{
-                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                        ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                         nPoints = 2;
                     }
 
@@ -5387,7 +5387,7 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                     
                 }
                 else{
-                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset);
+                    ppt = (float *)(vbo_point + ls->pcs->vbo_offset_cs);
                     nPoints = 2;
                     bcon = true;
                 }
@@ -5437,7 +5437,7 @@ int s52plib::RenderLC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                     
                 }
                 else{
-                    ppt = (float *)(vbo_point + lsn->pcs->vbo_offset);
+                    ppt = (float *)(vbo_point + lsn->pcs->vbo_offset_cs);
                     nPoints_next = 2;
                     bcon = true;
                 }

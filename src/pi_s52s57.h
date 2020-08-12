@@ -515,7 +515,7 @@ typedef enum
 class connector_segment
 {
 public:
-    int vbo_offset;
+    int vbo_offset_cs;
     int max_priority_cs;
     float               cs_lat_avg;                // segment centroid
     float               cs_lon_avg;
