@@ -2716,6 +2716,9 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     int ref_len = GetCharHeight();
 
     bool bCompact = false;
+#ifdef __OCPN__ANDROID__
+        qDebug() << "Compact Check" << GetSize().x << GetCharWidth();
+#endif        
     if(GetSize().x < 60 * GetCharWidth())
         bCompact = true;
     
