@@ -15,37 +15,39 @@ pwd
 
 ls -la
 
+#sudo chown -R 1000 /oesenc_pi/build_android_64_ci
 
 sudo apt-get -q update
 sudo apt-get -y install git cmake gettext unzip
 
 # Get the OCPN Android build support package.
 #NOT REQUIRED FOR LOCAL BUILD
-#wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
-#unzip -qq -o master.zip
+wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
+unzip -qq -o master.zip
 
 pwd
 ls -la
 
-#change this for local build, so as not to overwrite any other generic build.
-#mkdir -p build_android_64_ci
-#cd build_android_64_ci
-mkdir -p build
+#change this for local build, so as not to overwrite any other generic buildin "build".
+#sudo mkdir -p build_android_arm32
+#cd build_android_arm32
+sudo mkdir -p build
 cd build
 
 sudo rm -f CMakeCache.txt
 
 sudo cmake  \
-  -D_wx_selected_config=androideabi-qt-arm64 \
-  -DwxQt_Build=build_android_release_64_static_O3 \
-  -DQt_Build=build_arm64/qtbase \
-  -DCMAKE_AR=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar \
-  -DCMAKE_CXX_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++ \
-  -DCMAKE_C_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang \
+  -D_wx_selected_config=androideabi-qt-armhf \
+  -DwxQt_Build=build_android_release_19_static_O3 \
+  -DQt_Build=build_arm32_19_O3/qtbase \
+  -DCMAKE_AR=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-android-ar \
+  -DCMAKE_CXX_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang++ \
+  -DCMAKE_C_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang \
   -DOCPN_Android_Common=OCPNAndroidCommon-master \
   -DPREFIX=/ \
   .. 
-  
+
+ 
 #sudo make clean  
 sudo make
 sudo make package
@@ -66,7 +68,7 @@ sudo make package
 #tmpdir=repack.$$
 #sudo rm -rf $tmpdir && sudo mkdir $tmpdir
 #sudo tar -C $tmpdir -xf $tarball_basename
-#sudo cp oesenc-plugin-android-arm64-16.xml metadata.xml
+#sudo cp oesenc-plugin-android-armhf-16.xml metadata.xml
 #sudo cp metadata.xml $tmpdir
 #sudo tar -C $tmpdir -czf $tarball_basename .
 #sudo rm -rf $tmpdir
