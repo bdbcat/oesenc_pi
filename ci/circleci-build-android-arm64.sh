@@ -21,8 +21,8 @@ sudo apt-get -y install git cmake gettext unzip
 
 # Get the OCPN Android build support package.
 #NOT REQUIRED FOR LOCAL BUILD
-#wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
-#unzip -qq -o master.zip
+wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
+unzip -qq -o master.zip
 
 pwd
 ls -la
