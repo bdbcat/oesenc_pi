@@ -747,6 +747,20 @@ int oesenc_pi::Init(void)
     
     g_ChartInfoArray.Clear();
    
+#ifdef __OCPN__ANDROID__
+    g_deviceInfo = callActivityMethod_vs("getDeviceInfo");
+    
+    wxStringTokenizer tkz(g_deviceInfo, _T("\n"));
+    while( tkz.HasMoreTokens() )
+    {
+        wxString s1 = tkz.GetNextToken();
+        if(wxNOT_FOUND != s1.Find(_T("systemName:"))){
+            g_systemName = s1.AfterFirst(':');
+        }
+    }
+    qDebug() << "Init() systemName by deviceInfo: " << g_systemName.mb_str();
+#endif
+    
     //testSENCServer();
     
     int flags =  INSTALLS_PLUGIN_CHART_GL |
@@ -1416,7 +1430,12 @@ bool oesenc_pi::LoadConfig( void )
         pConf->Read( _T("DEBUG_SERVER"), &g_serverDebug);
         pConf->Read( _T("DEBUG_LEVEL"), &g_debugLevel);
 
-        pConf->Read( _T("systemName"), &g_systemName);
+        // On initial start, do not override g_systemName as populated in Init() method
+        wxString snTest;
+        pConf->Read( _T("systemName"), &snTest);
+        if(snTest.Length() && g_systemName.IsEmpty())
+            g_systemName = snTest;
+        
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
         pConf->Read( _T("ADMIN"), &g_admin);
@@ -4492,10 +4511,25 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
 void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
 {
     
-#ifndef x__OCPN__ANDROID__
+#ifdef __OCPN__ANDROID__
+    
+    g_deviceInfo = callActivityMethod_vs("getDeviceInfo");
+    
+    wxStringTokenizer tkz(g_deviceInfo, _T("\n"));
+    while( tkz.HasMoreTokens() )
+    {
+        wxString s1 = tkz.GetNextToken();
+        if(wxNOT_FOUND != s1.Find(_T("systemName:"))){
+            int pos = s1.Find(_T("systemName:"));
+            g_systemName = s1.Mid(pos);
+        }
+    }
+    qDebug() << "systemName by deviceInfo: " << g_systemName.mb_str();
+#endif
 
         doShop();
-#else
+
+#if 0        
 
         // Get XFPR from the oeserverda helper utility.
         //  The target binary executable
@@ -4625,7 +4659,7 @@ void oesenc_pi_event_handler::OnManageShopClick( wxCommandEvent &event )
         m_eventTimer.Start(1000, wxTIMER_CONTINUOUS);
         
 
-#endif  // Android
+#endif  // 0
 
     
 }

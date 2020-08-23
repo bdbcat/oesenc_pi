@@ -864,7 +864,8 @@ void loadShopConfig()
     if( pConf ) {
         pConf->SetPath( _T("/PlugIns/oesenc") );
         
-        pConf->Read( _T("systemName"), &g_systemName);
+        if(!g_systemName.Length())
+            pConf->Read( _T("systemName"), &g_systemName);
         pConf->Read( _T("loginUser"), &g_loginUser);
         pConf->Read( _T("loginKey"), &g_loginKey);
         pConf->Read( _T("lastInstllDir"), &g_lastInstallDir);
@@ -2111,8 +2112,6 @@ int doUnzip(itemChart *chart, int slot)
         
         wxString dirPath;
         int result = PlatformDirSelectorDialog( NULL, &dirPath, _("Choose chart set install location."), installLocn);
-        qDebug() << "chooser result " << result;
-        qDebug() << "path: " << dirPath.mb_str();
 #if 0
         wxDirDialog dirSelector( NULL, _("Choose chart set install location."), installLocn, wxDD_DEFAULT_STYLE  );
         int result = dirSelector.ShowModal();
@@ -3803,7 +3802,6 @@ wxString shopPanel::doGetNewSystemName( )
     #endif         
     dlg.SetSize(dialogSize);
     dlg.Centre();
-    
     
     int ret = dlg.ShowModal();
     
