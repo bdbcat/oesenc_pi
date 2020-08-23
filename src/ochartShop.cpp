@@ -2159,17 +2159,27 @@ int doUnzip(itemChart *chart, int slot)
     //  or the zip file name itself, if no embedded dirs are found
     //  This is the name to add to the chart database
     wxString targetAddDir = tlDir;
-
+#ifdef __OCPN__ANDROID__
+        qDebug() << "CoverCheck1: " << targetAddDir.mb_str();
+#endif
+        
     //  If the currect core chart directories do not cover this new directory, then add it
     bool covered = false;
     for( size_t i = 0; i < GetChartDBDirArrayString().GetCount(); i++ )
     {
+#ifdef __OCPN__ANDROID__
+        qDebug() << "CoverCheck2: " << GetChartDBDirArrayString().Item(i).mb_str();
+#endif
+
         if( targetAddDir.StartsWith((GetChartDBDirArrayString().Item(i))) )
         {
             covered = true;
             break;
         }
     }
+#ifdef __OCPN__ANDROID__
+        qDebug() << "CoverCheck3: " << covered;
+#endif
     if( !covered )
     {
         AddChartDirectory( targetAddDir );
