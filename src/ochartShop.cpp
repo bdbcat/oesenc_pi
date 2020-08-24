@@ -212,15 +212,18 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
         wxString result = callActivityMethod_ss( "getUnzipStatus", _T("") );
         if(wxNOT_FOUND != result.Find(_T("DONE"))){
             bDone = true;
-            rtopDir = result.AfterFirst(" "); //"UNZIPDONE shieldtabl3331-FO-2019-17/"
+            rtopDir = result.AfterFirst(' '); //"UNZIPDONE shieldtabl3331-FO-2019-17/"
         }
      }
 
      if(!rtopDir.Length()){        // if there is no directory in the zip file, then declare
                                             // the tlDir as the zip file name itself, without extension
-        wxFileName fn(aZipFile);
-        rtopDir = aTargetDir + wxFileName::GetPathSeparator() + fn.GetName();
+        wxFileName fn(ZipFile);
+        rtopDir = destDir + wxFileName::GetPathSeparator() + fn.GetName();
      }
+     else
+        rtopDir = destDir + wxFileName::GetPathSeparator() + rtopDir;
+         
 
      // Strip trailing '/'
      if(rtopDir.EndsWith(wxFileName::GetPathSeparator()))
@@ -228,7 +231,6 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
     
      tlDir = rtopDir;
 
-    }
     qDebug() << "unzip done";
     
     return true;    
