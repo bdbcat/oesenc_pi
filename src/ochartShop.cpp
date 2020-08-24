@@ -2749,10 +2749,11 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
     bool bCompact = false;
 #ifdef __OCPN__ANDROID__
-        qDebug() << "Compact Check" << GetActiveOptionsDialog()->GetSize().x << GetCharWidth();
-#endif        
-    if(GetActiveOptionsDialog()->GetSize().x < 60 * GetCharWidth())
+    qDebug() << "Compact Check" << ::wxGetDisplaySize().x << GetCharWidth();
+        
+    if(::wxGetDisplaySize().x < 60 * GetCharWidth())
         bCompact = true;
+#endif
     
     wxBoxSizer* boxSizerTop = new wxBoxSizer(wxVERTICAL);
     this->SetSizer(boxSizerTop);
