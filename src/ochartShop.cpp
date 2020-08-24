@@ -181,7 +181,7 @@ class HardBreakWrapper : public wxTextWrapper
     };
 
 #ifdef __OCPN__ANDROID__
-bool AndroidUnzip(wxString zipFile, wxString destDir, int nStrip, bool bRemoveZip)
+bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStrip, bool bRemoveZip)
 {
     qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
     
@@ -202,6 +202,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, int nStrip, bool bRemoveZi
     qDebug() << "unzip start";
     
     bool bDone = false;
+    wxString rtopDir;
     while (!bDone){
         wxMilliSleep(1000);
         //wxSafeYield(NULL, true);
@@ -209,8 +210,24 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, int nStrip, bool bRemoveZi
         qDebug() << "unzip poll";
         
         wxString result = callActivityMethod_ss( "getUnzipStatus", _T("") );
-        if(wxNOT_FOUND != result.Find(_T("DONE")))
+        if(wxNOT_FOUND != result.Find(_T("DONE"))){
             bDone = true;
+            rtopDir = result.AfterFirst(" "); //"UNZIPDONE shieldtabl3331-FO-2019-17/"
+        }
+     }
+
+     if(!rtopDir.Length()){        // if there is no directory in the zip file, then declare
+                                            // the tlDir as the zip file name itself, without extension
+        wxFileName fn(aZipFile);
+        rtopDir = aTargetDir + wxFileName::GetPathSeparator() + fn.GetName();
+     }
+
+     // Strip trailing '/'
+     if(rtopDir.EndsWith(wxFileName::GetPathSeparator()))
+        rtopDir = rtopDir.BeforeLast(wxFileName::GetPathSeparator());
+    
+     tlDir = rtopDir;
+
     }
     qDebug() << "unzip done";
     
@@ -1965,7 +1982,10 @@ bool ExtractZipFiles( const wxString& aZipFile, const wxString& aTargetDir, wxSt
     if(aStripPath)
         nStrip = 1;
     
-    ret = AndroidUnzip(aZipFile, aTargetDir, nStrip, true);
+    wxString tlDirAndroid;
+    ret = AndroidUnzip(aZipFile, aTargetDir, tlDirAndroid, nStrip, true);
+    tlDir = tlDirAndroid;
+    
 #else
 
     std::unique_ptr<wxZipEntry> entry(new wxZipEntry());
@@ -2727,9 +2747,9 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
     bool bCompact = false;
 #ifdef __OCPN__ANDROID__
-        qDebug() << "Compact Check" << GetSize().x << GetCharWidth();
+        qDebug() << "Compact Check" << GetActiveOptionsDialog()->GetSize().x << GetCharWidth();
 #endif        
-    if(GetSize().x < 60 * GetCharWidth())
+    if(GetActiveOptionsDialog()->GetSize().x < 60 * GetCharWidth())
         bCompact = true;
     
     wxBoxSizer* boxSizerTop = new wxBoxSizer(wxVERTICAL);
