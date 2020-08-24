@@ -2812,6 +2812,12 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
     int size_scrollerLines = 15;
     if(bCompact)
         size_scrollerLines = 10;
+
+#ifdef __OCPN__ANDROID__
+    size_scrollerLines = (::wxGetDisplaySize().y * 5 / 8) / GetCharHeight();
+    if(bCompact)
+        size_scrollerLines = 10;
+#endif
     
     m_scrollWinChartList->SetMinSize(wxSize(-1,size_scrollerLines * GetCharHeight()));
     staticBoxSizerChartList->SetMinSize(wxSize(-1,(size_scrollerLines + 1) * GetCharHeight()));
