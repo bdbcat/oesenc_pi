@@ -218,7 +218,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
 
      if(!rtopDir.Length()){        // if there is no directory in the zip file, then declare
                                             // the tlDir as the zip file name itself, without extension
-        wxFileName fn(ZipFile);
+        wxFileName fn(zipFile);
         rtopDir = destDir + wxFileName::GetPathSeparator() + fn.GetName();
      }
      else
