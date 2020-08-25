@@ -2815,7 +2815,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
 #ifdef __OCPN__ANDROID__
     //size_scrollerLines = (::wxGetDisplaySize().y * 5 / 10) / GetCharHeight();
-    size_scrollerLines = (::wxGetDisplaySize().y / GetCharHeight()) - 10;
+    size_scrollerLines = (::wxGetDisplaySize().y / GetCharHeight()) - 20;
 #endif
     
     m_scrollWinChartList->SetMinSize(wxSize(-1,size_scrollerLines * GetCharHeight()));
