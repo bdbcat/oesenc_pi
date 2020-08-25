@@ -78,6 +78,11 @@ IF(QT_ANDROID)
   MESSAGE (STATUS "Using GLESv2 for Android")
   ADD_DEFINITIONS(-DUSE_ANDROID_GLES2)
   ADD_DEFINITIONS(-DUSE_GLSL)
+  ADD_DEFINITIONS("-Wno-inconsistent-missing-override -Wno-potentially-evaluated-expression")
+  SET(QT_LINUX "OFF")
+  SET(QT "ON")
+  SET(CMAKE_SKIP_BUILD_RPATH  TRUE)
+  ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
 
   IF(_wx_selected_config MATCHES "androideabi-qt-arm64")
    INCLUDE_DIRECTORIES("${OCPN_Android_Common}/qt5/build_arm64_O3/qtbase/include")
@@ -90,7 +95,6 @@ IF(QT_ANDROID)
    INCLUDE_DIRECTORIES( "${OCPN_Android_Common}/wxWidgets/libarm64/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
    INCLUDE_DIRECTORIES( "${OCPN_Android_Common}/wxWidgets/include")
 
-   ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
    
    SET(OCPN_Core_LIBRARIES
                 ${CMAKE_CURRENT_SOURCE_DIR}/${OCPN_Android_Common}/qt5/build_arm64_O3/qtbase/lib/libQt5Core.so
@@ -114,7 +118,7 @@ IF(QT_ANDROID)
    INCLUDE_DIRECTORIES( "${OCPN_Android_Common}/wxWidgets/libarmhf/wx/include/arm-linux-androideabi-qt-unicode-static-3.1")
    INCLUDE_DIRECTORIES( "${OCPN_Android_Common}/wxWidgets/include")
 
-   ADD_DEFINITIONS(-DQT_WIDGETS_LIB)
+   ADD_DEFINITIONS( -DOCPN_ARMHF )
   
    SET(OCPN_Core_LIBRARIES
                 ${CMAKE_CURRENT_SOURCE_DIR}/${OCPN_Android_Common}/qt5/build_arm32_19_O3/qtbase/lib/libQt5Core.so

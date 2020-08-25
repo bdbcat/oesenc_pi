@@ -215,13 +215,6 @@ if (OCPN_FLATPAK)
 endif()
 
 
-
-#  To build for android, use this cmake invocation..
-#$cmake -DUSE_GARMINHOST=OFF -D_wx_selected_config=androideabi-qt
-#-DCMAKE_TOOLCHAIN_FILE=../buildandroid/build_android.cmake
-#-DwxQt_Build=build_android_55_intl -DwxQt_Base=/home/dsr/Projects/wxqt/wxWidgets
-#-DQt_Base=/home/dsr/Projects/qt5bare -DQt_Build=build_release/qtbase ..
-
 IF(DEFINED _wx_selected_config)
 
 #  May be overridden
@@ -232,26 +225,11 @@ ENDIF(NOT DEFINED Qt_Build)
 MESSAGE (STATUS "selected config ${_wx_selected_config}")
 
 IF(_wx_selected_config MATCHES "androideabi-qt-arm64")
-  MESSAGE (STATUS "Building for wxQt-Android-arm64")
-  MESSAGE (STATUS "Qt_Base/Build: " ${Qt_Base} "/" ${Qt_Build})
-  MESSAGE (STATUS "wxQt_Base/Build: " ${wxQt_Base} "/" ${wxQt_Build})
   SET(QT_ANDROID "ON")
-  SET(QT_LINUX "OFF")
-  SET(QT "ON")
-  ADD_DEFINITIONS("-Wno-inconsistent-missing-override -Wno-potentially-evaluated-expression")
-  SET(CMAKE_SKIP_BUILD_RPATH  TRUE)
 ENDIF(_wx_selected_config MATCHES "androideabi-qt-arm64")
 
 IF(_wx_selected_config MATCHES "androideabi-qt-armhf")
-  MESSAGE (STATUS "Building for wxQt-Android-armhf")
-  MESSAGE (STATUS "Qt_Base/Build: " ${Qt_Base} "/" ${Qt_Build})
-  MESSAGE (STATUS "wxQt_Base/Build: " ${wxQt_Base} "/" ${wxQt_Build})
   SET(QT_ANDROID "ON")
-  SET(QT_LINUX "OFF")
-  SET(QT "ON")
-  ADD_DEFINITIONS("-Wno-inconsistent-missing-override -Wno-potentially-evaluated-expression")
-  ADD_DEFINITIONS( -DOCPN_ARMHF )
-  SET(CMAKE_SKIP_BUILD_RPATH  TRUE)
 ENDIF(_wx_selected_config MATCHES "androideabi-qt-armhf")
 
 ENDIF(DEFINED _wx_selected_config)
