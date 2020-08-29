@@ -2815,7 +2815,7 @@ shopPanel::shopPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 
 #ifdef __OCPN__ANDROID__
     //size_scrollerLines = (::wxGetDisplaySize().y * 5 / 10) / GetCharHeight();
-    size_scrollerLines = (::wxGetDisplaySize().y / GetCharHeight()) - 30;
+    size_scrollerLines = (::wxGetDisplaySize().y / GetCharHeight()) - 29;
     size_scrollerLines = wxMax(size_scrollerLines, 10);
 #endif
     
