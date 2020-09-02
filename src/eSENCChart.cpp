@@ -1986,8 +1986,7 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
                         crnt->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( crnt->obj );
                 }
             }
-            if(crnt->obj->pPolyTessGeo->IsOk() ) 
-                ps52plib->RenderAreaToGL( glc, crnt, &tvp );
+            ps52plib->RenderAreaToGL( glc, crnt, &tvp );
         }
     }
 
