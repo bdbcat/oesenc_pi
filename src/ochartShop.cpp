@@ -2127,6 +2127,9 @@ int doUnzip(itemChart *chart, int slot)
     if(1/*!installDir.Length()*/){
         
         wxString installLocn = g_PrivateDataDir;
+#ifdef __OCPN__ANDROID__
+        installLocn = GetWritableDocumentsDir();        // /storage/emulated/0, typically
+#endif        
         if(installDir.Length())
             installLocn = installDir;
         else if(g_lastInstallDir.Length())
