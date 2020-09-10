@@ -12,6 +12,7 @@ modules:
       build-options:
           cflags: -fPIC
           cxxflags: -fPIC -DFLATPAK
+          strip: true
       config-opts:
           - -DPREFIX:PATH=/app/extensions/oesenc
       post-install:
