@@ -100,7 +100,7 @@ wxString callActivityMethod_vs(const char *method);
 wxString callActivityMethod_ss(const char *method, wxString parm);
 wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
 wxString callActivityMethod_s5s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5);
-wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5, wxString parm6);
+wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2="", wxString parm3="", wxString parm4="", wxString parm5="", wxString parm6="");
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
 void androidShowBusyIcon();
 void androidHideBusyIcon();
@@ -223,6 +223,9 @@ wxString                        g_csv_locn;
 long                            g_serverProc;
 wxString                        g_deviceInfo;
 wxString                        g_systemName;
+wxString                        g_UUID;
+wxString                        g_sSDK_INT;
+int                             g_SDK_INT;
 wxString                        g_loginUser;
 wxString                        g_loginKey;
 wxString                        g_systemOS;
@@ -757,8 +760,21 @@ int oesenc_pi::Init(void)
         if(wxNOT_FOUND != s1.Find(_T("systemName:"))){
             g_systemName = s1.AfterFirst(':');
         }
+        if(wxNOT_FOUND != s1.Find(_T("UUID:"))){
+            g_UUID = s1.AfterFirst(':');
+        }
+        if(wxNOT_FOUND != s1.Find(_T("OS SDK_INT:"))){
+            g_sSDK_INT = s1.AfterFirst(':');
+        }
     }
     qDebug() << "Init() systemName by deviceInfo: " << g_systemName.mb_str();
+    qDebug() << "Init() UUID by deviceInfo: " << g_UUID.mb_str();
+    qDebug() << "Init() OS SDK_INT by deviceInfo: " << g_sSDK_INT.mb_str();
+    
+    long nsdk;
+    g_sSDK_INT.ToLong(&nsdk);
+    g_SDK_INT = nsdk;
+    
 #endif
     
     //testSENCServer();
@@ -3259,10 +3275,23 @@ bool validate_SENC_server(void)
     wxFileName fnl(cmd);
     wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
     
+//     wxLogMessage(_T("oesenc_pi: Starting for version: ") + cmd );
+//     wxString vresult = callActivityMethod_s6s("createProcSync5stdout", cmd, "-a");
+//     wxLogMessage(_T("  Version result: ") + vresult );
+//     qDebug() << vresult.mb_str();
+    
     wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
     
-    wxString result = callActivityMethod_s4s("createProc", cmd, _T("-q"), dataDir, libDir);
-    
+    wxString result;
+    if(g_SDK_INT < 21){          // Earlier than Android 5
+        result = callActivityMethod_s4s("createProc", cmd, "-q", dataDir, libDir);
+    }
+    else if(g_SDK_INT < 29){            // Strictly earlier than Android 10
+        result = callActivityMethod_s4s("createProc", cmd, "-z", g_UUID, libDir);
+    }
+    else
+        result = callActivityMethod_s4s("createProc", cmd, "", "", libDir);
+        
     wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
     
     long pid;

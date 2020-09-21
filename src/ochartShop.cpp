@@ -58,7 +58,7 @@ wxString callActivityMethod_vs(const char *method);
 wxString callActivityMethod_ss(const char *method, wxString parm);
 wxString callActivityMethod_s4s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4);
 wxString callActivityMethod_s5s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5);
-wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2, wxString parm3, wxString parm4, wxString parm5, wxString parm6);
+wxString callActivityMethod_s6s(const char *method, wxString parm1, wxString parm2="", wxString parm3="", wxString parm4="", wxString parm5="", wxString parm6="");
 wxString callActivityMethod_s2s(const char *method, wxString parm1, wxString parm2);
 void androidShowBusyIcon();
 void androidHideBusyIcon();
@@ -111,6 +111,10 @@ double dl_now;
 double dl_total;
 time_t g_progressTicks;
 InProgressIndicator *g_ipGauge;
+
+extern wxString g_UUID;
+extern int      g_SDK_INT;
+extern wxString  g_sencutil_bin;
 
 #define N_MESSAGES 22
 #if 0
@@ -1605,7 +1609,10 @@ extern wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
 int doUploadXFPR(bool bDongle)
 {
     wxString err;
+    wxString stringFPR;
+    wxString fprName;
     
+#ifndef __OCPN__ANDROID__    
     // Generate the FPR file
     bool b_copyOK = false;
     
@@ -1619,7 +1626,6 @@ int doUploadXFPR(bool bDongle)
         
         //Read the file, convert to ASCII hex, and build a string
         if(::wxFileExists(fpr_file)){
-            wxString stringFPR;
             wxFileInputStream stream(fpr_file);
             while(stream.IsOk() && !stream.Eof() ){
                 unsigned char c = stream.GetC();
@@ -1629,109 +1635,138 @@ int doUploadXFPR(bool bDongle)
                     stringFPR += sc;
                 }
             }
-            
-            // Prepare the upload command string
-            wxString url = userURL;
-            if(g_admin)
-                url = adminURL;
-            
-            url +=_T("?fc=module&module=occharts&controller=api");
-            
             wxFileName fnxpr(fpr_file);
-            wxString fprName = fnxpr.GetFullName();
-            
-            wxString loginParms;
-            loginParms += _T("taskId=xfpr");
-            loginParms += _T("&username=") + g_loginUser;
-            loginParms += _T("&key=") + g_loginKey;
-            if(g_debugShop.Len())
-                loginParms += _T("&debug=") + g_debugShop;
-            loginParms += _T("&version=") + g_systemOS + g_versionString;
-
-            if(!bDongle)
-                loginParms += _T("&systemName=") + g_systemName;
-            else
-                loginParms += _T("&systemName=") + g_dongleName;
-                
-            loginParms += _T("&xfpr=") + stringFPR;
-            loginParms += _T("&xfprName=") + fprName;
-            
-            //wxLogMessage(loginParms);
-            
-    int iResponseCode = 0;
-    size_t res = 0;
-    std::string responseBody;
-    
-#ifdef __OCPN_USE_CURL__    
-    wxCurlHTTPNoZIP post;
-    post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-    
-    res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
-    
-    // get the response code of the server
-    
-    post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-    
-    std::string a = post.GetDetailedErrorString();
-    std::string b = post.GetErrorString();
-    std::string c = post.GetResponseBody();
-    
-    responseBody = post.GetResponseBody();
-    //printf("%s", post.GetResponseBody().c_str());
-    
-    //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
-    //wxLogMessage(tt);
-#else
-     wxString postresult;
-    //qDebug() << url.mb_str();
-    //qDebug() << loginParms.mb_str();
-
-    _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
-
-    //qDebug() << "getChartList Post Stat: " << stat;
-    
-    if(stat != OCPN_DL_FAILED){
-        wxCharBuffer buf = postresult.ToUTF8();
-        std::string response(buf.data());
-        
-        //qDebug() << response.c_str();
-        responseBody = response.c_str();
-        iResponseCode = 200;
-        res = 1;
-    }
-
-#endif    
-#if 0
-            wxCurlHTTPNoZIP post;
-            post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
-            const char* s = loginParms.mb_str(wxConvUTF8);    
-
-            size_t res = post.Post( s, strlen(s), url );
-            
-            // get the response code of the server
-            int iResponseCode;
-            post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
-#endif
-
-            if(iResponseCode == 200){
-                wxString result = ProcessResponse(responseBody);
-                
-                int iret = checkResult(result);
-                
-                return iret;
-            }
-            else
-                return checkResponseCode(iResponseCode);
-            
+            fprName = fnxpr.GetFullName();
         }
-        else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT")))
+        else if(fpr_file.IsSameAs(_T("DONGLE_NOT_PRESENT"))){
             err = _("[USB Key Dongle not found.]");
+        }
             
-        else
+        else{
             err = _("[fpr file not found.]");
+        }
     }
     else{
-        err = _("[fpr file not created.]");
+            err = _("[fpr file not created.]");
+    }
+#else   // Android
+
+    // Get the FPR directly from the helper oeserverda, in ASCII HEX
+    wxString cmd = g_sencutil_bin;
+    wxString result;
+    wxString prefix = "oc03R_";
+    if(g_SDK_INT < 21){          // Earlier than Android 5
+        //  Set up the parameter passed as the local app storage directory
+        wxString dataLoc = *GetpPrivateApplicationDataLocation();
+        wxFileName fn(dataLoc);
+        wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
+        result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-q", dataDir, "-g");
+    }
+    else if(g_SDK_INT < 29){            // Strictly earlier than Android 10
+        result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-z", g_UUID, "-g");
+    }
+    else{
+        result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-k");
+        prefix = "oc04R_";
+    }
+    
+    //qDebug() << result.mb_str();
+    
+    wxString kv, fpr;
+    wxStringTokenizer tkz(result, _T(";"));
+    kv = tkz.GetNextToken();
+    fpr = tkz.GetNextToken();
+    //qDebug() << kv.mb_str();
+    //qDebug() << fpr.mb_str();   
+    
+    stringFPR = fpr;
+    fprName = prefix + kv + ".fpr";
+    
+    //qDebug() << "[" << stringFPR.mb_str() << "]";
+    //qDebug() << "[" << fprName.mb_str() << "]";
+    
+
+#endif
+        
+    if(stringFPR.Length()){        
+            
+        // Prepare the upload command string
+        wxString url = userURL;
+        if(g_admin)
+            url = adminURL;
+            
+        url +=_T("?fc=module&module=occharts&controller=api");
+            
+            
+        wxString loginParms;
+        loginParms += _T("taskId=xfpr");
+        loginParms += _T("&username=") + g_loginUser;
+        loginParms += _T("&key=") + g_loginKey;
+        if(g_debugShop.Len())
+            loginParms += _T("&debug=") + g_debugShop;
+        loginParms += _T("&version=") + g_systemOS + g_versionString;
+
+        if(!bDongle)
+            loginParms += _T("&systemName=") + g_systemName;
+        else
+            loginParms += _T("&systemName=") + g_dongleName;
+                
+        loginParms += _T("&xfpr=") + stringFPR;
+        loginParms += _T("&xfprName=") + fprName;
+          
+            //wxLogMessage(loginParms);
+            
+        int iResponseCode = 0;
+        size_t res = 0;
+        std::string responseBody;
+    
+#ifdef __OCPN_USE_CURL__    
+        wxCurlHTTPNoZIP post;
+        post.SetOpt(CURLOPT_TIMEOUT, g_timeout_secs);
+    
+        res = post.Post( loginParms.ToAscii(), loginParms.Len(), url );
+    
+        // get the response code of the server
+    
+        post.GetInfo(CURLINFO_RESPONSE_CODE, &iResponseCode);
+    
+        std::string a = post.GetDetailedErrorString();
+        std::string b = post.GetErrorString();
+        std::string c = post.GetResponseBody();
+    
+        responseBody = post.GetResponseBody();
+        //printf("%s", post.GetResponseBody().c_str());
+    
+        //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
+        //wxLogMessage(tt);
+#else
+        wxString postresult;
+        //qDebug() << url.mb_str();
+        //qDebug() << loginParms.mb_str();
+
+        _OCPN_DLStatus stat = OCPN_postDataHttp( url, loginParms, postresult, g_timeout_secs );
+
+        //qDebug() << "getChartList Post Stat: " << stat;
+    
+        if(stat != OCPN_DL_FAILED){
+            wxCharBuffer buf = postresult.ToUTF8();
+            std::string response(buf.data());
+        
+            //qDebug() << response.c_str();
+            responseBody = response.c_str();
+            iResponseCode = 200;
+            res = 1;
+        }
+#endif    
+
+        if(iResponseCode == 200){
+            wxString result = ProcessResponse(responseBody);
+                
+            int iret = checkResult(result);
+            return iret;
+        }
+        else
+            return checkResponseCode(iResponseCode);
     }
     
     if(err.Len()){
