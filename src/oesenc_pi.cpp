@@ -4324,13 +4324,10 @@ extern void saveShopConfig();
 
 void oesenc_pi_event_handler::OnClearCredentials( wxCommandEvent &event )
 {
-#ifndef __OCPN__ANDROID__    
     g_loginKey.Clear();
     saveShopConfig();
     
     OCPNMessageBox_PlugIn(NULL, _("Credential Reset Successful"), _("oeSENC_pi Message"), wxOK);
-#endif    
- 
 }
 
 void oesenc_pi_event_handler::OnNewDFPRClick( wxCommandEvent &event )
