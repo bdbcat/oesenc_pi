@@ -3739,7 +3739,10 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         content->SetSizer(bSizer2);
         
         // Plugin Version
-        wxString versionText = _(" oeSENC Version: ") + g_versionString;
+        wxString extVersion;
+        extVersion.Printf(_T("%d.%d.%d.%d"), PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_PATCH), PLUGIN_VERSION_TWEAK;
+
+        wxString versionText = _(" oeSENC Version: ") + extVersion;
         wxStaticText *versionTextBox = new wxStaticText(content, wxID_ANY, versionText);
         bSizer2->Add(versionTextBox, 1, wxALL | wxALIGN_CENTER_HORIZONTAL, 20 );
  
