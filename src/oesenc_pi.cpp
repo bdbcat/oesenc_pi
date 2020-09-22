@@ -3750,7 +3750,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         m_buttonShowEULA->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowEULA), NULL, g_event_handler );
         bSizer2->AddSpacer( 20 );
 
-//#ifndef __OCPN__ANDROID__        
+#ifndef __OCPN__ANDROID__        
         //  FPR File Permit
         wxStaticBoxSizer* sbSizerFPR= new wxStaticBoxSizer( new wxStaticBox( content, wxID_ANY, _("System Identification") ), wxHORIZONTAL );
         m_fpr_text = new wxStaticText(content, wxID_ANY, _T(" "));
@@ -3788,7 +3788,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
 
         m_buttonShowFPR->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnShowFPRClick), NULL, g_event_handler );
 
-//#endif        
+#endif        
         // System Name
         if(g_systemName.Length()){
             wxString nameText = _T(" ") + _("System Name:") + _T(" ") + g_systemName;
@@ -3799,7 +3799,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         else
             bSizer2->AddSpacer( 10 );
  
-//#ifndef __OCPN__ANDROID__        
+#ifndef __OCPN__ANDROID__        
         m_buttonClearSystemName = new wxButton( content, wxID_ANY, _("Reset System Name"), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 10 );
@@ -3809,7 +3809,7 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         
         if(!g_systemName.Length())
             m_buttonClearSystemName->Disable();
-        
+#endif        
         m_buttonClearCreds = new wxButton( content, wxID_ANY, _("Reset o-charts credentials"), wxDefaultPosition, wxDefaultSize, 0 );
         
         bSizer2->AddSpacer( 10 );
@@ -3818,8 +3818,6 @@ oesencPrefsDialog::oesencPrefsDialog( wxWindow* parent, wxWindowID id, const wxS
         m_buttonClearCreds->Connect( wxEVT_COMMAND_BUTTON_CLICKED,wxCommandEventHandler(oesenc_pi_event_handler::OnClearCredentials), NULL, g_event_handler );
         
         
-//#endif
-            
         m_sdbSizer1 = new wxStdDialogButtonSizer();
         m_sdbSizer1OK = new wxButton( content, wxID_OK );
         m_sdbSizer1->AddButton( m_sdbSizer1OK );
