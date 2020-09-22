@@ -2375,11 +2375,11 @@ oeSencChartPanel::oeSencChartPanel(wxWindow *parent, wxWindowID id, const wxPoin
     SetMinSize(wxSize(-1, 5 * m_refDim));
     m_unselectedHeight = 5 * m_refDim;
     
-#ifdef __OCPN__ANDROID__
-    Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
-#else
+//#ifdef __OCPN__ANDROID__
+//    Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
+//#else
     Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
-#endif    
+//#endif    
     
 }
 
