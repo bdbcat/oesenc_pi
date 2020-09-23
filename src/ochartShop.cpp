@@ -1660,9 +1660,6 @@ int doUploadXFPR(bool bDongle)
     fpr_file = fpr_file.Trim(false);            // Trim leading spaces...
     
     if(fpr_file.Len()){
-        
-        wxString stringFPR;
-        
         //Read the file, convert to ASCII hex, and build a string
         if(::wxFileExists(fpr_file)){
             wxFileInputStream stream(fpr_file);
