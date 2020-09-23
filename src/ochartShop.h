@@ -94,7 +94,7 @@ public:
     bool isEnabled(){ return m_bEnabled; }
     wxString getStatusString();
     int getChartStatus();
-    wxBitmap& GetChartThumbnail(int size);
+    wxBitmap& GetChartThumbnail(int size, bool bDL_If_Needed = false);
     wxString getKeytypeString();
     wxString getKeytypeString( int slot, wxColour &tcolor );
     wxString getKeyString( int slot, wxColour &tcolor );

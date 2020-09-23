@@ -807,7 +807,9 @@ wxString itemChart::getKeyString( int slot, wxColour &tcolour ){
     return _T("");
 }
 
-wxBitmap& itemChart::GetChartThumbnail(int size)
+int s_dlbusy;
+
+wxBitmap& itemChart::GetChartThumbnail(int size, bool bDL_If_Needed)
 {
     if(!m_ChartImage.IsOk()){
         // Look for cached copy
@@ -819,7 +821,7 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
         if(::wxFileExists(file)){
             m_ChartImage = wxImage( file, wxBITMAP_TYPE_ANY);
         }
-        else{
+        else if(bDL_If_Needed){
             if(g_chartListUpdatedOK && thumbnailURL.Length()){  // Do not access network until after first "getList"
 #ifdef __OCPN_USE_CURL__
                 wxCurlHTTP get;
@@ -835,6 +837,43 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
                         m_ChartImage = wxImage( file, wxBITMAP_TYPE_ANY);
                     }
                 }
+#else
+                if(!s_dlbusy){
+                    
+                    wxString fileKeytmp = _T("ChartImage-");
+                    fileKeytmp += chartID;
+                    fileKeytmp += _T(".tmp");
+ 
+                    wxString filetmp = g_PrivateDataDir + fileKeytmp;
+
+                    wxString file_URI = _T("file://") + filetmp;
+                    
+                    int iResponseCode = 0;
+                    s_dlbusy = 1;
+                    _OCPN_DLStatus ret = OCPN_downloadFile( thumbnailURL, file_URI, _T(""), _T(""), wxNullBitmap, NULL, 0, 15);
+
+                    wxLogMessage(_T("DLRET"));
+                    qDebug() << "DL done";
+                    if(OCPN_DL_NO_ERROR == ret){
+                        wxCopyFile(filetmp, file);
+                        iResponseCode = 200;
+                    }
+                    else
+                        iResponseCode = ret;
+                    
+                    wxRemoveFile( filetmp );
+                    s_dlbusy = 0;
+                    
+                    if(iResponseCode == 200){
+                        if(::wxFileExists(file)){
+                            m_ChartImage = wxImage( file, wxBITMAP_TYPE_ANY);
+                        }
+                    }
+
+                }
+                else
+                    qDebug() << "Busy";
+                
 #endif                
             }
         }
@@ -845,7 +884,7 @@ wxBitmap& itemChart::GetChartThumbnail(int size)
         int scaledWidth = m_ChartImage.GetWidth() * scaledHeight / m_ChartImage.GetHeight();
         wxImage scaledImage = m_ChartImage.Rescale(scaledWidth, scaledHeight);
         m_bm = wxBitmap(scaledImage);
-        
+
         return m_bm;
     }
     else{
@@ -2434,26 +2473,20 @@ void oeSencChartPanel::SetSelected( bool selected )
     {
         GetGlobalColor(_T("DILG0"), &colour);
         m_boxColour = colour;
-        if(bCompact){
-            // Measure the required size
-           wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
-           double font_size = dFont->GetPointSize() * 3/2;
-           wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
-           
-           SetFont( *qFont );
-           HardBreakWrapper wrapper(this, nameString, g_shopPanel->GetSize().x / 2);
-           SetFont( *dFont );
 
-           int lineCount = wrapper.GetLineCount() + 1;
-           m_unselectedHeight = (refDim * 3) + (lineCount * (refDim * 3/2));
-           SetMinSize(wxSize(-1, m_unselectedHeight));
-           m_nameArrayString = wrapper.GetLineArray();
-    
-        }
-        else{
-            SetMinSize(wxSize(-1, 5 * refDim));
-            m_unselectedHeight = 5 * refDim;
-        }
+        // Measure the required size
+        wxFont *dFont = GetOCPNScaledFont_PlugIn(_("Dialog"));
+        double font_size = dFont->GetPointSize() * 3/2;
+        wxFont *qFont = wxTheFontList->FindOrCreateFont( font_size, dFont->GetFamily(), dFont->GetStyle(), dFont->GetWeight());
+           
+        SetFont( *qFont );
+        HardBreakWrapper wrapper(this, nameString, g_shopPanel->GetSize().x / 2);
+        SetFont( *dFont );
+
+        int lineCount = wrapper.GetLineCount() + 1;
+        m_unselectedHeight = (refDim * 3) + (lineCount * (refDim * 3/2));
+        SetMinSize(wxSize(-1, m_unselectedHeight));
+        m_nameArrayString = wrapper.GetLineArray();
     }
     
     Refresh( true );
@@ -2670,6 +2703,7 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         }
         
     }
+    
 }
 
 
@@ -3675,6 +3709,8 @@ void shopPanel::UpdateChartList( )
     // Add new panels
     for(unsigned int i=0 ; i < g_ChartArray.GetCount() ; i++){
         if(g_chartListUpdatedOK && g_ChartArray.Item(i)->isChartsetShow()){
+            if(g_ChartArray.Item(i))
+                g_ChartArray.Item(i)->GetChartThumbnail(100, true );              // attempt thumbnail download if necessary
             oeSencChartPanel *chartPanel = new oeSencChartPanel( m_chartListPanel, wxID_ANY, wxDefaultPosition, wxSize(-1, -1), g_ChartArray.Item(i), this);
             chartPanel->SetSelected(false);
         
@@ -4227,6 +4263,7 @@ END_EVENT_TABLE()
 
 InProgressIndicator::~InProgressIndicator()
 {
+    m_timer.Stop();
 }
  
 void InProgressIndicator::OnTimer(wxTimerEvent &evt)
@@ -4238,11 +4275,13 @@ void InProgressIndicator::OnTimer(wxTimerEvent &evt)
  
 void InProgressIndicator::Start() 
 {
+     m_timer.Start( 50 );
      m_bAlive = true;
 }
  
 void InProgressIndicator::Stop() 
 {
+     m_timer.Stop();
      m_bAlive = false;
      SetValue(0);
 }
