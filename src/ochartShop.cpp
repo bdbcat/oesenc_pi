@@ -2465,7 +2465,7 @@ void oeSencChartPanel::SetSelected( bool selected )
         GetGlobalColor(_T("UIBCK"), &colour);
         m_boxColour = colour;
         if(!bCompact)
-            SetMinSize(wxSize(-1, 9 * refDim));
+            SetMinSize(wxSize(-1, 18 * refDim));
         else
             SetMinSize(wxSize(-1, 18 * refDim));
     }
