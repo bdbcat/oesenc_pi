@@ -1719,6 +1719,9 @@ int doUploadXFPR(bool bDongle)
     stringFPR = fpr;
     fprName = prefix + kv + ".fpr";
     
+    if(stringFPR.IsEmpty())
+        err = _("[fpr not created.]");
+
     //qDebug() << "[" << stringFPR.mb_str() << "]";
     //qDebug() << "[" << fprName.mb_str() << "]";
     
