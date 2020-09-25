@@ -113,6 +113,7 @@ time_t g_progressTicks;
 InProgressIndicator *g_ipGauge;
 
 extern wxString g_UUID;
+extern wxString g_WVID;
 extern int      g_SDK_INT;
 extern wxString  g_sencutil_bin;
 
@@ -1702,7 +1703,7 @@ int doUploadXFPR(bool bDongle)
         result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-z", g_UUID, "-g");
     }
     else{
-        result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-k");
+        result = callActivityMethod_s6s("createProcSync5stdout", cmd, "-y", g_WVID, "-k");
         prefix = "oc04R_";
     }
     

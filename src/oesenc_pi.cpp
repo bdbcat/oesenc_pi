@@ -224,6 +224,7 @@ long                            g_serverProc;
 wxString                        g_deviceInfo;
 wxString                        g_systemName;
 wxString                        g_UUID;
+wxString                        g_WVID;
 wxString                        g_sSDK_INT;
 int                             g_SDK_INT;
 wxString                        g_loginUser;
@@ -695,24 +696,6 @@ int oesenc_pi::Init(void)
     
     
     
-#if 0    
-    
-    
-    wxFileName fn_exe(GetOCPN_ExePath());
-    g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
-       
-    
-#ifdef __WXMSW__
-    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-    _T("plugins\\oesenc_pi\\oeserverd.exe\"");
-#endif
-    
-#ifdef __WXOSX__
-    fn_exe.RemoveLastDir();
-    g_sencutil_bin = _T("\"") + fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) +
-    _T("PlugIns/oesenc_pi/oeserverd\"");
-#endif
-#endif
 
 #ifdef __OCPN__ANDROID__
     wxString piLocn = GetPlugInPath(this); //*GetpSharedDataLocation();
@@ -766,10 +749,14 @@ int oesenc_pi::Init(void)
         if(wxNOT_FOUND != s1.Find(_T("OS SDK_INT:"))){
             g_sSDK_INT = s1.AfterFirst(':');
         }
+        if(wxNOT_FOUND != s1.Find(_T("OCPNWVID:"))){
+            g_WVID = s1.AfterFirst(':');
+        }
     }
     qDebug() << "Init() systemName by deviceInfo: " << g_systemName.mb_str();
     qDebug() << "Init() UUID by deviceInfo: " << g_UUID.mb_str();
     qDebug() << "Init() OS SDK_INT by deviceInfo: " << g_sSDK_INT.mb_str();
+    qDebug() << "Init() WVID by deviceInfo: " << g_WVID.mb_str();
     
     long nsdk;
     g_sSDK_INT.ToLong(&nsdk);
@@ -3290,7 +3277,7 @@ bool validate_SENC_server(void)
         result = callActivityMethod_s4s("createProc", cmd, "-z", g_UUID, libDir);
     }
     else
-        result = callActivityMethod_s4s("createProc", cmd, "", "", libDir);
+        result = callActivityMethod_s4s("createProc", cmd, "-y", g_WVID, libDir);
         
     wxLogMessage(_T("oesenc_pi: Start Result: ") + result);
     
