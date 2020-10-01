@@ -2413,7 +2413,11 @@ oeSencChartPanel::oeSencChartPanel(wxWindow *parent, wxWindowID id, const wxPoin
 
     m_refDim = GetCharHeight();
     SetMinSize(wxSize(-1, 5 * m_refDim));
-    m_unselectedHeight = 5 * m_refDim;
+    m_unselectedHeight = 5 * m_refDim;          // might be recalculated based on chart title length
+    m_selectedHeight = 9 * m_refDim;
+#ifdef __OCPN__ANDROID__
+    m_selectedHeight = 18 * m_refDim;
+#endif    
     
 //#ifdef __OCPN__ANDROID__
 //    Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
@@ -2449,11 +2453,10 @@ void oeSencChartPanel::SetSelected( bool selected )
 {
     m_bSelected = selected;
     wxColour colour;
-    int refDim = m_refDim;
    
     bool bCompact = false;
 #ifdef __OCPN__ANDROID__
-    if(g_shopPanel->GetSize().x < 60 * refDim)
+    if(g_shopPanel->GetSize().x < 60 * m_refDim)
         bCompact = true;
 #endif
     
@@ -2465,10 +2468,7 @@ void oeSencChartPanel::SetSelected( bool selected )
     {
         GetGlobalColor(_T("UIBCK"), &colour);
         m_boxColour = colour;
-        if(!bCompact)
-            SetMinSize(wxSize(-1, 18 * refDim));
-        else
-            SetMinSize(wxSize(-1, 18 * refDim));
+        SetMinSize(wxSize(-1, m_selectedHeight));
     }
     else
     {
@@ -2485,7 +2485,7 @@ void oeSencChartPanel::SetSelected( bool selected )
         SetFont( *dFont );
 
         int lineCount = wrapper.GetLineCount() + 1;
-        m_unselectedHeight = (refDim * 3) + (lineCount * (refDim * 3/2));
+        m_unselectedHeight = (m_refDim * 3) + (lineCount * (m_refDim * 3/2));
         SetMinSize(wxSize(-1, m_unselectedHeight));
         m_nameArrayString = wrapper.GetLineArray();
     }

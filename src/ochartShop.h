@@ -174,6 +174,7 @@ private:
     wxStaticText *m_pName;
     wxColour m_boxColour;
     int m_unselectedHeight;
+    int m_selectedHeight;
     wxArrayString(m_nameArrayString);
     int m_refDim;
     
