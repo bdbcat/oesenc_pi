@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: opencpn\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-04 20:08-0500\n"
-"PO-Revision-Date: 2020-01-01 16:55\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2020-09-28 03:06\n"
+"Last-Translator: \n"
 "Language-Team: Polish\n"
 "Language: pl_PL\n"
 "MIME-Version: 1.0\n"
@@ -12,8 +12,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Crowdin-Project: opencpn\n"
+"X-Crowdin-Project-ID: 49843\n"
 "X-Crowdin-Language: pl\n"
 "X-Crowdin-File: /plugins/oesenc_pi/po/oesenc_pi.pot\n"
+"X-Crowdin-File-ID: 204\n"
 
 #: src/eSENCChart.cpp:6526
 msgid "Sector angles are True Bearings from Seaward"
@@ -357,7 +359,7 @@ msgstr "Proszę zaktualizować listę map."
 
 #: src/ochartShop.cpp:578
 msgid "Ready for Download Request."
-msgstr "Gotowy do pobrania żądania."
+msgstr "Gotowy do żądania pobrania."
 
 #: src/ochartShop.cpp:594 src/ochartShop.cpp:596 src/ochartShop.cpp:613
 #: src/ochartShop.cpp:631 src/ochartShop.cpp:1252 src/ochartShop.cpp:2344
@@ -399,7 +401,7 @@ msgstr "Sprawdź konfigurację i spróbuj ponownie."
 
 #: src/ochartShop.cpp:863
 msgid "o-Charts shop interface error"
-msgstr ""
+msgstr "Błąd interfejsu sklepu o-Charts"
 
 #: src/ochartShop.cpp:872
 msgid "internet communications error code: "
