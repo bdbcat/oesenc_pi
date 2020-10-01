@@ -2419,11 +2419,11 @@ oeSencChartPanel::oeSencChartPanel(wxWindow *parent, wxWindowID id, const wxPoin
     m_selectedHeight = 18 * m_refDim;
 #endif    
     
-//#ifdef __OCPN__ANDROID__
-//    Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
-//#else
-    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnChartSelected), NULL, this);
-//#endif    
+    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(oeSencChartPanel::OnClickDown), NULL, this);
+#ifdef __OCPN__ANDROID__
+    Connect(wxEVT_LEFT_UP, wxMouseEventHandler(oeSencChartPanel::OnClickUp), NULL, this);
+#endif
+    
     
 }
 
@@ -2431,7 +2431,35 @@ oeSencChartPanel::~oeSencChartPanel()
 {
 }
 
-void oeSencChartPanel::OnChartSelected( wxMouseEvent &event )
+static  wxStopWatch swclick;
+static  int downx, downy;
+
+void oeSencChartPanel::OnClickDown( wxMouseEvent &event )
+{
+#ifdef __OCPN__ANDROID__    
+    swclick.Start();
+    event.GetPosition( &downx, &downy );
+#else
+    DoChartSelected();
+#endif    
+}
+
+void oeSencChartPanel::OnClickUp( wxMouseEvent &event )
+{
+#ifdef __OCPN__ANDROID__    
+    qDebug() << swclick.Time();
+    if(swclick.Time() < 200){
+        int upx, upy;
+        event.GetPosition(&upx, &upy);
+        if( (fabs(upx-downx) < GetCharWidth()) && (fabs(upy-downy) < GetCharWidth()) ){
+            DoChartSelected();
+        }
+    }
+    swclick.Start();
+#endif    
+}
+
+void oeSencChartPanel::DoChartSelected( )
 {
     // Do not allow de-selection by mouse if this chart is busy, i.e. being prepared, or being downloaded 
     if(m_pChart){

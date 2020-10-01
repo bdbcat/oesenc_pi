@@ -159,7 +159,9 @@ public:
     oeSencChartPanel( wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, itemChart *p_itemChart, shopPanel *pContainer );
     ~oeSencChartPanel();
     
-    void OnChartSelected( wxMouseEvent &event );
+    void DoChartSelected();
+    void OnClickDown( wxMouseEvent &event );
+    void OnClickUp( wxMouseEvent &event );
     void SetSelected( bool selected );
     void OnPaint( wxPaintEvent &event );
     void OnEraseBackground( wxEraseEvent &event );
