@@ -2613,8 +2613,13 @@ void oeSencChartPanel::OnPaint( wxPaintEvent &event )
         // Create and populate the current chart information
         tx = _("Chart Set Edition:");
         dc.DrawText( tx, text_x, yPos);
+        int editionLabelWidth;                  // Account for extra long translation
+        dc.GetTextExtent( tx, &editionLabelWidth, NULL);
         tx = m_pChart->currentChartEdition;
-        dc.DrawText( tx, text_x_val, yPos);
+        if(( editionLabelWidth + text_x) > text_x_val)
+            dc.DrawText( tx, text_x + editionLabelWidth + GetCharWidth(), yPos);
+        else
+            dc.DrawText( tx, text_x_val, yPos);
         yPos += yPitch;
         
         tx = _("Order Reference:");
