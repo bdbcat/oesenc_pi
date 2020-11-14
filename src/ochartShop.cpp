@@ -1327,9 +1327,36 @@ wxString ProcessResponse(std::string body)
     // Validate/correct the input
         std::string body_corrected = correct_non_utf_8(&body);
 
+        wxString ss;
+        for(unsigned int i=0 ; i<body_corrected.size() ; i++){
+            unsigned char c=(unsigned char)(body_corrected)[i];
+            wxString sm;
+            sm.Printf(_T("%X,"), c);
+            ss.Append(sm);
+        }
+
+        wxLogMessage(_T("ProcessResponse RAW:"));
+        wxLogMessage(ss);
+
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( body_corrected.c_str());
     
+        if(!rr){
+            wxLogMessage(_T("TinyXML parse result 1:"));
+            wxString p1 = wxString(doc->ErrorDesc(), wxConvUTF8);
+            wxLogMessage(p1);
+            
+            //Try again with explicit encoding instruction
+            rr = doc->Parse( body_corrected.c_str(), NULL, TIXML_ENCODING_UTF8);
+
+            if(!rr){
+                wxLogMessage(_T("TinyXML parse result 2:"));
+                wxString p2 = wxString(doc->ErrorDesc(), wxConvUTF8);
+                wxLogMessage(p2);
+            }
+        }
+            
+           
         //doc->Print();
         
         wxString queryResult = _T("50");  // Default value, general error.;
