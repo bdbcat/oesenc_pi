@@ -1252,6 +1252,7 @@ std::string correct_non_utf_8(std::string *str)
 
     for(i=0 ; i<f_size ; i++){
         c=(unsigned char)(*str)[i];
+        
         if(c<32){//control char
             if(c==9 || c==10 || c==13){//allow only \t \n \r
                 to.append(1,c);
@@ -1348,14 +1349,14 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-//          wxString p = wxString(body_corrected.c_str(), wxConvUTF8);
-//          wxLogMessage(_T("ProcessResponse results:"));
-//          wxLogMessage(p);
+          wxString p = wxString(body_corrected.c_str(), wxConvUTF8);
+          wxLogMessage(_T("ProcessResponse results:"));
+          wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
-                return _T("50");                              // undetermined error??
+                return _T("57");                              // undetermined error??
             }
             
             wxString rootName = wxString::FromUTF8( root->Value() );
