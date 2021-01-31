@@ -3,75 +3,33 @@
 #
 # Build the Android artifacts inside the circleci linux container
 #
-
-
 set -xe
 
-pwd
+sudo apt -q update
+sudo apt install cmake git
 
-#not needed for CI built, the workflow starts up already in "project" directory.
-# but required for local build.
-#cd project
+# Install cloudsmith-cli (for upload) and cryptography (for git-push)
+sudo apt install python3-pip
+python3 -m pip install --user --force-reinstall pip setuptools
+sudo apt remove python3-six python3-colorama python3-urllib3
+export LC_ALL=C.UTF-8  LANG=C.UTF-8
+python3 -m pip install --user cloudsmith-cli cryptography
 
-ls -la
+# Build tarball
+builddir=build-android-hf
+test -d $builddir || mkdir $builddir
+cd $builddir && rm -rf *
 
-#sudo chown -R 1000 /oesenc_pi/build_android_64_ci
-
-sudo apt-get -q update
-sudo apt-get -y install git cmake gettext unzip
-
-# Get the OCPN Android build support package.
-#NOT REQUIRED FOR LOCAL BUILD
-wget https://github.com/bdbcat/OCPNAndroidCommon/archive/master.zip
-unzip -qq -o master.zip
-
-pwd
-ls -la
-
-#change this for local build, so as not to overwrite any other generic buildin "build".
-#sudo mkdir -p build_android_arm32
-#cd build_android_arm32
-sudo mkdir -p build
-cd build
-
-sudo rm -f CMakeCache.txt
-
-sudo cmake  \
-  -D_wx_selected_config=androideabi-qt-armhf \
+tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
+cmake \
+  -DOCPN_TARGET_TUPLE:STRING="Android-ARMHF;16;armhf" \
   -DwxQt_Build=build_android_release_19_static_O3 \
   -DQt_Build=build_arm32_19_O3/qtbase \
-  -DCMAKE_AR=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-android-ar \
-  -DCMAKE_CXX_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang++ \
-  -DCMAKE_C_COMPILER=/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang \
-  -DOCPN_Android_Common=OCPNAndroidCommon-master \
-  -DPREFIX=/ \
+  -DCMAKE_AR=${tool_base}/bin/arm-linux-androideabi-ar \
+  -DCMAKE_CXX_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang++ \
+  -DCMAKE_C_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang \
   .. 
+make VERBOSE=1 tarball
 
- 
-#sudo make clean  
-sudo make
-sudo make package
-
-#  All below for local docker build
-#ls -l 
-
-#xml=$(ls *.xml)
-#tarball=$(ls *.tar.gz)
-#tarball_basename=${tarball##*/}
-
-#echo $xml
-#echo $tarball
-#echo $tarball_basename
-#sudo sed -i -e "s|@filename@|$tarball_basename|" $xml
-
-
-#tmpdir=repack.$$
-#sudo rm -rf $tmpdir && sudo mkdir $tmpdir
-#sudo tar -C $tmpdir -xf $tarball_basename
-#sudo cp oesenc-plugin-android-armhf-16.xml metadata.xml
-#sudo cp metadata.xml $tmpdir
-#sudo tar -C $tmpdir -czf $tarball_basename .
-#sudo rm -rf $tmpdir
-    
-
-
+# Make sure that the upload script finds the files
+cd ..; mv  $builddir build

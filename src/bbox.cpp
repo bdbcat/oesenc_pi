@@ -5,7 +5,7 @@
 // Copyright:   2000 (c) Klaas Holwerda
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
-
+#include "config.h"
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
