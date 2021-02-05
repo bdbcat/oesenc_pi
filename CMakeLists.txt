@@ -154,6 +154,16 @@ IF (NOT WIN32)
      ENDIF (EXISTS /etc/os-release OR EXISTS /etc/sysconfig/SuSEfirewall2.d OR EXISTS /etc/suse-release OR EXISTS /etc/SuSE-release)
     ENDIF(NOT DEFINED PACKAGE_FORMAT)
 
+    IF (EXISTS /etc/arch-release)
+      IF (CMAKE_SIZEOF_VOID_P MATCHES "8")
+        SET (ARCH "x86_64")
+        SET (LIB_INSTALL_DIR "lib")
+      ELSE (CMAKE_SIZEOF_VOID_P MATCHES "8")
+        SET (ARCH "i386")
+        SET (LIB_INSTALL_DIR "lib")
+      ENDIF (CMAKE_SIZEOF_VOID_P MATCHES "8")
+    ENDIF (EXISTS /etc/arch-release)
+
   ENDIF (UNIX AND NOT APPLE)
   
   IF(APPLE)
