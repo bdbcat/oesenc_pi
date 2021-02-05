@@ -36,10 +36,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 message(STATUS "Building: ${BUILD_TYPE}")
 
-add_compile_options(
-  -Wno-inconsistent-missing-override
-  -Wno-potentially-evaluated-expression
-)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(
+    -Wno-inconsistent-missing-override
+    -Wno-potentially-evaluated-expression
+  )
+endif ()
 
 # -------- Options ----------
 
