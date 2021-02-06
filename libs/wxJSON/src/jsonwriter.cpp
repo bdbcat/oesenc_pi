@@ -8,13 +8,15 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-//#ifdef __GNUG__
+#ifdef __GNUG__
 //    #pragma implementation "jsonwriter.cpp"
-//#endif
+#endif
 
-// make wxLogTrace a noop, it's really slow
+#ifdef NDEBUG
+// make wxLogTrace a noop if no debug set, it's really slow
 // must be defined before including debug.h
 #define wxDEBUG_LEVEL 0
+#endif
 
 #include <wx/jsonwriter.h>
 
@@ -343,6 +345,8 @@ wxJSONWriter::SetDoubleFmtString( const char* fmt )
 int
 wxJSONWriter::DoWrite( wxOutputStream& os, const wxJSONValue& value, const wxString* key, bool comma )
 {
+    return 0;
+#if 0
     // note that this function is recursive
 
     // some variables that cannot be allocated in the switch statement
@@ -553,6 +557,8 @@ wxJSONWriter::DoWrite( wxOutputStream& os, const wxJSONValue& value, const wxStr
         lastChar = WriteSeparator( os );
     }
     return lastChar;
+#endif
+
 }
 
 

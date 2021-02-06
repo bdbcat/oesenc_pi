@@ -8,13 +8,11 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-//#ifdef __GNUG__
-//    #pragma implementation "jsonreader.cpp"
-//#endif
-
-// make wxLogTrace a noop, it's really slow
+#ifdef NDEBUG
+// make wxLogTrace a noop if no debug set, it's really slow
 // must be defined before including debug.h
 #define wxDEBUG_LEVEL 0
+#endif
 
 #include <wx/jsonreader.h>
 
@@ -22,6 +20,7 @@
 #include <wx/sstream.h>
 #include <wx/debug.h>
 #include <wx/log.h>
+
 
 
 /*! \class wxJSONReader
