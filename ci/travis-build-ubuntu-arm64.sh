@@ -42,7 +42,6 @@ python3 -m pip install -q --force-reinstall pip==20.3.4 setuptools==49.1.3
 python3 -m pip install --user -q cloudsmith-cli cryptography cmake
 
 export PATH=$HOME/.local/bin:$PATH
-python3 --version
 python3 -m pip install cmake
 cd /ci-source
 mkdir build && cd build

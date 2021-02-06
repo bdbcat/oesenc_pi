@@ -11,7 +11,6 @@ matrix:
     services:
     - docker
     script:
-    - pwd
     - ./ci/generic-build-raspbian-armhf.sh
     - sh -c "cd build; /bin/bash < upload.sh"
     - python3 ci/git-push
@@ -22,7 +21,6 @@ matrix:
     services:
     - docker
     script:
-    - pwd
     - ./ci/generic-build-raspbian-armhf.sh
     - sh -c "cd build; /bin/bash < upload.sh"
     - python3 ci/git-push
@@ -33,15 +31,12 @@ matrix:
     services:
     - docker
     script:
-    - pwd
     - ./ci/travis-build-ubuntu-arm64.sh
     - sh -c "cd build; /bin/bash < upload.sh"
     - python3 ci/git-push
-
 
 
 branches:
   only:
     - master
     - build
-
