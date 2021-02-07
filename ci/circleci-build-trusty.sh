@@ -24,8 +24,8 @@ python3.5 -m pip install --user --force-reinstall pip==20.3.4 setuptools==49.1.3
 # Install cloudsmith-cli (for upload) and cryptography (for git-push)
 sudo apt remove python3-six python3-colorama python3-urllib3
 export LC_ALL=C.UTF-8  LANG=C.UTF-8
-python3.5 -m pip install --user cloudsmith-cli
-python3.5 -m pip install --user cryptography
+# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
+python3.5 -m pip install --user cloudsmith-cli 'cryptography<3.4'
 
 
 # Build tarball and package

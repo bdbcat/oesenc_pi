@@ -54,7 +54,8 @@ make create-pkg
 python3 -m pip install --user cloudsmith-cli
 
 # Required by git-push
-python3 -m pip install --user cryptography
+# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
+python3 -m pip install --user 'cryptography<3.4'
 
 # python3 installs in odd place not on PATH, teach upload.sh to use it:
 pyvers=$(python3 --version | awk '{ print $2 }')

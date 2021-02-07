@@ -58,7 +58,8 @@ python3 -m pip install --user --upgrade pip
 python3 -m pip install --user cloudsmith-cli
 
 # Required by git-push
-python3 -m pip install --user cryptography
+# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
+python3 -m pip install --user 'cryptography<3.4'
 
 # python install scripts in ~/.local/bin, teach upload.sh to use this in PATH
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.uploadrc

@@ -48,7 +48,8 @@ sudo apt install python3-pip
 python3 -m pip install -q --force-reinstall pip==20.3.4 setuptools==49.1.3
 sudo apt remove python3-six python3-colorama python3-urllib3
 export LC_ALL=C.UTF-8  LANG=C.UTF-8
-python3 -m pip install --user cloudsmith-cli cryptography
+# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
+python3 -m pip install --user cloudsmith-cli 'cryptography<3.4'
 
 # Make sure the upload script can locate the build dir:
 ln -s $TRAVIS_BUILD_DIR/build . || :
