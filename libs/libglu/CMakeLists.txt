@@ -29,8 +29,12 @@ endif ()
 
 if ("${plugin_target}" STREQUAL  "raspbian")
   file(GLOB _glulibs /usr/lib/*/libGLU.so.* /usr/lib*/libGLU.so.*)
-  install(CODE
-    "execute_process(COMMAND cmake -E copy ${_glu_libs} app/files/lib)"
-  )
-  message(STATUS "Bundling libGLU.so on Raspbian build.")
+  if (NOT "${_glulibs}" STREQUAL "")
+    install(CODE
+      "execute_process(COMMAND cmake -E copy ${_glulibs} app/files/lib)"
+    )
+    message(STATUS "Bundling libGLU.so on Raspbian build.")
+  else ()
+    message(STATUS "Raspbian: Cannot locate libGLU library to bundle")
+  endif ()
 endif ()
