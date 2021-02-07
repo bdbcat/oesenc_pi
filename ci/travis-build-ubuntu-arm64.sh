@@ -31,14 +31,14 @@ EOF
 # Run script in docker
 #
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-docker run --privileged -d -ti -e "container=docker" \
+docker run --privileged -ti \
         -v "$TRAVIS_BUILD_DIR:/ci-source:rw" \
         -e "CLOUDSMITH_STABLE_REPO=$CLOUDSMITH_STABLE_REPO" \
         -e "CLOUDSMITH_BETA_REPO=$CLOUDSMITH_BETA_REPO" \
         -e "CLOUDSMITH_UNSTABLE_REPO=$CLOUDSMITH_UNSTABLE_REPO" \
         -e "CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM" \
         -e "TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER" \
-    $DOCKER_IMAGE /bin/bash -xe /ci-source/build.sh
+        $DOCKER_IMAGE /bin/bash -xe /ci-source/build.sh
 rm -f $TRAVIS_BUILD_DIR/build.sh
 
 
@@ -49,3 +49,6 @@ python3 -m pip install -q --force-reinstall pip==20.3.4 setuptools==49.1.3
 sudo apt remove python3-six python3-colorama python3-urllib3
 export LC_ALL=C.UTF-8  LANG=C.UTF-8
 python3 -m pip install --user cloudsmith-cli cryptography
+
+# Make sure the upload script can locate the build dir:
+ln -s $TRAVIS_BUILD_DIR/build . || :
