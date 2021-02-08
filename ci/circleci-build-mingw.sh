@@ -52,7 +52,8 @@ pyenv versions | sed 's/*//' | awk '{print $1}' | tail -1 \
 
 # Install cloudsmith(for upload script) and cryptography (for git-push).
 # https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
-python3 -m pip install --user cloudsmith-cli 'cryptography<3.4'
+python3 -m pip install --upgrade --user -q pip setuptools
+python3 -m pip install --user -q cloudsmith-cli cryptography
 
 # python installs scripts in ~/.local/bin, teach upload.sh to use it in PATH:
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.uploadrc

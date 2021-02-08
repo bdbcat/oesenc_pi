@@ -10,11 +10,10 @@ sudo apt install cmake git
 
 # Install cloudsmith-cli (for upload) and cryptography (for git-push)
 sudo apt install python3-pip
-python3 -m pip install --user --force-reinstall pip setuptools
+python3 -m pip install --user --force-reinstall -q pip setuptools
 sudo apt remove python3-six python3-colorama python3-urllib3
 export LC_ALL=C.UTF-8  LANG=C.UTF-8
-# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
-python3 -m pip install --user cloudsmith-cli 'cryptography<3.4'
+python3 -m pip install --user cloudsmith-cli cryptography
 
 # Build tarball
 builddir=build-android-hf

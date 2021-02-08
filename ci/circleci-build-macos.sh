@@ -51,11 +51,11 @@ make -j $(sysctl -n hw.physicalcpu) VERBOSE=1 tarball
 make create-pkg
 
 # Install cloudsmith needed by upload script
+python3 -m pip install --upgrade --user -q pip setuptools
 python3 -m pip install --user cloudsmith-cli
 
 # Required by git-push
-# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
-python3 -m pip install --user 'cryptography<3.4'
+python3 -m pip install --user cryptography
 
 # python3 installs in odd place not on PATH, teach upload.sh to use it:
 pyvers=$(python3 --version | awk '{ print $2 }')

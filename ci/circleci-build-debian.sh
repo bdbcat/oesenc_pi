@@ -5,7 +5,17 @@
 #
 set -xe
 sudo apt -qq update || apt update
-sudo apt-get -q install  devscripts equivs
+sudo apt-get -qq install devscripts equivs software-properties-common
+
+if [ -n  "$USE_DEADSNAKES_PY37" ]; then
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt -qq update
+    sudo  apt-get -q install  python3.7
+    for py in $(ls /usr/bin/python3.[0-9]); do
+        sudo update-alternatives --install /usr/bin/python3 python3 $py 1
+    done
+    sudo update-alternatives --set python3 /usr/bin/python3.7
+fi
 
 mkdir  build
 cd build
@@ -17,14 +27,13 @@ if [ -n "$BUILD_GTK3" ]; then
         /usr/lib/*-linux-*/wx/config/gtk3-unicode-3.0
 fi
 
-sudo apt-get install \
+sudo apt install -q \
     python3-pip python3-setuptools python3-dev python3-wheel \
     build-essential libssl-dev libffi-dev 
 
-# Latest pip 21.0.0 is broken:
-python3 -m pip install --force-reinstall pip==20.3.4
-# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
-python3 -m pip install --user -q cloudsmith-cli 'cryptography<3.4' cmake
+python3 -m pip install --user --upgrade -q setuptools
+python3 -m pip install --user --upgrade -q wheel pip
+python3 -m pip install --user -q cloudsmith-cli cryptography cmake
 
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j $(nproc) VERBOSE=1 tarball

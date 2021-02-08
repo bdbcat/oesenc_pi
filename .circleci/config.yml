@@ -67,7 +67,7 @@ jobs:
       - image: circleci/buildpack-deps:trusty-scm
     environment:
       - OCPN_TARGET: trusty
-    steps:     
+    steps:
       - checkout
       - run: ci/circleci-build-trusty.sh
       - run: sh -c "ldd build/app/*/lib/opencpn/*.so"
@@ -79,6 +79,7 @@ jobs:
       - image: circleci/buildpack-deps:xenial-scm
     environment:
       - OCPN_TARGET: xenial
+      - USE_DEADSNAKES_PY37: 1
     <<: *debian-steps
 
   build-bionic:

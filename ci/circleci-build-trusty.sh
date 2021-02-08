@@ -16,7 +16,7 @@ sudo apt-get install libglu1-mesa-dev
 wget https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.sh
 sudo sh cmake-3.12.0-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir
 
-# Update python and python-pip to extent possible
+# Update python and python-pip to extent possible.
 sudo apt install python3.5  python3-pip
 python3.5 -m pip install --user --force-reinstall pip==20.3.4 setuptools==49.1.3
 
