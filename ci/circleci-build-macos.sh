@@ -3,7 +3,6 @@
 
 #
 # Build the  MacOS artifacts
-#
 
 set -xe
 
@@ -32,8 +31,16 @@ else
     brew install --cask packages
 fi
 
+# Install the pre-built wxWidgets package
+wget -q https://download.opencpn.org/s/rwoCNGzx6G34tbC/download \
+    -O /tmp/wx312B_opencpn50_macos109.tar.xz
+tar -C /tmp -xJf /tmp/wx312B_opencpn50_macos109.tar.xz 
+
+
+# Build and package
 rm -rf build && mkdir build && cd build
 cmake \
+  -DCMAKE_BUILD_TYPE=Release \
   -DwxWidgets_CONFIG_EXECUTABLE=/tmp/wx312B_opencpn50_macos109/bin/wx-config \
   -DwxWidgets_CONFIG_OPTIONS="--prefix=/tmp/wx312B_opencpn50_macos109" \
   -DCMAKE_INSTALL_PREFIX= \

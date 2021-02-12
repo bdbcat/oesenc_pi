@@ -24,7 +24,7 @@ from OpenCPN 5.2.0 is built using:
     $ cmake ..
     $ make tarball
 
-To build the tarball:
+To build the flatpak tarball:
 
     $ cmake ..
     $ make flatpak
@@ -52,18 +52,18 @@ The build system is able to push all metadata changes to a local clone
 of the plugins catalog project at https://github.com/opencpn/plugins.
 The purpose is to make it easier to make pull requests to update the
 catalog. See
-https://github.com/Rasbats/managed_plugins/wiki/Catalog-PR-git-integration
+https://github.com/Rasbats/managed_plugins/wiki/OpenCPN-Plugins-Catalog-and-Github-Integration
 
 
 ## Copyright and licensing
 
-This software is Copyright (c) David S Register 2017-2020. It is distributed
-under the terms of the Gnu Public License version 2 or, at your option,
-any later version. See the file COPYING for details.
+This software is copyright (c) David Register 2020. It is distributed under
+the terms of the Gnu Public License version 2 or, at your option, any later
+version. See COPYING.gplv2.
 
-The software contains open-source licensed files under different licenses.
-See the source files for details.
+The oeserverd binary and libsgllnx64-2.29.02 libraries are closed source.
+Re-distribution of these items is allowed.
 
-
-[1] https://www.opencpn.org <br>
-[2] http://o-charts.org
+The sources also contains dependencies distributed under various open-source
+licenses including Expat, the Curl license, SGI-B, Zlib and Khronos. Refer
+to the source files for details.
