@@ -1985,8 +1985,10 @@ bool eSENCChart::DoRenderRectOnGL( const wxGLContext &glc, const ViewPort& VPoin
             // Don't pre-process the geometry unless the object is to be actually rendered
             if(!crnt->obj->pPolyTessGeo->IsOk() ){ 
                 if(ps52plib->ObjectRenderCheckRules( crnt, &tvp, true )){
-                   if(!crnt->obj->pPolyTessGeo->m_pxgeom)
+                   if(!crnt->obj->pPolyTessGeo->m_pxgeom){
+                       qDebug() << m_FullPath.mb_str(); 
                         crnt->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( crnt->obj );
+                   }
                 }
             }
             ps52plib->RenderAreaToGL( glc, crnt, &tvp );
@@ -5444,8 +5446,10 @@ int eSENCChart::DCRenderRect( wxMemoryDC& dcinput, const PlugIn_ViewPort& vp, wx
                     // Don't pre-process the geometry unless the object is to be actually rendered
                     if(!crnt->obj->pPolyTessGeo->IsOk() ){ 
                         if(ps52plib->ObjectRenderCheckRules( crnt, &cvp, true )){
-                            if(!crnt->obj->pPolyTessGeo->m_pxgeom)
+                            if(!crnt->obj->pPolyTessGeo->m_pxgeom){
+                                qDebug() << m_FullPath.mb_str(); 
                                 crnt->obj->pPolyTessGeo->m_pxgeom = buildExtendedGeom( crnt->obj );
+                            }
                         }
                     }
                     
@@ -9438,6 +9442,8 @@ Extended_Geometry *eSENCChart::buildExtendedGeom( S57Obj *obj )
     
     //  Allocate some storage for contour points
     double *ptpf = (double *) malloc( ( max_points *2 ) * sizeof(double) );
+    xG->malloc_size = max_points;
+    
     double *pfRun = ptpf;
     
     unsigned char *vbo_point = (unsigned char *)obj->m_chart_context->chart->GetLineVertexBuffer();;
