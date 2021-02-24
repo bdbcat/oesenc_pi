@@ -93,7 +93,6 @@ public:
       double            x_offset;
       double            y_rate;
       double            y_offset;
-      int malloc_size;
 };
 
 

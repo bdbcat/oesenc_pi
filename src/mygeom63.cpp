@@ -60,9 +60,6 @@
 
 #endif
 
-#ifdef __OCPN__ANDROID__
-#include "qdebug.h"
-#endif
 //------------------------------------------------------------------------------
 //          Some local definitions for opengl/glu types,
 //            just enough to build the glu tesselator option.
@@ -230,12 +227,9 @@ HINSTANCE      s_hGLU_DLL;                   // Handle to DLL
  * @return TRUE if clockwise otherwise FALSE.
  */
 
-int malloc_size;
 bool isRingClockwise(wxPoint2DDouble *pp, int nPointCount)
 
 {
-    qDebug() << "IRC" << pp << nPointCount << malloc_size;
-    
     double dfSum = 0.0;
     
     for( int iVert = 0; iVert < nPointCount-1; iVert++ )
@@ -955,7 +949,7 @@ int PolyTessGeo::BuildTessGLFromXG(void)
 //      printf("xgeom npta: %d\n", npta);
       geoPt = (GLdouble *)malloc((npta) * 3 * sizeof(GLdouble));     // vertex array
 
-    malloc_size =m_pxgeom->malloc_size;
+
 
    //  Grow the work buffer if necessary
 

@@ -5708,10 +5708,8 @@ int s52plib::RenderLCLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     else
         if( rzRules->obj->pPolyTessGeo ) {
             if( !rzRules->obj->pPolyTessGeo->IsOk() ){ // perform deferred tesselation
-                if(rzRules->obj->pPolyTessGeo->m_pxgeom){
-                    qDebug() << "IndexB" << rzRules->obj->Index;
-                    rzRules->obj->pPolyTessGeo->BuildDeferredTess();
-                }
+                if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+                rzRules->obj->pPolyTessGeo->BuildDeferredTess();
             }
 
             PolyTriGroup *pptg = rzRules->obj->pPolyTessGeo->Get_PolyTriGroup_head();
@@ -8597,10 +8595,8 @@ void s52plib::RenderToBufferFilledPolygon( ObjRazRules *rzRules, S57Obj *obj, S5
 
     if( obj->pPolyTessGeo ) {
         if( !rzRules->obj->pPolyTessGeo->IsOk() ){ // perform deferred tesselation
-                if(rzRules->obj->pPolyTessGeo->m_pxgeom){
-                    qDebug() << "IndexC" << rzRules->obj->Index;
-                    rzRules->obj->pPolyTessGeo->BuildDeferredTess();
-                }
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
         }
 
         wxPoint *pp3 = (wxPoint *) malloc( 3 * sizeof(wxPoint) );
@@ -8794,10 +8790,8 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         
         // perform deferred tesselation
         if( !rzRules->obj->pPolyTessGeo->IsOk() ){
-                if(rzRules->obj->pPolyTessGeo->m_pxgeom){
-                    qDebug() << "IndexD" << rzRules->obj->Index;
-                    rzRules->obj->pPolyTessGeo->BuildDeferredTess();
-                }
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
         }
 
         //  Get the vertex data
@@ -9328,10 +9322,8 @@ int s52plib::RenderToGLAP( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     wxPoint *ptp;
     if( rzRules->obj->pPolyTessGeo ) {
         if( !rzRules->obj->pPolyTessGeo->IsOk() ){ // perform deferred tesselation
-                if(rzRules->obj->pPolyTessGeo->m_pxgeom){
-                    qDebug() << "IndexE" << rzRules->obj->Index;
-                    rzRules->obj->pPolyTessGeo->BuildDeferredTess();
-                }
+            if(rzRules->obj->pPolyTessGeo->m_pxgeom)
+            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
         }
 
         ptp = (wxPoint *) malloc(
@@ -9680,10 +9672,7 @@ int s52plib::RenderToGLAP_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *vp
 
         // perform deferred tesselation
         if( !rzRules->obj->pPolyTessGeo->IsOk() )
-                if(rzRules->obj->pPolyTessGeo->m_pxgeom){
-                    qDebug() << "IndexA" << rzRules->obj->Index;
-                    rzRules->obj->pPolyTessGeo->BuildDeferredTess();
-                }
+            rzRules->obj->pPolyTessGeo->BuildDeferredTess();
 
         //  Get the vertex data
         PolyTriGroup *ppg_vbo = rzRules->obj->pPolyTessGeo->Get_PolyTriGroup_head();
