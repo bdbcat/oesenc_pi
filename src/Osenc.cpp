@@ -266,6 +266,10 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
 {
     #define READ_SIZE 64000;
     #define MAX_TRIES 100;
+    int timeout_msec = 100;
+#ifdef __OCPN__ANDROID__
+    timeout_msec = 1000;                // Longer for Android
+#endif    
     if(!m_uncrypt_stream){
         size_t max_read = READ_SIZE;
         //    bool blk = fcntl(privatefifo, F_GETFL) & O_NONBLOCK;
@@ -289,7 +293,7 @@ Osenc_instream &Osenc_instream::Read(void *buffer, size_t size)
                 
                 fd.fd = publicSocket; // your socket handler 
                 fd.events = POLLIN;
-                ret = poll(&fd, 1, 100); // 1 second for timeout
+                ret = poll(&fd, 1, timeout_msec); // nominal 100 msec timeout, except for Android.
                 switch (ret) {
                     case -1:
                         // Error
