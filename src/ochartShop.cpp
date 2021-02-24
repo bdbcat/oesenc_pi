@@ -3991,7 +3991,10 @@ bool shopPanel::doSystemNameWizard( bool *bnew )
     if( g_systemName.Len() && (g_systemNameChoiceArray.Index(g_systemName) == wxNOT_FOUND))
         g_systemNameChoiceArray.Insert(g_systemName, 0);
     
-    oeSENCSystemNameSelector dlg( GetOCPNCanvasWindow());
+    wxWindow *canvas=GetOCPNCanvasWindow();
+    if (canvas == NULL) return false;
+    
+    oeSENCSystemNameSelector dlg( canvas);
     
     wxSize dialogSize(500, -1);
     
@@ -4050,7 +4053,10 @@ bool shopPanel::doSystemNameWizard( bool *bnew )
 
 wxString shopPanel::doGetNewSystemName( )
 {
-    oeSENCGETSystemName dlg( GetOCPNCanvasWindow());
+    wxWindow *canvas=GetOCPNCanvasWindow();
+    if (canvas == NULL) return wxEmptyString;
+    
+    oeSENCGETSystemName dlg( canvas);
     
     wxSize dialogSize(500, -1);
     

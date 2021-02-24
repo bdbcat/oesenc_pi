@@ -251,7 +251,7 @@ else ()
 endif ()
 
 IF(NOT WIN32)
- ADD_DEFINITIONS( "-Wall -g -fexceptions -O2 -Wno-unused -fno-strict-aliasing ")
+ ADD_DEFINITIONS( "-Wall -g -fexceptions -Wno-unused -fno-strict-aliasing ")
 
  IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     ADD_DEFINITIONS( " -O0")
