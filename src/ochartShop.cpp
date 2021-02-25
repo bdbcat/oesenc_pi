@@ -23,7 +23,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************
  */
-
+#include "config.h"
 
 #include "wx/wxprec.h"
 
@@ -188,7 +188,7 @@ class HardBreakWrapper : public wxTextWrapper
 #ifdef __OCPN__ANDROID__
 bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStrip, bool bRemoveZip)
 {
-    qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
+//    qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
     
     wxString ns;
     ns.Printf(_T("%d"), nStrip);
@@ -197,14 +197,14 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
     if(bRemoveZip)
         br = _T("1");
     
-    qDebug() << "br" << br.mb_str();
+//    qDebug() << "br" << br.mb_str();
     
     wxString stat = callActivityMethod_s4s( "unzipFile", zipFile, destDir, ns, br  );
     
     if(wxNOT_FOUND == stat.Find(_T("OK")))
         return false;
     
-    qDebug() << "unzip start";
+//    qDebug() << "unzip start";
     
     bool bDone = false;
     wxString rtopDir;
@@ -212,7 +212,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
         wxMilliSleep(1000);
         //wxSafeYield(NULL, true);
         
-        qDebug() << "unzip poll";
+//        qDebug() << "unzip poll";
         
         wxString result = callActivityMethod_ss( "getUnzipStatus", _T("") );
         if(wxNOT_FOUND != result.Find(_T("DONE"))){
@@ -236,7 +236,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
     
      tlDir = rtopDir;
 
-    qDebug() << "unzip done";
+//    qDebug() << "unzip done";
     
     return true;    
     
@@ -854,7 +854,7 @@ wxBitmap& itemChart::GetChartThumbnail(int size, bool bDL_If_Needed)
                     _OCPN_DLStatus ret = OCPN_downloadFile( thumbnailURL, file_URI, _T(""), _T(""), wxNullBitmap, NULL, 0, 15);
 
                     wxLogMessage(_T("DLRET"));
-                    qDebug() << "DL done";
+//                    qDebug() << "DL done";
                     if(OCPN_DL_NO_ERROR == ret){
                         wxCopyFile(filetmp, file);
                         iResponseCode = 200;
@@ -872,8 +872,8 @@ wxBitmap& itemChart::GetChartThumbnail(int size, bool bDL_If_Needed)
                     }
 
                 }
-                else
-                    qDebug() << "Busy";
+//                else
+//                    qDebug() << "Busy";
                 
 #endif                
             }

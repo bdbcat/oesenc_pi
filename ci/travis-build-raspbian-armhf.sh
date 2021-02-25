@@ -72,8 +72,6 @@ set -xe
 
 #python -m ensurepip
 
-#python3 -m pip install -q setuptools
-#python3 -m pip install -q cloudsmith-cli
 sudo python3 -m pip install -q cloudsmith-cli
 
 BUILD_ID=${APPVEYOR_BUILD_NUMBER:-1}

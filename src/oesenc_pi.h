@@ -40,7 +40,7 @@
 #include <wx/html/htmlwin.h>
 
 #include "TexFont.h"
-#include "version.h"
+#include "config.h"
 
 //  The version number now comes from (${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/version.h) file
 //  as configured by the CMakeLists.txt script

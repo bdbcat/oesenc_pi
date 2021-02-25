@@ -25,6 +25,8 @@
  *
  *
  */
+
+#include <math.h>
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -36,9 +38,8 @@
 #include <wx/mstream.h>
 
 
+#include "config.h"
 #include "mygeom.h"
-
-#include <math.h>
 #include "ocpn_plugin.h"
 
 #ifdef ocpnUSE_GL

@@ -13,6 +13,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#include "config.h"
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"

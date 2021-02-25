@@ -29,6 +29,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "config.h"
 #include "LLRegion.h"
 
 static inline double cross(const contour_pt &v1, const contour_pt &v2)

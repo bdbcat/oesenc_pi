@@ -24,6 +24,7 @@
  ***************************************************************************
  */
 
+#include "config.h"
 
 #include "wx/wxprec.h"
 
@@ -44,7 +45,7 @@
 
 #include "oesenc_pi.h"
 #include "eSENCChart.h"
-#include "src/myiso8211/iso8211.h"
+#include "iso8211.h"
 #include "dsa_utils.h"
 #include "s57RegistrarMgr.h"
 #include "S57ClassRegistrar.h"
@@ -52,9 +53,9 @@
 #include "s52utils.h"
 #include "Osenc.h"
 #include "chartsymbols.h"
-#include "json_defs.h"
-#include "jsonwriter.h"
-#include "jsonreader.h"
+#include "wx/json_defs.h"
+#include "wx/jsonwriter.h"
+#include "wx/jsonreader.h"
 #include "dsa_utils.h"
 #include "sha1.h"
 #include "InstallDirs.h"
@@ -63,7 +64,6 @@
 #include "ochartShop.h"
 //#endif
 
-#include "version.h"
 
 #ifdef __WXOSX__
 #include "GL/gl.h"
@@ -84,7 +84,7 @@
 
 #endif
 
-#ifdef __MSVC__
+#ifdef _WIN32
 #include <windows.h>
 #include <shlobj.h>
 #endif

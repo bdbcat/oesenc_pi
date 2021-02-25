@@ -1,97 +1,74 @@
 #
-#  Export variables used in plugin setup: GIT_HASH, GIT_COMMIT,
-#  PKG_TARGET, PKG_TARGET_VERSION and PKG_NVR
-
-execute_process(
-  COMMAND git log -1 --format=%h
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-execute_process(
-  COMMAND git log -1 --format=%ci
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_COMMIT_DATE
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-if (OCPN_FLATPAK)
-    set(PKG_TARGET "flatpak-x86_64")
-    set(PKG_TARGET_VERSION "18.08")    # As of flatpak/*yaml
-elseif (MINGW)
-    set(PKG_TARGET "mingw-x86_64")
-    if (CMAKE_SYSTEM_VERSION)
-        set(PKG_TARGET_VERSION ${CMAKE_SYSTEM_VERSION})
-    else ()
-	set(PKG_TARGET_VERSION 10)
-    endif ()
-elseif (MSVC)
-    set(PKG_TARGET "msvc")
-    if (CMAKE_SYSTEM_VERSION)
-        set(PKG_TARGET_VERSION ${CMAKE_SYSTEM_VERSION})
-    elseif (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
-        set(PKG_TARGET_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
-    else ()
-        set(PKG_TARGET_VERSION 10)
-    endif ()
-elseif (APPLE)
-    set(PKG_TARGET "darwin")
-    execute_process(COMMAND "sw_vers" "-productVersion"
-                    OUTPUT_VARIABLE PKG_TARGET_VERSION)
-elseif(_wx_selected_config MATCHES "androideabi-qt-arm64")
-     #Android is cross built, so set wxWidgets dependies directly, elsewhere
-     set(wxWidgets_LIBRARIES FOOBAT)
-     set(PKG_TARGET "Android-ARM64")
-     set(PKG_TARGET_VERSION 16)
-     set(ARCH arm64)              
-elseif(_wx_selected_config MATCHES "androideabi-qt-armhf")
-     #Android is cross built, so set wxWidgets dependies directly, elsewhere
-     set(wxWidgets_LIBRARIES FOOBAT)
-     set(PKG_TARGET "Android-ARMHF")
-     set(PKG_TARGET_VERSION 16)
-     set(ARCH armhf)              
-elseif (UNIX)
-    # Some linux dist:
-    execute_process(COMMAND "lsb_release" "-is"
-                    OUTPUT_VARIABLE PKG_TARGET
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND "lsb_release" "-rs"
-                    OUTPUT_VARIABLE PKG_TARGET_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-
-    # Handle gtk3 build variant           
-    string(STRIP "${PKG_TARGET}" PKG_TARGET)
-    string(TOLOWER "${PKG_TARGET}" PKG_TARGET)
-    if (NOT DEFINED wxWidgets_LIBRARIES)
-        message(FATAL_ERROR "PluginSetup: required wxWidgets_LIBRARIES missing")
-    elseif ("${wxWidgets_LIBRARIES}" MATCHES "gtk3u" AND PKG_TARGET STREQUAL "ubuntu")
-        message(STATUS "PluginSetup: gtk3 found")
-        set(PKG_TARGET "${PKG_TARGET}-gtk3")
-    endif ()
-
-    # Generate architecturally uniques names for linux output packages
-    if(ARCH MATCHES "arm64")
-        set(PKG_TARGET "${PKG_TARGET}-ARM64")
-    elseif(ARCH MATCHES "armhf")
-        set(PKG_TARGET "${PKG_TARGET}-ARMHF")
-    elseif(ARCH MATCHES "i386")
-        set(PKG_TARGET "${PKG_TARGET}-i386")
-    else ()
-        set(PKG_TARGET "${PKG_TARGET}-x86_64")
-    endif ()
-else ()
-    set(PKG_TARGET "unknown")
-    set(PKG_TARGET_VERSION 1)
+# Export variables used in plugin setup: plugin_target and
+# plugin_target_version.
+#
+if (DEFINED plugin_target)
+  return ()
 endif ()
 
+if (NOT "${OCPN_TARGET_TUPLE}" STREQUAL "")
+  list(GET OCPN_TARGET_TUPLE 0 plugin_target)
+  list(GET OCPN_TARGET_TUPLE 1 plugin_target_version)
+elseif ("${BUILD_TYPE}" STREQUAL "flatpak")
+  set(plugin_target "flatpak")
+  set(plugin_target_version "18.08") # As of flatpak/*yaml
+elseif (MINGW)
+  set(plugin_target "mingw")
+  if (CMAKE_SYSTEM_VERSION)
+    set(plugin_target_version ${CMAKE_SYSTEM_VERSION})
+  else ()
+    set(plugin_target_version 10)
+  endif ()
+elseif (MSVC)
+  set(plugin_target "msvc")
+  if (CMAKE_SYSTEM_VERSION)
+    set(plugin_target_version ${CMAKE_SYSTEM_VERSION})
+  elseif (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
+    set(plugin_target_version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
+  else ()
+    set(plugin_target_version 10)
+  endif ()
+elseif (APPLE)
+  set(plugin_target "darwin")
+  set(plugin_target_version "10.13.6")
+elseif (UNIX)
+  # Some linux dist:
+  execute_process(
+    COMMAND "lsb_release" "-is"
+    OUTPUT_VARIABLE plugin_target
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  execute_process(
+    COMMAND "lsb_release" "-rs"
+    OUTPUT_VARIABLE plugin_target_version
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+else ()
+  set(plugin_target "unknown")
+  set(plugin_target_version 1)
+endif ()
 
-string(STRIP "${PKG_TARGET}" PKG_TARGET)
-string(TOLOWER "${PKG_TARGET}" PKG_TARGET)
-string(STRIP "${PKG_TARGET_VERSION}" PKG_TARGET_VERSION)
-string(TOLOWER "${PKG_TARGET_VERSION}" PKG_TARGET_VERSION)
-set(PKG_TARGET_NVR "${PKG_TARGET}-${PKG_TARGET_VERSION}")
+string(STRIP "${plugin_target}" plugin_target)
+string(TOLOWER "${plugin_target}" plugin_target)
+string(STRIP "${plugin_target_version}" plugin_target_version)
+string(TOLOWER "${plugin_target_version}" plugin_target_version)
 
-message(STATUS "PluginSetup: PKG_TARGET: ${PKG_TARGET}")
-message(STATUS "PluginSetup: PKG_TARGET_VERSION: ${PKG_TARGET_VERSION}")
+if (plugin_target STREQUAL "ubuntu")
+  if (DEFINED wxWidgets_CONFIG_EXECUTABLE)
+    set(_WX_CONFIG_PROG ${wxWidgets_CONFIG_EXECUTABLE})
+  else ()
+    find_program(_WX_CONFIG_PROG NAMES $ENV{WX_CONFIG} wx-config )
+  endif ()
+  if (_WX_CONFIG_PROG)
+    execute_process(
+      COMMAND ${_WX_CONFIG_PROG} --selected-config
+      OUTPUT_VARIABLE _WX_SELECTED_CONFIG
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if (_WX_SELECTED_CONFIG MATCHES gtk3)
+      set(plugin_target ubuntu-gtk3)
+    endif ()
+  else ()
+    message(WARNING "Cannot locate wx-config utility")
+  endif ()
+endif ()
