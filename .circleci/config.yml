@@ -162,6 +162,7 @@ std-filters: &std-filters
       only:
         - master
         - build
+        - leamas-new-build
 
 workflows:
   version: 2
