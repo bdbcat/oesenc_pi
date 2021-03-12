@@ -75,7 +75,8 @@ endif ()
 message(STATUS "Selected upload repository: ${pkg_repo}")
 
 # pkg_semver: Complete version including build info
-set(pkg_semver "${PROJECT_VERSION}+${_build_id}.${_gitversion}")
+#set(pkg_semver "${PROJECT_VERSION}+${_build_id}.${_gitversion}")
+set(pkg_semver "${PROJECT_VERSION}")
 
 # pkg_displayname: Used for xml metadata and GUI name
 string(CONCAT pkg_displayname
