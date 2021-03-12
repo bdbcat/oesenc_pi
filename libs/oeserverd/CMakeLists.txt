@@ -28,7 +28,10 @@ if (EXISTS "/etc/udev/rules.d")
 endif ()
 
 if (QT_ANDROID)
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/oeserverda_arm/oeserverda)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/oeserverda_android/oeserverda
+    ${CMAKE_INSTALL_PREFIX}/bin/oeserverda COPYONLY
+  )
 elseif (APPLE)
   install_libs("osx/oeserverd" "osx/libsglmac-2.29.0.0.dylib.x86_64")
   # We also need to copy the helper utility and required dylibs to the binary
