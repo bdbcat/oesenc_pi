@@ -81,9 +81,8 @@ set(pkg_semver "${PROJECT_VERSION}")
 # pkg_displayname: Used for xml metadata and GUI name
 string(CONCAT pkg_displayname
   "${PLUGIN_API_NAME}-${VERSION_MAJOR}.${VERSION_MINOR}"
-  "-${plugin_target}-${plugin_target_version}"
+  "-${_pkg_arch}-${plugin_target}-${plugin_target_version}"
 )
-
 # pkg_tarname: Tarball basename
 string(CONCAT pkg_tarname 
   "${PLUGIN_API_NAME}-${pkg_semver}_"
