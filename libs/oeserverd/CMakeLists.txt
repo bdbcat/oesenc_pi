@@ -42,17 +42,29 @@ elseif (APPLE)
     ${CMAKE_BINARY_DIR}/libsglmac-2.29.0.0.dylib.x86_64 COPYONLY
   )
 elseif (UNIX AND ARCH  STREQUAL "x86_64")
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linux64/oeserverd)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linux64/oeserverd
+    ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
+  )
   install_libs(${CMAKE_CURRENT_LIST_DIR}/linux64/libsgllnx64-2.29.02.so)
 elseif (UNIX AND ARCH STREQUAL "armhf")
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm/oeserverd)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linuxarm/oeserverd
+    ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
+  )
   install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm/libsglarmhf32-2.30.0.0.so)
 elseif (UNIX AND ARCH STREQUAL "armh64")
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm64/oeserverd)
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm/libsglarm64-2.31.0.0.so)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linuxarm64/oeserverd
+    ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
+  )
+  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm64/libsglarm64-2.31.0.0.so)
 elseif (UNIX)
   # 32-bit amd64: is this really useful?
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linux/oeserverd)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linux/oeserverd
+    ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
+  )
   install_libs(${CMAKE_CURRENT_LIST_DIR}/linux/libsgllnx-2.29.0.1.so)
 elseif (WIN32)
   file(GLOB vcdll_files "${CMAKE_CURRENT_LIST}/win//*.dll")
