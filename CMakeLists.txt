@@ -78,7 +78,10 @@ endif ()
 
 # -------  Plugin setup --------
 #
-project(oesenc_pi VERSION 4.2.18.2)
+include("VERSION.cmake")
+SET(FULL_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" )
+
+project(oesenc_pi VERSION ${FULL_VERSION})
 
 set(DISPLAY_NAME oesenc)    # Dialogs, installer artifacts, ...
 set(PLUGIN_API_NAME oeSENC) # As of GetCommonName() in plugin API
