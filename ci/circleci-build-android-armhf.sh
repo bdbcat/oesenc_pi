@@ -22,7 +22,7 @@ cd $builddir && rm -rf *
 
 tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
 cmake \
-  -DOCPN_TARGET_TUPLE:STRING="Android;16;armhf" \
+  -DOCPN_TARGET_TUPLE:STRING="Android-armhf;16;armhf" \
   -DwxQt_Build=build_android_release_19_static_O3 \
   -DQt_Build=build_arm32_19_O3/qtbase \
   -DCMAKE_AR=${tool_base}/bin/arm-linux-androideabi-ar \
