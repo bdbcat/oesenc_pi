@@ -22,7 +22,7 @@ cd $builddir && rm -rf *
 
 tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
 cmake \
-  -DOCPN_TARGET_TUPLE:STRING="Android-ARM64;16;arm64" \
+  -DOCPN_TARGET_TUPLE:STRING="Android;16;arm64" \
   -DwxQt_Build=build_android_release_64_static_O3 \
   -DQt_Build=build_arm64/qtbase \
   -DCMAKE_AR=${tool_base}/bin/aarch64-linux-android-ar \
