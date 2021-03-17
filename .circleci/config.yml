@@ -1,189 +1,207 @@
 ---
-version: 2
-jobs:
-   build-trusty:
-     docker:
-       - image: circleci/buildpack-deps:trusty-scm
-     environment:
-       - OCPN_TARGET:  trusty
-     steps:
-       - checkout
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ trusty-updates main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: cat /etc/apt/sources.list
-       - run: ci/circleci-build-trusty.sh
-       - run: ci/circleci-upload.sh
-   build-xenial:
-     docker:
-       - image: circleci/buildpack-deps:xenial-scm
-     environment:
-       - OCPN_TARGET:  xenial
-     steps:
-       - checkout
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ xenial main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ xenial-updates main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: cat /etc/apt/sources.list
-       - run: ci/circleci-build-debian.sh
-       - run: ci/circleci-upload.sh
-   build-bionic:
-     docker:
-       - image: circleci/buildpack-deps:bionic-scm
-     environment:
-       - OCPN_TARGET:  bionic
-     steps:
-       - checkout
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic-updates main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: cat /etc/apt/sources.list
-       - run: ci/circleci-build-debian.sh
-       - run: ci/circleci-upload.sh
-   build-focal:
-     docker:
-       - image: circleci/buildpack-deps:focal-scm
-     environment:
-       - OCPN_TARGET:  focal
-     steps:
-       - checkout
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ focal main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ focal-updates main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: cat /etc/apt/sources.list
-       - run: ci/circleci-build-debian.sh
-       - run: ci/circleci-upload.sh
-   build-bionic-gtk3:
-     docker:
-       - image: circleci/buildpack-deps:bionic-scm
-     environment:
-       - BUILD_GTK3: 1
-       - OCPN_TARGET:  bionic-gtk3
-     steps:
-       - checkout
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: >
-           echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic-updates main"
-           | sudo tee -a /etc/apt/sources.list
-       - run: cat /etc/apt/sources.list
-       - run: ci/circleci-build-debian.sh
-       - run: ci/circleci-upload.sh
-   build-buster:
-     docker:
-       - image: circleci/buildpack-deps:buster-scm
-     environment:
-       - OCPN_TARGET:  buster
-     steps:
-       - checkout
-       - run: ci/circleci-build-debian.sh
-       - run: ci/circleci-upload.sh
-   build-flatpak:
-     machine:
-       image: circleci/classic:201808-01
-     environment:
-       - OCPN_TARGET:  flatpak
-     steps:
-       - checkout
-       - run: ci/circleci-build-flatpak.sh
-       - run: ci/circleci-upload-flatpak.sh
-   build-mingw:
-     docker:
-         - image: fedora:29
-     environment:
-       - OCPN_TARGET:  mingw
-     steps:
-       - run: su -c "dnf install -q -y git openssh-clients openssh-server"
-       - checkout
-       - run: ci/circleci-build-mingw.sh
-       - run: ci/circleci-upload.sh
-   build-macos:
-     macos:
-       xcode: "10.0.0"
-     environment:
-       - OCPN_TARGET:  macos
-     steps:
-       - checkout
-       - run: ci/circleci-build-macos.sh
-       - run: ci/circleci-upload.sh
-   build-android-arm64:
-     docker:
-       - image: circleci/android:api-28-ndk 
-     environment:
-       - OCPN_TARGET:  android-arm64
-     steps:
-       - checkout
-       - run: ci/circleci-build-android-arm64.sh
-       - run: ci/circleci-upload.sh
-   build-android-armhf:
-     docker:
-       - image: circleci/android:api-28-ndk 
-     environment:
-       - OCPN_TARGET:  android-armhf
-     steps:
-       - checkout
-       - run: ci/circleci-build-android-armhf.sh
-       - run: ci/circleci-upload.sh
+version: 2.1
 
-       
+debian-steps: &debian-steps
+  steps:
+    - checkout
+    - run: ci/circleci-build-debian.sh
+    - run: sh -c "ldd  build/app/*/lib/opencpn/*.so"
+    - run: cd build; /bin/bash < upload.sh
+    - run: python3 ci/git-push
+
+jobs:
+  build-mingw:
+    machine:
+      image: circleci/classic:201808-01
+    environment:
+      - OCPN_TARGET: mingw
+    steps:
+      - checkout
+      - run: ci/circleci-build-mingw.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-flatpak:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      - OCPN_TARGET: flatpak
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - fp-v1-{{ checksum "ci/circleci-build-flatpak.sh" }}
+      - run: ci/circleci-build-flatpak.sh
+      - save_cache:
+          key: fp-v1-{{ checksum "ci/circleci-build-flatpak.sh" }}
+          paths:
+            - /home/circleci/.local/share/flatpak/repo
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-macos:
+    macos:
+      xcode: "11.0.0"
+    environment:
+      - OCPN_TARGET: macos
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - macos-cache-v1-{{checksum "ci/circleci-build-macos.sh"}}
+      - run: ci/circleci-build-macos.sh
+      - save_cache:
+          key: macos-cache-v1-{{checksum "ci/circleci-build-macos.sh"}}
+          paths:
+            - /usr/local/Homebrew
+            - /usr/local/Caskroom
+            - /usr/local/Cellar
+            - /usr/local/lib
+            - /usr/local/include
+      - run: sh -c "otool -L build/app/*/OpenCPN.app/Contents/PlugIns/*.dylib"
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-trusty:
+    docker:
+      - image: circleci/buildpack-deps:trusty-scm
+    environment:
+      - OCPN_TARGET: trusty
+    steps:
+      - checkout
+      - run: ci/circleci-build-trusty.sh
+      - run: sh -c "ldd build/app/*/lib/opencpn/*.so"
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-xenial:
+    docker:
+      - image: circleci/buildpack-deps:xenial-scm
+    environment:
+      - OCPN_TARGET: xenial
+      - USE_DEADSNAKES_PY37: 1
+    <<: *debian-steps
+
+  build-bionic:
+    docker:
+      - image: circleci/buildpack-deps:bionic-scm
+    environment:
+      - OCPN_TARGET: bionic
+    <<: *debian-steps
+
+  build-bionic-gtk3:
+    docker:
+      - image: circleci/buildpack-deps:bionic-scm
+    environment:
+      - BUILD_GTK3: true
+      - OCPN_TARGET: bionic-gtk3
+    <<: *debian-steps
+
+  build-focal:
+    docker:
+      - image: circleci/buildpack-deps:focal-scm
+    environment:
+      - OCPN_TARGET: focal
+    <<: *debian-steps
+
+  build-buster:
+    docker:
+      - image: circleci/buildpack-deps:buster-scm
+    environment:
+      - OCPN_TARGET: buster
+    <<: *debian-steps
+
+  build-armhf-stretch:
+    machine: true
+    environment:
+      - OCPN_TARGET=stretch-armhf
+      - DOCKER_IMAGE=balenalib/raspberry-pi-debian:stretch
+    steps:
+      - checkout
+      - run: ci/generic-build-raspbian-armhf.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-armhf-buster:
+    machine: true
+    environment:
+      - OCPN_TARGET=buster-armhf
+      - DOCKER_IMAGE=balenalib/raspberry-pi-debian:buster
+    steps:
+      - checkout
+      - run: ci/generic-build-raspbian-armhf.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-android-arm64:
+    docker:
+      - image: circleci/android:api-28-ndk 
+    environment:
+      - OCPN_TARGET:  android-arm64
+    steps:
+      - checkout
+      - run: ci/circleci-build-android-arm64.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+  build-android-armhf:
+    docker:
+      - image: circleci/android:api-28-ndk 
+    environment:
+      - OCPN_TARGET:  android-armhf
+    steps:
+      - checkout
+      - run: ci/circleci-build-android-armhf.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
+
+std-filters: &std-filters
+  filters:
+    branches:
+      only:
+        - master
+        - build
+
 workflows:
   version: 2
   build_all:
     jobs:
-      - build-trusty:
-          filters:
-            branches:
-              only: master
-      - build-xenial:
-          filters:
-            branches:
-              only: master
-      - build-bionic-gtk3:
-          filters:
-            branches:
-              only: master
-      - build-bionic:
-          filters:
-            branches:
-              only: master
-      - build-focal:
-          filters:
-            branches:
-              only: master
-      - build-buster:
-          filters:
-            branches:
-              only: master
-      - build-flatpak:
-          filters:
-            branches:
-              only: master
-      - build-macos:
-          filters:
-            branches:
-              only: master
       - build-mingw:
-          filters:
-            branches:
-              only: master
+          <<: *std-filters
+
+      - build-flatpak:
+          <<: *std-filters
+
+      - build-macos:
+          <<: *std-filters
+
+      - build-xenial:
+          <<: *std-filters
+
+      - build-bionic-gtk3:
+          <<: *std-filters
+
+      - build-bionic:
+          <<: *std-filters
+
+      - build-focal:
+          <<: *std-filters
+
+      - build-buster:
+          <<: *std-filters
+
+      - build-trusty:
+          <<: *std-filters
+
+      - build-armhf-stretch:
+          <<: *std-filters
+
+      - build-armhf-buster:
+          <<: *std-filters
+
       - build-android-arm64:
-          filters:
-            branches:
-              only: master
+          <<: *std-filters
+
       - build-android-armhf:
-          filters:
-            branches:
-              only: master
+          <<: *std-filters

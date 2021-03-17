@@ -6,3 +6,4 @@ cscope.out
 CMakeFiles
 po/*.rule
 *.kdev4
+cache

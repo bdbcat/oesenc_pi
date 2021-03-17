@@ -13,6 +13,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#include "config.h"
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -704,6 +705,9 @@ eSENCChart::~eSENCChart()
       free(m_pvaldco_array);
       
       free(m_line_vertex_buffer);
+      
+      delete m_pCloneBM;
+
 }
 
 static void free_mps(mps_container *mps)

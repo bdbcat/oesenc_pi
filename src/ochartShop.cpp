@@ -23,7 +23,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************
  */
-
+#include "config.h"
 
 #include "wx/wxprec.h"
 
@@ -188,7 +188,7 @@ class HardBreakWrapper : public wxTextWrapper
 #ifdef __OCPN__ANDROID__
 bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStrip, bool bRemoveZip)
 {
-    qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
+//    qDebug() << "AndroidUnzip" << zipFile.mb_str() << destDir.mb_str();
     
     wxString ns;
     ns.Printf(_T("%d"), nStrip);
@@ -197,14 +197,14 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
     if(bRemoveZip)
         br = _T("1");
     
-    qDebug() << "br" << br.mb_str();
+//    qDebug() << "br" << br.mb_str();
     
     wxString stat = callActivityMethod_s4s( "unzipFile", zipFile, destDir, ns, br  );
     
     if(wxNOT_FOUND == stat.Find(_T("OK")))
         return false;
     
-    qDebug() << "unzip start";
+//    qDebug() << "unzip start";
     
     bool bDone = false;
     wxString rtopDir;
@@ -212,7 +212,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
         wxMilliSleep(1000);
         //wxSafeYield(NULL, true);
         
-        qDebug() << "unzip poll";
+//        qDebug() << "unzip poll";
         
         wxString result = callActivityMethod_ss( "getUnzipStatus", _T("") );
         if(wxNOT_FOUND != result.Find(_T("DONE"))){
@@ -236,7 +236,7 @@ bool AndroidUnzip(wxString zipFile, wxString destDir, wxString &tlDir, int nStri
     
      tlDir = rtopDir;
 
-    qDebug() << "unzip done";
+//    qDebug() << "unzip done";
     
     return true;    
     
@@ -854,7 +854,7 @@ wxBitmap& itemChart::GetChartThumbnail(int size, bool bDL_If_Needed)
                     _OCPN_DLStatus ret = OCPN_downloadFile( thumbnailURL, file_URI, _T(""), _T(""), wxNullBitmap, NULL, 0, 15);
 
                     wxLogMessage(_T("DLRET"));
-                    qDebug() << "DL done";
+//                    qDebug() << "DL done";
                     if(OCPN_DL_NO_ERROR == ret){
                         wxCopyFile(filetmp, file);
                         iResponseCode = 200;
@@ -872,8 +872,8 @@ wxBitmap& itemChart::GetChartThumbnail(int size, bool bDL_If_Needed)
                     }
 
                 }
-                else
-                    qDebug() << "Busy";
+//                else
+//                    qDebug() << "Busy";
                 
 #endif                
             }
@@ -1243,12 +1243,120 @@ int doLogin()
     
 }
 
+std::string correct_non_utf_8(std::string *str)
+{
+    int i,f_size=str->size();
+    unsigned char c,c2,c3,c4;
+    std::string to;
+    to.reserve(f_size);
+
+    for(i=0 ; i<f_size ; i++){
+        c=(unsigned char)(*str)[i];
+        
+        if(c<32){//control char
+            if(c==9 || c==10 || c==13){//allow only \t \n \r
+                to.append(1,c);
+            }
+            continue;
+        }else if(c<127){//normal ASCII
+            to.append(1,c);
+            continue;
+        }else if(c<160){//control char (nothing should be defined here either ASCI, ISO_8859-1 or UTF8, so skipping)
+            if(c2==128){//fix microsoft mess, add euro
+                to.append(1,226);
+                to.append(1,130);
+                to.append(1,172);
+            }
+            if(c2==133){//fix IBM mess, add NEL = \n\r
+                to.append(1,10);
+                to.append(1,13);
+            }
+            continue;
+        }else if(c<192){//invalid for UTF8, converting ASCII
+            to.append(1,(unsigned char)194);
+            to.append(1,c);
+            continue;
+        }else if(c<194){//invalid for UTF8, converting ASCII
+            to.append(1,(unsigned char)195);
+            to.append(1,c-64);
+            continue;
+        }else if(c<224 && i+1<f_size){//possibly 2byte UTF8
+            c2=(unsigned char)(*str)[i+1];
+            if(c2>127 && c2<192){//valid 2byte UTF8
+                if(c==194 && c2<160){//control char, skipping
+                    ;
+                }else{
+                    to.append(1,c);
+                    to.append(1,c2);
+                }
+                i++;
+                continue;
+            }
+        }else if(c<240 && i+2<f_size){//possibly 3byte UTF8
+            c2=(unsigned char)(*str)[i+1];
+            c3=(unsigned char)(*str)[i+2];
+            if(c2>127 && c2<192 && c3>127 && c3<192){//valid 3byte UTF8
+                to.append(1,c);
+                to.append(1,c2);
+                to.append(1,c3);
+                i+=2;
+                continue;
+            }
+        }else if(c<245 && i+3<f_size){//possibly 4byte UTF8
+            c2=(unsigned char)(*str)[i+1];
+            c3=(unsigned char)(*str)[i+2];
+            c4=(unsigned char)(*str)[i+3];
+            if(c2>127 && c2<192 && c3>127 && c3<192 && c4>127 && c4<192){//valid 4byte UTF8
+                to.append(1,c);
+                to.append(1,c2);
+                to.append(1,c3);
+                to.append(1,c4);
+                i+=3;
+                continue;
+            }
+        }
+        //invalid UTF8, converting ASCII (c>245 || string too short for multi-byte))
+        to.append(1,(unsigned char)195);
+        to.append(1,c-64);
+    }
+    return to;
+}
 
 wxString ProcessResponse(std::string body)
 {
+    // Validate/correct the input
+        std::string body_corrected = correct_non_utf_8(&body);
+
+        wxString ss;
+        for(unsigned int i=0 ; i<body_corrected.size() ; i++){
+            unsigned char c=(unsigned char)(body_corrected)[i];
+            wxString sm;
+            sm.Printf(_T("%X,"), c);
+            ss.Append(sm);
+        }
+
+        wxLogMessage(_T("ProcessResponse RAW:"));
+        wxLogMessage(ss);
+
         TiXmlDocument * doc = new TiXmlDocument();
-        const char *rr = doc->Parse( body.c_str());
+        const char *rr = doc->Parse( body_corrected.c_str());
     
+        if(!rr){
+            wxLogMessage(_T("TinyXML parse result 1:"));
+            wxString p1 = wxString(doc->ErrorDesc(), wxConvUTF8);
+            wxLogMessage(p1);
+            
+            //Try again with explicit encoding instruction
+            rr = doc->Parse( body_corrected.c_str(), NULL, TIXML_ENCODING_UTF8);
+
+            if(!rr){
+                wxLogMessage(_T("TinyXML parse result 2:"));
+                wxString p2 = wxString(doc->ErrorDesc(), wxConvUTF8);
+                wxLogMessage(p2);
+            }
+        }
+            
+           
         //doc->Print();
         
         wxString queryResult = _T("50");  // Default value, general error.;
@@ -1268,14 +1376,14 @@ wxString ProcessResponse(std::string body)
         wxString chartSize;
         wxString chartThumbURL;
 
-         //wxString p = wxString(body.c_str(), wxConvUTF8);
-         //wxLogMessage(_T("ProcessResponse results:"));
-         //wxLogMessage(p);
+          wxString p = wxString(body_corrected.c_str(), wxConvUTF8);
+          wxLogMessage(_T("ProcessResponse results:"));
+          wxLogMessage(p);
 
         
             TiXmlElement * root = doc->RootElement();
             if(!root){
-                return _T("50");                              // undetermined error??
+                return _T("57");                              // undetermined error??
             }
             
             wxString rootName = wxString::FromUTF8( root->Value() );
