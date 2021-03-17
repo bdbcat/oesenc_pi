@@ -56,7 +56,7 @@ elseif (UNIX AND ARCH STREQUAL "armhf")
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
   )
   install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm/libsglarmhf32-2.30.0.0.so)
-elseif (UNIX AND ARCH STREQUAL "armh64")
+elseif (UNIX AND ARCH STREQUAL "arm64")
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/linuxarm64/oeserverd
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
