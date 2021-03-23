@@ -1335,8 +1335,8 @@ wxString ProcessResponse(std::string body)
             ss.Append(sm);
         }
 
-        wxLogMessage(_T("ProcessResponse RAW:"));
-        wxLogMessage(ss);
+        //wxLogMessage(_T("ProcessResponse RAW:"));
+        //wxLogMessage(ss);
 
         TiXmlDocument * doc = new TiXmlDocument();
         const char *rr = doc->Parse( body_corrected.c_str());
