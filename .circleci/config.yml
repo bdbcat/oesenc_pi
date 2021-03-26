@@ -194,6 +194,12 @@ workflows:
       - build-trusty:
           <<: *std-filters
 
+      - build-armhf-stretch:
+          <<: *std-filters
+
+      - build-armhf-buster:
+          <<: *std-filters
+
       - build-android-arm64:
           <<: *std-filters
 
