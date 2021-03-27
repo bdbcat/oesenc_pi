@@ -40,8 +40,8 @@
 #include "ocpn_plugin.h"
 
 #ifdef __OCPN_USE_CURL__
-#include "wxcurl/wx/curl/http.h"
-#include "wxcurl/wx/curl/thread.h"
+#include <wx/curl/http.h>
+#include <wx/curl/thread.h>
 #endif
 
 #include <tinyxml.h>
@@ -1708,7 +1708,7 @@ int doAssign(itemChart *chart, int slot, wxString systemName)
     std::string c = post.GetResponseBody();
     
     responseBody = post.GetResponseBody();
-    //printf("%s", post.GetResponseBody().c_str());
+    
     
     //wxString tt(post.GetResponseBody().data(), wxConvUTF8);
     //wxLogMessage(tt);

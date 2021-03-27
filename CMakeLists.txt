@@ -26,6 +26,7 @@ if (WIN32)
 endif ()
 message(STATUS "Cmake version: ${CMAKE_VERSION}.")
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # -------- Build setup (mostly in PluginCompiler) --------
 #
@@ -73,6 +74,7 @@ if ("${_lc_target}" MATCHES "android*")
 else ()
   set(QT_ANDROID OFF)
   option(OCPN_USE_CURL "Use Curl libraries" ON)
+  add_definitions(-D__OCPN_USE_CURL__)
 endif ()
 
 
