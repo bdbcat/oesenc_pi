@@ -49,26 +49,38 @@ elseif (UNIX AND ARCH  STREQUAL "x86_64")
     ${CMAKE_CURRENT_LIST_DIR}/linux64/oeserverd
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
   )
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linux64/libsgllnx64-2.29.02.so)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linux64/libsgllnx64-2.29.02.so
+    ${CMAKE_INSTALL_PREFIX}/bin/libsgllnx64-2.29.02.so COPYONLY
+  )
 elseif (UNIX AND ARCH STREQUAL "armhf")
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/linuxarm/oeserverd
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
   )
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm/libsglarmhf32-2.30.0.0.so)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linuxarm/libsglarmhf32-2.30.0.0.so
+    ${CMAKE_INSTALL_PREFIX}/bin/libsglarmhf32-2.30.0.0.so COPYONLY
+  )
 elseif (UNIX AND ARCH STREQUAL "arm64")
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/linuxarm64/oeserverd
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
   )
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linuxarm64/libsglarm64-2.31.0.0.so)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linuxarm64/libsglarm64-2.31.0.0.so
+    ${CMAKE_INSTALL_PREFIX}/bin/libsglarm64-2.31.0.0.so COPYONLY
+  )
 elseif (UNIX)
   # 32-bit amd64: is this really useful?
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/linux/oeserverd
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverd COPYONLY
   )
-  install_libs(${CMAKE_CURRENT_LIST_DIR}/linux/libsgllnx-2.29.0.1.so)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/linux/libsgllnx-2.29.0.1.so
+    ${CMAKE_INSTALL_PREFIX}/bin/libsgllnx-2.29.0.1.so COPYONLY
+  )
 elseif (WIN32)
   file(GLOB_RECURSE vcdll_files "win/*.dll")
   message(STATUS "GLOB vcdll_files: ${vcdll_files}")

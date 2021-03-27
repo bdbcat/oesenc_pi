@@ -705,15 +705,20 @@ int oesenc_pi::Init(void)
 #endif
 
     // Set environment variable for some platforms to find the required sglock dongle library
-    wxFileName fn_exe(GetOCPN_ExePath());
-
 #if !defined(__WXMSW__) && !defined(__WXMAC__)
-    // Set environment variable to find the required sglock dongle library
+    wxFileName fn_exe(GetPlugInPath(this));
     wxFileName libraryPath = fn_exe;
     libraryPath.RemoveLastDir();
-    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
-    wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
+    libraryPath.RemoveLastDir();
+    wxString path = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("bin");
+    wxString envPath;
+    if (wxGetEnv("LD_LIBRARY_PATH", &envPath)) {
+        path = path + ":" + envPath.ToStdString(); 
+    }
+    wxLogMessage("oeSENC_PI::Using LD_LIBRARY_PATH: %s", path.c_str());
+    wxSetEnv("LD_LIBRARY_PATH", path.c_str());
 #endif
+
 
 #ifdef __WXMAC__
     // Set environment variable to find the required sglock dongle library
