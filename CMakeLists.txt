@@ -73,13 +73,8 @@ if ("${_lc_target}" MATCHES "android*")
   set(CMAKE_CROSSCOMPILING ON)
 else ()
   set(QT_ANDROID OFF)
-  if( NOT ("${plugin_target}" STREQUAL  "mingw"))
-    option(OCPN_USE_CURL "Use Curl libraries" ON)
-    add_definitions(-D__OCPN_USE_CURL__)
-  else( NOT ("${plugin_target}" STREQUAL  "mingw"))
-    set(OCPN_USE_CURL OFF)
-  endif( NOT ("${plugin_target}" STREQUAL  "mingw"))
-  
+  option(OCPN_USE_CURL "Use Curl libraries" ON)
+  add_definitions(-D__OCPN_USE_CURL__)
 endif ()
 
 
@@ -208,11 +203,6 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
     target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   endif ()
   add_subdirectory("libs/oeserverd")
-
-  if (ARCH STREQUAL "armhf")
-   add_definitions(-DOCPN_ARMHF)
-  endif (ARCH STREQUAL "armhf")      
-
 
   if (APPLE)
     # Copy some items needed by the .img package
