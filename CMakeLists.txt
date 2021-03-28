@@ -76,6 +76,8 @@ else ()
   if( NOT ("${plugin_target}" STREQUAL  "mingw"))
     option(OCPN_USE_CURL "Use Curl libraries" ON)
     add_definitions(-D__OCPN_USE_CURL__)
+  else( NOT ("${plugin_target}" STREQUAL  "mingw"))
+    set(OCPN_USE_CURL OFF)
   endif( NOT ("${plugin_target}" STREQUAL  "mingw"))
   
 endif ()
