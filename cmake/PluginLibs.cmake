@@ -43,6 +43,6 @@ if (MSYS)
 endif ()
 include(${wxWidgets_USE_FILE})	
 
-if( (NOT "${_lc_target}" MATCHES "android*") AND ( NOT ("${plugin_target}" STREQUAL  "mingw")) )
+if( NOT "${_lc_target}" MATCHES "android*") 
 include( Curl.cmake )
-endif( (NOT "${_lc_target}" MATCHES "android*") AND ( NOT ("${plugin_target}" STREQUAL  "mingw")) )
+endif( NOT "${_lc_target}" MATCHES "android*" )
