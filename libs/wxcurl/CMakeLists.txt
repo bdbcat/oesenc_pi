@@ -60,3 +60,5 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif ()
 target_include_directories(WXCURL PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 target_include_directories(WXCURL PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
+target_link_libraries( WXCURL PUBLIC ${CURL_LIBRARIES})
+
