@@ -28,6 +28,8 @@ BuildRequires: mingw32-libtiff
 BuildRequires: mingw32-nsiswrapper
 BuildRequires: mingw32-win-iconv
 BuildRequires: mingw32-wxWidgets3 >= 3.0.2
+BuildRequires: mingw32-curl
+BuildRequires: mingw32-openssl
 
 %description
 
