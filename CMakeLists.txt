@@ -73,8 +73,11 @@ if ("${_lc_target}" MATCHES "android*")
   set(CMAKE_CROSSCOMPILING ON)
 else ()
   set(QT_ANDROID OFF)
-  option(OCPN_USE_CURL "Use Curl libraries" ON)
-  add_definitions(-D__OCPN_USE_CURL__)
+  if( NOT ("${plugin_target}" STREQUAL  "mingw"))
+    option(OCPN_USE_CURL "Use Curl libraries" ON)
+    add_definitions(-D__OCPN_USE_CURL__)
+  endif( NOT ("${plugin_target}" STREQUAL  "mingw"))
+  
 endif ()
 
 
