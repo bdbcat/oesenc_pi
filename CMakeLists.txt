@@ -208,6 +208,12 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
     target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   endif ()
   add_subdirectory("libs/oeserverd")
+
+  if (ARCH STREQUAL "armhf")
+   add_definitions(-DOCPN_ARMHF)
+  endif (ARCH STREQUAL "armhf")      
+
+
   if (APPLE)
     # Copy some items needed by the .img package
     execute_process(
