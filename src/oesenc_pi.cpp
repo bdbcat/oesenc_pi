@@ -3129,6 +3129,21 @@ void init_GLLibrary(void)
     }
 }
 
+#ifdef __OCPN__ANDROID__
+wxString getAndroidLibdir()
+{
+    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+    wxString piLocn = g_pi_filename;
+    wxFileName fnl(piLocn);
+    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR);
+    if(libDir.Find(_T("manPlug")) != wxNOT_FOUND){
+        fnl.RemoveLastDir();
+        libDir = fnl.GetPath(wxPATH_GET_SEPARATOR);
+    }
+    libDir += _T("lib");
+    return libDir;    
+}
+#endif
 
 bool testSENCServer()
 {
@@ -3143,11 +3158,8 @@ bool testSENCServer()
     wxFileName fn(dataLoc);
     wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-    // This will be {dir of g_sencutil_bin}/lib
-    wxFileName fnl(cmd);
-    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+    wxString libDir = getAndroidLibdir();
+    
     wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
     
     wxString result = callActivityMethod_s4s("createProcSync", cmd, _T("-w"), dataDir, libDir);
@@ -3266,10 +3278,8 @@ bool validate_SENC_server(void)
     wxFileName fn(dataLoc);
     wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-    // This will be {dir of g_sencutil_bin}/lib
-    wxFileName fnl(cmd);
-    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+    wxString libDir = getAndroidLibdir();
+
     
 //     wxLogMessage(_T("oesenc_pi: Starting for version: ") + cmd );
 //     wxString vresult = callActivityMethod_s6s("createProcSync5stdout", cmd, "-a");
@@ -4163,12 +4173,8 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
 
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}
-        wxFileName fnl(cmd);
-//        wxString libDir = fnl.GetPath();
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-      
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oernc_pi: Getting XFPR: Starting: ") + cmd );
         wxLogMessage(_T("oernc_pi: Getting XFPR: Parms: ") + rootDir + _T(" ") + dataDir + _T(" ") + libDir );
 
@@ -4428,10 +4434,8 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
         //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}/lib
-        wxFileName fnl(cmd);
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
@@ -4706,10 +4710,8 @@ void oesenc_pi_event_handler::OnGetHWIDClick( wxCommandEvent &event )
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
         //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}/lib
-        wxFileName fnl(cmd);
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oesenc_pi: Getting HWID: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-w"), dataDir, libDir);
