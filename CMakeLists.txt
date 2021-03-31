@@ -68,12 +68,11 @@ set(OCPN_TARGET_TUPLE "" CACHE STRING
 string(TOLOWER "${OCPN_TARGET_TUPLE}" _lc_target)
 if ("${_lc_target}" MATCHES "android*")
   set(QT_ANDROID ON)
-  set(OCPN_USE_CURL OFF)
+  set(OCPN_USE_BUNDLED_WXCURL OFF)
   # Until we have a proper toolchain file:
   set(CMAKE_CROSSCOMPILING ON)
 else ()
   set(QT_ANDROID OFF)
-  option(OCPN_USE_CURL "Use Curl libraries" ON)
   add_definitions(-D__OCPN_USE_CURL__)
 endif ()
 
@@ -197,11 +196,19 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
     add_subdirectory("libs/libglu")
     target_link_libraries(${PACKAGE_NAME} ocpn::glu)
   endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )
+  
+  if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
+    option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
+  else( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") ) 
+    INCLUDE_DIRECTORIES("libs/wxcurl/src")
+  endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
     
-  if (OCPN_USE_CURL)
+
+  if (OCPN_USE_BUNDLED_WXCURL)
     add_subdirectory("libs/wxcurl")
     target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   endif ()
+  
   add_subdirectory("libs/oeserverd")
 
   if (ARCH STREQUAL "armhf")

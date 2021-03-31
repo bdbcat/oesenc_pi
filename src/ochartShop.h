@@ -38,8 +38,8 @@
 
 #ifdef __OCPN_USE_CURL__
 #include <wx/curl/http.h>
-
 #endif
+
 #include "ocpn_plugin.h"
 
 #ifdef WXC_FROM_DIP
