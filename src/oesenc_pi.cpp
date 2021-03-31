@@ -665,11 +665,11 @@ int oesenc_pi::Init(void)
      
     // Specify the location of the xxserverd helper.
 #ifdef __WXMSW__
-      g_sencutil_bin = GetPluginDataDir("oesenc_pi") + _T("\\oeserverd.exe");
+    wxString piWLocn = GetPlugInPath(this);
+    wxFileName pifn(piWLocn);
+    g_sencutil_bin = pifn.GetPath() + _T("\\oeserverd.exe");
+    wxLogMessage(_T("Path to Windows server is: ") + g_sencutil_bin);
 
-//#else      
-      //wxFileName fn_exe(GetOCPN_ExePath());
-      //g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
 #endif
       
       // Search for helper in the $PATH.
@@ -733,6 +733,12 @@ int oesenc_pi::Init(void)
 
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
+#ifdef __OCPN__ANDROID__
+    bool bCopyOK;
+    wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
+    getFPR( false, bCopyOK, false);
+#endif
+    
     if(IsDongleAvailable())
         wxLogMessage(_T("Dongle detected"));
     else
