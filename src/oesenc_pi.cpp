@@ -691,6 +691,11 @@ int oesenc_pi::Init(void)
       g_sencutil_bin.Append(_T("\""));
 #endif    
 
+            // And Windows.
+#ifdef __WXMSW__
+      g_sencutil_bin.Prepend(_T("\""));
+      g_sencutil_bin.Append(_T("\""));
+#endif    
 
     
     
