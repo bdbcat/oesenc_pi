@@ -1,0 +1,302 @@
+== oeSENC Charts
+
+=== OpenCPN Vector Charts
+
+OCPN Vector Charts are licensed and sourced from chart providers like
+Hydrographic Offices. These - non free - charts give OCPN access to
+up-to-date and proven charts for areas where those are not available for
+free.
+
+Different from S-63 or genuine S-57 charts (US), these are not
+_“Official Charts”_ in the context of “_carriage requirements”_, as they
+are not issued or certified by official bodies. Even if the content is
+the same.
+
+The charts are delivered in an encrypted format optimized for OpenCPN
+called oeSENC and are requiring the corresponding oeSENC plug-in. They
+appear like all the other vector charts in S-57 format and can be
+quilted and managed identically.
+
+In the case of charts licensed from the Australian AHS the charts are
+called oeEVC due to legal reasons. The oeSENC plug-in will handle these
+files same as the oeSENCs.
+
+Same as in the case of the S-63 plug-in, the operational part is managed
+by an outside entity, o-charts.org. The charts are available at its web
+shop.
+
+=== Links
+
+Source: https://github.com/bdbcat/oesenc_pi[Github source] +
+Download: https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSenc_pi
+Download] +
+Website: https://o-charts.org/[o-charts Vector Charts for Opencpn] +
+Forum:
+http://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc
+CF Thread]
+
+=== Windows / Mac / Linux
+
+_- requires to be online! For offline install of oeSENC charts see
+further below.._
+
+*1.* Download and install the
+https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSENC plugin] (only for
+OpenCPN 4.6 version and above). If you have already the oeSENC plugin
+installed, update to the latest version.
+
+For the online procedure described here version 2.0 or later of the
+plug-in is required.
+
+*2.* Go to OpenCPN, _Options → Plugins → oeSENC_ and enable it.
+
+*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+sets you are interested in. Remember your access data to o-charts shop
+(email and password), you will need them later.
+
+*4.* Go to OpenCPN, _Options → Charts → oeSENC charts_ tab and press
+_Refresh Chart List_.
+
+*5.* Login with your o-charts shop access data.
+
+*6.* If you have previously requested charts, you will get a list of
+System Names. Select the System Name that corresponds to your computer.
+
+If not, you have to provide a new System Name to identify your system. 3
+characters minimum and 15 maximum. Only lowercase letters and numbers
+allowed. No symbols or spaces.
+
+*7.* Follow on screen instructions to assign and download on your
+computer the charts sets you licensed on the o-charts shop.
+
+Note: for the linux version you need libusb-0.1-4 for the SG lock
+library (“*sudo apt install libusb-0.1-4*”). The system itself will use
+most likely some libusb-1.0, which is a different library.
+
+=== Android
+
+*1.* Install OpenCPN 1.0.13, or above, for Android 4.2, or above, from
+the
+https://play.google.com/store/apps/details?id=org.opencpn.opencpn[Play
+Store].
+
+*2.* Install oeSENC plugin for OpenCPN from the
+https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin[Play
+Store] to be sure your device is compatible.
+
+*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+sets you are interested in.
+
+*4.* Back to OpenCPN, _Options → Charts → oeSENC charts → Add/update
+oeSENC chart sets_ and login with your o-charts access data.
+
+*5.* Follow on screen instructions to assign and download on your device
+the charts sets you licensed on the o-charts shop.
+
+=== Updates
+
+You should visit _Options → Charts → oeSENC charts_ from time to time to
+see if a new update is available. DE, FR and NO chart sets are updated
+weekly. UK, BE, NL, IS, HR and ES chart sets are updated quarterly.
+
+*Offline Installation of oeSENC charts*
+
+For target systems without connection to Internet you will create the
+System Identifier file at the target system, take it to a site with
+Internet access and request and download the chart set for the target
+system. Copy the received file onto some portable device and copy it
+onto the target system.
+
+The steps in detail:
+
+Install the plug-in, enable it at *Options | plug-ins* and create your
+system identifier file from “*Preferences*” The plug-in will report the
+path to the file. For Windows and macOS systems a copy is created
+directly on the desktop.
+
+ 
+image::createsystemidentifierfile.png[]
+
+==== At the shop at
+
+*_http://o-charts.org/index.html[http://o-charts.org]_*
+- Select the chart set you want to license.
+
+. Upload your SystemIdentifierFile - it is used to encode the charts for
+a specific system - and finish the purchase.
+. You will receive an e-mail with the download path and your license
+key.
+. Depending on the workload of the production system this can take some
+time.
+
+==== Download the packet
+
+. Unzip it to a directory of your choice.
+. Add an entry to the source chart directories pointing to the directory
+of the chart set.
+. Apply.
+
+The downloaded set contains a text file with information about the set,
+the license key, the EULA and the chart “blob” itself.
+
+image::oesenc-add-oesenc-dir.png[]
+
+==== Each Use
+
+Each time you will use the charts from the set, a pop-up will inform you
+about the licensing period of the charts and you will have to accept the
+terms of use. These are requirements from our licensors.
+
+image::pop-up.png[]]
+
+One additional license for back-up purposes is included and can be
+generating by the user when required.
+
+==== Chart Examples
+
+ 
+image::screenshot_large.png[] 
+
+image::screenshot_medium.png[]
+ 
+image::screenshot_small.png[]
+
+image::oesenc-chart-example.png[]
+
+image::oesenc-chart-example-2.png[]
+
+image::oesenc-chart-example-3.png[]
+
+=== Windows / Mac / Linux
+
+_- requires to be online! For offline install of oeSENC charts see
+further below.._
+
+*1.* Download and install the
+https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSENC plugin] (only for
+OpenCPN 4.6 version and above). If you have already the oeSENC plugin
+installed, update to the latest version.
+
+For the online procedure described here version 2.0 or later of the
+plug-in is required.
+
+*2.* Go to OpenCPN, _Options → Plugins → oeSENC_ and enable it.
+
+*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+sets you are interested in. Remember your access data to o-charts shop
+(email and password), you will need them later.
+
+*4.* Go to OpenCPN, _Options → Charts → oeSENC charts_ tab and press
+_Refresh Chart List_.
+
+*5.* Login with your o-charts shop access data.
+
+*6.* If you have previously requested charts, you will get a list of
+System Names. Select the System Name that corresponds to your computer.
+
+If not, you have to provide a new System Name to identify your system. 3
+characters minimum and 15 maximum. Only lowercase letters and numbers
+allowed. No symbols or spaces.
+
+*7.* Follow on screen instructions to assign and download on your
+computer the charts sets you licensed on the o-charts shop.
+
+Note: for the linux version you need libusb-0.1-4 for the SG lock
+library (“sudo apt install libusb-0.1-4”). The system itself will use
+most likely some libusb-1.0, which is a different library.
+
+=== Android
+
+*1.* Install OpenCPN 1.0.13, or above, for Android 4.2, or above, from
+the
+https://play.google.com/store/apps/details?id=org.opencpn.opencpn[Play
+Store].
+
+*2.* Install oeSENC plugin for OpenCPN from the
+https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin[Play
+Store] to be sure your device is compatible.
+
+*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+sets you are interested in.
+
+*4.* Back to OpenCPN, _Options → Charts → oeSENC charts → Add/update
+oeSENC chart sets_ and login with your o-charts access data.
+
+*5.* Follow on screen instructions to assign and download on your device
+the charts sets you licensed on the o-charts shop.
+
+=== Updates
+
+You should visit _Options → Charts → oeSENC charts_ from time to time to
+see if a new update is available. DE, FR and NO chart sets are updated
+weekly. UK, BE, NL, IS, HR and ES chart sets are updated quarterly.
+
+*Offline Installation of oeSENC charts*
+
+For target systems without connection to Internet you will create the
+System Identifier file at the target system, take it to a site with
+Internet access and request and download the chart set for the target
+system. Copy the received file onto some portable device and copy it
+onto the target system.
+
+The steps in detail:
+
+Install the plug-in, enable it at *Options | plug-ins* and create your
+system identifier file from “*Preferences*” The plug-in will report the
+path to the file. For Windows and macOS systems a copy is created
+directly on the desktop.
+
+ 
+image::createsystemidentifierfile.png[image::createsystemidentifierfile.png[Create
+System Identifier,title="Create System Identifier",width=600]]
+
+==== At the shop at
+
+ 
+*_http://o-charts.org/index.html[http://o-charts.org]_*
+ 
+
+. Select the chart set you want to license.
+. Upload your SystemIdentifierFile - it is used to encode the charts for
+a specific system - and finish the purchase.
+. You will receive an e-mail with the download path and your license
+key.
+. Depending on the workload of the production system this can take some
+time.
+
+==== Download the packet
+
+. Unzip it to a directory of your choice.
+. Add an entry to the source chart directories pointing to the directory
+of the chart set.
+. Apply.
+
+The downloaded set contains a text file with information about the set,
+the license key, the EULA and the chart “blob” itself. 
+
+image::oesenc-add-oesenc-dir.png[]
+
+==== Each Use
+
+Each time you will use the charts from the set, a pop-up will inform you
+about the licensing period of the charts and you will have to accept the
+terms of use. These are requirements from our licensors. +
+
+image::pop-up.png[]
+ 
+One additional license for back-up purposes is included and can be
+generating by the user when required. 
+
+==== Chart Examples
+
+image::screenshot_large.png[]
+
+image::screenshot_medium.png[]
+
+image::screenshot_small.png[]
+
+image::oesenc-chart-example.png[]
+
+image::oesenc-chart-example-2.png[]
+
+image::oesenc-chart-example-3.png[]
