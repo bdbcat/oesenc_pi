@@ -1,34 +1,49 @@
+#
+# Branches and runtimes:
+#   - master     Nigthly builds, 18.08 runtime
+#   - beta       Flathub beta branch, aarch64 with 20.08 runtime.
+#   - stable     Flathub main branch, x86_64 with 18.08 runtime.
+#
 id: org.opencpn.OpenCPN.Plugin.oesenc
 runtime: org.opencpn.OpenCPN
-runtime-version: master
+runtime-version: stable   # official build at flathub
+#runtime-version: master   # for nightly builds
 sdk: org.freedesktop.Sdk//18.08
 build-extension: true
 separate-locales: false
 appstream-compose: false
+finish-args:
+    - --socket=x11
+    - --socket=pulseaudio
+    - --filesystem=home
+    - --device=all
+
 modules:
     - name: oesenc
       no-autogen: true
-      cmake: true
       build-options:
           cflags: -fPIC
           cxxflags: -fPIC -DFLATPAK
+      buildsystem: cmake
       config-opts:
-          - -DPREFIX:PATH=/app/extensions/oesenc
+          - -DCMAKE_INSTALL_PREFIX=/app/extensions/oesenc/
+          - -DCMAKE_BUILD_TYPE:STRING=Release
+          - -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          - -DBUILD_TYPE:STRING=tarball
+          - -Uplugin_target
+
       post-install:
           - >
             mv /app/extensions/oesenc/bin/oeserverd
             /app/extensions/oesenc/bin/oeserverd.prog
-          - install -t /app/extensions/oesenc/bin/ -m 755 oeserverd
+          - >
+            install -t /app/extensions/oesenc/bin/ -m 755
+            libs/oeserverd/linux64/oeserverd
           - >
             install -t /app/extensions/oesenc/lib -m 755
-            buildlinux64/oeserverd/libsgllnx64-2.29.02.so
-            libusb-0.1.so.4
+            libs/oeserverd/linux64/libusb-0.1.so.4
+
       sources:
           - type: git
             url: ..
             branch: master
-          - type: file
-            path: oeserverd
-          - type: file
-            # originally libusb-0.1.so.4.1.1, built from  libusb-0.1.6
-            path: libusb-0.1.so.4
