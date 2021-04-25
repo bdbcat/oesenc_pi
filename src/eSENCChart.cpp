@@ -6976,9 +6976,11 @@ void eSENCChart::AssembleLineGeometry( void )
     if(g_debugLevel) wxLogMessage(_T("AssembleLineGeometry:  Got Point count: ") + msgc);
 #endif
         
-    std::map<std::string, connector_segment *> ce_connector_hash;
-    std::map<std::string, connector_segment *> ec_connector_hash;
-    std::map<std::string, connector_segment *> cc_connector_hash;
+    std::map<long long, connector_segment *> ce_connector_hash;
+    std::map<long long, connector_segment *> ec_connector_hash;
+    std::map<long long, connector_segment *> cc_connector_hash;
+
+    std::map<long long, connector_segment *>::iterator csit;
     
     int ndelta = 0;
     
@@ -7050,19 +7052,14 @@ void eSENCChart::AssembleLineGeometry( void )
                             
                             //      The initial node exists and connects to the start of an edge
                             
-                            char buf[40];
-                            snprintf(buf, sizeof(buf), "%d_%d", inode, venode);
-                            std::string key(buf);
+                            long long key = ((unsigned long long)inode << 32) + venode;
+
 
                             connector_segment *pcs = NULL;
-                            std::map<std::string, connector_segment *>::iterator itce;
-                            itce = ce_connector_hash.find( key );
-                            if( itce == ce_connector_hash.end() ){
+                            csit = ce_connector_hash.find( key );
+                            if( csit == ce_connector_hash.end() ){
                                 ndelta += 2;
                                 pcs = new connector_segment;
-//                                pcs->type = TYPE_CE;
-//                                pcs->start = ipnode;
-//                                pcs->end = pedge;
                                 ce_connector_hash[key] = pcs;
                                 
                                 // capture and store geometry
@@ -7093,7 +7090,7 @@ void eSENCChart::AssembleLineGeometry( void )
                                 
                             }
                             else
-                                pcs = itce->second;
+                                pcs = csit->second;
 
                             
                             line_segment_element *pls = new line_segment_element;
@@ -7131,19 +7128,13 @@ void eSENCChart::AssembleLineGeometry( void )
                         if(ipnode){
                             if(pedge && pedge->nCount){
                                 
-                                //wxString key;
-                                //key.Printf(_T("EC%d%d"), venode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "%d_%d", venode, enode);
-                                std::string key(buf);
+                                long long key = ((unsigned long long)venode << 32) + enode;
                                 
                                 connector_segment *pcs = NULL;
-                                std::map<std::string, connector_segment *>::iterator itec;
-                                itec = ec_connector_hash.find( key );
-                                if( itec == ec_connector_hash.end() ){
+                                csit = ec_connector_hash.find( key );
+                                if( csit == ec_connector_hash.end() ){
                                     ndelta += 2;
                                     pcs = new connector_segment;
-//                                    pcs->type = TYPE_EC;
                                     ec_connector_hash[key] = pcs;
                                     
                                     // capture and store geometry
@@ -7176,11 +7167,10 @@ void eSENCChart::AssembleLineGeometry( void )
                                     
                                 }
                                 else
-                                    pcs = itec->second;
+                                    pcs = csit->second;
                                 
                                 line_segment_element *pls = new line_segment_element;
                                 pls->next = 0;
-//                                pls->n_points = 2;
                                 pls->priority = 0;
                                 pls->pcs = pcs;
                                 pls->ls_type = TYPE_EC;
@@ -7191,22 +7181,13 @@ void eSENCChart::AssembleLineGeometry( void )
                                 
                             }
                             else {
-                                //wxString key;
-                                //key.Printf(_T("CC%d%d"), inode, enode);
-                                char buf[40];
-                                snprintf(buf, sizeof(buf), "%d_%d", inode, enode);
-                                std::string key(buf);
-                                
+                                long long key = ((unsigned long long)inode << 32) + enode;
                                 
                                 connector_segment *pcs = NULL;
-                                std::map<std::string, connector_segment *>::iterator itcc;
-                                itcc = cc_connector_hash.find( key );
-                                if( itcc == cc_connector_hash.end() ){
+                                csit = cc_connector_hash.find( key );
+                                if( csit == cc_connector_hash.end() ){
                                     ndelta += 2;
                                     pcs = new connector_segment;
-//                                    pcs->type = TYPE_CC;
-//                                    pcs->start = ipnode;
-//                                    pcs->end = epnode;
                                     cc_connector_hash[key] = pcs;
                                     
                                     // capture and store geometry
@@ -7232,11 +7213,10 @@ void eSENCChart::AssembleLineGeometry( void )
                                     
                                 }
                                 else
-                                    pcs = itcc->second;
+                                    pcs = csit->second;
                                 
                                 line_segment_element *pls = new line_segment_element;
                                 pls->next = 0;
-//                                pls->n_points = 2;
                                 pls->priority = 0;
                                 pls->pcs = pcs;
                                 pls->ls_type = TYPE_CC;
@@ -7298,9 +7278,9 @@ void eSENCChart::AssembleLineGeometry( void )
                                      
     std::map<std::string, connector_segment *>::iterator iter;
     
-    for( iter = ce_connector_hash.begin(); iter != ce_connector_hash.end(); ++iter )
+    for( csit = ce_connector_hash.begin(); csit != ce_connector_hash.end(); ++csit )
     {
-        connector_segment *pcs = iter->second;
+        connector_segment *pcs = csit->second;
         m_pcs_vector.push_back(pcs);
         
         segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
@@ -7313,9 +7293,9 @@ void eSENCChart::AssembleLineGeometry( void )
         offset += 4 * sizeof(float);
     }
 
-    for( iter = ec_connector_hash.begin(); iter != ec_connector_hash.end(); ++iter )
+    for( csit = ec_connector_hash.begin(); csit != ec_connector_hash.end(); ++csit )
     {
-        connector_segment *pcs = iter->second;
+        connector_segment *pcs = csit->second;
         m_pcs_vector.push_back(pcs);
         
         segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
@@ -7328,9 +7308,9 @@ void eSENCChart::AssembleLineGeometry( void )
         offset += 4 * sizeof(float);
     }
     
-    for( iter = cc_connector_hash.begin(); iter != cc_connector_hash.end(); ++iter )
+    for( csit = cc_connector_hash.begin(); csit != cc_connector_hash.end(); ++csit )
     {
-        connector_segment *pcs = iter->second;
+        connector_segment *pcs = csit->second;
         m_pcs_vector.push_back(pcs);
         
         segment_pair pair = connector_segment_vector.at(pcs->vbo_offset_cs);
