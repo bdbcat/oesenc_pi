@@ -33,7 +33,7 @@ endif ()
 
 set(wxWidgets_USE_LIBS base core net xml html adv stc)
 
-find_package(wxWidgets REQUIRED base core net xml html adv stc)
+find_package(wxWidgets REQUIRED base core net xml html adv)
 if (MSYS)
   # This is just a hack. I think the bug is in FindwxWidgets.cmake
   string(
