@@ -10,16 +10,6 @@ debian-steps: &debian-steps
     - run: python3 ci/git-push
 
 jobs:
-  build-mingw:
-    machine:
-      image: circleci/classic:201808-01
-    environment:
-      - OCPN_TARGET: mingw
-    steps:
-      - checkout
-      - run: ci/circleci-build-mingw.sh
-      - run: cd build; /bin/bash < upload.sh
-      - run: python3 ci/git-push
 
   build-flatpak-arm64:
     machine:
@@ -189,9 +179,6 @@ workflows:
   version: 2
   build_all:
     jobs:
-      - build-mingw:
-          <<: *std-filters
-
       - build-flatpak-arm64:
           <<: *std-filters
 
