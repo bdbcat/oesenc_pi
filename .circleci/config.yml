@@ -21,11 +21,33 @@ jobs:
       - run: cd build; /bin/bash < upload.sh
       - run: python3 ci/git-push
 
+  build-flatpak-arm64:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    environment:
+      - OCPN_TARGET: flatpak-arm64
+      - FLATPAK_BRANCH: beta
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - fp-a64-v1-{{ checksum "ci/circleci-build-flatpak.sh" }}
+      - run: ci/circleci-build-flatpak.sh
+      - save_cache:
+          key: fp-a64-v1-{{ checksum "ci/circleci-build-flatpak.sh" }}
+          paths:
+            - /home/circleci/.local/share/flatpak/repo
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
   build-flatpak:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       - OCPN_TARGET: flatpak
+      - USE_CUSTOM_PPA: yes
+      - FLATPAK_BRANCH: stable
     steps:
       - checkout
       - restore_cache:
@@ -168,6 +190,9 @@ workflows:
   build_all:
     jobs:
       - build-mingw:
+          <<: *std-filters
+
+      - build-flatpak-arm64:
           <<: *std-filters
 
       - build-flatpak:
