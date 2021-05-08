@@ -19,6 +19,40 @@ finish-args:
     - --device=all
 
 modules:
+
+    - name: iproute2
+      sources:
+          - type: archive
+            url: https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-5.7.0.tar.xz
+            sha256: 725dc7ba94aae54c6f8d4223ca055d9fb4fe89d6994b1c03bfb4411c4dd10f21
+      no-autogen: true
+      buildsystem: autotools
+      make-args:
+        - PREFIX=/app
+      make-install-args:
+        - DESTDIR=/app/extensions/oesenc
+        - SBINDIR=/bin
+      cleanup:
+        - bridge
+        - ctstat
+        - genl
+        - ifcfg
+        - ifstat
+        - lnstat
+        - nstat
+        - routef
+        - routel
+        - rtacct
+        - rtmon
+        - rtpr
+        - rtstat
+        - ss
+        - tc
+        - /etc
+        - /usr/lib
+        - /usr/share
+        - /var
+        - /usr/include
     - name: oesenc
       no-autogen: true
       build-options:
