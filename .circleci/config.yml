@@ -37,7 +37,7 @@ jobs:
     environment:
       - OCPN_TARGET: flatpak
       - USE_CUSTOM_PPA: yes
-      - FLATPAK_BRANCH: stable
+      - FLATPAK_BRANCH: beta
     steps:
       - checkout
       - restore_cache:
