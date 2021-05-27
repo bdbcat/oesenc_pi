@@ -28,6 +28,9 @@ cmake \
   -DCMAKE_AR=${tool_base}/bin/aarch64-linux-android-ar \
   -DCMAKE_CXX_COMPILER=${tool_base}/bin/aarch64-linux-android21-clang++ \
   -DCMAKE_C_COMPILER=${tool_base}/bin/aarch64-linux-android21-clang \
+  -DCMAKE_SYSROOT=${tool_base}/sysroot \
+  -DCMAKE_INCLUDE_PATH=${tool_base}/sysroot/usr/include \
+  -DCMAKE_LIBRARY_PATH=${tool_base}/sysroot/usr/lib/aarch64-linux-android/29 \
   .. 
 make tarball
 
