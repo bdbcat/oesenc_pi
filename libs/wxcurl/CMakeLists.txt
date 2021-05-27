@@ -8,6 +8,31 @@ if (NOT CMAKE_MODULE_PATH)
   set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 endif ()
 
+# Library is used also in the plugins, so:
+set(CMAKE_POSITION_INDEPENDENT_CODE "ON")
+
+add_library(WXCURL_IF INTERFACE)
+add_library(ocpn::wxcurl ALIAS WXCURL_IF)
+
+if (WIN32 OR MINGW)
+  option(OCPN_USE_PREBUILT_WXCURL "Use wxCurl libraries" ON)
+else ()
+  set(OCPN_USE_PREBUILT_WXCURL OFF)
+endif ()
+
+if (OCPN_USE_PREBUILT_WXCURL)
+  set(_implib ${CMAKE_CURRENT_LIST_DIR}/win/libcurl.dll)
+  add_library(CURL_LIBRARIES STATIC IMPORTED)
+  set_property(TARGET CURL_LIBRARIES
+    PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/win/libcurl.lib
+  )
+  set(CURL_LIBRARIES ${CMAKE_CURRENT_LIST_DIR}/win/libcurl.lib)
+  set(CURL_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/include)
+else ()  
+  find_package(CURL REQUIRED)
+  target_link_libraries(WXCURL_IF INTERFACE CURL::libcurl)
+endif ()
+
 set(SRC
   include/README
   include/curl
@@ -49,16 +74,14 @@ set(SRC
   src/dav.cpp
 )   
 
-# Library is used also in the plugins, so:
-set(CMAKE_POSITION_INDEPENDENT_CODE "ON")
+add_library(WXCURL_SRC STATIC ${SRC})
+target_include_directories(WXCURL_SRC
+  PUBLIC ${CURL_INCLUDE_DIRS} ${CMAKE_CURRENT_LIST_DIR}/src
+)
+target_link_libraries(WXCURL_SRC PUBLIC ${CURL_LIBRARIES})
 
-add_library(WXCURL STATIC ${SRC})
-add_library(ocpn::wxcurl ALIAS WXCURL)
+target_link_libraries(WXCURL_IF INTERFACE WXCURL_SRC)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-  set_property(TARGET ISO8211 PROPERTY COMPILE_FLAGS "-fvisibility=hidden")
+  set_property(TARGET WXCURL_SRC PROPERTY COMPILE_FLAGS "-fvisibility=hidden")
 endif ()
-target_include_directories(WXCURL PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
-target_include_directories(WXCURL PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
-target_link_libraries( WXCURL PUBLIC ${CURL_LIBRARIES})
-

@@ -167,44 +167,39 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
   # Build package as required (flatpak already dealt with).
   #
   include(PluginCompiler)
-  if (NOT QT_ANDROID)
-    include(PluginLibs)
-  endif ()
   include(PluginLocalization)
   include(PluginInstall)
   include(PluginPackage)
+  if (QT_ANDROID)
+    include(libs/AndroidLibs.cmake)
+  else ()
+    include(PluginLibs)
+  endif ()
 
   include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
   include_directories(${CMAKE_SOURCE_DIR}/src)
   include_directories(${CMAKE_SOURCE_DIR}/include)
   include_directories(${CMAKE_SOURCE_DIR}/libs/gdal/src)
-  if (QT_ANDROID)
-    include(libs/AndroidLibs.cmake)
-  endif ()
+  
   add_subdirectory("libs/cpl")
   target_link_libraries(${PACKAGE_NAME} ocpn::cpl)
+
   add_subdirectory("libs/dsa")
   target_link_libraries(${PACKAGE_NAME} ocpn::dsa)
+
   add_subdirectory("libs/wxJSON")
   target_link_libraries(${PACKAGE_NAME} ocpn::wxjson)
+
   add_subdirectory("libs/iso8211")
   target_link_libraries(${PACKAGE_NAME} ocpn::iso8211)
+
   add_subdirectory("libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
 
-  if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )
-    add_subdirectory("libs/libglu")
-    target_link_libraries(${PACKAGE_NAME} ocpn::glu)
-  endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )
+  add_subdirectory("libs/libglu")
+  target_link_libraries(${PACKAGE_NAME} ocpn::glu)
   
-  if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
-    option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
-  else( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") ) 
-    INCLUDE_DIRECTORIES("libs/wxcurl/src")
-  endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
-    
-
-  if (OCPN_USE_BUNDLED_WXCURL)
+  if (NOT QT_ANDROID)
     add_subdirectory("libs/wxcurl")
     target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   endif ()
@@ -212,8 +207,8 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
   add_subdirectory("libs/oeserverd")
 
   if (ARCH STREQUAL "armhf")
-   add_definitions(-DOCPN_ARMHF)
-  endif (ARCH STREQUAL "armhf")      
+   add_compile_definitions(OCPN_ARMHF)
+  endif ()      
 
   if (APPLE)
     # Copy some items needed by the .img package
