@@ -26,7 +26,7 @@ if (${CMAKE_MAJOR_VERSION} LESS 3 OR ${CMAKE_MINOR_VERSION} LESS 16)
   set(_install_cmd make install)
 else ()
   set(_build_target_cmd
-      cmake --build ${CMAKE_BINARY_DIR} --config $<CONFIG> --target
+      cmake --build ${CMAKE_BINARY_DIR} --parallel --config $<CONFIG> --target
   )
   set(_install_cmd cmake --install ${CMAKE_BINARY_DIR} --config $<CONFIG>)
 endif ()
