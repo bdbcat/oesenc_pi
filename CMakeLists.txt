@@ -81,7 +81,7 @@ endif ()
 #
 include("VERSION.cmake")
 
-project(o-charts_pi VERSION ${OCPN_VERSION})
+project(oesenc_pi VERSION ${OCPN_VERSION})
 set(PKG_PRERELEASE "")  # Empty, or a tag like 'beta'
 
 set(DISPLAY_NAME oesenc)    # Dialogs, installer artifacts, ...
@@ -249,4 +249,4 @@ configure_file(
   ${CMAKE_SOURCE_DIR}/plugin.xml.in
   ${CMAKE_BINARY_DIR}/${pkg_displayname}.xml.in
   @ONLY
-  N)
+)
