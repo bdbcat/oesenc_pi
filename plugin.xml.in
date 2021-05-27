@@ -2,14 +2,14 @@
 <plugin version="1">
   <name> @PLUGIN_API_NAME@ </name>
   <version> @pkg_semver@ </version>
-  <release> @PKG_RELEASE@ </release>
+  <release> @PROJECT_VERSION_TWEAK@ </release>
   <summary> @CPACK_PACKAGE_DESCRIPTION_SUMMARY@ </summary>
 
   <api-version> @API_VERSION@ </api-version>
   <open-source> no </open-source>
   <author> @PKG_AUTHOR@ </author>
-  <source> https://github.com/bdbcat/oesenc_pi </source>
-  <info-url> https://opencpn.org/OpenCPN/plugins/oesenc.html </info-url>
+  <source> @CPACK_PACKAGE_HOMEPAGE_URL@ </source>
+  <info-url> @PKG_INFO_URL@ </info-url>
 
   <description> @CPACK_PACKAGE_DESCRIPTION@ </description>
 

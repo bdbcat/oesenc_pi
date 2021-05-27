@@ -80,9 +80,9 @@ endif ()
 # -------  Plugin setup --------
 #
 include("VERSION.cmake")
-SET(FULL_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" )
 
-project(oesenc_pi VERSION ${FULL_VERSION})
+project(o-charts_pi VERSION ${OCPN_VERSION})
+set(PKG_PRERELEASE "")  # Empty, or a tag like 'beta'
 
 set(DISPLAY_NAME oesenc)    # Dialogs, installer artifacts, ...
 set(PLUGIN_API_NAME oeSENC) # As of GetCommonName() in plugin API
@@ -101,8 +101,10 @@ way to access the national chart databases. Charts are encrypted and
 can only be used after purchasing decryption keys from o-charts.org.
 ]=])
 
-set(PKG_RELEASE "1")
 set(PKG_AUTHOR "Dave register")
+
+set(CPACK_PACKAGE_HOMEPAGE_URL https://github.com/bdbcat/oesenc_pi)
+set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/oesenc.html)
 
 set(SRC
     src/oesenc_pi.h
@@ -241,9 +243,10 @@ configure_file(
 )
 
 set(checksum "@checksum@")
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 configure_file(
   # The XML metadata file
-  ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+  ${CMAKE_SOURCE_DIR}/plugin.xml.in
   ${CMAKE_BINARY_DIR}/${pkg_displayname}.xml.in
   @ONLY
-)
+  N)
