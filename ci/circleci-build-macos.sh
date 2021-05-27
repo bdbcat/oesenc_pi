@@ -55,7 +55,7 @@ fi
 
 make -j $(sysctl -n hw.physicalcpu) VERBOSE=1 tarball
 
-make create-pkg
+#make create-pkg
 
 # Install cloudsmith needed by upload script
 python3 -m pip install --upgrade --user -q pip setuptools
