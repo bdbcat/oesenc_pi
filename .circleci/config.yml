@@ -79,6 +79,7 @@ jobs:
       - image: circleci/buildpack-deps:trusty-scm
     environment:
       - OCPN_TARGET: trusty
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
       - checkout
       - run: ci/circleci-build-trusty.sh
@@ -92,6 +93,7 @@ jobs:
     environment:
       - OCPN_TARGET: xenial
       - USE_DEADSNAKES_PY37: 1
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     <<: *debian-steps
 
   build-bionic:
@@ -99,6 +101,7 @@ jobs:
       - image: circleci/buildpack-deps:bionic-scm
     environment:
       - OCPN_TARGET: bionic
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     <<: *debian-steps
 
   build-bionic-gtk3:
@@ -107,6 +110,7 @@ jobs:
     environment:
       - BUILD_GTK3: true
       - OCPN_TARGET: bionic-gtk3
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     <<: *debian-steps
 
   build-focal:
@@ -114,6 +118,7 @@ jobs:
       - image: circleci/buildpack-deps:focal-scm
     environment:
       - OCPN_TARGET: focal
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     <<: *debian-steps
 
   build-buster:
@@ -121,6 +126,7 @@ jobs:
       - image: circleci/buildpack-deps:buster-scm
     environment:
       - OCPN_TARGET: buster
+      - CMAKE_BUILD_PARALLEL_LEVEL: 2
     <<: *debian-steps
 
   build-armhf-stretch:
