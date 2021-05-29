@@ -8,7 +8,7 @@ id: org.opencpn.OpenCPN.Plugin.oesenc
 runtime: org.opencpn.OpenCPN
 runtime-version: stable   # official build at flathub
 #runtime-version: master   # for nightly builds
-sdk: org.freedesktop.Sdk//20.08
+sdk: org.freedesktop.Sdk//18.08
 build-extension: true
 separate-locales: false
 appstream-compose: false
@@ -19,65 +19,70 @@ finish-args:
     - --device=all
 
 modules:
+  - name: libusb
+    config-opts:
+      - --disable-static
+      - --disable-udev
+      - --prefix=/app/extensions/oesenc
+    sources:
+      - type: archive
+        url: https://github.com/libusb/libusb/archive/v1.0.22.tar.gz
+        sha256: 3500f7b182750cd9ccf9be8b1df998f83df56a39ab264976bdb3307773e16f48
 
-    - name: iproute2
-      sources:
-          - type: archive
-            url: https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-5.7.0.tar.xz
-            sha256: 725dc7ba94aae54c6f8d4223ca055d9fb4fe89d6994b1c03bfb4411c4dd10f21
-      no-autogen: true
-      buildsystem: autotools
-      make-args:
-        - PREFIX=/app
-      make-install-args:
-        - DESTDIR=/app/extensions/oesenc
-        - SBINDIR=/bin
-      cleanup:
-        - bridge
-        - ctstat
-        - genl
-        - ifcfg
-        - ifstat
-        - lnstat
-        - nstat
-        - routef
-        - routel
-        - rtacct
-        - rtmon
-        - rtpr
-        - rtstat
-        - ss
-        - tc
-        - /etc
-        - /usr/lib
-        - /usr/share
-        - /var
-        - /usr/include
-    - name: oesenc
-      no-autogen: true
-      build-options:
-          cflags: -fPIC
-          cxxflags: -fPIC -DFLATPAK
-      buildsystem: cmake
-      config-opts:
-          - -DCMAKE_INSTALL_PREFIX=/app/extensions/oesenc/
-          - -DCMAKE_BUILD_TYPE:STRING=Release
-          - -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-          - -DBUILD_TYPE:STRING=tarball
-          - -Uplugin_target
+  - name: libusb-compat-0.1
+    config-opts:
+      - --disable-static
+      - --prefix=/app/extensions/oesenc
+    build-options:
+      env:
+        PKG_CONFIG_PATH: /app/extensions/oesenc/lib/pkgconfig
+    sources:
+      - type: git
+        url: https://github.com/libusb/libusb-compat-0.1.git
+        tag: v0.1.7
+    cleanup:
+      - /lib/*.la
+      - /lib/pkgconfig
+      - /include
+    post-install:
+      - rm -f /app/extensions/oesenc/bin/libusb-config
 
-      post-install:
-          - >
-            mv /app/extensions/oesenc/bin/oeserverd
-            /app/extensions/oesenc/bin/oeserverd.prog
-          - >
-            install -t /app/extensions/oesenc/bin/ -m 755
-            libs/oeserverd/linux64/oeserverd
-          - >
-            install -t /app/extensions/oesenc/lib -m 755
-            libs/oeserverd/linux64/libusb-0.1.so.4
+  - name: iproute2
+    sources:
+      - type: archive
+        url: https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-5.7.0.tar.xz
+        sha256: 725dc7ba94aae54c6f8d4223ca055d9fb4fe89d6994b1c03bfb4411c4dd10f21
+    no-autogen: true
+    buildsystem: autotools
+    make-args:
+      - PREFIX=/app
+    make-install-args:
+      - DESTDIR=/app/extensions/oesenc
+      - SBINDIR=/bin
+    post-install:
+      - >
+        cd /app/extensions/oesenc/bin;
+        rm -f bridge genl if* *stat route* rt* ss tc 
+      - cd /app/extensions/oesenc; rm -rf include etc lib/pkgconfig lib/*.la
 
-      sources:
-          - type: git
-            url: ..
-            branch: master
+  - name: oesenc
+    no-autogen: true
+    build-options:
+      cflags: -fPIC
+      cxxflags: -fPIC -DFLATPAK
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_INSTALL_PREFIX=/app/extensions/oesenc/
+      - -DCMAKE_BUILD_TYPE:STRING=Release
+      - -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+      - -DBUILD_TYPE:STRING=tarball
+      - -Uplugin_target
+
+    post-install:
+      - /usr/bin/bash libs/oeserverd/install-flatpak.sh
+      - rm -f /app/extensions/oesenc/bin/*.so
+
+    sources:
+      - type: git
+        url: ..
+        branch: HEAD

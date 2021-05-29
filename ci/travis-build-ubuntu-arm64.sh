@@ -23,7 +23,7 @@ export PATH=$HOME/.local/bin:$PATH
 python3 -m pip install cmake
 cd /ci-source
 mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 make tarball
 EOF
 

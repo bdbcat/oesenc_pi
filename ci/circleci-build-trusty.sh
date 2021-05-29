@@ -7,36 +7,46 @@ set -xe
 sudo apt-get -qq update
 sudo apt-get install devscripts equivs
 
+# Build dependencies
 mk-build-deps build-deps/control
 sudo dpkg -i ./*all.deb   || :
 sudo apt-get --allow-unauthenticated install -f
-sudo apt-get install libglu1-mesa-dev 
 
-# Get  reasonably modern cmake which meets the requirements
-wget https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.sh
-sudo sh cmake-3.12.0-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir
+sudo apt-get install libglu1-mesa-dev
 
-# Update python and python-pip to extent possible.
-sudo apt install python3.5  python3-pip
-python3.5 -m pip install --user --force-reinstall pip==20.3.4 setuptools==49.1.3
+# Install pre-built cmake 3.12
+repo="https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable"
+wget $repo/raw/names/cmake/versions/3.12-trusty/cmake-3.12.4-trusty.tar.gz
+sudo tar -C /usr/local -xf cmake-3.12.4-trusty.tar.gz
 
 
-# Install cloudsmith-cli (for upload) and cryptography (for git-push)
-sudo apt remove python3-six python3-colorama python3-urllib3
-export LC_ALL=C.UTF-8  LANG=C.UTF-8
-# https://github.com/pyca/cryptography/issues/5753 -> cryptography < 3.4
-python3.5 -m pip install --user cloudsmith-cli 'cryptography<3.4'
+# Build the tarball
+if [ -n "$BUILD_GTK3" ]; then
+    sudo update-alternatives --set wx-config \
+        /usr/lib/*-linux-*/wx/config/gtk3-unicode-3.0
+fi
 
-
-# Build tarball and package
-mkdir build && cd build
+mkdir  build
+cd build
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-make -j $(nproc) VERBOSE=1 tarball
-make package
+VERBOSE=1 cmake --build . --target tarball
 
+#  Install cloudsmith-cli, used by upload script.
+sudo apt-get install software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt -qq update
+sudo apt-get -q install python3.5 python3.5-venv
+for py in $(ls /usr/bin/python3.[0-9]); do
+    sudo update-alternatives --install /usr/bin/python3 python3 $py 1
+done
+sudo update-alternatives --set python3 /usr/bin/python3.5
 
-# python install scripts in ~/.local/bin, teach upload.sh to use it in PATH:
+sudo apt install -q \
+    python3-pip python3-setuptools python3-dev python3-wheel \
+    build-essential libssl-dev libffi-dev
+python3 -m ensurepip --upgrade --user
+python3 -m pip install -q --user cryptography
+python3 -m pip install -q --user cloudsmith-cli
+
+# python install scripts in ~/.local/bin, teach upload.sh to use in it's PATH:
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.uploadrc
-
-# Both python modules needs 3.5:
-sudo ln -sf /usr/bin/python3.5 /usr/bin/python3
