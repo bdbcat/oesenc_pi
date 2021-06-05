@@ -665,11 +665,11 @@ int oesenc_pi::Init(void)
      
     // Specify the location of the xxserverd helper.
 #ifdef __WXMSW__
-      g_sencutil_bin = GetPluginDataDir("oesenc_pi") + _T("\\oeserverd.exe");
+    wxString piWLocn = GetPlugInPath(this);
+    wxFileName pifn(piWLocn);
+    g_sencutil_bin = pifn.GetPath() + _T("\\oeserverd.exe");
+    wxLogMessage(_T("Path to Windows server is: ") + g_sencutil_bin);
 
-//#else      
-      //wxFileName fn_exe(GetOCPN_ExePath());
-      //g_sencutil_bin = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("oeserverd");
 #endif
       
       // Search for helper in the $PATH.
@@ -685,12 +685,12 @@ int oesenc_pi::Init(void)
         }
       }
       
-            // Account for possible "space" in Mac directory name.
-#ifdef __WXOSX__
+
+            // And Windows.
+#ifdef __WXMSW__
       g_sencutil_bin.Prepend(_T("\""));
       g_sencutil_bin.Append(_T("\""));
 #endif    
-
 
     
     
@@ -705,25 +705,55 @@ int oesenc_pi::Init(void)
 #endif
 
     // Set environment variable for some platforms to find the required sglock dongle library
-    wxFileName fn_exe(GetOCPN_ExePath());
-
 #if !defined(__WXMSW__) && !defined(__WXMAC__)
-    // Set environment variable to find the required sglock dongle library
-    wxFileName libraryPath = fn_exe;
+    wxFileName fn_plug(GetPlugInPath(this));
+    wxFileName libraryPath = fn_plug;
     libraryPath.RemoveLastDir();
-    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("lib/opencpn");
-    wxSetEnv(_T("LD_LIBRARY_PATH"), libDir ); //"/usr/local/lib/opencpn");
+    libraryPath.RemoveLastDir();
+    wxString path = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("bin");
+    wxString envPath;
+    if (wxGetEnv("LD_LIBRARY_PATH", &envPath)) {
+        path = path + ":" + envPath.ToStdString(); 
+    }
+    wxLogMessage("oeSENC_PI::Using LD_LIBRARY_PATH: %s", path.c_str());
+    wxSetEnv("LD_LIBRARY_PATH", path.c_str());
+    if(g_sencutil_bin.IsEmpty())
+        g_sencutil_bin = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("bin/oeserverd");
 #endif
 
+
 #ifdef __WXMAC__
+    wxFileName fn_plug(GetPlugInPath(this));
+
     // Set environment variable to find the required sglock dongle library
-    wxString libDir = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("PlugIns/oesenc_pi");
+    wxFileName libraryPath = fn_plug;       //Mac OS⁩ ▸ ⁨Users⁩ ▸ ⁨macmini⁩ ▸ ⁨Library⁩ ▸ ⁨Application Support⁩ ▸ ⁨OpenCPN⁩ ▸ ⁨Contents⁩ ▸ ⁨PlugIns⁩
+    libraryPath.RemoveLastDir();
+    
+    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("SharedSupport/plugins/oesenc_pi");
+
     wxSetEnv(_T("DYLD_LIBRARY_PATH"), libDir ); 
-    wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);
+    wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);     ///Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi
+
+    
+    wxString path = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("SharedSupport/plugins/oesenc_pi");
+    g_sencutil_bin = libDir +_T("/oeserverd"); //Mac OS⁩ ▸ ⁨Users⁩ ▸ ⁨macmini⁩ ▸ ⁨Library⁩ ▸ ⁨Application Support⁩ ▸ ⁨OpenCPN⁩ ▸ ⁨Contents⁩ ▸ ⁨SharedSupport⁩ ▸ ⁨plugins⁩ ▸ ⁨oesenc_pi⁩
+    // Account for possible "space" in Mac directory name.
+    g_sencutil_bin.Prepend(_T("\""));
+    g_sencutil_bin.Append(_T("\""));
+
+    //             iNSTALLED AT /Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi/oeserverd
+    //750 Path to oeserverd is: /Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi/oeserverd
+    
 #endif
 
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
 
+#ifdef __OCPN__ANDROID__
+    bool bCopyOK;
+    wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock);
+    getFPR( false, bCopyOK, false);
+#endif
+    
     if(IsDongleAvailable())
         wxLogMessage(_T("Dongle detected"));
     else
@@ -3120,6 +3150,21 @@ void init_GLLibrary(void)
     }
 }
 
+#ifdef __OCPN__ANDROID__
+wxString getAndroidLibdir()
+{
+    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
+    wxString piLocn = g_pi_filename;
+    wxFileName fnl(piLocn);
+    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR);
+    if(libDir.Find(_T("manPlug")) != wxNOT_FOUND){
+        fnl.RemoveLastDir();
+        libDir = fnl.GetPath(wxPATH_GET_SEPARATOR);
+    }
+    libDir += _T("lib");
+    return libDir;    
+}
+#endif
 
 bool testSENCServer()
 {
@@ -3134,11 +3179,8 @@ bool testSENCServer()
     wxFileName fn(dataLoc);
     wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-    // This will be {dir of g_sencutil_bin}/lib
-    wxFileName fnl(cmd);
-    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+    wxString libDir = getAndroidLibdir();
+    
     wxLogMessage(_T("oesenc_pi: Starting: ") + cmd );
     
     wxString result = callActivityMethod_s4s("createProcSync", cmd, _T("-w"), dataDir, libDir);
@@ -3257,10 +3299,8 @@ bool validate_SENC_server(void)
     wxFileName fn(dataLoc);
     wxString dataDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-    //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-    // This will be {dir of g_sencutil_bin}/lib
-    wxFileName fnl(cmd);
-    wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
+    wxString libDir = getAndroidLibdir();
+
     
 //     wxLogMessage(_T("oesenc_pi: Starting for version: ") + cmd );
 //     wxString vresult = callActivityMethod_s6s("createProcSync5stdout", cmd, "-a");
@@ -4154,12 +4194,8 @@ wxString getFPR( bool bCopyToDesktop, bool &bCopyOK, bool bSGLock)
 
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
-        //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}
-        wxFileName fnl(cmd);
-//        wxString libDir = fnl.GetPath();
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-      
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oernc_pi: Getting XFPR: Starting: ") + cmd );
         wxLogMessage(_T("oernc_pi: Getting XFPR: Parms: ") + rootDir + _T(" ") + dataDir + _T(" ") + libDir );
 
@@ -4419,10 +4455,8 @@ void oesenc_pi_event_handler::OnNewFPRClick( wxCommandEvent &event )
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
         //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}/lib
-        wxFileName fnl(cmd);
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oesenc_pi: Getting XFPR: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-g"), dataDir, libDir);
@@ -4697,10 +4731,8 @@ void oesenc_pi_event_handler::OnGetHWIDClick( wxCommandEvent &event )
         wxString rootDir = fn.GetPath(wxPATH_GET_SEPARATOR);
         
         //  Set up the parameter passed to runtime environment as LD_LIBRARY_PATH
-        // This will be {dir of g_sencutil_bin}/lib
-        wxFileName fnl(cmd);
-        wxString libDir = fnl.GetPath(wxPATH_GET_SEPARATOR) + _T("lib");
-        
+        wxString libDir = getAndroidLibdir();
+
         wxLogMessage(_T("oesenc_pi: Getting HWID: Starting: ") + cmd );
 
         wxString result = callActivityMethod_s6s("createProcSync4", cmd, _T("-q"), rootDir, _T("-w"), dataDir, libDir);

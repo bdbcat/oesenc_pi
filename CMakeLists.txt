@@ -26,6 +26,7 @@ if (WIN32)
 endif ()
 message(STATUS "Cmake version: ${CMAKE_VERSION}.")
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # -------- Build setup (mostly in PluginCompiler) --------
 #
@@ -67,21 +68,21 @@ set(OCPN_TARGET_TUPLE "" CACHE STRING
 string(TOLOWER "${OCPN_TARGET_TUPLE}" _lc_target)
 if ("${_lc_target}" MATCHES "android*")
   set(QT_ANDROID ON)
-  set(OCPN_USE_CURL OFF)
+  set(OCPN_USE_BUNDLED_WXCURL OFF)
   # Until we have a proper toolchain file:
   set(CMAKE_CROSSCOMPILING ON)
 else ()
   set(QT_ANDROID OFF)
-  option(OCPN_USE_CURL "Use Curl libraries" ON)
+  add_definitions(-D__OCPN_USE_CURL__)
 endif ()
 
 
 # -------  Plugin setup --------
 #
 include("VERSION.cmake")
-SET(FULL_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" )
 
-project(oesenc_pi VERSION ${FULL_VERSION})
+project(oesenc_pi VERSION ${OCPN_VERSION})
+set(PKG_PRERELEASE "")  # Empty, or a tag like 'beta'
 
 set(DISPLAY_NAME oesenc)    # Dialogs, installer artifacts, ...
 set(PLUGIN_API_NAME oeSENC) # As of GetCommonName() in plugin API
@@ -100,8 +101,10 @@ way to access the national chart databases. Charts are encrypted and
 can only be used after purchasing decryption keys from o-charts.org.
 ]=])
 
-set(PKG_RELEASE "1")
 set(PKG_AUTHOR "Dave register")
+
+set(CPACK_PACKAGE_HOMEPAGE_URL https://github.com/bdbcat/oesenc_pi)
+set(PKG_INFO_URL https://opencpn.org/OpenCPN/plugins/oesenc.html)
 
 set(SRC
     src/oesenc_pi.h
@@ -166,37 +169,49 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
   # Build package as required (flatpak already dealt with).
   #
   include(PluginCompiler)
-  if (NOT QT_ANDROID)
-    include(PluginLibs)
-  endif ()
   include(PluginLocalization)
   include(PluginInstall)
   include(PluginPackage)
+  if (QT_ANDROID)
+    include(libs/AndroidLibs.cmake)
+  else ()
+    include(PluginLibs)
+  endif ()
 
   include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
   include_directories(${CMAKE_SOURCE_DIR}/src)
   include_directories(${CMAKE_SOURCE_DIR}/include)
   include_directories(${CMAKE_SOURCE_DIR}/libs/gdal/src)
-  if (QT_ANDROID)
-    include(libs/AndroidLibs.cmake)
-  endif ()
+  
   add_subdirectory("libs/cpl")
   target_link_libraries(${PACKAGE_NAME} ocpn::cpl)
+
   add_subdirectory("libs/dsa")
   target_link_libraries(${PACKAGE_NAME} ocpn::dsa)
+
   add_subdirectory("libs/wxJSON")
   target_link_libraries(${PACKAGE_NAME} ocpn::wxjson)
+
   add_subdirectory("libs/iso8211")
   target_link_libraries(${PACKAGE_NAME} ocpn::iso8211)
+
   add_subdirectory("libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
+
   add_subdirectory("libs/libglu")
   target_link_libraries(${PACKAGE_NAME} ocpn::glu)
-  if (OCPN_USE_CURL)
+  
+  if (NOT QT_ANDROID)
     add_subdirectory("libs/wxcurl")
     target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   endif ()
+  
   add_subdirectory("libs/oeserverd")
+
+  if (ARCH STREQUAL "armhf")
+   add_compile_definitions(OCPN_ARMHF)
+  endif ()      
+
   if (APPLE)
     # Copy some items needed by the .img package
     execute_process(
@@ -228,9 +243,10 @@ configure_file(
 )
 
 set(checksum "@checksum@")
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 configure_file(
   # The XML metadata file
-  ${CMAKE_SOURCE_DIR}/oesenc-plugin.xml.in
+  ${CMAKE_SOURCE_DIR}/plugin.xml.in
   ${CMAKE_BINARY_DIR}/${pkg_displayname}.xml.in
   @ONLY
 )

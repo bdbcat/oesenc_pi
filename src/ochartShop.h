@@ -37,8 +37,9 @@
 //#include <../../wxWidgets/wxWidgets-3.0.2/wxWidgets-3.0.2/include/wx/gtk/gauge.h>
 
 #ifdef __OCPN_USE_CURL__
-#include "wxcurl/wx/curl/http.h"
+#include <wx/curl/http.h>
 #endif
+
 #include "ocpn_plugin.h"
 
 #ifdef WXC_FROM_DIP

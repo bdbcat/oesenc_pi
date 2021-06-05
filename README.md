@@ -43,8 +43,7 @@ On windows, a somewhat different workflow is used:
     > cmake --build . --target tarball --config RelWithDebInfo
 
 This is to build the installer tarball. Use _--target pkg_ to build the
-legacy NSIS installer. The build requires access to a specific wxWidgets
-3.1.2 build, see the appveyor.yml file for details.
+legacy NSIS installer.
 
 ## Plugin Catalog Git Push Integration
 

@@ -36,4 +36,4 @@ python3 -m pip install --user --upgrade -q wheel pip
 python3 -m pip install --user -q cloudsmith-cli cryptography cmake
 
 cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j $(nproc) VERBOSE=1 tarball
+VERBOSE=1 cmake --build . --target tarball

@@ -28,7 +28,11 @@ cmake \
   -DCMAKE_AR=${tool_base}/bin/arm-linux-androideabi-ar \
   -DCMAKE_CXX_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang++ \
   -DCMAKE_C_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang \
+  -DCMAKE_SYSROOT=${tool_base}/sysroot \
+  -DCMAKE_INCLUDE_PATH=${tool_base}/sysroot/usr/include \
+  -DCMAKE_LIBRARY_PATH=${tool_base}/sysroot/usr/lib/arm-linux-androideabi/16 \
   .. 
+
 make VERBOSE=1 tarball
 
 # Make sure that the upload script finds the files
