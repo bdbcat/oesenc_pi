@@ -74,15 +74,22 @@ else ()
 endif ()
 message(STATUS "Selected upload repository: ${pkg_repo}")
 
-# pkg_semver: Complete version including build info
-#set(pkg_semver "${PROJECT_VERSION}+${_build_id}.${_gitversion}")
-set(pkg_semver "${PROJECT_VERSION}")
+# pkg_semver: Complete version including pre-release tag and build info
+set(_pre_rel ${PKG_PRERELEASE})
+if (_pre_rel MATCHES "^[^-]")
+  string(PREPEND _pre_rel "-")
+endif ()
+set(pkg_semver "${PROJECT_VERSION}${_pre_rel}+${_build_id}.${_gitversion}")
 
 # pkg_displayname: Used for xml metadata and GUI name
+if (ARCH MATCHES "arm64|aarch64")
+  set(_display_arch "-A64")
+endif()
 string(CONCAT pkg_displayname
   "${PLUGIN_API_NAME}-${VERSION_MAJOR}.${VERSION_MINOR}"
-  "-${plugin_target}-${_pkg_arch}-${plugin_target_version}"
+  "-${plugin_target}${_display_arch}-${plugin_target_version}"
 )
+
 # pkg_tarname: Tarball basename
 string(CONCAT pkg_tarname 
   "${PLUGIN_API_NAME}-${pkg_semver}_"
