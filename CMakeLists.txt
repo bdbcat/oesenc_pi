@@ -76,11 +76,6 @@ else ()
   add_definitions(-D__OCPN_USE_CURL__)
 endif ()
 
-if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
-    option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
-else( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") ) 
-    INCLUDE_DIRECTORIES("libs/wxcurl/src")
-endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
  
 
 # -------  Plugin setup --------
@@ -207,6 +202,14 @@ if (NOT ${BUILD_TYPE} STREQUAL "flatpak")
   add_subdirectory("libs/libglu")
   target_link_libraries(${PACKAGE_NAME} ocpn::glu)
   
+  if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
+    option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
+    message(STATUS "Building bundled wxCurl libraries")
+  else( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") ) 
+    message(STATUS "Using system wxCurl libraries")
+    INCLUDE_DIRECTORIES("libs/wxcurl/src")
+  endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
+
   if (NOT QT_ANDROID)
     if(OCPN_USE_BUNDLED_WXCURL)
         add_subdirectory("libs/wxcurl")
