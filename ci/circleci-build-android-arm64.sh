@@ -20,7 +20,7 @@ builddir=build-android-64
 test -d $builddir || mkdir $builddir
 cd $builddir && rm -rf *
 
-tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
+tool_base="/opt/android/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/"
 cmake \
   -DOCPN_TARGET_TUPLE:STRING="Android-arm64;16;arm64" \
   -DwxQt_Build=build_android_release_64_static_O3 \
