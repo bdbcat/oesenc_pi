@@ -113,6 +113,10 @@ void OE_ChartSymbols::ProcessColorTables( TiXmlElement* colortableNodes )
     for( TiXmlNode *childNode = colortableNodes->FirstChild(); childNode;
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
+    
+        if(!child)
+            continue;
+
         colTable *colortable = new colTable;
 
         const char *pName = child->Attribute( "name" );
@@ -161,8 +165,12 @@ void OE_ChartSymbols::ProcessLookups( TiXmlElement* lookupNodes )
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
 
+        if(!child)
+            continue;
+        
         TGET_INT_PROPERTY_VALUE( child, "id", lookup.id )
         TGET_INT_PROPERTY_VALUE( child, "RCID", lookup.RCID )
+    
         lookup.name = wxString( child->Attribute( "name" ), wxConvUTF8 );
         lookup.attributeCodeArray = NULL;
 
@@ -348,6 +356,9 @@ void OE_ChartSymbols::ProcessLinestyles( TiXmlElement* linestyleNodes )
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
 
+        if(!child)
+            continue;
+
         TGET_INT_PROPERTY_VALUE( child, "RCID", lineStyle.RCID )
 
         TiXmlElement* subNode = child->FirstChild()->ToElement();
@@ -427,6 +438,9 @@ void OE_ChartSymbols::ProcessPatterns( TiXmlElement* patternNodes )
     for( TiXmlNode *childNode = patternNodes->FirstChild(); childNode;
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
+
+        if(!child)
+            continue;
 
         TGET_INT_PROPERTY_VALUE( child, "RCID", pattern.RCID )
 
@@ -591,6 +605,9 @@ void OE_ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
     for( TiXmlNode *childNode = symbolNodes->FirstChild(); childNode;
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
+
+        if(!child)
+            continue;
 
         TGET_INT_PROPERTY_VALUE( child, "RCID", symbol.RCID )
 
