@@ -3031,11 +3031,12 @@ void init_S52Library(void)
         _T("oesenc_pi") + wxFileName::GetPathSeparator() +
         _T("data");
         
-        wxArrayString patchFiles;
-        wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
-        for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
-
-            g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
+        if(!dataLocn.IsEmpty()){
+            wxArrayString patchFiles;
+            wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
+            for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
+                g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
+            }
         }
 
             //    Preset some object class visibilites for "Mariner's Standard" display category
