@@ -19,13 +19,14 @@ macro (install_libs libs)
   endforeach ()
 endmacro () 
 
-if (EXISTS "/etc/udev/rules.d")
-  install(
-    FILES "linux/98-sglock.rules"
-    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/udev/rules.d"
-  )
-endif ()
+# the 98-sglock.rules have been moved to opencpn!
+# if (EXISTS "/etc/udev/rules.d")
+#   install(
+#     FILES "linux/98-sglock.rules"
+#     PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+#     DESTINATION "/etc/udev/rules.d"
+#   )
+# endif ()
 
 if (QT_ANDROID)
   configure_file(
