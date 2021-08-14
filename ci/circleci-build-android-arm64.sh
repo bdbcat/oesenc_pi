@@ -20,7 +20,7 @@ builddir=build-android-64
 test -d $builddir || mkdir $builddir
 cd $builddir && rm -rf *
 
-tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
+tool_base="/opt/android/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/"
 cmake \
   -DOCPN_TARGET_TUPLE:STRING="Android-arm64;16;arm64" \
   -DwxQt_Build=build_android_release_64_static_O3 \
@@ -28,6 +28,9 @@ cmake \
   -DCMAKE_AR=${tool_base}/bin/aarch64-linux-android-ar \
   -DCMAKE_CXX_COMPILER=${tool_base}/bin/aarch64-linux-android21-clang++ \
   -DCMAKE_C_COMPILER=${tool_base}/bin/aarch64-linux-android21-clang \
+  -DCMAKE_SYSROOT=${tool_base}/sysroot \
+  -DCMAKE_INCLUDE_PATH=${tool_base}/sysroot/usr/include \
+  -DCMAKE_LIBRARY_PATH=${tool_base}/sysroot/usr/lib/aarch64-linux-android/29 \
   .. 
 make tarball
 

@@ -20,7 +20,7 @@ builddir=build-android-hf
 test -d $builddir || mkdir $builddir
 cd $builddir && rm -rf *
 
-tool_base="/opt/android/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/"
+tool_base="/opt/android/android-ndk-r21e/toolchains/llvm/prebuilt/linux-x86_64/"
 cmake \
   -DOCPN_TARGET_TUPLE:STRING="Android-armhf;16;armhf" \
   -DwxQt_Build=build_android_release_19_static_O3 \
@@ -28,7 +28,11 @@ cmake \
   -DCMAKE_AR=${tool_base}/bin/arm-linux-androideabi-ar \
   -DCMAKE_CXX_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang++ \
   -DCMAKE_C_COMPILER=${tool_base}/bin/armv7a-linux-androideabi21-clang \
+  -DCMAKE_SYSROOT=${tool_base}/sysroot \
+  -DCMAKE_INCLUDE_PATH=${tool_base}/sysroot/usr/include \
+  -DCMAKE_LIBRARY_PATH=${tool_base}/sysroot/usr/lib/arm-linux-androideabi/16 \
   .. 
+
 make VERBOSE=1 tarball
 
 # Make sure that the upload script finds the files

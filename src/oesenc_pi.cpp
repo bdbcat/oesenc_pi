@@ -685,11 +685,6 @@ int oesenc_pi::Init(void)
         }
       }
       
-            // Account for possible "space" in Mac directory name.
-#ifdef __WXOSX__
-      g_sencutil_bin.Prepend(_T("\""));
-      g_sencutil_bin.Append(_T("\""));
-#endif    
 
             // And Windows.
 #ifdef __WXMSW__
@@ -728,12 +723,27 @@ int oesenc_pi::Init(void)
 
 
 #ifdef __WXMAC__
-    wxFileName fn_exe(GetOCPN_ExePath());
+    wxFileName fn_plug(GetPlugInPath(this));
 
     // Set environment variable to find the required sglock dongle library
-    wxString libDir = fn_exe.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("PlugIns/oesenc_pi");
+    wxFileName libraryPath = fn_plug;       //Mac OS⁩ ▸ ⁨Users⁩ ▸ ⁨macmini⁩ ▸ ⁨Library⁩ ▸ ⁨Application Support⁩ ▸ ⁨OpenCPN⁩ ▸ ⁨Contents⁩ ▸ ⁨PlugIns⁩
+    libraryPath.RemoveLastDir();
+    
+    wxString libDir = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("SharedSupport/plugins/oesenc_pi");
+
     wxSetEnv(_T("DYLD_LIBRARY_PATH"), libDir ); 
-    wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);
+    wxLogMessage(_T("OSX LIB DYLD_LIBRARY_PATH: ") + libDir);     ///Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi
+
+    
+    wxString path = libraryPath.GetPath( wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + _T("SharedSupport/plugins/oesenc_pi");
+    g_sencutil_bin = libDir +_T("/oeserverd"); //Mac OS⁩ ▸ ⁨Users⁩ ▸ ⁨macmini⁩ ▸ ⁨Library⁩ ▸ ⁨Application Support⁩ ▸ ⁨OpenCPN⁩ ▸ ⁨Contents⁩ ▸ ⁨SharedSupport⁩ ▸ ⁨plugins⁩ ▸ ⁨oesenc_pi⁩
+    // Account for possible "space" in Mac directory name.
+    g_sencutil_bin.Prepend(_T("\""));
+    g_sencutil_bin.Append(_T("\""));
+
+    //             iNSTALLED AT /Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi/oeserverd
+    //750 Path to oeserverd is: /Users/macmini/Library/Application Support/OpenCPN/Contents/SharedSupport/plugins/oesenc_pi/oeserverd
+    
 #endif
 
     wxLogMessage(_T("Path to oeserverd is: ") + g_sencutil_bin);
@@ -3021,11 +3031,12 @@ void init_S52Library(void)
         _T("oesenc_pi") + wxFileName::GetPathSeparator() +
         _T("data");
         
-        wxArrayString patchFiles;
-        wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
-        for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
-
-            g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
+        if(!dataLocn.IsEmpty()){
+            wxArrayString patchFiles;
+            wxDir::GetAllFiles(dataLocn, &patchFiles, _T("*.xml"));
+            for(unsigned int i=0 ; i < patchFiles.GetCount() ; i++){
+                g_oeChartSymbols->PatchConfigFile( ps52plib, patchFiles.Item(i));
+            }
         }
 
             //    Preset some object class visibilites for "Mariner's Standard" display category
