@@ -27,13 +27,14 @@ shop.
 
 === Links
 
-Source: https://github.com/bdbcat/oesenc_pi[Github source] +
-Download: https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSenc_pi
-Download] +
-Website: https://o-charts.org/[o-charts Vector Charts for Opencpn] +
+Source: https://github.com/bdbcat/oesenc_pi[oesenc plugin]
+
+Download: https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSenc_pi]
+
+Website: https://www.o-charts.org[o-charts.org Vector Charts for Opencpn]
+
 Forum:
-http://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc
-CF Thread]
+http://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc CF Thread]
 
 === Windows / Mac / Linux
 
@@ -41,7 +42,7 @@ _- requires to be online! For offline install of oeSENC charts see
 further below.._
 
 *1.* Download and install the
-https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSENC plugin] (only for
+https://www.opencpn.org/OpenCPN/plugins/oesenc.html[oeSENC plugin] (only for
 OpenCPN 4.6 version and above). If you have already the oeSENC plugin
 installed, update to the latest version.
 
@@ -77,14 +78,11 @@ most likely some libusb-1.0, which is a different library.
 
 *1.* Install OpenCPN 1.0.13, or above, for Android 4.2, or above, from
 the
-https://play.google.com/store/apps/details?id=org.opencpn.opencpn[Play
-Store].
+https://play.google.com/store/apps/details?id=org.opencpn.opencpn
 
-*2.* Install oeSENC plugin for OpenCPN from the
-https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin[Play
-Store] to be sure your device is compatible.
+*2.* Install oeSENC plugin for OpenCPN using the plugin manager. Update the master catalog first.
 
-*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+*3.* Go to https://o-charts.org and license the chart
 sets you are interested in.
 
 *4.* Back to OpenCPN, _Options → Charts → oeSENC charts → Add/update
@@ -119,7 +117,7 @@ image::createsystemidentifierfile.png[]
 
 ==== At the shop at
 
-*_http://o-charts.org/index.html[http://o-charts.org]_*
+https://o-charts.org
 - Select the chart set you want to license.
 
 . Upload your SystemIdentifierFile - it is used to encode the charts for
@@ -173,7 +171,7 @@ _- requires to be online! For offline install of oeSENC charts see
 further below.._
 
 *1.* Download and install the
-https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSENC plugin] (only for
+link:https://www.opencpn.org/OpenCPN/plugins/oesenc.html[oesenc plugin] (only for
 OpenCPN 4.6 version and above). If you have already the oeSENC plugin
 installed, update to the latest version.
 
