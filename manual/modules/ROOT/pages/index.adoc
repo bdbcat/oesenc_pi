@@ -32,7 +32,7 @@ Download: https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSenc_pi
 Download] +
 Website: https://o-charts.org/[o-charts Vector Charts for Opencpn] +
 Forum:
-http://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc
+https://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc
 CF Thread]
 
 === Windows / Mac / Linux
@@ -50,7 +50,7 @@ plug-in is required.
 
 *2.* Go to OpenCPN, _Options → Plugins → oeSENC_ and enable it.
 
-*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+*3.* Go to https://o-charts.org/shop/[o-charts shop] and license the chart
 sets you are interested in. Remember your access data to o-charts shop
 (email and password), you will need them later.
 
@@ -80,11 +80,12 @@ the
 https://play.google.com/store/apps/details?id=org.opencpn.opencpn[Play
 Store].
 
-*2.* Install oeSENC plugin for OpenCPN from the
-https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin[Play
-Store] to be sure your device is compatible.
+*2.* oeSENC plugin for OpenCPN should be available from the Play Store at
+\https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin
+NOTE:
+However, at the time of writing the plugin is unavailable at the Play Store.
 
-*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+*3.* Go to https://o-charts.org/shop/[o-charts shop] and license the chart
 sets you are interested in.
 
 *4.* Back to OpenCPN, _Options → Charts → oeSENC charts → Add/update
@@ -119,7 +120,7 @@ image::createsystemidentifierfile.png[]
 
 ==== At the shop at
 
-*_http://o-charts.org/index.html[http://o-charts.org]_*
+*_https://o-charts.org/index.html[https://o-charts.org]_*
 - Select the chart set you want to license.
 
 . Upload your SystemIdentifierFile - it is used to encode the charts for
@@ -182,7 +183,7 @@ plug-in is required.
 
 *2.* Go to OpenCPN, _Options → Plugins → oeSENC_ and enable it.
 
-*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+*3.* Go to https://o-charts.org/shop/[o-charts shop] and license the chart
 sets you are interested in. Remember your access data to o-charts shop
 (email and password), you will need them later.
 
@@ -212,11 +213,13 @@ the
 https://play.google.com/store/apps/details?id=org.opencpn.opencpn[Play
 Store].
 
-*2.* Install oeSENC plugin for OpenCPN from the
-https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin[Play
-Store] to be sure your device is compatible.
+*2.* Install oeSENC plugin for OpenCPN from the Play Store at
+\https://play.google.com/store/apps/details?id=org.opencpn.oesencplugin
+NOTE:
+AT the time of writing, plugin is not available here.
 
-*3.* Go to http://o-charts.org/shop[o-charts shop] and license the chart
+
+*3.* Go to https://o-charts.org/shop/[o-charts shop] and license the chart
 sets you are interested in.
 
 *4.* Back to OpenCPN, _Options → Charts → oeSENC charts → Add/update
@@ -253,7 +256,7 @@ System Identifier,title="Create System Identifier",width=600]]
 ==== At the shop at
 
  
-*_http://o-charts.org/index.html[http://o-charts.org]_*
+*_https://o-charts.org/index.html[https://o-charts.org]_*
  
 
 . Select the chart set you want to license.
