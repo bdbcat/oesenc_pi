@@ -1,6 +1,6 @@
-== oeSENC Charts
+= oeSENC Charts
 
-=== OpenCPN Vector Charts
+== OpenCPN Vector Charts
 
 OCPN Vector Charts are licensed and sourced from chart providers like
 Hydrographic Offices. These - non free - charts give OCPN access to
@@ -25,7 +25,7 @@ Same as in the case of the S-63 plug-in, the operational part is managed
 by an outside entity, o-charts.org. The charts are available at its web
 shop.
 
-=== Links
+== Links
 
 Source: https://github.com/bdbcat/oesenc_pi[Github source] +
 Download: https://opencpn.org/OpenCPN/plugins/oesenc.html[oeSenc_pi
@@ -35,7 +35,7 @@ Forum:
 https://www.cruisersforum.com/forums/f134/up-to-date-vector-charts-for-opencpn-oesenc-181733.html[oeSenc
 CF Thread]
 
-=== Windows / Mac / Linux
+== Windows / Mac / Linux
 
 _- requires to be online! For offline install of oeSENC charts see
 further below.._
@@ -73,7 +73,7 @@ Note: for the linux version you need libusb-0.1-4 for the SG lock
 library (“*sudo apt install libusb-0.1-4*”). The system itself will use
 most likely some libusb-1.0, which is a different library.
 
-=== Android
+== Android
 
 *1.* Install OpenCPN 1.0.13, or above, for Android 4.2, or above, from
 the
@@ -94,7 +94,7 @@ oeSENC chart sets_ and login with your o-charts access data.
 *5.* Follow on screen instructions to assign and download on your device
 the charts sets you licensed on the o-charts shop.
 
-=== Updates
+== Updates
 
 You should visit _Options → Charts → oeSENC charts_ from time to time to
 see if a new update is available. DE, FR and NO chart sets are updated
@@ -118,7 +118,7 @@ directly on the desktop.
  
 image::createsystemidentifierfile.png[]
 
-==== At the shop at
+=== At the shop at
 
 *_https://o-charts.org/index.html[https://o-charts.org]_*
 - Select the chart set you want to license.
@@ -130,7 +130,7 @@ key.
 . Depending on the workload of the production system this can take some
 time.
 
-==== Download the packet
+=== Download the packet
 
 . Unzip it to a directory of your choice.
 . Add an entry to the source chart directories pointing to the directory
@@ -142,7 +142,7 @@ the license key, the EULA and the chart “blob” itself.
 
 image::oesenc-add-oesenc-dir.png[]
 
-==== Each Use
+=== Each Use
 
 Each time you will use the charts from the set, a pop-up will inform you
 about the licensing period of the charts and you will have to accept the
@@ -153,7 +153,7 @@ image::pop-up.png[]]
 One additional license for back-up purposes is included and can be
 generating by the user when required.
 
-==== Chart Examples
+=== Chart Examples
 
  
 image::screenshot_large.png[] 
@@ -168,7 +168,7 @@ image::oesenc-chart-example-2.png[]
 
 image::oesenc-chart-example-3.png[]
 
-=== Windows / Mac / Linux
+== Windows / Mac / Linux
 
 _- requires to be online! For offline install of oeSENC charts see
 further below.._
@@ -206,7 +206,7 @@ Note: for the linux version you need libusb-0.1-4 for the SG lock
 library (“sudo apt install libusb-0.1-4”). The system itself will use
 most likely some libusb-1.0, which is a different library.
 
-=== Android
+== Android
 
 *1.* Install OpenCPN 1.0.13, or above, for Android 4.2, or above, from
 the
@@ -228,7 +228,7 @@ oeSENC chart sets_ and login with your o-charts access data.
 *5.* Follow on screen instructions to assign and download on your device
 the charts sets you licensed on the o-charts shop.
 
-=== Updates
+== Updates
 
 You should visit _Options → Charts → oeSENC charts_ from time to time to
 see if a new update is available. DE, FR and NO chart sets are updated
@@ -253,7 +253,7 @@ directly on the desktop.
 image::createsystemidentifierfile.png[image::createsystemidentifierfile.png[Create
 System Identifier,title="Create System Identifier",width=600]]
 
-==== At the shop at
+=== At the shop at
 
  
 *_https://o-charts.org/index.html[https://o-charts.org]_*
@@ -267,7 +267,7 @@ key.
 . Depending on the workload of the production system this can take some
 time.
 
-==== Download the packet
+=== Download the packet
 
 . Unzip it to a directory of your choice.
 . Add an entry to the source chart directories pointing to the directory
@@ -279,7 +279,7 @@ the license key, the EULA and the chart “blob” itself.
 
 image::oesenc-add-oesenc-dir.png[]
 
-==== Each Use
+=== Each Use
 
 Each time you will use the charts from the set, a pop-up will inform you
 about the licensing period of the charts and you will have to accept the
@@ -290,7 +290,7 @@ image::pop-up.png[]
 One additional license for back-up purposes is included and can be
 generating by the user when required. 
 
-==== Chart Examples
+=== Chart Examples
 
 image::screenshot_large.png[]
 
