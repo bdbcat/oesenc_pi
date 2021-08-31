@@ -1,7 +1,7 @@
 site:
   title: oeSENC Plugin Manual
   url:  https://nowhere.net
-  start_page: oesenc:ROOT:oesenc.adoc
+  start_page: oesenc::index.adoc
 
 content:
   sources:
