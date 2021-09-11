@@ -2,9 +2,7 @@ rem
 rem  Conditionally upload the .tar.gz and .xml artifacts to cloudsmith
 rem
 
-if [[ ! -v APPVEYOR_PULL_REQUEST_NUMBER ]]; then
-    echo "Skipping Cloudsmith upload"
-elif [[ -z "APPVEYOR_PULL_REQUEST_NUMBER" ]]; then
+if [[ -z "APPVEYOR_PULL_REQUEST_NUMBER" ]]; then
     echo "Skipping Cloudsmith upload"
 else
   echo OFF
