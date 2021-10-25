@@ -10867,6 +10867,24 @@ bool s52plib::ObjectRenderCheckRules( ObjRazRules *rzRules, ViewPort *vp, bool c
     if( check_noshow && IsObjNoshow( rzRules->LUP->OBCL) )
         return false;
 
+    if (strncmp(rzRules->obj->FeatureName, "DATEND", 7)) {
+        wxString value;
+        value = rzRules->obj->GetAttrValueAsString("DATEND");
+        // Format for DATEND as of www.s-57.com
+        // CCYYMMDD or CCYYMM or CCYY. Either is mandatory.
+        wxDateTime now {wxDateTime::Now()};
+        int today = 0;
+        if (8 == value.Length()) {
+            today = (now.GetYear() * 10000) + (now.GetMonth() * 100) + now.GetDay();
+        } else if (6 == value.Length()) {
+            today = (now.GetYear() * 100) + now.GetMonth();
+        } else if (4 == value.Length()) {
+            today = now.GetYear();
+        }
+        if (today > wxAtoi(value))
+            return false;
+    }
+
     if( ObjectRenderCheckCat( rzRules, vp ) ) 
         return true;
 
