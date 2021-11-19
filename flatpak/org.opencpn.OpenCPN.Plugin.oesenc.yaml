@@ -8,7 +8,7 @@ id: org.opencpn.OpenCPN.Plugin.oesenc
 runtime: org.opencpn.OpenCPN
 runtime-version: stable   # official build at flathub
 #runtime-version: master   # for nightly builds
-sdk: org.freedesktop.Sdk//18.08
+sdk: org.freedesktop.Sdk//20.08
 build-extension: true
 separate-locales: false
 appstream-compose: false
