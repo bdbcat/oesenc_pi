@@ -1,1 +1,1 @@
-set(OCPN_VERSION "4.3.0.0")
+set(OCPN_VERSION "4.3.1.0")
