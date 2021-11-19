@@ -465,7 +465,7 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
     g_displayScale = 1.0;
 #ifdef __WXOSX__
     // Support Mac Retina displays.
-    g_displayScale = GetOCPNCanvasWindow()->GetGetContentScaleFactor();
+    g_displayScale = GetOCPNCanvasWindow()->GetContentScaleFactor();
 #endif
 
 }
