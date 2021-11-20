@@ -1,5 +1,4 @@
 src/eSENCChart.cpp
-src/ocpn_plugin.h
 src/oesenc_pi.cpp
 src/oesenc_pi.h
 src/Osenc.cpp
