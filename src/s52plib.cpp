@@ -522,17 +522,21 @@ void s52plib::SetPPMM( float ppmm )
 {
     canvas_pix_per_mm = ppmm;
 
-    // We need a supplemental scale factor for HPGL vector symbol rendering.
-    //  This will cause raster and vector symbols to be rendered harmoniously
+ // We need a supplemental scale factor for HPGL vector symbol rendering.
+  //  This will cause raster and vector symbols to be rendered harmoniously
 
-    //  We do this by making an arbitrary measurement and declaration:
-    // We declare that the nominal size of a "flare" light rendered as HPGL vector should be roughly twice the
-    // size of a simplified lateral bouy rendered as raster.
+  //  We do this by making an arbitrary measurement and declaration:
+  // We declare that the nominal size of a "flare" light rendered as HPGL vector
+  // should be roughly twice the size of a simplified lateral bouy rendered as
+  // raster.
 
-    // Referring to the chartsymbols.xml file, we find that the dimension of a flare light is 810 units,
-    // and a raster BOYLAT is 16 pix.
+  // Referring to the chartsymbols.xml file, we find that the dimension of a
+  // flare light is 810 units, and a raster BOYLAT is nominally 16 pix.
+  // However, elsewhere we declare that the nominal size of of a flare
+  //  should be 6 mm instead of 8.1 mm
+  // So, do the math with 600 instead of 810.
 
-    m_rv_scale_factor = 2.0 * (1600. / (810 * ppmm));
+  m_rv_scale_factor = 2.0 * (1600. / (600 * ppmm));
 
     // Estimate the display size
 
