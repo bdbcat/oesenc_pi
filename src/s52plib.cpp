@@ -2750,13 +2750,13 @@ bool s52plib::RenderHPGL( ObjRazRules *rzRules, Rule *prule, wxPoint &r, ViewPor
 
     float xscale = 1.0;
 
-#ifdef __OCPN__ANDROID__
+//#ifdef __OCPN__ANDROID__
     //  Set the onscreen size of the symbol
     //  Compensate for various display resolutions
     //  Develop empirically, making a flare light about 6 mm long
     double pix_factor = GetPPMM() / 6.0;
     xscale *= pix_factor;
-#endif
+//#endif
 
     if( (!strncmp(rzRules->obj->FeatureName, "TSSLPT", 6))
         || (!strncmp(rzRules->obj->FeatureName, "DWRTPT", 6))
