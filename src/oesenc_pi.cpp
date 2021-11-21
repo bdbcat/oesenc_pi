@@ -989,6 +989,7 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 
             wxWindow *cc1 = GetOCPNCanvasWindow();
             if(cc1){
+#if 0
                 int display_size_mm = wxMax(g_display_size_mm, 75);
 
                 int sx, sy;
@@ -1004,6 +1005,35 @@ void oesenc_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
                 wxString msg;
                 msg.Printf(_T("oesenc_pi:  Calculated pix/mm = %g"), g_pix_per_mm);
                 wxLogMessage(msg);
+#endif
+
+            if(!g_display_size_mm)
+                g_display_size_mm = wxGetDisplaySizeMM().GetWidth();
+
+            int display_size_mm = wxMax(g_display_size_mm, 75);
+
+            int sx, sy;
+            wxDisplaySize( &sx, &sy );
+            double max_physical = wxMax(sx, sy);
+
+            double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
+            double displayScale = 1.0;
+#ifdef __WXOSX__
+            displayScale = cc1->GetContentScaleFactor();
+#endif
+            wxString msgd;
+            msgd.Printf(" oeSENC onMessage  g_display_size_mm: %g max_physical: %g display_size_mm: %d pix_per_mm: %g DisplayScale: %g ",
+                        g_display_size_mm, max_physical, display_size_mm, pix_per_mm, displayScale);
+            wxLogMessage(msgd);
+            pix_per_mm /= displayScale;
+            if(ps52plib)
+              ps52plib->SetPPMM( pix_per_mm );
+
+            g_pix_per_mm = pix_per_mm;
+
+            wxString msg;
+            msg.Printf(_T("oesenc_pi:  Calculated pix/mm = %g"), g_pix_per_mm);
+            wxLogMessage(msg);
             }
         }
 
