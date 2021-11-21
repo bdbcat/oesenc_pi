@@ -23,6 +23,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  **************************************************************************/
 
+#include "config.h"
+
 #include "wx/wxprec.h"
 
 #ifndef  WX_PRECOMP
@@ -113,7 +115,7 @@ void OE_ChartSymbols::ProcessColorTables( TiXmlElement* colortableNodes )
     for( TiXmlNode *childNode = colortableNodes->FirstChild(); childNode;
             childNode = childNode->NextSibling() ) {
         TiXmlElement *child = childNode->ToElement();
-    
+
         if(!child)
             continue;
 
@@ -167,10 +169,10 @@ void OE_ChartSymbols::ProcessLookups( TiXmlElement* lookupNodes )
 
         if(!child)
             continue;
-        
+
         TGET_INT_PROPERTY_VALUE( child, "id", lookup.id )
         TGET_INT_PROPERTY_VALUE( child, "RCID", lookup.RCID )
-    
+
         lookup.name = wxString( child->Attribute( "name" ), wxConvUTF8 );
         lookup.attributeCodeArray = NULL;
 
@@ -701,7 +703,7 @@ void OE_ChartSymbols::ProcessSymbols( TiXmlElement* symbolNodes )
                         goto nextVector;
                     }
                     if( vectornodeType == _T("HPGL") ) {
-                        
+
                         // Substitute some vector rendering strings
                         if(symbol.RCID == 3501)
                             symbol.HPGL = wxString( fix3501, wxConvUTF8 );
@@ -844,49 +846,49 @@ bool OE_ChartSymbols::LoadConfigFile(s52plib* plibArg, const wxString & s52ilePa
 bool OE_ChartSymbols::PatchConfigFile(s52plib* plibArg, const wxString &xmlPatchFileName)
 {
     TiXmlDocument doc;
-    
+
     plib = plibArg;
-    
+
     if( !wxFileName::FileExists( xmlPatchFileName ) ) {
         wxString msg( _T("ChartSymbols PatchFile not found: ") );
         msg += xmlPatchFileName;
         wxLogMessage( msg );
         return false;
     }
-    
+
     if( !doc.LoadFile( (const char *) xmlPatchFileName.mb_str() ) ) {
         wxString msg( _T("    ChartSymbols PatchFile Failed to load ") );
         msg += xmlPatchFileName;
         wxLogMessage( msg );
         return false;
     }
-    
+
     wxString msg( _T("ChartSymbols PatchFile loaded from ") );
     msg += xmlPatchFileName;
     wxLogMessage( msg );
-    
+
     TiXmlHandle hRoot( doc.RootElement() );
-    
+
     wxString root = wxString( doc.RootElement()->Value(), wxConvUTF8 );
     if( root != _T("chartsymbols" ) ) {
         wxLogMessage(
             _T("    ChartSymbols::LoadConfigFile(): Expected XML Root <chartsymbols> not found.") );
             return false;
     }
-    
+
     TiXmlElement* pElem = hRoot.FirstChild().Element();
-    
+
     for( ; pElem != 0; pElem = pElem->NextSiblingElement() ) {
         wxString child = wxString( pElem->Value(), wxConvUTF8 );
-        
+
         if( child == _T("color-tables") ) ProcessColorTables( pElem );
         if( child == _T("lookups") ) ProcessLookups( pElem );
         if( child == _T("line-styles") ) ProcessLinestyles( pElem );
         if( child == _T("patterns") ) ProcessPatterns( pElem );
         if( child == _T("symbols") ) ProcessSymbols( pElem );
-                     
+
     }
-    
+
     return true;
 }
 
@@ -903,25 +905,25 @@ void OE_ChartSymbols::ResetRasterTextureCache()
     oe_rasterSymbolsTexture = 0;               // This will leak one texture
                                                 // but we cannot just delete it, since it might have been erroeously created
                                                 // while there was no valid GLcontext.
-                                                
+
     LoadRasterFileForColorTable(oe_ColorTableIndex, true);
 }
-    
+
 int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
 {
     if( tableNo == oe_rasterSymbolsLoadedColorMapNumber && !flush ){
         if( pi_bopengl) {
             if(oe_rasterSymbolsTexture > 0)
                 return true;
-#ifdef ocpnUSE_GL            
-            else if( !g_oe_texture_rectangle_format && oe_rasterSymbols.IsOk()) 
+#ifdef ocpnUSE_GL
+            else if( !g_oe_texture_rectangle_format && oe_rasterSymbols.IsOk())
                 return true;
-#endif            
+#endif
         }
         if( oe_rasterSymbols.IsOk())
             return true;
     }
-        
+
     colTable* coltab = (colTable *) oe_pi_colorTables->Item( tableNo );
 
     wxString filename = configFileDirectory + wxFileName::GetPathSeparator()
@@ -953,7 +955,7 @@ int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
                         e[off * 4 + 3] = a[off];
                     }
             }
-            
+
             glEnable(GL_TEXTURE_2D);
 
 
@@ -974,7 +976,7 @@ int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
 
             glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            
+
             glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_MAG_FILTER,  GL_NEAREST );   // No mipmapping
             glTexParameteri(g_oe_texture_rectangle_format, GL_TEXTURE_MIN_FILTER,  GL_NEAREST );
 
@@ -982,7 +984,7 @@ int OE_ChartSymbols::LoadRasterFileForColorTable( int tableNo, bool flush )
 
             glDisable(GL_TEXTURE_2D);
             free(e);
-        } 
+        }
 #endif
         {
             oe_rasterSymbols = wxBitmap( rasterFileImg, -1/*32*/);

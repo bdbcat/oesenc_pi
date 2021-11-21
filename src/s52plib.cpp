@@ -3008,21 +3008,23 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     scale_factor *=  g_ChartScaleFactorExp;
     scale_factor *= g_scaminScale;
 
-#ifdef __OCPN__ANDROID__
-    //  Set the onscreen size of the symbol
-    //  Compensate for various display resolutions
-    //  Develop empirically, making a buoy about 4 mm tall
-    double boyHeight = 21. / GetPPMM();           // from raster symbol definitions, boylat is xx pix high
+     if (m_display_size_mm <
+      200) {  // about 8 inches, implying some sort of smaller mobile device
 
-    double targetHeight0 = 4.0;
+      //  Set the onscreen size of the symbol
+      //  Compensate for various display resolutions
+      //  Develop empirically, making a buoy about 4 mm tall
+      double boyHeight = 21. / GetPPMM();           // from raster symbol definitions, boylat is xx pix high
+
+      double targetHeight0 = 4.0;
 
     // But we want to scale the size for smaller displays
-    double displaySize = m_display_size_mm;
-    displaySize = wxMax(displaySize, 100);
+      double displaySize = m_display_size_mm;
+      displaySize = wxMax(displaySize, 100);
 
-    float targetHeight = wxMin(targetHeight0, displaySize / 30);
+      float targetHeight = wxMin(targetHeight0, displaySize / 30);
 
-    double pix_factor = targetHeight / boyHeight;
+      double pix_factor = targetHeight / boyHeight;
 
 
     //qDebug() << "scaleing" << m_display_size_mm  << targetHeight0 << targetHeight << GetPPMM() << boyHeight << pix_factor;
@@ -3035,10 +3037,8 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 
     // judgement: all OK
 
-
-
-    scale_factor *= pix_factor;
-#endif
+      scale_factor *= pix_factor;
+     }
 
 
     if(g_oz_vector_scale && vp->b_quilt){
@@ -3084,10 +3084,12 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 #endif
 
     // For opengl, hopefully the symbols are loaded in a texture
+    char key[9];
+    strncpy(key, prule->name.SYNM, 8);
     unsigned int texture = 0;
     wxRect texrect;
     if(!m_pdc) {
-      texture = g_oeChartSymbols->GetGLTextureRect(texrect, prule->name.SYNM);
+      texture = g_oeChartSymbols->GetGLTextureRect(texrect, key/*prule->name.SYNM*/);
       if(texture) {
           prule->parm2 = texrect.width * scale_factor;
           prule->parm3 = texrect.height * scale_factor;
@@ -3111,7 +3113,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         // If the requested scaled symbol size is not the same as is currently cached,
         // we have to dump the cache
         wxRect trect;
-        g_oeChartSymbols->GetGLTextureRect( trect, prule->name.SYNM );
+        g_oeChartSymbols->GetGLTextureRect( trect, key/*prule->name.SYNM*/ );
         if(prule->parm2 != trect.width * scale_factor)
             b_dump_cache = true;
 
@@ -3121,7 +3123,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
         //Instantiate the symbol if necessary
         if( ( prule->pixelPtr == NULL ) || ( prule->parm1 != m_colortable_index ) || b_dump_cache ) {
             Image = useLegacyRaster ?
-                RuleXBMToImage( prule ) : g_oeChartSymbols->GetImage( prule->name.SYNM );
+                RuleXBMToImage( prule ) : g_oeChartSymbols->GetImage( key/*prule->name.SYNM*/ );
 
             // delete any old private data
             ClearRulesCache( prule );
@@ -3481,7 +3483,7 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
                 wxImage im_back = b1.ConvertToImage();
 
                 //    Get the scaled symbol as a wxImage
-                wxImage im_sym = g_oeChartSymbols->GetImage( prule->name.SYNM );
+                wxImage im_sym = g_oeChartSymbols->GetImage( key/*prule->name.SYNM*/ );
                 im_sym.Rescale(b_width, b_height, wxIMAGE_QUALITY_HIGH);
 
                 wxImage im_result( b_width, b_height );
