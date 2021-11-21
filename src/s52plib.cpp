@@ -71,8 +71,6 @@ extern GLenum       g_oe_texture_rectangle_format;
 
 float g_scaminScale;
 
-double g_displayScale;
-
 OE_ChartSymbols *g_oeChartSymbols;
 
 extern PFNGLGENBUFFERSPROC                 s_glGenBuffers;
@@ -462,11 +460,7 @@ s52plib::s52plib( const wxString& PLib, bool b_forceLegacy )
 
     m_display_size_mm = 300;
 
-    g_displayScale = 1.0;
-#ifdef __WXOSX__
-    // Support Mac Retina displays.
-    g_displayScale = GetOCPNCanvasWindow()->GetContentScaleFactor();
-#endif
+    m_displayScale = 1.0;
 
 }
 
@@ -520,6 +514,11 @@ void s52plib::SetGLOptions(bool b_useStencil,
 
 void s52plib::SetPPMM( float ppmm )
 {
+#ifdef __WXOSX__
+  // Support Mac Retina displays.
+  m_displayScale = GetOCPNCanvasWindow()->GetContentScaleFactor();
+#endif
+
     canvas_pix_per_mm = ppmm;
 
  // We need a supplemental scale factor for HPGL vector symbol rendering.
@@ -544,6 +543,11 @@ void s52plib::SetPPMM( float ppmm )
     ::wxDisplaySize( &ww, &hh);
     m_display_size_mm = wxMax(ww, hh) / GetPPMM();        // accurate enough for internal use
 
+    m_display_size_mm /= m_displayScale;
+
+    wxString msg;
+    msg.Printf("Core s52plib:  ppmm: %g rv_scale_factor: %g  calc_display_size_mm: %g", ppmm, m_rv_scale_factor, m_display_size_mm);
+    wxLogMessage(msg);
 
 }
 
@@ -3074,8 +3078,8 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
 
 #ifdef __WXOSX__
     if (!m_pdc){       // GL mode
-      pivot_x /= g_displayScale;
-      pivot_y /= g_displayScale;
+      pivot_x /= m_displayScale;
+      pivot_y /= m_displayScale;
     }
 #endif
 
