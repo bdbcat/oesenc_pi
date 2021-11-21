@@ -3077,10 +3077,10 @@ bool s52plib::RenderRasterSymbol( ObjRazRules *rzRules, Rule *prule, wxPoint &r,
     pivot_y *= scale_factor;
 
 #ifdef __WXOSX__
-    if (!m_pdc){       // GL mode
-      pivot_x /= m_displayScale;
-      pivot_y /= m_displayScale;
-    }
+//     if (!m_pdc){       // GL mode
+//       pivot_x /= m_displayScale;
+//       pivot_y /= m_displayScale;
+//     }
 #endif
 
     // For opengl, hopefully the symbols are loaded in a texture
