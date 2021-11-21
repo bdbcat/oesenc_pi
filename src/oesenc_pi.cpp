@@ -3068,7 +3068,7 @@ void init_S52Library(void)
             double pix_per_mm = ( max_physical ) / ( (double) display_size_mm );
             double displayScale = 1.0;
 #ifdef __WXOSX__
-            displayScale = cc1->GetGetContentScaleFactor();
+            displayScale = cc1->GetContentScaleFactor();
 #endif
             wxString msg;
             msg.Printf(" oeSENC S52 Init  g_display_size_mm: %g max_physical: %g display_size_mm: %d pix_per_mm: %g DisplayScale: %g ",
