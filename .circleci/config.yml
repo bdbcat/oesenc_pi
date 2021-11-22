@@ -57,7 +57,7 @@ jobs:
         type: string
         default: "fp-x86-20-v1"
     <<: *flatpak-steps
- 
+
   build-macos:
     macos:
       xcode: "11.0.0"
@@ -134,9 +134,20 @@ jobs:
       - run: cd build; /bin/bash < upload.sh
       - run: python3 ci/git-push
 
+  build-armhf-bullseye:
+    machine: true
+    environment:
+      - OCPN_TARGET=bullseye-armhf
+      - DOCKER_IMAGE=balenalib/raspberry-pi-debian:bullseye
+    steps:
+      - checkout
+      - run: ci/generic-build-raspbian-armhf.sh
+      - run: cd build; /bin/bash < upload.sh
+      - run: python3 ci/git-push
+
   build-android-arm64:
     docker:
-      - image: circleci/android:api-28-ndk 
+      - image: circleci/android:api-28-ndk
     environment:
       - OCPN_TARGET:  android-arm64
     steps:
@@ -147,7 +158,7 @@ jobs:
 
   build-android-armhf:
     docker:
-      - image: circleci/android:api-28-ndk 
+      - image: circleci/android:api-28-ndk
     environment:
       - OCPN_TARGET:  android-armhf
     steps:
