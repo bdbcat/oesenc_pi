@@ -26,21 +26,21 @@ sudo apt install devscripts equivs
 sudo mk-build-deps -ir /ci-source/build-deps/control-raspbian
 sudo apt-get -q --allow-unauthenticated install -f
 
-# Temporary fix until 3.19 is available as a pypi package
-# 3.19 is needed: https://gitlab.kitware.com/cmake/cmake/-/issues/20568
-url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
-#wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
-# wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake_3.19.3-0.1_armhf.deb
-# sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
+if [  ${OCPN_TARGET} = "bullseye-armhf" ]; then
+    mkdir cmake
+    cd cmake
+    wget https://www.dropbox.com/s/m9t9sqvlho7cfsh/cmake-3.22.0-Linux-armv7l.sh
+    sudo sh cmake-3.22.0-Linux-armv7l.sh --prefix=/usr/local/ --exclude-subdir
+    cd ..
+else
+    # Temporary fix until 3.19 is available as a pypi package
+    # 3.19 is needed: https://gitlab.kitware.com/cmake/cmake/-/issues/20568
+    url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
+    wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
+    wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake_3.19.3-0.1_armhf.deb
+    sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
+fi
 
-mkdir cmake
-cd cmake
-#wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz
-wget https://www.dropbox.com/s/m9t9sqvlho7cfsh/cmake-3.22.0-Linux-armv7l.sh
-sudo sh cmake-3.22.0-Linux-armv7l.sh --prefix=/usr/local/ --exclude-subdir
-#tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
-#cmake-3.22.0-Linux-armv7l/bin/cmake --version
-cd ..
 cmake --version
 
 cd /ci-source
