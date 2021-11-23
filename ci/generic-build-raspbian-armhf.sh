@@ -38,11 +38,11 @@ cd cmake
 wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz
 tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
 cd ..
-/cmake/bin/cmake --version
+cmake/bin/cmake --version
 
 cd /ci-source
 rm -rf build; mkdir build; cd build
-/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j $(nproc) VERBOSE=1 tarball
 ldd  app/*/lib/opencpn/*.so
 EOF
