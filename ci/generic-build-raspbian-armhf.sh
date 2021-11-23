@@ -33,6 +33,8 @@ sudo apt-get -q --allow-unauthenticated install -f
 #wget $url/pool/buster/main/c/cm/cmake_3.19.3-0.1_armhf.deb
 #sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
 
+sudo apt install cmake
+
 mkdir cmake
 cd cmake
 wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0.tar.gz
