@@ -22,6 +22,13 @@ curl http://mirrordirector.raspbian.org/raspbian.public.key  | apt-key add -
 curl http://archive.raspbian.org/raspbian.public.key  | apt-key add -
 sudo apt -q update
 
+mkdir cmake
+cd cmake
+wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz
+tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
+cd ..
+/cmake/bin/cmake --version
+
 sudo apt install devscripts equivs
 sudo mk-build-deps -ir /ci-source/build-deps/control-raspbian
 sudo apt-get -q --allow-unauthenticated install -f
@@ -33,14 +40,6 @@ url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debi
 # wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake_3.19.3-0.1_armhf.deb
 # sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
 
-mkdir cmake
-cd cmake
-wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz?dl=1
-tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
-cd ..
-
-
-/cmake/bin/cmake --version
 
 cd /ci-source
 rm -rf build; mkdir build; cd build
