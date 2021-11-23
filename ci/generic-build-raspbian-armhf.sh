@@ -23,6 +23,7 @@ curl http://archive.raspbian.org/raspbian.public.key  | apt-key add -
 sudo apt -q update
 
 sudo apt install devscripts equivs
+sudo apt list
 sudo mk-build-deps -ir /ci-source/build-deps/control-raspbian
 sudo apt-get -q --allow-unauthenticated install -f
 
