@@ -23,16 +23,17 @@ curl http://archive.raspbian.org/raspbian.public.key  | apt-key add -
 sudo apt -q update
 
 sudo apt install devscripts equivs
-sudo apt list
 sudo mk-build-deps -ir /ci-source/build-deps/control-raspbian
 sudo apt-get -q --allow-unauthenticated install -f
 
 # Temporary fix until 3.19 is available as a pypi package
 # 3.19 is needed: https://gitlab.kitware.com/cmake/cmake/-/issues/20568
 url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
-wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake-data_3.19.3-0.1_all.deb
-wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake_3.19.3-0.1_armhf.deb
+wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
+wget $url/pool/buster/main/c/cm/cmake_3.19.3-0.1_armhf.deb
 sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
+
+cmake --version
 
 cd /ci-source
 rm -rf build; mkdir build; cd build
