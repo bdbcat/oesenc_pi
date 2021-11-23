@@ -28,10 +28,20 @@ sudo apt-get -q --allow-unauthenticated install -f
 
 # Temporary fix until 3.19 is available as a pypi package
 # 3.19 is needed: https://gitlab.kitware.com/cmake/cmake/-/issues/20568
-url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
-wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
-wget $url/pool/buster/main/c/cm/cmake_3.19.3-0.1_armhf.deb
-sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
+#url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
+#wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
+#wget $url/pool/buster/main/c/cm/cmake_3.19.3-0.1_armhf.deb
+#sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
+
+mkdir cmake
+cd cmake
+wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0.tar.gz
+tar -xf cmake-3.22.0.tar.gz
+cd cmake-3.22.0
+cmake -DCMAKE_USE_OPENSSL=OFF .
+make
+sudo make install
+cd ../..
 
 cmake --version
 
