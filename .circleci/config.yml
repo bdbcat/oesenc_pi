@@ -188,9 +188,6 @@ workflows:
       - build-flatpak-x86-2008:
           <<: *std-filters
 
-      - build-macos:
-          <<: *std-filters
-
       - build-xenial:
           <<: *std-filters
 

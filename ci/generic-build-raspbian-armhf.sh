@@ -28,28 +28,23 @@ sudo apt-get -q --allow-unauthenticated install -f
 
 # Temporary fix until 3.19 is available as a pypi package
 # 3.19 is needed: https://gitlab.kitware.com/cmake/cmake/-/issues/20568
-#url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
+url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debian'
 #wget $url/pool/buster/main/c/cm/cmake-data_3.19.3-0.1_all.deb
-#wget $url/pool/buster/main/c/cm/cmake_3.19.3-0.1_armhf.deb
-#sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
-
-sudo apt install cmake
+# wget $url/pool/${OCPN_TARGET/-*/}/main/c/cm/cmake_3.19.3-0.1_armhf.deb
+# sudo apt install ./cmake_3.19.3-0.1_armhf.deb ./cmake-data_3.19.3-0.1_all.deb
 
 mkdir cmake
 cd cmake
-wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0.tar.gz
-tar -xf cmake-3.22.0.tar.gz
-cd cmake-3.22.0
-cmake -DCMAKE_USE_OPENSSL=OFF .
-make
-sudo make install
-cd ../..
+wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz?dl=1
+tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
+cd ..
 
-cmake --version
+
+/cmake/bin/cmake --version
 
 cd /ci-source
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j $(nproc) VERBOSE=1 tarball
 ldd  app/*/lib/opencpn/*.so
 EOF
