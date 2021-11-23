@@ -35,15 +35,17 @@ url='https://dl.cloudsmith.io/public/alec-leamas/opencpn-plugins-stable/deb/debi
 
 mkdir cmake
 cd cmake
-wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz
-tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
-cmake-3.22.0-Linux-armv7l/bin/cmake --version
+#wget https://www.dropbox.com/s/lj968bsk5efzdbr/cmake-3.22.0-Linux-armv7l.tar.gz
+wget https://www.dropbox.com/s/m9t9sqvlho7cfsh/cmake-3.22.0-Linux-armv7l.sh
+sudo sh cmake-3.22.0-Linux-armv7l.sh --prefix=/usr/local/ --exclude-subdir
+#tar -xf cmake-3.22.0-Linux-armv7l.tar.gz
+#cmake-3.22.0-Linux-armv7l/bin/cmake --version
 cd ..
-/cmake/cmake-3.22.0-Linux-armv7l/bin/cmake --version
+cmake --version
 
 cd /ci-source
 rm -rf build; mkdir build; cd build
-/cmake/cmake-3.22.0-Linux-armv7l/bin/cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j $(nproc) VERBOSE=1 tarball
 ldd  app/*/lib/opencpn/*.so
 EOF
