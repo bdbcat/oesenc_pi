@@ -200,6 +200,9 @@ workflows:
       - build-focal:
           <<: *std-filters
 
+      - build-macos:
+          <<: *std-filters
+
       - build-buster:
           <<: *std-filters
 
