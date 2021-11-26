@@ -116,20 +116,8 @@ macro(add_plugin_libraries)
   add_subdirectory("libs/opencpn-glu")
   target_link_libraries(${PACKAGE_NAME} opencpn::glu)
  
-  if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
-    option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
-    message(STATUS "Building bundled wxCurl libraries")
-  else( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") ) 
-    message(STATUS "Using system wxCurl libraries")
-    INCLUDE_DIRECTORIES("libs/wxcurl/src")
-  endif( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
-
-  if (NOT QT_ANDROID)
-    if(OCPN_USE_BUNDLED_WXCURL)
-        add_subdirectory("libs/wxcurl")
-        target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
-    endif(OCPN_USE_BUNDLED_WXCURL)
-  endif ()
+  add_subdirectory("libs/wxcurl")
+  target_link_libraries(${PACKAGE_NAME} ocpn::wxcurl)
   
   add_subdirectory("libs/oeserverd")
 
