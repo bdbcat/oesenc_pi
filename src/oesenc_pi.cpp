@@ -79,7 +79,7 @@
         #endif
     #else
         #include <qopengl.h>
-        #include <GL/gl.h>
+        #include <EGL/gl.h>
     #endif
 
 #endif

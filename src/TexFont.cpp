@@ -28,7 +28,7 @@
 #include "TexFont.h"
 
 #ifdef USE_ANDROID_GLES2
-#include "../include/GLES/gl2.h"
+#include "GLES/gl2.h"
 #include "linmath.h"
 #include "shaders.h"
 #else
