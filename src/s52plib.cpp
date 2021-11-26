@@ -5096,8 +5096,6 @@ int s52plib::RenderLS_Dash_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *v
    glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
    GLint parmsa[2];
    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parmsa[0] );
-   GLint parmsb[2];
-   glGetIntegerv( GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parmsb[0] );
 
    if( w > 1 ) {
        if( w > parms[1] )

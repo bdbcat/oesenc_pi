@@ -3148,12 +3148,14 @@ void init_GLLibrary(void)
         //    This is most evident on rendered symbols which have horizontal or vertical line segments
         //    Detect this case, and adjust the render parameters.
 
+#ifdef GL_SMOOTH_LINE_WIDTH_GRANULARITY
         if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
             GLfloat parf;
             glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
 
             g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
         }
+#endif
 
         // Intel integrated GPU processors do not handle VBO in legacy direct mode very well.
         // Mainly, problems are seen with loss of mapping, and leakage of deleted buffers.
