@@ -79,7 +79,7 @@
         #endif
     #else
         #include <qopengl.h>
-        #include <GL/gl_private.h>              // this is a cut-down version of gl.h
+        #include <GL/gl.h>
     #endif
 
 #endif
