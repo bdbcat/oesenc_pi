@@ -66,7 +66,7 @@ typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
 
 #elif defined(__OCPN__ANDROID__)
 #include <qopengl.h>
-#include <GL/gl.h>
+#include <GLES/gl.h>
 
 #elif defined(_WIN32)
 #include <windows.h>
@@ -12563,7 +12563,7 @@ void PLIBDrawGLThickLine( float x1, float y1, float x2, float y2, wxPen pen, boo
 
 #ifdef USE_ANDROID_GLES2
 
-#include "GLES/gl2.h"
+#include "GLES2/gl2.h"
 
 // Simple colored triangle shader
 
