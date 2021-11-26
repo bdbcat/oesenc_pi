@@ -112,9 +112,9 @@ macro(add_plugin_libraries)
   add_subdirectory("libs/tinyxml")
   target_link_libraries(${PACKAGE_NAME} ocpn::tinyxml)
 
-  add_subdirectory("libs/libglu")
-  target_link_libraries(${PACKAGE_NAME} ocpn::glu)
-  
+  add_subdirectory("libs/opencpn-glu")
+  target_link_libraries(${PACKAGE_NAME} opencpn::glu)
+ 
   if( ("${plugin_target}" STREQUAL  "mingw") OR ("${plugin_target}" STREQUAL  "msvc") )  
     option(OCPN_USE_BUNDLED_WXCURL "Use wxCurl libraries" ON)
     message(STATUS "Building bundled wxCurl libraries")
