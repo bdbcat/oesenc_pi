@@ -68,6 +68,13 @@ typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
 #include <qopengl.h>
 #include <GL/gl.h>
 
+#elif defined(_WIN32)
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glu.h>
+typedef void (__stdcall *_GLUfuncptr)(void);
+
 #else
 #include <GL/gl.h>
 #include <GL/glu.h>
