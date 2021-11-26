@@ -52,8 +52,14 @@
 #include "s52utils.h"
 
 #ifdef __WXOSX__
-#include "GL/gl.h"
-#include "GL/glu.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+typedef void (*PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef void (*PFNGLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
+
 #else
 
 #ifndef __OCPN__ANDROID__
@@ -63,6 +69,8 @@
 #else
 #include <qopengl.h>
 #include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
 #endif
 
 #endif

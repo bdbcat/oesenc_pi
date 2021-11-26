@@ -66,23 +66,30 @@
 
 
 #ifdef __WXOSX__
-#include "GL/gl.h"
-#include "GL/glu.h"
-#else
+#include "OpenGL/gl.h"
+#include "OpenGL/glext.h"
+#include "OpenGL/glu.h"
+typedef void (*PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef void (*PFNGLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
 
-    #ifndef __OCPN__ANDROID__
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glext.h>
-        #ifndef __WXMSW__
-            #include <GL/glx.h>
-        #endif
-    #else
-        #include <qopengl.h>
-        #include <EGL/gl.h>
-    #endif
 
+#elif defined(__OCPN__ANDROID__)
+#include <qopengl.h>
+#include <GL/gl.h>
+#include <EGL/egl.h>
+
+#else  //__WXOSX
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+
+#ifndef __WXMSW__
+#include <GL/glx.h>
 #endif
+
+#endif  //__WXOSX
 
 #ifdef _WIN32
 #include <windows.h>

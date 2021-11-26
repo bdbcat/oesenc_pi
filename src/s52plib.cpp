@@ -54,6 +54,25 @@
 #include <wx/tokenzr.h>
 #include <wx/fileconf.h>
 
+#ifdef __WXOSX__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#define APIENTRY
+typedef void (*PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef void (*PFNGLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
+
+#elif defined(__OCPN__ANDROID__)
+#include <qopengl.h>
+#include <GL/gl.h>
+
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
 
 #ifdef USE_ANDROID_GLES2
 #include "linmath.h"
