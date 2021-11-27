@@ -6,7 +6,10 @@
 # Purpose:     Generate and install translations
 # ~~~
 
-find_program(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
+message(STATUS "Start find xgettext")
+FIND_PROGRAM(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
+message(STATUS "After find xgettext  ${GETTEXT_XGETTEXT_EXECUTABLE} ${GETTEXT_MSGFMT_EXECUTABLE}  ")
+
 string(REPLACE "_pi" "" I18N_NAME ${PACKAGE_NAME})
 if (GETTEXT_XGETTEXT_EXECUTABLE)
   add_custom_command(
