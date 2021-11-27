@@ -92,7 +92,7 @@ endmacro (GETTEXT_BUILD_MO)
 
 if (GETTEXT_MSGFMT_EXECUTABLE)
   file(GLOB PACKAGE_PO_FILES po/*.po)
-  gettext_build_mo(${PACKAGE_PO_FILES})
+  GETTEXT_BUILD_MO(${PACKAGE_PO_FILES})
   add_custom_target(
     ${I18N_NAME}-i18n
     COMMENT "${PACKAGE_NAME}-i18n: Done."
