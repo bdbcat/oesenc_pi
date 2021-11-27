@@ -6,11 +6,12 @@
 # Purpose:     Generate and install translations
 # ~~~
 
-message(STATUS "Start find xgettext")
-#FIND_PROGRAM(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
-#include( FindGettext )
-find_package(Gettext REQUIRED)
-message(STATUS "After find xgettext  ${GETTEXT_XGETTEXT_EXECUTABLE} ${GETTEXT_MSGFMT_EXECUTABLE}  ")
+if (NOT QT_ANDROID)
+  message(STATUS "Start find Gettext")
+  #FIND_PROGRAM(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
+  find_package(Gettext REQUIRED)
+  message(STATUS "After find Gettext  ${GETTEXT_XGETTEXT_EXECUTABLE} ${GETTEXT_MSGFMT_EXECUTABLE}  ")
+endif(NOT QT_ANDROID)
 
 string(REPLACE "_pi" "" I18N_NAME ${PACKAGE_NAME})
 if (GETTEXT_XGETTEXT_EXECUTABLE)
