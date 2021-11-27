@@ -5747,20 +5747,22 @@ void oesenc_pi::OnSetupOptions( void )
     sizer->Add( m_oesencpanel, 1, wxALL | wxEXPAND );
     m_oesencpanel->FitInside();
 #else
-    m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
-    if( ! m_pOptionsPage )
-    {
+    if (!m_pOptionsPage){
+      m_pOptionsPage = AddOptionsPage( PI_OPTIONS_PARENT_CHARTS, _("oeSENC Charts") );
+      if( ! m_pOptionsPage )
+      {
         wxLogMessage( _T("Error: oesenc_pi::OnSetupOptions AddOptionsPage failed!") );
         return;
+      }
+      wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
+      m_pOptionsPage->SetSizer( sizer );
+
+      m_shoppanel = new shopPanel( m_pOptionsPage, wxID_ANY, wxDefaultPosition, wxDefaultSize );
+
+      m_pOptionsPage->InvalidateBestSize();
+      sizer->Add( m_shoppanel, 1, wxALL | wxEXPAND );
+      m_shoppanel->FitInside();
     }
-    wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
-    m_pOptionsPage->SetSizer( sizer );
-
-    m_shoppanel = new shopPanel( m_pOptionsPage, wxID_ANY, wxDefaultPosition, wxDefaultSize );
-
-    m_pOptionsPage->InvalidateBestSize();
-    sizer->Add( m_shoppanel, 1, wxALL | wxEXPAND );
-    m_shoppanel->FitInside();
 
 #endif
 }
