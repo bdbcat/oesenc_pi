@@ -1,19 +1,20 @@
 # ~~~
-# Author:      Pavel Kalian / Sean D'Epagnier
-# Copyright:
-# License:     GPLv3+
-#
-# Purpose:     Generate and install translations
+# Summary:      Generate and install translations
+# Author:       Pavel Kalian / Sean D'Epagnier
+# Copyright (c) 2014 Pavel Kallian
+# License:      GPLv3+
 # ~~~
 
-if (NOT QT_ANDROID)
-  message(STATUS "Start find Gettext")
-  #FIND_PROGRAM(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
-  find_package(Gettext REQUIRED)
-  message(STATUS "After find Gettext  ${GETTEXT_XGETTEXT_EXECUTABLE} ${GETTEXT_MSGFMT_EXECUTABLE}  ")
-endif(NOT QT_ANDROID)
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+
+find_program(GETTEXT_XGETTEXT_EXECUTABLE xgettext)
 
 string(REPLACE "_pi" "" I18N_NAME ${PACKAGE_NAME})
+
 if (GETTEXT_XGETTEXT_EXECUTABLE)
   add_custom_command(
     OUTPUT po/${PACKAGE_NAME}.pot.dummy
@@ -98,11 +99,12 @@ endmacro (GETTEXT_BUILD_MO)
 
 if (GETTEXT_MSGFMT_EXECUTABLE)
   file(GLOB PACKAGE_PO_FILES po/*.po)
-  GETTEXT_BUILD_MO(${PACKAGE_PO_FILES})
+  gettext_build_mo(${PACKAGE_PO_FILES})
   add_custom_target(
     ${I18N_NAME}-i18n
     COMMENT "${PACKAGE_NAME}-i18n: Done."
     DEPENDS ${_gmoFiles}
   )
   add_dependencies(${PACKAGE_NAME} ${I18N_NAME}-i18n)
+  add_dependencies( tarball ${I18N_NAME}-i18n)
 endif (GETTEXT_MSGFMT_EXECUTABLE)
