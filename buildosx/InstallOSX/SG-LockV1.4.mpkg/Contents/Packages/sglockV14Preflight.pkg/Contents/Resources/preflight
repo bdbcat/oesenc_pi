@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-RESULT=`/sbin/kextunload '/System/Library/Extentions/SGLock.kext'`
-RESULT=`/sbin/kextunload '/Library/Extentions/SGLock.kext'`
-
-exit 0

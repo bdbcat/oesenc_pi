@@ -14,6 +14,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE "ON")
 add_library(WXCURL_IF INTERFACE)
 add_library(ocpn::wxcurl ALIAS WXCURL_IF)
 
+if (QT_ANDROID)
+  # Return an empty, no-op library -- assumes __OCPN_USE_CURL__ is undef.
+  return ()
+endif ()
+
 if (WIN32 OR MINGW)
   option(OCPN_USE_PREBUILT_WXCURL "Use wxCurl libraries" ON)
 else ()

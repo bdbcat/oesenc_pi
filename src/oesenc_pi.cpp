@@ -66,23 +66,30 @@
 
 
 #ifdef __WXOSX__
-#include "GL/gl.h"
-#include "GL/glu.h"
-#else
+#include "OpenGL/gl.h"
+#include "OpenGL/glext.h"
+#include "OpenGL/glu.h"
+typedef void (*PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef void (*PFNGLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
 
-    #ifndef __OCPN__ANDROID__
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glext.h>
-        #ifndef __WXMSW__
-            #include <GL/glx.h>
-        #endif
-    #else
-        #include <qopengl.h>
-        #include <GL/gl_private.h>              // this is a cut-down version of gl.h
-    #endif
 
+#elif defined(__OCPN__ANDROID__)
+#include <qopengl.h>
+#include <GLES/gl.h>
+#include <EGL/egl.h>
+
+#else  //__WXOSX
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+
+#ifndef __WXMSW__
+#include <GL/glx.h>
 #endif
+
+#endif  //__WXOSX
 
 #ifdef _WIN32
 #include <windows.h>
@@ -3148,12 +3155,14 @@ void init_GLLibrary(void)
         //    This is most evident on rendered symbols which have horizontal or vertical line segments
         //    Detect this case, and adjust the render parameters.
 
+#ifdef GL_SMOOTH_LINE_WIDTH_GRANULARITY
         if( renderer.Upper().Find( _T("MESA") ) != wxNOT_FOUND ){
             GLfloat parf;
             glGetFloatv(  GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parf );
 
             g_GLMinSymbolLineWidth = wxMax(((float)parms[0] + parf), 1);
         }
+#endif
 
         // Intel integrated GPU processors do not handle VBO in legacy direct mode very well.
         // Mainly, problems are seen with loss of mapping, and leakage of deleted buffers.

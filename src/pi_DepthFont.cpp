@@ -28,10 +28,16 @@
 #include "pi_DepthFont.h"
 
 #ifdef USE_ANDROID_GLES2
-#include "../include/GLES/gl2.h"
+#include "GLES2/gl2.h"
 #include "linmath.h"
 #include "shaders.h"
-#else
+
+#elif defined(__WXOSX__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#include <OpenGL/glu.h>
+
+ #else
  #include <GL/gl.h>
  #include <GL/glu.h>
 #endif

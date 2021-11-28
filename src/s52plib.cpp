@@ -54,6 +54,32 @@
 #include <wx/tokenzr.h>
 #include <wx/fileconf.h>
 
+#ifdef __WXOSX__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+#define APIENTRY
+typedef void (*PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
+typedef void (*PFNGLBINDBUFFERPROC) (GLenum target, GLuint buffer);
+typedef void (*PFNGLBUFFERDATAPROC) (GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*PFNGLDELETEBUFFERSPROC) (GLsizei n, const GLuint *buffers);
+
+#elif defined(__OCPN__ANDROID__)
+#include <qopengl.h>
+#include <GLES/gl.h>
+
+#elif defined(_WIN32)
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glu.h>
+typedef void (__stdcall *_GLUfuncptr)(void);
+
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
 
 #ifdef USE_ANDROID_GLES2
 #include "linmath.h"
@@ -62,6 +88,12 @@
 #ifdef __OCPN__ANDROID__
 #include "qdebug.h"
 #endif
+
+#ifndef GL_DOUBLE
+#define GL_DOUBLE 0x140A
+// FIXME:  Does not exist in android sysroot, but never the less used.
+#endif
+
 
 extern float g_GLMinCartographicLineWidth;
 extern float g_GLMinSymbolLineWidth;
@@ -4060,7 +4092,7 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     }
 #endif
 
-#ifndef ocpnUSE_GLES // linestipple is emulated poorly
+#ifndef ocpnUSE_GLES && defined(GL_LINE_STIPPLE) // linestipple is emulated poorly
     if( !strncmp( str, "DASH", 4 ) ) {
         glLineStipple( 1, 0x3F3F );
         glEnable( GL_LINE_STIPPLE );
@@ -4243,10 +4275,10 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         }
         ls_list = ls_list->next;
     }
-
+#ifdef GL_ARRAY_BUFFER_ARB
      if(b_useVBO)
          glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-
+#endif
 
 #ifndef USE_ANDROID_GLES2
     glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
@@ -4258,8 +4290,9 @@ int s52plib::RenderGLLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     glUniformMatrix4fv( matlocf, 1, GL_FALSE, (const GLfloat*)IM);
 #endif
 
-
+#ifdef GL_LINE_STIPPLE
     glDisable( GL_LINE_STIPPLE );
+#endif
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_BLEND );
 
@@ -4356,7 +4389,7 @@ int s52plib::RenderLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         } else
             glLineWidth( wxMax(g_GLMinCartographicLineWidth, 1) );
 
-#ifndef ocpnUSE_GLES // linestipple is emulated poorly
+#ifndef ocpnUSE_GLES && defined(GL_LINE_STIPPLE) // linestipple is emulated poorly
             if( !strncmp( str, "DASH", 4 ) ) {
                 glLineStipple( 1, 0x3F3F );
                 glEnable( GL_LINE_STIPPLE );
@@ -4475,7 +4508,9 @@ int s52plib::RenderLS( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
 #ifdef ocpnUSE_GL
     if( !m_pdc ){
+#ifdef GL_LINE_STIPPLE
         glDisable( GL_LINE_STIPPLE );
+#endif
         glDisable( GL_LINE_SMOOTH );
         glDisable( GL_BLEND );
     }
@@ -4571,7 +4606,7 @@ int s52plib::RenderLSLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         } else
             glLineWidth( wxMax(g_GLMinCartographicLineWidth, 1) );
 
-#ifndef ocpnUSE_GLES // linestipple is emulated poorly
+#ifndef ocpnUSE_GLES && defined(GL_LINE_STIPPLE) // linestipple is emulated poorly
         if( !strncmp( str, "DASH", 4 ) ) {
             glLineStipple( 1, 0x3F3F );
             glEnable( GL_LINE_STIPPLE );
@@ -4759,7 +4794,9 @@ int s52plib::RenderLSLegacy( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
     }
 #ifdef ocpnUSE_GL
     if( !m_pdc ){
+#ifdef GL_LINE_STIPPLE
         glDisable( GL_LINE_STIPPLE );
+#endif
         glDisable( GL_LINE_SMOOTH );
         glDisable( GL_BLEND );
     }
@@ -4858,7 +4895,8 @@ int s52plib::RenderLSPlugIn( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         } else
             glLineWidth( wxMax(g_GLMinCartographicLineWidth, 1) );
 
-        #ifndef ocpnUSE_GLES // linestipple is emulated poorly
+        // linestipple is emulated poorly
+        #ifndef ocpnUSE_GLES  && defined(GL_LINE_STIPPLE)
             if( !strncmp( str, "DASH", 4 ) ) {
                 glLineStipple( 1, 0x3F3F );
                 glEnable( GL_LINE_STIPPLE );
@@ -4972,7 +5010,7 @@ int s52plib::RenderLSPlugIn( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                     #endif
     }
 
-    #ifdef ocpnUSE_GL
+    #ifdef ocpnUSE_GL && defined(GL_LINE_STIPPLE)
     if( !m_pdc )
         glDisable( GL_LINE_STIPPLE );
     #endif
@@ -5096,8 +5134,6 @@ int s52plib::RenderLS_Dash_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *v
    glGetIntegerv( GL_ALIASED_LINE_WIDTH_RANGE, &parms[0] );
    GLint parmsa[2];
    glGetIntegerv( GL_SMOOTH_LINE_WIDTH_RANGE, &parmsa[0] );
-   GLint parmsb[2];
-   glGetIntegerv( GL_SMOOTH_LINE_WIDTH_GRANULARITY, &parmsb[0] );
 
    if( w > 1 ) {
        if( w > parms[1] )
@@ -6994,14 +7030,14 @@ int s52plib::RenderCARC_VBO( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
         //qDebug() << buffer.line_width[0] << buffer.line_width[1] << buffer.line_width[2];
 
         if(buffer.line_width[2]) {
-#ifndef ocpnUSE_GLES // linestipple is emulated poorly
+#ifndef ocpnUSE_GLES  && defined(GL_LINE_STIPPLE) // linestipple is emulated poorly
             glLineStipple( 1, 0x3F3F );
             glEnable( GL_LINE_STIPPLE );
 #endif
             glColor3ubv(buffer.color[2]);
             glLineWidth(buffer.line_width[2]);
             glDrawArrays(GL_LINES, buffer.steps, 4);
-#ifndef ocpnUSE_GLES
+#ifndef ocpnUSE_GLES && defined(GL_LINE_STIPPLE)
             glDisable( GL_LINE_STIPPLE );
 #endif
         }
@@ -8968,7 +9004,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error A: %d"), err);
                         wxLogMessage(msg);
-#ifndef USE_ANDROID_GLES2
+#ifndef USE_ANDROID_GLES2 and defined(GL_ARRAY_BUFFER_ARB)
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
@@ -8987,7 +9023,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error B: %d"), err);
                         wxLogMessage(msg);
-#ifndef USE_ANDROID_GLES2
+#ifndef USE_ANDROID_GLES2 and defined(GL_ARRAY_BUFFER_ARB)
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
@@ -9005,7 +9041,7 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
                         wxString msg;
                         msg.Printf(_T("VBO Error C: %d"), err);
                         wxLogMessage(msg);
-#ifndef USE_ANDROID_GLES2
+#ifndef USE_ANDROID_GLES2 and defined(GL_ARRAY_BUFFER_ARB)
                         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
                         glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
                         if(b_transform)
@@ -9170,9 +9206,10 @@ int s52plib::RenderToGLAC( ObjRazRules *rzRules, Rules *rules, ViewPort *vp )
 
         } // while
 
+#ifdef GL_ARRAY_BUFFER_ARB
         if(b_useVBO)
             glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
-
+#endif
 
 #ifndef USE_ANDROID_GLES2
         glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
@@ -9995,8 +10032,10 @@ int s52plib::RenderToGLAP_GLSL( ObjRazRules *rzRules, Rules *rules, ViewPort *vp
 
             } // while
 
+#ifdef GL_ARRAY_BUFFER_ARB
             if(b_useVBO)
                 glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+#endif
 
 #ifndef USE_ANDROID_GLES2
             glDisableClientState(GL_VERTEX_ARRAY);            // deactivate vertex array
@@ -11662,11 +11701,12 @@ void RenderFromHPGL::SetPen()
         targetDC->SetPen( *pen );
         targetDC->SetBrush( *brush );
     }
-#ifdef ocpnUSE_GL
+#ifdef ocpnUSE_GL 
     if( renderToOpenGl ) {
+#ifdef GL_POLYGON_SMOOTH
         if( plib->GetGLPolygonSmoothing() )
             glEnable( GL_POLYGON_SMOOTH );
-
+#endif
 #ifndef USE_ANDROID_GLES2
         glColor4ub( penColor.Red(), penColor.Green(), penColor.Blue(), transparency );
 #endif
@@ -11996,12 +12036,15 @@ void RenderFromHPGL::DrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCo
 
  #ifdef __WXQT__
             glDisable( GL_LINE_SMOOTH );
+#ifdef GL_POLYGON_SMOOTH
             glDisable( GL_POLYGON_SMOOTH );
+#endif
             glDisable( GL_BLEND );
-
  #else
             glEnable( GL_LINE_SMOOTH );
+#ifdef GL_POLYGON_SMOOTH
             glEnable( GL_POLYGON_SMOOTH );
+#endif
             glEnable( GL_BLEND );
 
   #endif
@@ -12110,13 +12153,16 @@ void RenderFromHPGL::DrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCo
 
             wxColour c = brush->GetColour();
             glColor4ub( c.Red(), c.Green(), c.Blue(), c.Alpha() );
-
+#ifdef GL_POLYGON_SMOOTH
             glEnable( GL_POLYGON_SMOOTH );
+#endif
             glBegin( GL_POLYGON );
             for( int i = 0; i < n; i++ )
                 glVertex2f( (points[i].x * scale) + xoffset, (points[i].y * scale) + yoffset );
             glEnd();
+#ifdef GL_POLYGON_SMOOTH
             glDisable( GL_POLYGON_SMOOTH );
+#endif
 
             int width = pen->GetWidth();
             glLineWidth( width );
@@ -12130,7 +12176,9 @@ void RenderFromHPGL::DrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCo
 #endif
 
             glDisable( GL_LINE_SMOOTH );
+#ifdef GL_POLYGON_SMOOTH
             glDisable( GL_POLYGON_SMOOTH );
+#endif
             glDisable( GL_BLEND );
 
         }
@@ -12515,7 +12563,7 @@ void PLIBDrawGLThickLine( float x1, float y1, float x2, float y2, wxPen pen, boo
 
 #ifdef USE_ANDROID_GLES2
 
-#include "../include/GLES/gl2.h"
+#include "GLES2/gl2.h"
 
 // Simple colored triangle shader
 

@@ -44,21 +44,27 @@
 
 #ifdef ocpnUSE_GL
 
-//#ifdef USE_GLU_TESS
 #ifdef __WXOSX__
-#include "GL/gl.h"
-#include "GL/glu.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <OpenGL/glext.h>
+
+#elif defined(__OCPN__ANDROID__)
+#include <KHR/khrplatform.h>
+typedef khronos_intptr_t GLintptr;
+typedef khronos_ssize_t GLsizeiptr;
+#include <GLES/gl.h>
+#include <GL/glu.h>
+
 #else
 #include <GL/gl.h>
 #include <GL/glu.h>
-#endif
+#endif  // __WSOSX
 
-//#endif
+#endif  // ocpnUSE_GL
 
 #ifdef __WXMSW__
 #include <windows.h>
-#endif
-
 #endif
 
 //------------------------------------------------------------------------------

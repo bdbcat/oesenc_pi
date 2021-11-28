@@ -1,0 +1,207 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(glues)
+
+set(HEADERS glues/source/glu.h)
+
+set(SRC_GLUES
+  glues/source/glues_error.c
+  glues/source/glues_mipmap.c
+  glues/source/glues_project.c
+  glues/source/glues_quad.c
+  glues/source/glues_registry.c
+  
+  glues/source/glues_error.h
+  glues/source/glues.h
+  glues/source/glues_mipmap.h
+  glues/source/glues_project.h
+  glues/source/glues_quad.h
+  glues/source/glues_registry.h
+  glues/source/glu.h
+)  
+set(SRC_LIBNURBS
+  glues/source/libnurbs/interface/bezierEval.cc
+  glues/source/libnurbs/interface/bezierEval.h
+  glues/source/libnurbs/interface/bezierPatch.cc
+  glues/source/libnurbs/interface/bezierPatch.h
+  glues/source/libnurbs/interface/bezierPatchMesh.cc
+  glues/source/libnurbs/interface/bezierPatchMesh.h
+  glues/source/libnurbs/interface/glcurveval.cc
+  glues/source/libnurbs/interface/glcurveval.h
+  glues/source/libnurbs/interface/gles_evaluator.cc
+  glues/source/libnurbs/interface/gles_evaluator.h
+  glues/source/libnurbs/interface/glimports.h
+  glues/source/libnurbs/interface/glinterface.cc
+  glues/source/libnurbs/interface/glrenderer.cc
+  glues/source/libnurbs/interface/glrenderer.h
+  glues/source/libnurbs/interface/glsurfeval.cc
+  glues/source/libnurbs/interface/glsurfeval.h
+  glues/source/libnurbs/interface/incurveeval.cc
+  glues/source/libnurbs/interface/insurfeval.cc
+  glues/source/libnurbs/interface/mystdio.h
+  glues/source/libnurbs/interface/mystdlib.h
+  
+  glues/source/libnurbs/internals/arc.cc
+  glues/source/libnurbs/internals/arc.h
+  glues/source/libnurbs/internals/arcsorter.cc
+  glues/source/libnurbs/internals/arcsorter.h
+  glues/source/libnurbs/internals/arctess.cc
+  glues/source/libnurbs/internals/arctess.h
+  glues/source/libnurbs/internals/backend.cc
+  glues/source/libnurbs/internals/backend.h
+  glues/source/libnurbs/internals/basiccrveval.cc
+  glues/source/libnurbs/internals/basiccrveval.h
+  glues/source/libnurbs/internals/basicsurfeval.cc
+  glues/source/libnurbs/internals/basicsurfeval.h
+  glues/source/libnurbs/internals/bezierarc.h
+  glues/source/libnurbs/internals/bin.cc
+  glues/source/libnurbs/internals/bin.h
+  glues/source/libnurbs/internals/bufpool.cc
+  glues/source/libnurbs/internals/bufpool.h
+  glues/source/libnurbs/internals/cachingeval.cc
+  glues/source/libnurbs/internals/cachingeval.h
+  glues/source/libnurbs/internals/ccw.cc
+  glues/source/libnurbs/internals/coveandtiler.cc
+  glues/source/libnurbs/internals/coveandtiler.h
+  glues/source/libnurbs/internals/curve.cc
+  glues/source/libnurbs/internals/curve.h
+  glues/source/libnurbs/internals/curvelist.cc
+  glues/source/libnurbs/internals/curvelist.h
+  glues/source/libnurbs/internals/curvesub.cc
+  glues/source/libnurbs/internals/dataTransform.cc
+  glues/source/libnurbs/internals/dataTransform.h
+  glues/source/libnurbs/internals/defines.h
+  glues/source/libnurbs/internals/displaylist.cc
+  glues/source/libnurbs/internals/displaylist.h
+  glues/source/libnurbs/internals/displaymode.h
+  glues/source/libnurbs/internals/flist.cc
+  glues/source/libnurbs/internals/flist.h
+  glues/source/libnurbs/internals/flistsorter.cc
+  glues/source/libnurbs/internals/flistsorter.h
+  glues/source/libnurbs/internals/gridline.h
+  glues/source/libnurbs/internals/gridtrimvertex.h
+  glues/source/libnurbs/internals/gridvertex.h
+  glues/source/libnurbs/internals/hull.cc
+  glues/source/libnurbs/internals/hull.h
+  glues/source/libnurbs/internals/intersect.cc
+  glues/source/libnurbs/internals/jarcloc.h
+  glues/source/libnurbs/internals/knotvector.cc
+  glues/source/libnurbs/internals/knotvector.h
+  glues/source/libnurbs/internals/mapdesc.cc
+  glues/source/libnurbs/internals/mapdesc.h
+  glues/source/libnurbs/internals/mapdescv.cc
+  glues/source/libnurbs/internals/maplist.cc
+  glues/source/libnurbs/internals/maplist.h
+  glues/source/libnurbs/internals/mesher.cc
+  glues/source/libnurbs/internals/mesher.h
+  glues/source/libnurbs/internals/monotonizer.cc
+  glues/source/libnurbs/internals/monotonizer.h
+  glues/source/libnurbs/internals/monoTriangulationBackend.cc
+  glues/source/libnurbs/internals/myassert.h
+  glues/source/libnurbs/internals/mycode.cc
+  glues/source/libnurbs/internals/mymath.h
+  glues/source/libnurbs/internals/mysetjmp.h
+  glues/source/libnurbs/internals/mystring.h
+  glues/source/libnurbs/internals/nurbsconsts.h
+  glues/source/libnurbs/internals/nurbsinterfac.cc
+  glues/source/libnurbs/internals/nurbstess.cc
+  glues/source/libnurbs/internals/nurbstess.h
+  glues/source/libnurbs/internals/patch.cc
+  glues/source/libnurbs/internals/patch.h
+  glues/source/libnurbs/internals/patchlist.cc
+  glues/source/libnurbs/internals/patchlist.h
+  glues/source/libnurbs/internals/pwlarc.h
+  glues/source/libnurbs/internals/quilt.cc
+  glues/source/libnurbs/internals/quilt.h
+  glues/source/libnurbs/internals/reader.cc
+  glues/source/libnurbs/internals/reader.h
+  glues/source/libnurbs/internals/renderhints.cc
+  glues/source/libnurbs/internals/renderhints.h
+  glues/source/libnurbs/internals/simplemath.h
+  glues/source/libnurbs/internals/slicer.cc
+  glues/source/libnurbs/internals/slicer.h
+  glues/source/libnurbs/internals/sorter.cc
+  glues/source/libnurbs/internals/sorter.h
+  glues/source/libnurbs/internals/splitarcs.cc
+  glues/source/libnurbs/internals/subdivider.cc
+  glues/source/libnurbs/internals/subdivider.h
+  glues/source/libnurbs/internals/tobezier.cc
+  glues/source/libnurbs/internals/trimline.cc
+  glues/source/libnurbs/internals/trimline.h
+  glues/source/libnurbs/internals/trimregion.cc
+  glues/source/libnurbs/internals/trimregion.h
+  glues/source/libnurbs/internals/trimvertex.h
+  glues/source/libnurbs/internals/trimvertpool.cc
+  glues/source/libnurbs/internals/trimvertpool.h
+  glues/source/libnurbs/internals/types.h
+  glues/source/libnurbs/internals/uarray.cc
+  glues/source/libnurbs/internals/uarray.h
+  glues/source/libnurbs/internals/varray.cc
+  glues/source/libnurbs/internals/varray.h
+)
+set(SRC_NURBTESS
+  glues/source/libnurbs/nurbtess/
+  glues/source/libnurbs/nurbtess/definitions.h
+  glues/source/libnurbs/nurbtess/directedLine.cc
+  glues/source/libnurbs/nurbtess/directedLine.h
+  glues/source/libnurbs/nurbtess/glimports.h
+  glues/source/libnurbs/nurbtess/gridWrap.cc
+  glues/source/libnurbs/nurbtess/gridWrap.h
+  glues/source/libnurbs/nurbtess/monoChain.cc
+  glues/source/libnurbs/nurbtess/monoChain.h
+  glues/source/libnurbs/nurbtess/monoPolyPart.cc
+  glues/source/libnurbs/nurbtess/monoPolyPart.h
+  glues/source/libnurbs/nurbtess/monoTriangulation.cc
+  glues/source/libnurbs/nurbtess/monoTriangulation.h
+  glues/source/libnurbs/nurbtess/mystdio.h
+  glues/source/libnurbs/nurbtess/mystdlib.h
+  glues/source/libnurbs/nurbtess/partitionX.cc
+  glues/source/libnurbs/nurbtess/partitionX.h
+  glues/source/libnurbs/nurbtess/partitionY.cc
+  glues/source/libnurbs/nurbtess/partitionY.h
+  glues/source/libnurbs/nurbtess/polyDBG.cc
+  glues/source/libnurbs/nurbtess/polyDBG.h
+  glues/source/libnurbs/nurbtess/polyUtil.cc
+  glues/source/libnurbs/nurbtess/polyUtil.h
+  glues/source/libnurbs/nurbtess/primitiveStream.cc
+  glues/source/libnurbs/nurbtess/primitiveStream.h
+  glues/source/libnurbs/nurbtess/quicksort.cc
+  glues/source/libnurbs/nurbtess/quicksort.h
+  glues/source/libnurbs/nurbtess/rectBlock.cc
+  glues/source/libnurbs/nurbtess/rectBlock.h
+  glues/source/libnurbs/nurbtess/sampleCompBot.cc
+  glues/source/libnurbs/nurbtess/sampleCompBot.h
+  glues/source/libnurbs/nurbtess/sampleComp.cc
+  glues/source/libnurbs/nurbtess/sampleComp.h
+  glues/source/libnurbs/nurbtess/sampleCompRight.cc
+  glues/source/libnurbs/nurbtess/sampleCompRight.h
+  glues/source/libnurbs/nurbtess/sampleCompTop.cc
+  glues/source/libnurbs/nurbtess/sampleCompTop.h
+  glues/source/libnurbs/nurbtess/sampledLine.cc
+  glues/source/libnurbs/nurbtess/sampledLine.h
+  glues/source/libnurbs/nurbtess/sampleMonoPoly.cc
+  glues/source/libnurbs/nurbtess/sampleMonoPoly.h
+  glues/source/libnurbs/nurbtess/searchTree.cc
+  glues/source/libnurbs/nurbtess/searchTree.h
+  glues/source/libnurbs/nurbtess/zlassert.h
+)
+add_library(GLU SHARED ${HEADERS} ${SRC_NURBTESS})
+target_compile_definitions(GLU PUBLIC __USE_SDL_GLES__=1 LIBRARYBUILD)
+target_include_directories(GLU PUBLIC
+  include
+  glues/include
+  glues/source/libnurbs/interface
+)
+target_include_directories(GLU PRIVATE
+  glues/source
+  glues/source/libnurbs/internals
+  glues/source/libnurbs/nurbtess
+)
+find_path(EGL_hdr gl.h PATH_SUFFIXES GLES)
+target_include_directories(GLU PUBLIC ${EGL_hdr})
+target_link_libraries(GLU PUBLIC GLESv2)
+add_library(glues::glu ALIAS GLU)
+
+if (CMAKE_SHARED_LIBRARY_SUFFIX MATCHES ".so")
+  set_target_properties(GLU PROPERTIES SUFFIX ".so.1")
+endif ()
