@@ -17,7 +17,7 @@ macro (install_libs libs)
       DESTINATION ${CMAKE_INSTALL_PREFIX}/${_oe_libdir}
     )
   endforeach ()
-endmacro () 
+endmacro ()
 
 if (EXISTS "/etc/udev/rules.d")
   install(
@@ -33,7 +33,7 @@ if (QT_ANDROID)
     ${CMAKE_INSTALL_PREFIX}/bin/oeserverda COPYONLY
   )
 elseif (APPLE)
-  install_libs("osx/oeserverd" "osx/libsglmac-2.29.0.0.dylib.x86_64")
+  install_libs("osx/oeserverd" "osx/libsglmac-2.38.0.0.dylib.x86_64")
   # We also need to copy the helper utility and required dylibs to the binary
   # build directory so that the PACKAGES scripts will find it.
   configure_file(
@@ -41,7 +41,7 @@ elseif (APPLE)
     ${CMAKE_BINARY_DIR}/oeserverd COPYONLY
   )
   configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/osx/libsglmac-2.29.0.0.dylib.x86_64
+    ${CMAKE_CURRENT_LIST_DIR}/osx/libsglmac-2.38.0.0.dylib.x86_64
     ${CMAKE_BINARY_DIR}/libsglmac-2.29.0.0.dylib.x86_64 COPYONLY
   )
 elseif (UNIX AND ARCH  STREQUAL "x86_64")
