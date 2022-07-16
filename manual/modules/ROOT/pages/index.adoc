@@ -2,6 +2,10 @@
 
 == OpenCPN Vector Charts
 
+oeSENC is no longer being used or accepted.
+oeSENC and oeRNC users must migrate to using the "o-charts Plugin" please see
+[[https://o-charts.org/manuals/migration.php?lng=en|Migration to O-charts]]
+
 OCPN Vector Charts are licensed and sourced from chart providers like
 Hydrographic Offices. These - non free - charts give OCPN access to
 up-to-date and proven charts for areas where those are not available for
